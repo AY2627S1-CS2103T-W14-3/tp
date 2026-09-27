@@ -4,6 +4,8 @@ on: [push, pull_request]
 
 jobs:
   build:
+    permissions:
+      contents: read
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
@@ -29,7 +31,11 @@ jobs:
           java-package: jdk+fx
 
       - name: Build and check with Gradle
-        run: ./gradlew check coverage
+        run: ./gradlew build coverage
+
+      - name: Upload build artifact and pull request comment
+        if: runner.os == 'Linux'
+        uses: ./.github/actions/upload-build-artifact
 
       - name: Upload coverage reports to Codecov
         if: runner.os == 'Linux'

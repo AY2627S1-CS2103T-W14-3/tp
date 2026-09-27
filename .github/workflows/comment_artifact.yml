@@ -1,0 +1,50 @@
+name: Comment on pull request
+
+on:
+  workflow_run:
+    workflows: ["Java CI"]
+    types: [completed]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pull-requests: write
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Download comment metadata
+        uses: actions/download-artifact@v4
+        with:
+          name: pr-comment
+          path: ${{ runner.temp }}/pr-comment
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Validate pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REPO_ID: ${{ github.event.workflow_run.head_repository.id }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          number=$(cat "${RUNNER_TEMP}/pr-comment/number.txt")
+          [[ "$number" =~ ^[1-9][0-9]*$ ]] || exit 1
+          # Fork metadata is untrusted: verify the PR belongs to this build.
+          pr=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${number}")
+          if jq -e --arg repo "$HEAD_REPO_ID" --arg sha "$HEAD_SHA" \
+            '.state == "open" and (.head.repo.id | tostring) == $repo and .head.sha == $sha' \
+            <<< "$pr" > /dev/null; then
+            printf 'number=%s\n' "$number" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post artifact link
+        if: steps.pr.outputs.number != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ steps.pr.outputs.number }}
+          header: build-artifacts
+          path: ${{ runner.temp }}/pr-comment/message.md
