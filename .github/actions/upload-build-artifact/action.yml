@@ -4,12 +4,26 @@ description: Upload the JAR and prepare comment metadata for pull request builds
 runs:
   using: composite
   steps:
+    - name: Prepare artifact filename
+      id: filename
+      shell: bash
+      env:
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        name=addressbook
+        if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
+          name="addressbook-pr-${PR_NUMBER}"
+        fi
+        mkdir -p "${RUNNER_TEMP}/build-artifact"
+        cp build/libs/addressbook.jar "${RUNNER_TEMP}/build-artifact/${name}.jar"
+        printf 'name=%s\n' "$name" >> "$GITHUB_OUTPUT"
+
     - name: Artifact output
       id: artifact
       uses: actions/upload-artifact@v4
       with:
-        name: addressbook
-        path: build/libs/addressbook.jar
+        name: ${{ steps.filename.outputs.name }}
+        path: ${{ runner.temp }}/build-artifact/${{ steps.filename.outputs.name }}.jar
         if-no-files-found: error
 
     - name: Prepare pull request comment
@@ -18,10 +32,19 @@ runs:
       env:
         PR_NUMBER: ${{ github.event.pull_request.number }}
         ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        ARTIFACT_NAME: ${{ steps.filename.outputs.name }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       run: |
         mkdir -p "${RUNNER_TEMP}/pr-comment"
         printf '%s\n' "$PR_NUMBER" > "${RUNNER_TEMP}/pr-comment/number.txt"
-        printf '[Download addressbook.jar (ZIP)](%s)\n' "$ARTIFACT_URL" > "${RUNNER_TEMP}/pr-comment/message.md"
+        {
+          printf '### ✅ Build for PR #%s\n' "$PR_NUMBER"
+          printf 'Last updated for: [%s](%s/commit/%s)\n' "$HEAD_SHA" "$REPOSITORY_URL" "$HEAD_SHA"
+          printf '**Download:** [%s.zip](%s)\n\n' "$ARTIFACT_NAME" "$ARTIFACT_URL"
+          printf 'View [CI build and checks](%s) for more details.\n' "$RUN_URL"
+        } > "${RUNNER_TEMP}/pr-comment/message.md"
 
     - name: Upload pull request comment
       if: github.event_name == 'pull_request'
