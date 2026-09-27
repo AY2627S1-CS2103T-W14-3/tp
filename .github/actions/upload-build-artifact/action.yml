@@ -1,0 +1,32 @@
+name: Upload build artifact
+description: Upload the JAR and prepare comment metadata for pull request builds.
+
+runs:
+  using: composite
+  steps:
+    - name: Artifact output
+      id: artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: addressbook
+        path: build/libs/addressbook.jar
+        if-no-files-found: error
+
+    - name: Prepare pull request comment
+      if: github.event_name == 'pull_request'
+      shell: bash
+      env:
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+      run: |
+        mkdir -p "${RUNNER_TEMP}/pr-comment"
+        printf '%s\n' "$PR_NUMBER" > "${RUNNER_TEMP}/pr-comment/number.txt"
+        printf '[Download addressbook.jar (ZIP)](%s)\n' "$ARTIFACT_URL" > "${RUNNER_TEMP}/pr-comment/message.md"
+
+    - name: Upload pull request comment
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: pr-comment
+        path: ${{ runner.temp }}/pr-comment/
+        if-no-files-found: error
