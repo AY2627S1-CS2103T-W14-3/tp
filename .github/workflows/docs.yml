@@ -1,0 +1,62 @@
+name: Deploy docs
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: docs-site
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          # Reruns and queued builds must publish the current main site.
+          ref: master
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          working-directory: docs
+          bundler-cache: true
+
+      - name: Build docs
+        working-directory: docs
+        env:
+          JEKYLL_ENV: production
+        run: |
+          bundle exec jekyll build \
+            --baseurl "/${GITHUB_REPOSITORY#*/}" \
+            --destination "${GITHUB_WORKSPACE}/_site"
+          touch "${GITHUB_WORKSPACE}/_site/.nojekyll"
+
+      - name: Deploy docs and preserve PR previews
+        id: deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: _site
+          clean-exclude: pr-preview/
+          force: false
+
+      - name: Rebuild GitHub Pages when files changed
+        if: steps.deploy.outputs.deployment-status == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/${GITHUB_REPOSITORY}/pages/builds"
