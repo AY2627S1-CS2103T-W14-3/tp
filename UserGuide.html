@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/tp/assets/css/style.css">
+<title>User Guide</title>
+
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/tp/">AB-3</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tp/UserGuide.html">User Guide</a><a class="page-link" href="/tp/DeveloperGuide.html">Developer Guide</a><a class="page-link" href="/tp/AboutUs.html">About Us</a><a class="page-link no-hover" href="https://github.com/se-edu/addressbook-level3">
+            <img src="/tp/images/github-icon.png" class="icon" alt="View on GitHub">
+          </a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">User Guide</h1>
+  </header>
+
+  <div class="post-content">
+    <p>AddressBook Level 3 (AB3) is a <strong>desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)</strong> while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, AB3 can help you manage contacts faster than traditional GUI applications.</p>
+
+<ul id="markdown-toc">
+  <li><a href="#quick-start" id="markdown-toc-quick-start">Quick start</a></li>
+  <li>
+<a href="#features" id="markdown-toc-features">Features</a>    <ul>
+      <li><a href="#viewing-help-help" id="markdown-toc-viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code></a></li>
+      <li><a href="#adding-a-person-add" id="markdown-toc-adding-a-person-add">Adding a person: <code class="language-plaintext highlighter-rouge">add</code></a></li>
+      <li><a href="#listing-all-persons-list" id="markdown-toc-listing-all-persons-list">Listing all persons: <code class="language-plaintext highlighter-rouge">list</code></a></li>
+      <li><a href="#editing-a-person-edit" id="markdown-toc-editing-a-person-edit">Editing a person: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
+      <li><a href="#locating-persons-by-name-find" id="markdown-toc-locating-persons-by-name-find">Locating persons by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
+      <li><a href="#deleting-a-person-delete" id="markdown-toc-deleting-a-person-delete">Deleting a person: <code class="language-plaintext highlighter-rouge">delete</code></a></li>
+      <li><a href="#clearing-all-entries-clear" id="markdown-toc-clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code></a></li>
+      <li><a href="#exiting-the-program-exit" id="markdown-toc-exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code></a></li>
+      <li><a href="#saving-the-data" id="markdown-toc-saving-the-data">Saving the data</a></li>
+      <li><a href="#editing-the-data-file" id="markdown-toc-editing-the-data-file">Editing the data file</a></li>
+      <li><a href="#archiving-data-files-coming-in-v20" id="markdown-toc-archiving-data-files-coming-in-v20">Archiving data files <code class="language-plaintext highlighter-rouge">[coming in v2.0]</code></a></li>
+    </ul>
+  </li>
+  <li><a href="#faq" id="markdown-toc-faq">FAQ</a></li>
+  <li><a href="#known-issues" id="markdown-toc-known-issues">Known issues</a></li>
+  <li><a href="#command-summary" id="markdown-toc-command-summary">Command summary</a></li>
+</ul>
+
+<hr>
+
+<h2 id="quick-start">Quick start</h2>
+
+<ol>
+  <li>
+    <p>Ensure that Java <code class="language-plaintext highlighter-rouge">25</code> or later is installed on your computer.<br>
+<strong>Mac users:</strong> Ensure you have the precise JDK version prescribed <a href="https://se-education.org/guides/tutorials/javaInstallationMac.html">here</a>.</p>
+  </li>
+  <li>
+    <p>Download the latest <code class="language-plaintext highlighter-rouge">.jar</code> file from <a href="https://github.com/se-edu/addressbook-level3/releases">here</a>.</p>
+  </li>
+  <li>
+    <p>Copy the file to the folder you want to use as the <em>home folder</em> for your AddressBook.</p>
+  </li>
+  <li>
+    <p>Open a terminal, <code class="language-plaintext highlighter-rouge">cd</code> to the folder containing the JAR file, and run <code class="language-plaintext highlighter-rouge">java -jar addressbook.jar</code>.<br>
+A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
+<img src="/tp/images/Ui.png" alt="Ui"></p>
+  </li>
+  <li>
+    <p>Type a command in the command box and press Enter to execute it. For example, type <strong><code class="language-plaintext highlighter-rouge">help</code></strong> and press Enter to open the help window.<br>
+Some example commands you can try:</p>
+
+    <ul>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">list</code> : Lists all contacts.</p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01</code> : Adds a contact named <code class="language-plaintext highlighter-rouge">John Doe</code> to the Address Book.</p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">delete 3</code> : Deletes the 3rd contact shown in the current list.</p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">clear</code> : Deletes all contacts.</p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">exit</code> : Exits the app.</p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>Refer to the <a href="#features">Features</a> section below for details of each command.</p>
+  </li>
+</ol>
+
+<hr>
+
+<h2 id="features">Features</h2>
+
+<div class="alert alert-info">
+
+  <p><strong><img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> Notes about the command format:</strong><br></p>
+
+  <ul>
+    <li>
+      <p>Words in <code class="language-plaintext highlighter-rouge">UPPER_CASE</code> are the parameters to be supplied by the user.<br>
+For example, in <code class="language-plaintext highlighter-rouge">add n/NAME</code>, replace <code class="language-plaintext highlighter-rouge">NAME</code> with a value such as <code class="language-plaintext highlighter-rouge">John Doe</code>.</p>
+    </li>
+    <li>
+      <p>Items in square brackets are optional.<br>
+For example, <code class="language-plaintext highlighter-rouge">n/NAME [t/TAG]</code> can be used as <code class="language-plaintext highlighter-rouge">n/John Doe t/friend</code> or as <code class="language-plaintext highlighter-rouge">n/John Doe</code>.</p>
+    </li>
+    <li>
+      <p>Items followed by <code class="language-plaintext highlighter-rouge">…</code>​ can appear zero or more times.<br>
+For example, <code class="language-plaintext highlighter-rouge">[t/TAG]…​</code> may be omitted, or written as <code class="language-plaintext highlighter-rouge">t/friend</code> or <code class="language-plaintext highlighter-rouge">t/friend t/family</code>.</p>
+    </li>
+    <li>
+      <p>Parameters can be in any order.<br>
+For example, if the command specifies <code class="language-plaintext highlighter-rouge">n/NAME p/PHONE_NUMBER</code>, <code class="language-plaintext highlighter-rouge">p/PHONE_NUMBER n/NAME</code> is also acceptable.</p>
+    </li>
+    <li>
+      <p>Extraneous parameters for commands that take no parameters, such as <code class="language-plaintext highlighter-rouge">help</code>, <code class="language-plaintext highlighter-rouge">list</code>, <code class="language-plaintext highlighter-rouge">exit</code>, and <code class="language-plaintext highlighter-rouge">clear</code>, are ignored.<br>
+For example, <code class="language-plaintext highlighter-rouge">help 123</code> is interpreted as <code class="language-plaintext highlighter-rouge">help</code>.</p>
+    </li>
+    <li>
+      <p>If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.</p>
+    </li>
+  </ul>
+</div>
+
+<h3 id="viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code>
+</h3>
+
+<p>Shows a message explaining how to access the help page.</p>
+
+<p><img src="/tp/images/helpMessage.png" alt="help message"></p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">help</code></p>
+
+<h3 id="adding-a-person-add">Adding a person: <code class="language-plaintext highlighter-rouge">add</code>
+</h3>
+
+<p>Adds a person to the address book.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​</code></p>
+
+<div class="alert alert-primary">
+<img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Tip:</strong>
+A person can have any number of tags, including zero.
+</div>
+
+<p>Examples:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01</code></li>
+  <li><code class="language-plaintext highlighter-rouge">add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal</code></li>
+</ul>
+
+<h3 id="listing-all-persons-list">Listing all persons: <code class="language-plaintext highlighter-rouge">list</code>
+</h3>
+
+<p>Shows a list of all persons in the address book.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">list</code></p>
+
+<h3 id="editing-a-person-edit">Editing a person: <code class="language-plaintext highlighter-rouge">edit</code>
+</h3>
+
+<p>Edits an existing person in the address book.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​</code></p>
+
+<ul>
+  <li>Edits the person at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>. The index refers to the index number shown in the displayed person list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
+  <li>At least one of the optional fields must be provided.</li>
+  <li>Existing values will be updated to the input values.</li>
+  <li>When editing tags, all of the person’s existing tags are removed; adding tags is not cumulative.</li>
+  <li>To remove all of a person’s tags, enter <code class="language-plaintext highlighter-rouge">t/</code> without a tag after it.</li>
+</ul>
+
+<p>Examples:</p>
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">edit 1 p/91234567 e/johndoe@example.com</code> Edits the phone number and email address of the 1st person to be <code class="language-plaintext highlighter-rouge">91234567</code> and <code class="language-plaintext highlighter-rouge">johndoe@example.com</code> respectively.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">edit 2 n/Betsy Crower t/</code> Edits the name of the 2nd person to be <code class="language-plaintext highlighter-rouge">Betsy Crower</code> and clears all existing tags.</li>
+</ul>
+
+<h3 id="locating-persons-by-name-find">Locating persons by name: <code class="language-plaintext highlighter-rouge">find</code>
+</h3>
+
+<p>Finds persons whose names contain any of the given keywords.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">find KEYWORD [MORE_KEYWORDS]</code></p>
+
+<ul>
+  <li>The search is case-insensitive; for example, <code class="language-plaintext highlighter-rouge">hans</code> matches <code class="language-plaintext highlighter-rouge">Hans</code>.</li>
+  <li>Keyword order does not matter; for example, <code class="language-plaintext highlighter-rouge">Hans Bo</code> matches <code class="language-plaintext highlighter-rouge">Bo Hans</code>.</li>
+  <li>The search considers only names.</li>
+  <li>Only full words match; for example, <code class="language-plaintext highlighter-rouge">Han</code> does not match <code class="language-plaintext highlighter-rouge">Hans</code>.</li>
+  <li>Persons matching at least one keyword are returned (an <code class="language-plaintext highlighter-rouge">OR</code> search); for example, <code class="language-plaintext highlighter-rouge">Hans Bo</code> returns <code class="language-plaintext highlighter-rouge">Hans Gruber</code> and <code class="language-plaintext highlighter-rouge">Bo Yang</code>.</li>
+</ul>
+
+<p>Examples:</p>
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">find John</code> returns <code class="language-plaintext highlighter-rouge">john</code> and <code class="language-plaintext highlighter-rouge">John Doe</code>
+</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">find alex david</code> returns <code class="language-plaintext highlighter-rouge">Alex Yeoh</code>, <code class="language-plaintext highlighter-rouge">David Li</code><br>
+<img src="/tp/images/findAlexDavidResult.png" alt="result for 'find alex david'">
+</li>
+</ul>
+
+<h3 id="deleting-a-person-delete">Deleting a person: <code class="language-plaintext highlighter-rouge">delete</code>
+</h3>
+
+<p>Deletes the specified person from the address book.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">delete INDEX</code></p>
+
+<ul>
+  <li>Deletes the person at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>.</li>
+  <li>The index refers to the index number shown in the displayed person list.</li>
+  <li>The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
+</ul>
+
+<p>Examples:</p>
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">list</code> followed by <code class="language-plaintext highlighter-rouge">delete 2</code> deletes the 2nd person in the address book.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">find Betsy</code> followed by <code class="language-plaintext highlighter-rouge">delete 1</code> deletes the 1st person in the results of the <code class="language-plaintext highlighter-rouge">find</code> command.</li>
+</ul>
+
+<h3 id="clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code>
+</h3>
+
+<p>Clears all entries from the address book.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">clear</code></p>
+
+<h3 id="exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code>
+</h3>
+
+<p>Exits the program.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">exit</code></p>
+
+<h3 id="saving-the-data">Saving the data</h3>
+
+<p>AddressBook automatically saves data after every command. You do not need to save manually.</p>
+
+<h3 id="editing-the-data-file">Editing the data file</h3>
+
+<p>AddressBook data is saved automatically as a JSON file <code class="language-plaintext highlighter-rouge">[JAR file location]/data/addressbook.json</code>. Advanced users are welcome to update data directly by editing that data file.</p>
+
+<div class="alert alert-warning">
+<img class="emoji" title=":exclamation:" alt=":exclamation:" src="https://github.githubassets.com/images/icons/emoji/unicode/2757.png" height="20" width="20"> <strong>Caution:</strong>
+If your changes make the data file invalid, AddressBook starts with an empty address book at the next run. The invalid file remains on disk until you run a command (AddressBook saves after every command). Still, we recommend backing up the file before editing it.<br>
+Furthermore, certain edits can cause the AddressBook to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+</div>
+
+<h3 id="archiving-data-files-coming-in-v20">Archiving data files <code class="language-plaintext highlighter-rouge">[coming in v2.0]</code>
+</h3>
+
+<p><em>Details coming soon …</em></p>
+
+<hr>
+
+<h2 id="faq">FAQ</h2>
+
+<p><strong>Q</strong>: How do I transfer my data to another computer?<br>
+<strong>A</strong>: Install the app on the other computer and overwrite the data file it creates with the data file from your previous AddressBook home folder.</p>
+
+<hr>
+
+<h2 id="known-issues">Known issues</h2>
+
+<ol>
+  <li>
+<strong>When using multiple screens</strong>, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the <code class="language-plaintext highlighter-rouge">preferences.json</code> file created by the application before running the application again.</li>
+  <li>
+<strong>If you minimize the Help Window</strong> and then run the <code class="language-plaintext highlighter-rouge">help</code> command (or use the <code class="language-plaintext highlighter-rouge">Help</code> menu, or the keyboard shortcut <code class="language-plaintext highlighter-rouge">F1</code>) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.</li>
+</ol>
+
+<hr>
+
+<h2 id="command-summary">Command summary</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>Format, Examples</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Add</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​</code> <br> e.g., <code class="language-plaintext highlighter-rouge">add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Clear</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">clear</code></td>
+    </tr>
+    <tr>
+      <td><strong>Delete</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">delete INDEX</code><br> e.g., <code class="language-plaintext highlighter-rouge">delete 3</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Edit</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​</code><br> e.g., <code class="language-plaintext highlighter-rouge">edit 2 n/James Lee e/jameslee@example.com</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Find</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">find KEYWORD [MORE_KEYWORDS]</code><br> e.g., <code class="language-plaintext highlighter-rouge">find James Jake</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>List</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">list</code></td>
+    </tr>
+    <tr>
+      <td><strong>Help</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">help</code></td>
+    </tr>
+  </tbody>
+</table>
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+  </body>
+
+</html>

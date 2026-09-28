@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/tp/assets/css/style.css">
+<title>DevOps guide</title>
+
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/tp/">AB-3</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/tp/UserGuide.html">User Guide</a><a class="page-link" href="/tp/DeveloperGuide.html">Developer Guide</a><a class="page-link" href="/tp/AboutUs.html">About Us</a><a class="page-link no-hover" href="https://github.com/se-edu/addressbook-level3">
+            <img src="/tp/images/github-icon.png" class="icon" alt="View on GitHub">
+          </a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">DevOps guide</h1>
+  </header>
+
+  <div class="post-content">
+    <ul id="markdown-toc">
+  <li><a href="#build-automation" id="markdown-toc-build-automation">Build automation</a></li>
+  <li><a href="#continuous-integration-ci" id="markdown-toc-continuous-integration-ci">Continuous integration (CI)</a>    <ul>
+      <li><a href="#documentation-deployment-and-pr-previews" id="markdown-toc-documentation-deployment-and-pr-previews">Documentation deployment and PR previews</a></li>
+      <li><a href="#code-coverage" id="markdown-toc-code-coverage">Code coverage</a></li>
+      <li><a href="#repository-wide-checks" id="markdown-toc-repository-wide-checks">Repository-wide checks</a></li>
+    </ul>
+  </li>
+  <li><a href="#making-a-release" id="markdown-toc-making-a-release">Making a release</a></li>
+</ul>
+
+<hr />
+
+<h2 id="build-automation">Build automation</h2>
+
+<p>This project uses Gradle for <strong>build automation and dependency management</strong>. <strong>We recommend reading <a href="https://se-education.org/guides/tutorials/gradle.html">this Gradle tutorial from se-edu/guides</a>.</strong></p>
+
+<p>The following commands perform common Gradle tasks.</p>
+
+<ul>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">clean</code></strong>: Deletes the files created during the previous build tasks (e.g. files in the <code class="language-plaintext highlighter-rouge">build</code> folder).<br />
+For example: <code class="language-plaintext highlighter-rouge">./gradlew clean</code></p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">shadowJar</code></strong>: Uses the Shadow plugin to create the fat JAR file <code class="language-plaintext highlighter-rouge">build/libs/addressbook.jar</code>.<br />
+For example: <code class="language-plaintext highlighter-rouge">./gradlew shadowJar</code></p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">run</code></strong>: Builds and runs the application.<br />
+<strong><code class="language-plaintext highlighter-rouge">runShadow</code></strong>: Builds the application as a fat JAR, then runs it.</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">checkstyleMain</code></strong>: Runs the code style check for the main code base.<br />
+<strong><code class="language-plaintext highlighter-rouge">checkstyleTest</code></strong>: Runs the code style check for the test code base.</p>
+  </li>
+  <li>
+    <p><strong><code class="language-plaintext highlighter-rouge">test</code></strong></p>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">./gradlew test</code>: Runs all tests.</li>
+      <li><code class="language-plaintext highlighter-rouge">./gradlew clean test</code>: Cleans the project before running all tests</li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<h2 id="continuous-integration-ci">Continuous integration (CI)</h2>
+
+<p>This project uses GitHub Actions for CI. The necessary workflow configuration files are in <code class="language-plaintext highlighter-rouge">.github/workflows</code>.</p>
+
+<h3 id="documentation-deployment-and-pr-previews">Documentation deployment and PR previews</h3>
+
+<p><code class="language-plaintext highlighter-rouge">Deploy docs</code> builds the Jekyll site in <code class="language-plaintext highlighter-rouge">docs/</code> on pushes to <code class="language-plaintext highlighter-rouge">master</code> and publishes to <code class="language-plaintext highlighter-rouge">gh-pages</code>, preserving active previews.</p>
+
+<p>After merging the workflows into <code class="language-plaintext highlighter-rouge">master</code>:</p>
+
+<ol>
+  <li>Run <code class="language-plaintext highlighter-rouge">Deploy docs</code> if <code class="language-plaintext highlighter-rouge">gh-pages</code> does not exist.</li>
+  <li>Set <strong>Settings &gt; Pages</strong> to <strong>Deploy from a branch &gt; gh-pages &gt; / (root)</strong>.</li>
+  <li>Allow workflow writes to Contents, Pull requests, and Pages, including pushes to <code class="language-plaintext highlighter-rouge">gh-pages</code>.</li>
+</ol>
+
+<p>Label an open PR <code class="language-plaintext highlighter-rouge">type.Docs</code> to create a preview using <a href="https://github.com/rossjrw/pr-preview-action">pr-preview-action</a>.
+The preview link appears in a PR comment and becomes available after Pages finishes deploying.
+New commits and reopened PRs refresh it; removing the label or closing the PR removes it.
+Fork PRs are supported, but first-time contributors may need workflow approval. Resolve merge conflicts before building.</p>
+
+<h3 id="code-coverage">Code coverage</h3>
+
+<p>As part of CI, Gradle generates JaCoCo coverage reports from the tests, and CI uploads the coverage data to Codecov. Codecov then provides information about test coverage.</p>
+
+<p>However, because Codecov is known to run into intermittent problems (e.g., report upload fails) due to issues on the Codecov service side, the CI is configured to pass even if the Codecov task failed. Therefore, developers are advised to check the code coverage levels periodically and take corrective actions if the coverage level falls below desired levels.</p>
+
+<p>To enable Codecov for forks of this project, follow the steps given in <a href="https://se-education.org/guides/tutorials/codecov.html">this se-edu guide</a>.</p>
+
+<h3 id="repository-wide-checks">Repository-wide checks</h3>
+
+<p>In addition to Gradle checks, CI runs repository-wide checks. Unlike Gradle checks, which cover files used in the build, these checks cover every repository file and enforce rules that are hard to apply on development machines, such as line-ending requirements.</p>
+
+<p>These checks are implemented as POSIX shell scripts, and thus can only be run on POSIX-compliant operating systems such as macOS and Linux. To run all checks locally on these operating systems, execute the following in the repository root directory:</p>
+
+<p><code class="language-plaintext highlighter-rouge">./.github/run-checks.sh</code></p>
+
+<p>Any warnings or errors will be printed out to the console.</p>
+
+<p><strong>If adding new checks:</strong></p>
+
+<ul>
+  <li>
+    <p>Checks are implemented as executable <code class="language-plaintext highlighter-rouge">check-*</code> scripts within the <code class="language-plaintext highlighter-rouge">.github</code> directory. The <code class="language-plaintext highlighter-rouge">run-checks.sh</code> script will automatically pick up and run files named as such. That is, you can add more such files if you need and the CI will do the rest.</p>
+  </li>
+  <li>Check scripts should print out errors in the format <code class="language-plaintext highlighter-rouge">SEVERITY:FILENAME:LINE: MESSAGE</code>
+    <ul>
+      <li>SEVERITY is either ERROR or WARN.</li>
+      <li>FILENAME is the path to the file relative to the current directory.</li>
+      <li>LINE is the line of the file where the error occurred and MESSAGE is the message explaining the error.</li>
+    </ul>
+  </li>
+  <li>Check scripts must exit with a non-zero exit code if any errors occur.</li>
+</ul>
+
+<hr />
+
+<h2 id="making-a-release">Making a release</h2>
+
+<p>Here are the steps to create a new release.</p>
+
+<ol>
+  <li>Update the version number in <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java"><code class="language-plaintext highlighter-rouge">MainApp.java</code></a>.</li>
+  <li>Generate a fat JAR file using Gradle (i.e., <code class="language-plaintext highlighter-rouge">./gradlew shadowJar</code>).</li>
+  <li>Tag the repo with the version number. e.g. <code class="language-plaintext highlighter-rouge">v0.1</code></li>
+  <li><a href="https://help.github.com/articles/creating-releases/">Create a new release using GitHub</a>. Upload the JAR file you created.</li>
+</ol>
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+  </body>
+
+</html>

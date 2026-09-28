@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/tp/assets/css/style.css">
+<title>Testing guide</title>
+
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/tp/">AB-3</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tp/UserGuide.html">User Guide</a><a class="page-link" href="/tp/DeveloperGuide.html">Developer Guide</a><a class="page-link" href="/tp/AboutUs.html">About Us</a><a class="page-link no-hover" href="https://github.com/se-edu/addressbook-level3">
+            <img src="/tp/images/github-icon.png" class="icon" alt="View on GitHub">
+          </a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Testing guide</h1>
+  </header>
+
+  <div class="post-content">
+    <ul id="markdown-toc">
+  <li><a href="#running-tests" id="markdown-toc-running-tests">Running tests</a></li>
+  <li><a href="#types-of-tests" id="markdown-toc-types-of-tests">Types of tests</a></li>
+</ul>
+
+<hr>
+
+<h2 id="running-tests">Running tests</h2>
+
+<p>You can run tests in two ways.</p>
+
+<ul>
+  <li>
+<strong>Method 1: Using IntelliJ JUnit test runner</strong>
+    <ul>
+      <li>To run all tests, right-click on the <code class="language-plaintext highlighter-rouge">src/test/java</code> folder and choose <code class="language-plaintext highlighter-rouge">Run 'All Tests'</code>
+</li>
+      <li>To run a subset of tests, you can right-click on a test package,
+test class, or a test and choose <code class="language-plaintext highlighter-rouge">Run 'ABC'</code>
+</li>
+    </ul>
+  </li>
+  <li>
+<strong>Method 2: Using Gradle</strong>
+    <ul>
+      <li>Open a console and run the command <code class="language-plaintext highlighter-rouge">gradlew clean test</code> (Mac/Linux: <code class="language-plaintext highlighter-rouge">./gradlew clean test</code>)</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="alert alert-secondary">
+<img class="emoji" title=":link:" alt=":link:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f517.png" height="20" width="20"> <strong>Link</strong>: Read <a href="https://se-education.org/guides/tutorials/gradle.html">this Gradle Tutorial from the se-edu/guides</a> to learn more about using Gradle.
+</div>
+
+<hr>
+
+<h2 id="types-of-tests">Types of tests</h2>
+
+<p>This project has three types of tests:</p>
+
+<ol>
+  <li>
+<em>Unit tests</em> target the lowest-level methods and classes.<br>
+For example: <code class="language-plaintext highlighter-rouge">seedu.address.commons.StringUtilTest</code>
+</li>
+  <li>
+<em>Integration tests</em> check how multiple code units work together; the individual units are assumed to work.<br>
+For example: <code class="language-plaintext highlighter-rouge">seedu.address.storage.StorageManagerTest</code>
+</li>
+  <li>
+<em>Hybrid tests</em> combine unit and integration testing. These tests check both the individual units and how they work together.<br>
+For example: <code class="language-plaintext highlighter-rouge">seedu.address.logic.LogicManagerTest</code>
+</li>
+</ol>
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+  </body>
+
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/tp/assets/css/style.css">
+<title>Setting up and getting started</title>
+
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/tp/">AB-3</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tp/UserGuide.html">User Guide</a><a class="page-link" href="/tp/DeveloperGuide.html">Developer Guide</a><a class="page-link" href="/tp/AboutUs.html">About Us</a><a class="page-link no-hover" href="https://github.com/se-edu/addressbook-level3">
+            <img src="/tp/images/github-icon.png" class="icon" alt="View on GitHub">
+          </a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Setting up and getting started</h1>
+  </header>
+
+  <div class="post-content">
+    <ul id="markdown-toc">
+  <li><a href="#setting-up-the-project-on-your-computer" id="markdown-toc-setting-up-the-project-on-your-computer">Setting up the project on your computer</a></li>
+  <li><a href="#before-writing-code" id="markdown-toc-before-writing-code">Before writing code</a></li>
+</ul>
+
+<hr>
+
+<h2 id="setting-up-the-project-on-your-computer">Setting up the project on your computer</h2>
+
+<div class="alert alert-warning">
+<img class="emoji" title=":exclamation:" alt=":exclamation:" src="https://github.githubassets.com/images/icons/emoji/unicode/2757.png" height="20" width="20"> <strong>Caution:</strong>
+
+Follow the steps below precisely. The setup may fail if you skip or change a step.
+</div>
+
+<p>First, <strong>fork</strong> this repo, and <strong>clone</strong> the fork into your computer.</p>
+
+<p>If you plan to use IntelliJ IDEA (highly recommended):</p>
+<ol>
+  <li>
+<strong>Configure the JDK</strong>: Follow the guide <a href="https://se-education.org/guides/tutorials/intellijJdk.html"><em>[se-edu/guides] IDEA: Configuring the JDK</em></a> to ensure IntelliJ is configured to use <strong>JDK 25</strong>.</li>
+  <li>
+<strong>Import the project as a Gradle project</strong>: Follow the guide <a href="https://se-education.org/guides/tutorials/intellijImportGradleProject.html"><em>[se-edu/guides] IDEA: Importing a Gradle project</em></a> to import the project into IDEA.<br>
+  <img class="emoji" title=":exclamation:" alt=":exclamation:" src="https://github.githubassets.com/images/icons/emoji/unicode/2757.png" height="20" width="20"> Note: Importing a Gradle project is slightly different from importing a normal Java project.</li>
+  <li>
+<strong>Verify the setup</strong>:
+    <ol>
+      <li>Run <code class="language-plaintext highlighter-rouge">seedu.address.Main</code> and try a few commands.</li>
+      <li>
+<a href="/tp/Testing.html">Run the tests</a> to ensure they all pass.</li>
+    </ol>
+  </li>
+</ol>
+
+<hr>
+
+<h2 id="before-writing-code">Before writing code</h2>
+
+<ol>
+  <li>
+    <p><strong>Configure the coding style</strong></p>
+
+    <p>If using IDEA, follow the guide <a href="https://se-education.org/guides/tutorials/intellijCodeStyle.html"><em>[se-edu/guides] IDEA: Configuring the code style</em></a> to set up IDEA’s coding style to match ours.</p>
+
+    <div class="alert alert-primary">
+<img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Tip:</strong>
+
+Optionally, follow the guide <a href="https://se-education.org/guides/tutorials/checkstyle.html"><em>[se-edu/guides] Using Checkstyle</em></a> to learn how to use Checkstyle in IDEA, for example to report problems <em>as</em> you write code.
+</div>
+  </li>
+  <li>
+    <p><strong>Set up CI</strong></p>
+
+    <p>This project includes GitHub Actions configuration files in <code class="language-plaintext highlighter-rouge">.github/workflows</code>. GitHub runs CI automatically for every push and pull request. No setup is required.</p>
+  </li>
+  <li>
+    <p><strong>Learn the design</strong></p>
+
+    <p>When you are ready to start coding, we recommend that you get some sense of the overall design by reading about <a href="/tp/DeveloperGuide.html#architecture">AddressBook’s architecture</a>.</p>
+  </li>
+  <li>
+    <p><strong>Do the tutorials</strong>
+These tutorials will help you get acquainted with the codebase.</p>
+
+    <ul>
+      <li><a href="https://se-education.org/guides/tutorials/ab3TracingCode.html">Tracing code</a></li>
+      <li><a href="https://se-education.org/guides/tutorials/ab3AddRemark.html">Adding a new command</a></li>
+      <li><a href="https://se-education.org/guides/tutorials/ab3RemovingFields.html">Removing fields</a></li>
+    </ul>
+  </li>
+</ol>
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+  </body>
+
+</html>

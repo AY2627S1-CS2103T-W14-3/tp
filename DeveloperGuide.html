@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/tp/assets/css/style.css">
+<title>Developer Guide</title>
+
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/tp/">AB-3</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/tp/UserGuide.html">User Guide</a><a class="page-link" href="/tp/DeveloperGuide.html">Developer Guide</a><a class="page-link" href="/tp/AboutUs.html">About Us</a><a class="page-link no-hover" href="https://github.com/se-edu/addressbook-level3">
+            <img src="/tp/images/github-icon.png" class="icon" alt="View on GitHub">
+          </a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Developer Guide</h1>
+  </header>
+
+  <div class="post-content">
+    <ul id="markdown-toc">
+  <li><a href="#acknowledgements" id="markdown-toc-acknowledgements"><strong>Acknowledgements</strong></a></li>
+  <li><a href="#setting-up-getting-started" id="markdown-toc-setting-up-getting-started"><strong>Setting up, getting started</strong></a></li>
+  <li>
+<a href="#design" id="markdown-toc-design"><strong>Design</strong></a>    <ul>
+      <li><a href="#architecture" id="markdown-toc-architecture">Architecture</a></li>
+      <li><a href="#ui-component" id="markdown-toc-ui-component">UI component</a></li>
+      <li><a href="#logic-component" id="markdown-toc-logic-component">Logic component</a></li>
+      <li><a href="#model-component" id="markdown-toc-model-component">Model component</a></li>
+      <li><a href="#storage-component" id="markdown-toc-storage-component">Storage component</a></li>
+      <li><a href="#common-classes" id="markdown-toc-common-classes">Common classes</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#implementation" id="markdown-toc-implementation"><strong>Implementation</strong></a>    <ul>
+      <li>
+<a href="#proposed-undoredo-feature" id="markdown-toc-proposed-undoredo-feature">[Proposed] Undo/redo feature</a>        <ul>
+          <li><a href="#proposed-implementation" id="markdown-toc-proposed-implementation">Proposed Implementation</a></li>
+          <li><a href="#design-considerations" id="markdown-toc-design-considerations">Design considerations:</a></li>
+        </ul>
+      </li>
+      <li><a href="#proposed-data-archiving" id="markdown-toc-proposed-data-archiving">[Proposed] Data archiving</a></li>
+    </ul>
+  </li>
+  <li><a href="#documentation-logging-testing-dev-ops" id="markdown-toc-documentation-logging-testing-dev-ops"><strong>Documentation, logging, testing, dev-ops</strong></a></li>
+  <li>
+<a href="#appendix-requirements" id="markdown-toc-appendix-requirements"><strong>Appendix: Requirements</strong></a>    <ul>
+      <li><a href="#product-scope" id="markdown-toc-product-scope">Product scope</a></li>
+      <li><a href="#user-stories" id="markdown-toc-user-stories">User stories</a></li>
+      <li><a href="#use-cases" id="markdown-toc-use-cases">Use cases</a></li>
+      <li><a href="#non-functional-requirements" id="markdown-toc-non-functional-requirements">Non-Functional Requirements</a></li>
+      <li><a href="#glossary" id="markdown-toc-glossary">Glossary</a></li>
+    </ul>
+  </li>
+  <li>
+<a href="#appendix-instructions-for-manual-testing" id="markdown-toc-appendix-instructions-for-manual-testing"><strong>Appendix: Instructions for manual testing</strong></a>    <ul>
+      <li><a href="#launch-and-shutdown" id="markdown-toc-launch-and-shutdown">Launch and shutdown</a></li>
+      <li><a href="#deleting-a-person" id="markdown-toc-deleting-a-person">Deleting a person</a></li>
+      <li><a href="#saving-data" id="markdown-toc-saving-data">Saving data</a></li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h2 id="acknowledgements"><strong>Acknowledgements</strong></h2>
+
+<ul>
+  <li><em>{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}</em></li>
+</ul>
+
+<hr>
+
+<h2 id="setting-up-getting-started"><strong>Setting up, getting started</strong></h2>
+
+<p>Refer to the guide <a href="/tp/SettingUp.html"><em>Setting up and getting started</em></a>.</p>
+
+<hr>
+
+<h2 id="design"><strong>Design</strong></h2>
+
+<div class="alert alert-primary">
+
+<img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Tip:</strong> The <code class="language-plaintext highlighter-rouge">.puml</code> files used to create diagrams are in <code class="language-plaintext highlighter-rouge">docs/diagrams</code>. Refer to the <a href="https://se-education.org/guides/tutorials/plantUml.html"><em>PlantUML Tutorial</em> at se-edu/guides</a> to learn how to create and edit diagrams.
+</div>
+
+<h3 id="architecture">Architecture</h3>
+
+<p><img src="images/ArchitectureDiagram.png" width="280"></p>
+
+<p>The <strong><em>Architecture Diagram</em></strong> given above explains the high-level design of the App.</p>
+
+<p>The following provides a quick overview of the main components and their interactions.</p>
+
+<p><strong>Main components of the architecture</strong></p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">Main</code></strong> (consisting of classes <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/Main.java"><code class="language-plaintext highlighter-rouge">Main</code></a> and <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java"><code class="language-plaintext highlighter-rouge">MainApp</code></a>) is in charge of the app launch and shut down.</p>
+<ul>
+  <li>At app launch, it initializes the other components in the correct sequence, and connects them up with each other.</li>
+  <li>At shut down, it shuts down the other components and invokes cleanup methods where necessary.</li>
+</ul>
+
+<p>The bulk of the app’s work is done by the following four components:</p>
+
+<ul>
+  <li>
+<a href="#ui-component"><strong><code class="language-plaintext highlighter-rouge">UI</code></strong></a>: The UI of the App.</li>
+  <li>
+<a href="#logic-component"><strong><code class="language-plaintext highlighter-rouge">Logic</code></strong></a>: The command executor.</li>
+  <li>
+<a href="#model-component"><strong><code class="language-plaintext highlighter-rouge">Model</code></strong></a>: Holds the data of the App in memory.</li>
+  <li>
+<a href="#storage-component"><strong><code class="language-plaintext highlighter-rouge">Storage</code></strong></a>: Reads data from, and writes data to, the hard disk.</li>
+</ul>
+
+<p><a href="#common-classes"><strong><code class="language-plaintext highlighter-rouge">Commons</code></strong></a> represents a collection of classes used by multiple other components.</p>
+
+<p><strong>How the architecture components interact with each other</strong></p>
+
+<p>The <em>Sequence Diagram</em> below shows how the components interact with each other for the scenario where the user issues the command <code class="language-plaintext highlighter-rouge">delete 1</code>.</p>
+
+<p><img src="images/ArchitectureSequenceDiagram.png" width="574"></p>
+
+<p>Each of the four main components (also shown in the diagram above),</p>
+
+<ul>
+  <li>defines its <em>API</em> in an <code class="language-plaintext highlighter-rouge">interface</code> with the same name as the Component.</li>
+  <li>provides its functionality through a concrete <code class="language-plaintext highlighter-rouge">{Component Name}Manager</code> class that implements the corresponding API interface.</li>
+</ul>
+
+<p>For example, the <code class="language-plaintext highlighter-rouge">Logic</code> component defines its API in <code class="language-plaintext highlighter-rouge">Logic.java</code> and implements it in <code class="language-plaintext highlighter-rouge">LogicManager.java</code>. Other components interact with a component through its interface rather than its concrete class, preventing them from coupling to that component’s implementation, as illustrated in the following partial class diagram.</p>
+
+<p><img src="images/ComponentManagers.png" width="300"></p>
+
+<p>The sections below give more details of each component.</p>
+
+<h3 id="ui-component">UI component</h3>
+
+<p>The <strong>API</strong> of this component is specified in <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/Ui.java"><code class="language-plaintext highlighter-rouge">Ui.java</code></a></p>
+
+<p><img src="/tp/images/UiClassDiagram.png" alt="Structure of the UI Component"></p>
+
+<p>The UI consists of a <code class="language-plaintext highlighter-rouge">MainWindow</code> and its parts, such as <code class="language-plaintext highlighter-rouge">CommandBox</code>, <code class="language-plaintext highlighter-rouge">ResultDisplay</code>, <code class="language-plaintext highlighter-rouge">PersonListPanel</code>, and <code class="language-plaintext highlighter-rouge">StatusBarFooter</code>. All of these, including <code class="language-plaintext highlighter-rouge">MainWindow</code>, inherit from the abstract <code class="language-plaintext highlighter-rouge">UiPart</code> class, which captures common behavior among classes that represent visible GUI parts.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">UI</code> component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching <code class="language-plaintext highlighter-rouge">.fxml</code> files in <code class="language-plaintext highlighter-rouge">src/main/resources/view</code>. For example, <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml"><code class="language-plaintext highlighter-rouge">MainWindow.fxml</code></a> specifies the layout of <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java"><code class="language-plaintext highlighter-rouge">MainWindow</code></a>.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">UI</code> component,</p>
+
+<ul>
+  <li>executes user commands using the <code class="language-plaintext highlighter-rouge">Logic</code> component.</li>
+  <li>listens for changes to <code class="language-plaintext highlighter-rouge">Model</code> data so that the UI can be updated with the modified data.</li>
+  <li>keeps a reference to the <code class="language-plaintext highlighter-rouge">Logic</code> component, because the <code class="language-plaintext highlighter-rouge">UI</code> relies on the <code class="language-plaintext highlighter-rouge">Logic</code> to execute commands.</li>
+  <li>depends on some classes in the <code class="language-plaintext highlighter-rouge">Model</code> component because it displays <code class="language-plaintext highlighter-rouge">Person</code> objects from the model.</li>
+</ul>
+
+<h3 id="logic-component">Logic component</h3>
+
+<p><strong>API</strong> : <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/logic/Logic.java"><code class="language-plaintext highlighter-rouge">Logic.java</code></a></p>
+
+<p>Here’s a (partial) class diagram of the <code class="language-plaintext highlighter-rouge">Logic</code> component:</p>
+
+<p><img src="images/LogicClassDiagram.png" width="550"></p>
+
+<p>The sequence diagram below illustrates the interactions within the <code class="language-plaintext highlighter-rouge">Logic</code> component, taking <code class="language-plaintext highlighter-rouge">execute("delete 1")</code> API call as an example.</p>
+
+<p><img src="/tp/images/DeleteSequenceDiagram.png" alt="Interactions Inside the Logic Component for the `delete 1` Command"></p>
+
+<div class="alert alert-info">
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> The lifeline for <code class="language-plaintext highlighter-rouge">DeleteCommandParser</code> should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
+</div>
+
+<p>How the <code class="language-plaintext highlighter-rouge">Logic</code> component works:</p>
+
+<ol>
+  <li>When <code class="language-plaintext highlighter-rouge">Logic</code> is called upon to execute a command, the command is passed to an <code class="language-plaintext highlighter-rouge">AddressBookParser</code> object, which in turn creates a parser that matches the command (e.g., <code class="language-plaintext highlighter-rouge">DeleteCommandParser</code>) and uses it to parse the command.</li>
+  <li>This results in a <code class="language-plaintext highlighter-rouge">Command</code> object (more precisely, an object of one of its subclasses e.g., <code class="language-plaintext highlighter-rouge">DeleteCommand</code>) which is executed by the <code class="language-plaintext highlighter-rouge">LogicManager</code>.</li>
+  <li>The command can communicate with the <code class="language-plaintext highlighter-rouge">Model</code> when it is executed (e.g. to delete a person).<br>
+Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the <code class="language-plaintext highlighter-rouge">Model</code> to complete the operation.</li>
+  <li>The result of the command execution is encapsulated as a <code class="language-plaintext highlighter-rouge">CommandResult</code> object which is returned from <code class="language-plaintext highlighter-rouge">Logic</code>.</li>
+</ol>
+
+<p>Here are the other classes in <code class="language-plaintext highlighter-rouge">Logic</code> (omitted from the class diagram above) that are used for parsing a user command:</p>
+
+<p><img src="images/ParserClasses.png" width="600"></p>
+
+<p>How the parsing works:</p>
+<ul>
+  <li>When called upon to parse a user command, the <code class="language-plaintext highlighter-rouge">AddressBookParser</code> class creates an <code class="language-plaintext highlighter-rouge">XYZCommandParser</code> (<code class="language-plaintext highlighter-rouge">XYZ</code> is a placeholder for the specific command name, e.g., <code class="language-plaintext highlighter-rouge">AddCommandParser</code>). The parser uses the other classes shown above to parse the user command and create an <code class="language-plaintext highlighter-rouge">XYZCommand</code> object (e.g., <code class="language-plaintext highlighter-rouge">AddCommand</code>). The <code class="language-plaintext highlighter-rouge">AddressBookParser</code> returns that object as a <code class="language-plaintext highlighter-rouge">Command</code> object.</li>
+  <li>All <code class="language-plaintext highlighter-rouge">XYZCommandParser</code> classes, such as <code class="language-plaintext highlighter-rouge">AddCommandParser</code> and <code class="language-plaintext highlighter-rouge">DeleteCommandParser</code>, implement the <code class="language-plaintext highlighter-rouge">Parser</code> interface so they can be treated similarly where appropriate, for example during testing.</li>
+</ul>
+
+<h3 id="model-component">Model component</h3>
+<p><strong>API</strong> : <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java"><code class="language-plaintext highlighter-rouge">Model.java</code></a></p>
+
+<p><img src="images/ModelClassDiagram.png" width="450"></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">Model</code> component,</p>
+
+<ul>
+  <li>stores the address book data i.e., all <code class="language-plaintext highlighter-rouge">Person</code> objects (which are contained in a <code class="language-plaintext highlighter-rouge">UniquePersonList</code> object).</li>
+  <li>stores the <code class="language-plaintext highlighter-rouge">Person</code> objects selected by the current filter, such as search results, in a separate <em>filtered</em> list. It exposes this list as an unmodifiable <code class="language-plaintext highlighter-rouge">ObservableList&lt;Person&gt;</code> that the UI can observe and bind to, so the UI updates when the list changes.</li>
+  <li>stores a <code class="language-plaintext highlighter-rouge">UserPrefs</code> object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a <code class="language-plaintext highlighter-rouge">ReadOnlyUserPrefs</code> object.</li>
+  <li>does not depend on any of the other three components (as the <code class="language-plaintext highlighter-rouge">Model</code> represents data entities of the domain, they should make sense on their own without depending on other components)</li>
+</ul>
+
+<div class="alert alert-info">
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> The alternative, arguably more object-oriented, design below keeps a unique list of tags in <code class="language-plaintext highlighter-rouge">AddressBook</code>, and each <code class="language-plaintext highlighter-rouge">Person</code> references tags from that list. This lets <code class="language-plaintext highlighter-rouge">AddressBook</code> maintain one <code class="language-plaintext highlighter-rouge">Tag</code> object per unique tag instead of each <code class="language-plaintext highlighter-rouge">Person</code> holding its own <code class="language-plaintext highlighter-rouge">Tag</code> objects.<br>
+
+<img src="images/BetterModelClassDiagram.png" width="450">
+
+</div>
+
+<h3 id="storage-component">Storage component</h3>
+
+<p><strong>API</strong> : <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java"><code class="language-plaintext highlighter-rouge">Storage.java</code></a></p>
+
+<p><img src="images/StorageClassDiagram.png" width="550"></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">Storage</code> component,</p>
+<ul>
+  <li>can save both address book data and user preference data in JSON format, and read them back into corresponding objects.</li>
+  <li>is implemented by <code class="language-plaintext highlighter-rouge">StorageManager</code>, which delegates the actual JSON file access to <code class="language-plaintext highlighter-rouge">JsonAddressBookStorage</code> and <code class="language-plaintext highlighter-rouge">JsonUserPrefsStorage</code> (one class per data file).</li>
+  <li>depends on some classes in the <code class="language-plaintext highlighter-rouge">Model</code> component (because the <code class="language-plaintext highlighter-rouge">Storage</code> component’s job is to save/retrieve objects that belong to the <code class="language-plaintext highlighter-rouge">Model</code>)</li>
+</ul>
+
+<h3 id="common-classes">Common classes</h3>
+
+<p>Classes used by multiple components are in the <code class="language-plaintext highlighter-rouge">seedu.address.commons</code> package.</p>
+
+<hr>
+
+<h2 id="implementation"><strong>Implementation</strong></h2>
+
+<p>This section describes some noteworthy details on how certain features are implemented.</p>
+
+<h3 id="proposed-undoredo-feature">[Proposed] Undo/redo feature</h3>
+
+<h4 id="proposed-implementation">Proposed Implementation</h4>
+
+<p>The proposed undo/redo mechanism is facilitated by <code class="language-plaintext highlighter-rouge">VersionedAddressBook</code>. It extends <code class="language-plaintext highlighter-rouge">AddressBook</code> with an undo/redo history, stored internally as an <code class="language-plaintext highlighter-rouge">addressBookStateList</code> and <code class="language-plaintext highlighter-rouge">currentStatePointer</code>. Additionally, it implements the following operations:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">VersionedAddressBook#commit()</code> — Saves the current address book state in its history.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">VersionedAddressBook#undo()</code> — Restores the previous address book state from its history.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">VersionedAddressBook#redo()</code> — Restores a previously undone address book state from its history.</li>
+</ul>
+
+<p>These operations are exposed in the <code class="language-plaintext highlighter-rouge">Model</code> interface as <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, <code class="language-plaintext highlighter-rouge">Model#undoAddressBook()</code> and <code class="language-plaintext highlighter-rouge">Model#redoAddressBook()</code> respectively.</p>
+
+<p>Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.</p>
+
+<p>Step 1. The user launches the application for the first time. The <code class="language-plaintext highlighter-rouge">VersionedAddressBook</code> will be initialized with the initial address book state, and the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> pointing to that single address book state.</p>
+
+<p><img src="/tp/images/UndoRedoState0.png" alt="UndoRedoState0"></p>
+
+<p>Step 2. The user executes <code class="language-plaintext highlighter-rouge">delete 5</code> command to delete the 5th person in the address book. The <code class="language-plaintext highlighter-rouge">delete</code> command calls <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, causing the modified state of the address book after the <code class="language-plaintext highlighter-rouge">delete 5</code> command executes to be saved in the <code class="language-plaintext highlighter-rouge">addressBookStateList</code>, and the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is shifted to the newly inserted address book state.</p>
+
+<p><img src="/tp/images/UndoRedoState1.png" alt="UndoRedoState1"></p>
+
+<p>Step 3. The user executes <code class="language-plaintext highlighter-rouge">add n/David …​</code> to add a new person. The <code class="language-plaintext highlighter-rouge">add</code> command also calls <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, causing another modified address book state to be saved into the <code class="language-plaintext highlighter-rouge">addressBookStateList</code>.</p>
+
+<p><img src="/tp/images/UndoRedoState2.png" alt="UndoRedoState2"></p>
+
+<div class="alert alert-info">
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> If a command fails its execution, it will not call <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, so the address book state will not be saved into the <code class="language-plaintext highlighter-rouge">addressBookStateList</code>.
+
+</div>
+
+<p>Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the <code class="language-plaintext highlighter-rouge">undo</code> command. The <code class="language-plaintext highlighter-rouge">undo</code> command will call <code class="language-plaintext highlighter-rouge">Model#undoAddressBook()</code>, which will shift the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> once to the left, pointing it to the previous address book state, and restores the address book to that state.</p>
+
+<p><img src="/tp/images/UndoRedoState3.png" alt="UndoRedoState3"></p>
+
+<div class="alert alert-info">
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> If the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is at index 0, pointing to the initial AddressBook state, then there are no previous AddressBook states to restore. The <code class="language-plaintext highlighter-rouge">undo</code> command uses <code class="language-plaintext highlighter-rouge">Model#canUndoAddressBook()</code> to check if this is the case. If so, it will return an error to the user rather
+than attempting to perform the undo.
+
+</div>
+
+<p>The following sequence diagram shows how an undo operation goes through the <code class="language-plaintext highlighter-rouge">Logic</code> component:</p>
+
+<p><img src="/tp/images/UndoSequenceDiagram-Logic.png" alt="UndoSequenceDiagram"></p>
+
+<div class="alert alert-info">
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> The lifeline for <code class="language-plaintext highlighter-rouge">UndoCommand</code> should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
+
+</div>
+
+<p>Similarly, how an undo operation goes through the <code class="language-plaintext highlighter-rouge">Model</code> component is shown below:</p>
+
+<p><img src="/tp/images/UndoSequenceDiagram-Model.png" alt="UndoSequenceDiagram"></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">redo</code> command does the opposite — it calls <code class="language-plaintext highlighter-rouge">Model#redoAddressBook()</code>, which shifts the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> once to the right, pointing to the previously undone state, and restores the address book to that state.</p>
+
+<div class="alert alert-info">
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> If the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is at index <code class="language-plaintext highlighter-rouge">addressBookStateList.size() - 1</code>, pointing to the latest address book state, then there are no undone AddressBook states to restore. The <code class="language-plaintext highlighter-rouge">redo</code> command uses <code class="language-plaintext highlighter-rouge">Model#canRedoAddressBook()</code> to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
+
+</div>
+
+<p>Step 5. The user then decides to execute the command <code class="language-plaintext highlighter-rouge">list</code>. Commands that do not modify the address book, such as <code class="language-plaintext highlighter-rouge">list</code>, will usually not call <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, <code class="language-plaintext highlighter-rouge">Model#undoAddressBook()</code> or <code class="language-plaintext highlighter-rouge">Model#redoAddressBook()</code>. Thus, the <code class="language-plaintext highlighter-rouge">addressBookStateList</code> remains unchanged.</p>
+
+<p><img src="/tp/images/UndoRedoState4.png" alt="UndoRedoState4"></p>
+
+<p>Step 6. The user executes <code class="language-plaintext highlighter-rouge">clear</code>, which calls <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>. Since the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is not pointing at the end of the <code class="language-plaintext highlighter-rouge">addressBookStateList</code>, all address book states after the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> will be purged. Reason: It no longer makes sense to redo the <code class="language-plaintext highlighter-rouge">add n/David …​</code> command. This is the behavior that most modern desktop applications follow.</p>
+
+<p><img src="/tp/images/UndoRedoState5.png" alt="UndoRedoState5"></p>
+
+<p>The following activity diagram summarizes what happens when a user executes a new command:</p>
+
+<p><img src="images/CommitActivityDiagram.png" width="250"></p>
+
+<h4 id="design-considerations">Design considerations:</h4>
+
+<p><strong>Aspect: How undo &amp; redo execute:</strong></p>
+
+<ul>
+  <li>
+<strong>Alternative 1 (current choice):</strong> Saves the entire address book.
+    <ul>
+      <li>Pros: Easy to implement.</li>
+      <li>Cons: May have performance issues in terms of memory usage.</li>
+    </ul>
+  </li>
+  <li>
+<strong>Alternative 2:</strong> Individual command knows how to undo/redo by
+itself.
+    <ul>
+      <li>Pros: Will use less memory (e.g. for <code class="language-plaintext highlighter-rouge">delete</code>, just save the person being deleted).</li>
+      <li>Cons: We must ensure that the implementation of each individual command is correct.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><em>{more aspects and alternatives to be added}</em></p>
+
+<h3 id="proposed-data-archiving">[Proposed] Data archiving</h3>
+
+<p><em>{Explain here how the data archiving feature will be implemented}</em></p>
+
+<hr>
+
+<h2 id="documentation-logging-testing-dev-ops"><strong>Documentation, logging, testing, dev-ops</strong></h2>
+
+<ul>
+  <li><a href="/tp/Documentation.html">Documentation guide</a></li>
+  <li><a href="/tp/Testing.html">Testing guide</a></li>
+  <li><a href="/tp/Logging.html">Logging guide</a></li>
+  <li><a href="/tp/DevOps.html">DevOps guide</a></li>
+</ul>
+
+<hr>
+
+<h2 id="appendix-requirements"><strong>Appendix: Requirements</strong></h2>
+
+<h3 id="product-scope">Product scope</h3>
+
+<p><strong>Target user profile</strong>:</p>
+
+<ul>
+  <li>has a need to manage a significant number of contacts</li>
+  <li>prefers desktop apps over other types of applications</li>
+  <li>can type fast</li>
+  <li>prefers typing to mouse interactions</li>
+  <li>is reasonably comfortable using CLI apps</li>
+</ul>
+
+<p><strong>Value proposition</strong>: Manage contacts faster than with a typical mouse-driven GUI application.</p>
+
+<h3 id="user-stories">User stories</h3>
+
+<p>Priorities: High (must have) - <code class="language-plaintext highlighter-rouge">* * *</code>, Medium (nice to have) - <code class="language-plaintext highlighter-rouge">* *</code>, Low (unlikely to have) - <code class="language-plaintext highlighter-rouge">*</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Priority</th>
+      <th>As a …​</th>
+      <th>I want to …​</th>
+      <th>So that I can…​</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">* * *</code></td>
+      <td>new user</td>
+      <td>see usage instructions</td>
+      <td>refer to instructions when I forget how to use the App</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">* * *</code></td>
+      <td>user</td>
+      <td>add a new person</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">* * *</code></td>
+      <td>user</td>
+      <td>delete a person</td>
+      <td>remove entries that I no longer need</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">* * *</code></td>
+      <td>user</td>
+      <td>find a person by name</td>
+      <td>locate details of persons without having to go through the entire list</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">* *</code></td>
+      <td>user</td>
+      <td>hide private contact details</td>
+      <td>minimize chance of someone else seeing them by accident</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">*</code></td>
+      <td>user with many persons in the address book</td>
+      <td>sort persons by name</td>
+      <td>locate a person easily</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>{More to be added}</em></p>
+
+<h3 id="use-cases">Use cases</h3>
+
+<p>(For all use cases below, the <strong>System</strong> is the <code class="language-plaintext highlighter-rouge">AddressBook</code> and the <strong>Actor</strong> is the <code class="language-plaintext highlighter-rouge">user</code>, unless specified otherwise)</p>
+
+<p><strong>Use case: Delete a person</strong></p>
+
+<p><strong>MSS</strong></p>
+
+<ol>
+  <li>User requests to list persons</li>
+  <li>AddressBook shows a list of persons</li>
+  <li>User requests to delete a specific person in the list</li>
+  <li>
+    <p>AddressBook deletes the person</p>
+
+    <p>Use case ends.</p>
+  </li>
+</ol>
+
+<p><strong>Extensions</strong></p>
+
+<ul>
+  <li>
+    <p>2a. The list is empty.</p>
+
+    <p>Use case ends.</p>
+  </li>
+  <li>
+    <p>3a. The given index is invalid.</p>
+
+    <ul>
+      <li>
+        <p>3a1. AddressBook shows an error message.</p>
+
+        <p>Use case resumes at step 2.</p>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p><em>{More to be added}</em></p>
+
+<h3 id="non-functional-requirements">Non-Functional Requirements</h3>
+
+<ol>
+  <li>Should work on any <em>mainstream OS</em> as long as it has Java <code class="language-plaintext highlighter-rouge">25</code> or above installed.</li>
+  <li>Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.</li>
+  <li>A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.</li>
+</ol>
+
+<p><em>{More to be added}</em></p>
+
+<h3 id="glossary">Glossary</h3>
+
+<ul>
+  <li>
+<strong>Mainstream OS</strong>: Windows, Linux, Unix, or macOS</li>
+  <li>
+<strong>Private contact detail</strong>: A contact detail that is not meant to be shared with others</li>
+</ul>
+
+<hr>
+
+<h2 id="appendix-instructions-for-manual-testing"><strong>Appendix: Instructions for manual testing</strong></h2>
+
+<p>Given below are instructions to test the app manually.</p>
+
+<div class="alert alert-info">
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> These instructions only provide a starting point for testers to work on;
+testers are expected to do more <em>exploratory</em> testing.
+
+</div>
+
+<h3 id="launch-and-shutdown">Launch and shutdown</h3>
+
+<ol>
+  <li>
+    <p>Initial launch</p>
+
+    <ol>
+      <li>
+        <p>Download the JAR file and copy it into an empty folder.</p>
+      </li>
+      <li>
+        <p>Double-click the JAR file.<br>
+Expected: The GUI opens with a set of sample contacts. The window size may not be optimal.</p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>Saving window preferences</p>
+
+    <ol>
+      <li>
+        <p>Resize the window to an optimal size. Move the window to a different location. Close the window.</p>
+      </li>
+      <li>
+        <p>Relaunch the app by double-clicking the JAR file.<br>
+ Expected: The most recent window size and location are retained.</p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p><em>{ more test cases …​ }</em></p>
+  </li>
+</ol>
+
+<h3 id="deleting-a-person">Deleting a person</h3>
+
+<ol>
+  <li>
+    <p>Deleting a person while all persons are being shown</p>
+
+    <ol>
+      <li>
+        <p>Prerequisites: List all persons using the <code class="language-plaintext highlighter-rouge">list</code> command, with multiple persons in the list.</p>
+      </li>
+      <li>
+        <p>Test case: <code class="language-plaintext highlighter-rouge">delete 1</code><br>
+Expected: The first contact is deleted from the list. The status message shows the deleted contact’s details.</p>
+      </li>
+      <li>
+        <p>Test case: <code class="language-plaintext highlighter-rouge">delete 0</code><br>
+Expected: No person is deleted. The status message shows error details.</p>
+      </li>
+      <li>
+        <p>Other incorrect delete commands to try: <code class="language-plaintext highlighter-rouge">delete</code>, <code class="language-plaintext highlighter-rouge">delete x</code>, <code class="language-plaintext highlighter-rouge">...</code> (where x is larger than the list size)<br>
+Expected: Similar to previous.</p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p><em>{ more test cases …​ }</em></p>
+  </li>
+</ol>
+
+<h3 id="saving-data">Saving data</h3>
+
+<ol>
+  <li>
+    <p>Dealing with missing/corrupted data files</p>
+
+    <ol>
+      <li><em>{Explain how to simulate missing or corrupted data files and state the expected behavior.}</em></li>
+    </ol>
+  </li>
+  <li>
+    <p><em>{ more test cases …​ }</em></p>
+  </li>
+</ol>
+
+  </div>
+
+</article>
+
+      </div>
+    </main>
+
+  </body>
+
+</html>
