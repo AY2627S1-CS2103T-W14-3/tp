@@ -1,0 +1,53 @@
+name: Build docs PR preview
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: >-
+      github.event.pull_request.state == 'open' &&
+      contains(github.event.pull_request.labels.*.name, 'type.Docs') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'type.Docs')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Job-level concurrency means unrelated label events cannot cancel a build.
+    concurrency:
+      group: docs-preview-build-${{ github.event.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Check out PR
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          working-directory: docs
+          bundler-cache: true
+
+      - name: Build preview
+        working-directory: docs
+        env:
+          JEKYLL_ENV: production
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          bundle exec jekyll build \
+            --baseurl "/${GITHUB_REPOSITORY#*/}/pr-preview/pr-${PR_NUMBER}" \
+            --destination "${RUNNER_TEMP}/docs-preview"
+
+      - name: Upload preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-preview-${{ github.event.number }}
+          path: ${{ runner.temp }}/docs-preview
+          if-no-files-found: error
+          retention-days: 7

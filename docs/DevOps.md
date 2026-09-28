@@ -36,7 +36,22 @@ The following commands perform common Gradle tasks.
 
 ## Continuous integration (CI)
 
-This project uses GitHub Actions for CI. The necessary workflow configuration files are in `.github/workflows`. No further setup is required.
+This project uses GitHub Actions for CI. The necessary workflow configuration files are in `.github/workflows`.
+
+### Documentation deployment and PR previews
+
+`Deploy docs` builds the Jekyll site in `docs/` on pushes to `master` and publishes to `gh-pages`, preserving active previews.
+
+After merging the workflows into `master`:
+
+1. Run `Deploy docs` if `gh-pages` does not exist.
+1. Set **Settings > Pages** to **Deploy from a branch > gh-pages > / (root)**.
+1. Allow workflow writes to Contents, Pull requests, and Pages, including pushes to `gh-pages`.
+
+Label an open PR `type.Docs` to create a preview using [pr-preview-action](https://github.com/rossjrw/pr-preview-action).
+The preview link appears in a PR comment and becomes available after Pages finishes deploying.
+New commits and reopened PRs refresh it; removing the label or closing the PR removes it.
+Fork PRs are supported, but first-time contributors may need workflow approval. Resolve merge conflicts before building.
 
 ### Code coverage
 

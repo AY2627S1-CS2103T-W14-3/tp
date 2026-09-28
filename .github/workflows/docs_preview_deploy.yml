@@ -1,0 +1,140 @@
+name: Publish docs PR preview
+
+on:
+  workflow_run:
+    workflows: ["Build docs PR preview"]
+    types: [completed]
+  pull_request_target:
+    types: [unlabeled, closed]
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'pull_request' &&
+       github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'pull_request_target' &&
+       (github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'type.Docs') ||
+        github.event.action == 'unlabeled' && github.event.label.name == 'type.Docs'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      pull-requests: read
+    outputs:
+      number: ${{ steps.pr.outputs.number }}
+    steps:
+      - name: Resolve and validate PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.number }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          HEAD_REPO_ID: ${{ github.event.workflow_run.head_repository.id }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = 'workflow_run' ]; then
+            artifacts=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/artifacts")
+            PR_NUMBER=$(jq -r '.artifacts[] | select(.expired == false) | .name |
+              select(test("^docs-preview-[1-9][0-9]*$")) | ltrimstr("docs-preview-")' <<< "$artifacts")
+            # A skipped build has no artifact. Never trust an artifact's claimed PR number alone.
+            [ -n "$PR_NUMBER" ] || exit 0
+            [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]] || exit 1
+            pr=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")
+            jq -e --arg repo "$HEAD_REPO_ID" --arg sha "$HEAD_SHA" \
+              '(.head.repo.id | tostring) == $repo and .head.sha == $sha' \
+              <<< "$pr" > /dev/null || exit 0
+          fi
+          printf 'number=%s\n' "$PR_NUMBER" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: resolve
+    if: needs.resolve.outputs.number != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Serialize publication and cleanup for this PR without cancelling a branch push.
+    concurrency:
+      group: docs-preview-publish-${{ needs.resolve.outputs.number }}
+      cancel-in-progress: false
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+      pages: write
+    steps:
+      # Only trusted code is checked out; PR artifacts are never executed here.
+      - name: Check out trusted branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Check current PR state after waiting for deployment
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ needs.resolve.outputs.number }}
+          HEAD_REPO_ID: ${{ github.event.workflow_run.head_repository.id }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          pr=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")
+          if ! jq -e '.state == "open" and any(.labels[]; .name == "type.Docs")' <<< "$pr" > /dev/null; then
+            echo 'action=remove' >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_EVENT_NAME" = 'workflow_run' ] && \
+            jq -e --arg repo "$HEAD_REPO_ID" --arg sha "$HEAD_SHA" \
+              '(.head.repo.id | tostring) == $repo and .head.sha == $sha' <<< "$pr" > /dev/null; then
+            echo 'action=deploy' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download preview from the validated build
+        if: steps.preview.outputs.action == 'deploy'
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-preview-${{ needs.resolve.outputs.number }}
+          path: .docs-preview
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Publish or remove preview
+        if: steps.preview.outputs.action != ''
+        id: publish
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: .docs-preview
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          pr-number: ${{ needs.resolve.outputs.number }}
+          action: ${{ steps.preview.outputs.action }}
+          deploy-commit-message: Deploy docs preview for PR ${{ needs.resolve.outputs.number }}
+          remove-commit-message: Remove docs preview for PR ${{ needs.resolve.outputs.number }}
+          # The action's built-in comment assumes a pull_request event.
+          comment: false
+
+      - name: Rebuild GitHub Pages when files changed
+        if: steps.preview.outputs.action != '' && env.deployment_status == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Commits made with GITHUB_TOKEN do not trigger a Pages build themselves.
+        run: gh api --method POST "repos/${GITHUB_REPOSITORY}/pages/builds"
+
+      - name: Comment with preview link
+        if: steps.preview.outputs.action == 'deploy'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ needs.resolve.outputs.number }}
+          header: pr-preview
+          message: |
+            [View the docs preview](${{ steps.publish.outputs.preview-url }})
+
+            Built from `${{ github.event.workflow_run.head_sha }}`. The link will be ready after GitHub Pages finishes deploying.
+
+      - name: Mark preview as removed
+        if: steps.preview.outputs.action == 'remove'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ needs.resolve.outputs.number }}
+          header: pr-preview
+          message: Docs preview removed because this PR is closed or no longer has the `type.Docs` label.
