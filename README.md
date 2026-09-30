@@ -1,9 +1,10 @@
+# GameMates
+
 [![CI Status](https://github.com/AY2627S1-CS2103T-W14-3/tp/workflows/Java%20CI/badge.svg)](https://github.com/AY2627S1-CS2103T-W14-3/tp/actions)
 [![codecov](https://codecov.io/gh/AY2627S1-CS2103T-W14-3/tp/graph/badge.svg?token=S4O2ICMM1L)](https://codecov.io/gh/AY2627S1-CS2103T-W14-3/tp)
 
 ![Ui](docs/images/Ui.png)
 
-# GameMates
 GameMates is a desktop app for gamers who want to keep track of the friends they play with across different games.
 
 It helps users store each friend's contact details, the games they play, their in-game usernames, and game-specific notes such as roles, servers, preferred weapons, or play styles.
