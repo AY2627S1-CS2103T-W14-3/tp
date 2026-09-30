@@ -261,13 +261,13 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* Play multiple online or multiplayer games.
+* Have many gaming friends across different games or platforms.
+* Want to remember each friend's in-game usernames, preferred roles, servers, play styles, or other game-specific details.
+* Prefer using a command-line interface over navigating menus and mouse interactions.
+* Still want a simple visual interface to view their friend and game information clearly.
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: Manage gaming friends and their game-specific details faster than generic contacts apps, spreadsheets, or chat history searches.
 
 
 ### User stories
