@@ -316,11 +316,32 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+#### Environment
 
-*{More to be added}*
+1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
+2.  Should work offline on a single user's personal laptop, without requiring an internet connection or any installed software other than Java `25` or above.
+3.  Should work on screens with a resolution of `1280 x 720` or higher, with all panels and the command box visible without scrolling the window at its default size.
+
+#### Data
+
+4.  All data should be stored locally in a human-editable JSON file. GameMates should not send any data over the network.
+5.  Data saved on exit should be fully restored on the next launch, with no loss of friends, game entries or metadata, provided the data file is not edited manually into an invalid format.
+6.  If the data file is missing, GameMates should start with the sample data without crashing. If the data file is corrupted, GameMates should start with an empty list without crashing.
+
+#### Capacity
+
+7.  Should be able to hold up to 1000 friends, each with up to 100 game entries.
+
+#### Usability
+
+8.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to add, edit, delete, list and filter friends, and add, delete and list game entries, faster using commands than using the mouse.
+9.  A first-time user should be able to add a friend and add a game entry to that friend within 5 minutes of first launching GameMates, using only the in-app help and the sample data as a reference.
+10. Every invalid command should produce an error message that states what was wrong and shows the correct usage or allowed input range, and should not modify any data.
+11. Every command described in the User Guide should be usable through the command box alone, without needing the mouse.
+
+#### Constraints
+
+12. GameMates does not verify friend names, game names, usernames or metadata against any online gaming platform. All such data is whatever the user enters.
 
 ### Glossary
 
