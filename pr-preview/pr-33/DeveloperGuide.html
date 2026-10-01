@@ -447,116 +447,159 @@ itself.
 
 <p>(For all use cases below, the <strong>System</strong> is <code class="language-plaintext highlighter-rouge">GameMates</code> and the <strong>Actor</strong> is the <code class="language-plaintext highlighter-rouge">user</code>, unless specified otherwise)</p>
 
-<p><strong>Use case: Add a friend</strong>
-<strong>MSS</strong></p>
+<p><strong>Use case: Add a friend</strong></p>
+
+<p><strong>MSS</strong></p>
 <ol>
   <li>User requests to add a friend, providing a name.</li>
-  <li>GameMates adds the friend to the list and shows a confirmation.
-Use case ends.</li>
+  <li>GameMates adds the friend to the list and shows a confirmation.</li>
 </ol>
+
+<p>Use case ends.</p>
 
 <p><strong>Extensions</strong></p>
 <ul>
   <li>1a. The name field is missing or empty.
     <ul>
-      <li>1a1. GameMates shows an error message.
-Use case ends.</li>
+      <li>
+        <p>1a1. GameMates shows an error message.</p>
+
+        <p>Use case ends.</p>
+      </li>
     </ul>
   </li>
   <li>1b. A friend with the same name already exists.
     <ul>
-      <li>1b1. GameMates shows an error message, suggesting the user search first.
-Use case resumes at step 1.</li>
+      <li>
+        <p>1b1. GameMates shows an error message, suggesting the user search first.</p>
+
+        <p>Use case resumes at step 1.</p>
+      </li>
     </ul>
   </li>
 </ul>
 
-<p><strong>Use case: Delete a friend</strong>
-<strong>MSS</strong></p>
+<p><strong>Use case: Delete a friend</strong></p>
+
+<p><strong>MSS</strong></p>
 <ol>
   <li>User requests to list friends.</li>
   <li>GameMates shows a list of friends.</li>
   <li>User requests to delete a specific friend in the list.</li>
   <li>GameMates asks for confirmation.</li>
   <li>User confirms.</li>
-  <li>GameMates deletes the friend.
-Use case ends.</li>
+  <li>GameMates deletes the friend.</li>
 </ol>
+
+<p>Use case ends.</p>
 
 <p><strong>Extensions</strong></p>
 <ul>
-  <li>2a. The list is empty.
-Use case ends.</li>
+  <li>
+    <p>2a. The list is empty.</p>
+
+    <p>Use case ends.</p>
+  </li>
   <li>3a. The given index is invalid.
     <ul>
-      <li>3a1. GameMates shows an error message.
-Use case resumes at step 2.</li>
+      <li>
+        <p>3a1. GameMates shows an error message.</p>
+
+        <p>Use case resumes at step 2.</p>
+      </li>
     </ul>
   </li>
-  <li>5a. User does not confirm.
-Use case ends.</li>
+  <li>
+    <p>5a. User does not confirm.</p>
+
+    <p>Use case ends.</p>
+  </li>
 </ul>
 
-<p><strong>Use case: Edit a friend’s platform handle</strong>
-<strong>MSS</strong></p>
+<p><strong>Use case: Edit a friend’s platform handle</strong></p>
+
+<p><strong>MSS</strong></p>
 <ol>
   <li>User requests to list friends.</li>
   <li>GameMates shows a list of friends.</li>
   <li>User requests to edit a specific friend’s handle for a platform, providing the new handle.</li>
-  <li>GameMates updates the handle and shows a confirmation.
-Use case ends.</li>
+  <li>GameMates updates the handle and shows a confirmation.</li>
 </ol>
+
+<p>Use case ends.</p>
 
 <p><strong>Extensions</strong></p>
 <ul>
-  <li>2a. The list is empty.
-Use case ends.</li>
+  <li>
+    <p>2a. The list is empty.</p>
+
+    <p>Use case ends.</p>
+  </li>
   <li>3a. The given index is invalid.
     <ul>
-      <li>3a1. GameMates shows an error message.
-Use case resumes at step 2.</li>
+      <li>
+        <p>3a1. GameMates shows an error message.</p>
+
+        <p>Use case resumes at step 2.</p>
+      </li>
     </ul>
   </li>
   <li>3b. The specified platform does not exist for that friend.
     <ul>
-      <li>3b1. GameMates shows an error message.
-Use case resumes at step 2.</li>
+      <li>
+        <p>3b1. GameMates shows an error message.</p>
+
+        <p>Use case resumes at step 2.</p>
+      </li>
     </ul>
   </li>
 </ul>
 
-<p><strong>Use case: Search for a friend</strong>
-<strong>MSS</strong></p>
+<p><strong>Use case: Search for a friend</strong></p>
+
+<p><strong>MSS</strong></p>
 <ol>
   <li>User requests to search for friends matching a keyword.</li>
-  <li>GameMates shows a list of friends matching the keyword.
-Use case ends.</li>
+  <li>GameMates shows a list of friends matching the keyword.</li>
 </ol>
+
+<p>Use case ends.</p>
 
 <p><strong>Extensions</strong></p>
 <ul>
   <li>1a. No keyword is given.
     <ul>
-      <li>1a1. GameMates shows an error message.
-Use case ends.</li>
+      <li>
+        <p>1a1. GameMates shows an error message.</p>
+
+        <p>Use case ends.</p>
+      </li>
     </ul>
   </li>
-  <li>2a. No friends match the keyword.
-Use case ends.</li>
+  <li>
+    <p>2a. No friends match the keyword.</p>
+
+    <p>Use case ends.</p>
+  </li>
 </ul>
 
-<p><strong>Use case: Filter friends by game</strong>
-<strong>MSS</strong></p>
+<p><strong>Use case: Filter friends by game</strong></p>
+
+<p><strong>MSS</strong></p>
 <ol>
   <li>User requests to filter friends by a specific game.</li>
-  <li>GameMates shows a list of friends who play that game.
-Use case ends.</li>
+  <li>GameMates shows a list of friends who play that game.</li>
 </ol>
+
+<p>Use case ends.</p>
 
 <p><strong>Extensions</strong></p>
 <ul>
-  <li>2a. No friends play that game.
-Use case ends.</li>
+  <li>
+    <p>2a. No friends play that game.</p>
+
+    <p>Use case ends.</p>
+  </li>
 </ul>
 
 <h3 id="non-functional-requirements">Non-Functional Requirements</h3>
