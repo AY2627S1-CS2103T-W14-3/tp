@@ -295,14 +295,16 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 1. User requests to add a friend, providing a name.
 2. GameMates adds the friend to the list and shows a confirmation.
 
-Use case ends.
+   Use case ends.
 
 **Extensions** 
 * 1a. The name field is missing or empty.
+
   * 1a1. GameMates shows an error message.
     
     Use case ends.
 * 1b. A friend with the same name already exists.
+
   * 1b1. GameMates shows an error message, suggesting the user search first.
     
     Use case resumes at step 1.
@@ -318,13 +320,14 @@ Use case ends.
 5. User confirms.
 6. GameMates deletes the friend.
 
-Use case ends.
+   Use case ends.
 
 **Extensions**
 * 2a. The list is empty.
   
   Use case ends.
 * 3a. The given index is invalid.
+
   * 3a1. GameMates shows an error message.
     
     Use case resumes at step 2.
@@ -341,17 +344,19 @@ Use case ends.
 3. User requests to edit a specific friend's handle for a platform, providing the new handle.
 4. GameMates updates the handle and shows a confirmation.
 
-Use case ends.
+   Use case ends.
 
 **Extensions**
 * 2a. The list is empty.
   
   Use case ends.
 * 3a. The given index is invalid.
+
   * 3a1. GameMates shows an error message.
     
     Use case resumes at step 2.
 * 3b. The specified platform does not exist for that friend.
+
   * 3b1. GameMates shows an error message.
     
     Use case resumes at step 2.
@@ -363,10 +368,11 @@ Use case ends.
 1. User requests to search for friends matching a keyword.
 2. GameMates shows a list of friends matching the keyword.
 
-Use case ends.
+   Use case ends.
 
 **Extensions**
 * 1a. No keyword is given.
+
   * 1a1. GameMates shows an error message.
     
     Use case ends.
@@ -381,7 +387,7 @@ Use case ends.
 1. User requests to filter friends by a specific game.
 2. GameMates shows a list of friends who play that game.
 
-Use case ends.
+   Use case ends.
 
 **Extensions**
 * 2a. No friends play that game.
