@@ -328,8 +328,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * **Friend**: A person stored in GameMates, identified by a unique name and optionally associated with contact details and game entries.
 * **User profile**: The current user’s own stored details; it is edited when `edit` is used without a friend index.
 * **Game entry**: A record that a particular friend plays a particular game, including their in-game username and optional metadata.
+* **Role**: A job or duty a friend plays as in a particular game, for example a friend can play as a `Sniper` or a `Healer`.
 * **Game name**: The user-provided name used to identify a game within one friend’s game entries. Aliases such as “Val” and “Valorant” are treated as different game names.
-* **In-game username**: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.
+* **In-game username/Handle**: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.
 * **Metadata**: Optional additional information recorded for a game entry, such as a role, preferred weapon, server, or play style.
 * **Metadata key**: The label before the first colon in a metadata item; for example, `Role` in `Role:Sentinel`.
 * **Metadata value**: The information after the first colon in a metadata item; for example, `Sentinel` in `Role:Sentinel`.
