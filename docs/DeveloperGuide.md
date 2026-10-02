@@ -428,8 +428,24 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Glossary
 
+* **Modern computer**: A computer running a mainstream OS with 16 GB of RAM, a 512 GB SSD, and a mid-range modern processor such as an Intel Core i5 or AMD Ryzen 5.
 * **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **Friend**: A person stored in GameMates, identified by a unique name and optionally associated with contact details and game entries.
+* **User profile**: The current user’s own stored details. It is edited when `edit` is used without a friend index.
+* **Game entry**: A record that a particular friend plays a particular game, including their in-game username and optional metadata.
+* **Role**: A job or duty a friend plays as in a particular game, for example a friend can play as a `Sniper` or a `Healer`.
+* **Game name**: The user-provided name used to identify a game within one friend’s game entries. Aliases such as “Val” and “Valorant” are treated as different game names.
+* **In-game username/Handle**: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.
+* **Metadata**: Optional additional information recorded for a game entry, such as a role, preferred weapon, server, or play style.
+* **Metadata key**: The label before the first colon in a metadata item. For example, `Role` in `Role:Sentinel`.
+* **Metadata value**: The information after the first colon in a metadata item. For example, `Sentinel` in `Role:Sentinel`.
+* **Friend index**: A positive number representing a friend’s position in the currently displayed friend list.
+* **Currently displayed list**: The friend list currently shown after any active filters have been applied. Friend indices refer to this list.
+* **Filter**: A condition used to narrow a displayed list, such as a name keyword or game name.
+* **Name keyword**: A word used to match part of a friend’s name.
+* **Case-insensitive comparison**: A comparison that treats uppercase and lowercase letters as equivalent.
+* **Trimmed value**: A value after its leading and trailing spaces have been removed.
+* **Duplicate**: Two entries considered the same according to the project’s matching rules, and therefore not both allowed.
 
 --------------------------------------------------------------------------------------------------------------------
 
