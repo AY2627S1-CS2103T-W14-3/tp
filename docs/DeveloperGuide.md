@@ -276,16 +276,38 @@ _{Explain here how the data archiving feature will be implemented}_
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​                                    | I want to …​                     | So that I can…​                                                        |
-| -------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------- |
-| `* * *`  | new user                                   | see usage instructions         | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person               |                                                                        |
-| `* * *`  | user                                       | delete a person                | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name          | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details   | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name           | locate a person easily                                                 |
-
-*{More to be added}*
+| Priority | As a …​                          | I want to …​                                            | So that I can…​                                                   |
+|----------|----------------------------------|--------------------------------------------------------|------------------------------------------------------------------|
+| `* * *`  | new user                         | see usage instructions                                 | refer to instructions when I forget how to use the App           |
+| `* * *`  | gamer                            | add a gaming friend                                    | remember the people I play games with                            |
+| `* * *`  | gamer                            | delete a friend                                        | remove friends I no longer play with                             |
+| `* * *`  | gamer                            | list all my friends                                    | see everyone I have saved at a glance                            |
+| `* * *`  | gamer                            | edit a friend's details                                | keep their information up to date                                |
+| `* * *`  | gamer                            | add games to a friend's entry                          | remember what games they play                                    |
+| `* * *`  | gamer                            | remove games from a friend's entry                     | know which games they no longer play                             |
+| `* * *`  | gamer                            | add a friend's in-game username for a game or platform | know what name to search for when inviting them                  |
+| `* * *`  | gamer                            | edit a friend's platform handle                        | keep it up to date when they change their username               |
+| `* * *`  | gamer                            | search for a friend by name                            | find the people I want without scrolling through the whole list  |
+| `* * *`  | gamer                            | filter my friends by game or platform                  | quickly find friends relevant to what I am currently playing     |
+| `* * *`  | gamer                            | add my own details                                     | see how I fit into the context of my friends                     |
+| `* * *`  | gamer                            | edit my own details                                    | keep my profile accurate as my games and usernames change        |
+| `* * *`  | gamer                            | have my data saved automatically                       | keep my friend list after closing the App                        |
+| `* *`    | gamer                            | be asked to confirm before deleting a friend           | avoid deleting someone by accident                               |
+| `* *`    | gamer                            | be warned when adding a friend who already exists      | avoid duplicate entries                                          |
+| `* *`    | gamer                            | see which games my friends and I have in common        | decide what to play together                                     |
+| `* *`    | gamer who plays many games       | see all the games a friend plays                       | know which games I can invite them to                            |
+| `* *`    | gamer                            | record a friend's preferred role (e.g. support, tank)  | put together a balanced team                                     |
+| `* *`    | gamer                            | record the server or region a friend plays on          | invite only friends who can join my lobby                        |
+| `* *`    | gamer                            | record a friend's rank in a game                       | find friends at a similar skill level                            |
+| `* *`    | gamer                            | add notes about a friend's play style                  | remember who is casual and who is competitive                    |
+| `* *`    | gamer                            | tag friends (e.g. "duo", "casual")                     | group them in ways that suit me                                  |
+| `* *`    | expert user                      | use shorter command aliases                            | manage my friends even faster                                    |
+| `*`      | gamer with many friends          | sort friends by name                                   | locate a friend easily                                           |
+| `*`      | gamer                            | mark friends as favourites                             | find my regular teammates first                                  |
+| `*`      | gamer with friends abroad        | record a friend's time zone                            | know when they are likely to be online                           |
+| `*`      | gamer                            | undo my last command                                   | recover from mistakes quickly                                    |
+| `*`      | gamer                            | record when I last played with a friend                | reconnect with friends I have not played with in a while         |
+| `*`      | gamer                            | export my friend list                                  | back up my data or move it to another computer                   |
 
 ### Use cases
 
