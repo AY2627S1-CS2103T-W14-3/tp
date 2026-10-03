@@ -41,8 +41,6 @@ public class Messages {
                 .append(friend.getPhone())
                 .append("; Email: ")
                 .append(friend.getEmail())
-                .append("; Address: ")
-                .append(friend.getAddress())
                 .append("; Tags: ");
         friend.getTags().forEach(builder::append);
         return builder.toString();

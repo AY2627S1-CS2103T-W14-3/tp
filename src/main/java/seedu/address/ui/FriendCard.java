@@ -35,8 +35,6 @@ public class FriendCard extends UiPart<Region> {
     @FXML
     private Label phone;
     @FXML
-    private Label address;
-    @FXML
     private Label email;
     @FXML
     private FlowPane tags;
@@ -50,7 +48,6 @@ public class FriendCard extends UiPart<Region> {
         id.setText(displayedIndex + ". ");
         name.setText(friend.getName().fullName);
         phone.setText(friend.getPhone().value);
-        address.setText(friend.getAddress().value);
         email.setText(friend.getEmail().value);
         friend.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
