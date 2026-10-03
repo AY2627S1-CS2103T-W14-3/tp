@@ -10,33 +10,33 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
-import seedu.address.model.person.Person;
+import seedu.address.model.friend.Friend;
 
 /**
- * Represents the in-memory model of the address book data.
+ * Represents the in-memory model of the GameMates data.
  */
 public class ModelManager implements Model {
     private static final Logger logger = LogsCenter.getLogger(ModelManager.class);
 
-    private final AddressBook addressBook;
+    private final GameMates gameMates;
     private final UserPrefs userPrefs;
-    private final FilteredList<Person> filteredPersons;
+    private final FilteredList<Friend> filteredFriends;
 
     /**
-     * Initializes a ModelManager with the given addressBook and userPrefs.
+     * Initializes a ModelManager with the given gameMates and userPrefs.
      */
-    public ModelManager(ReadOnlyAddressBook addressBook, ReadOnlyUserPrefs userPrefs) {
-        requireAllNonNull(addressBook, userPrefs);
+    public ModelManager(ReadOnlyGameMates gameMates, ReadOnlyUserPrefs userPrefs) {
+        requireAllNonNull(gameMates, userPrefs);
 
-        logger.fine("Initializing with address book: " + addressBook + " and user prefs " + userPrefs);
+        logger.fine("Initializing with GameMates: " + gameMates + " and user prefs " + userPrefs);
 
-        this.addressBook = new AddressBook(addressBook);
+        this.gameMates = new GameMates(gameMates);
         this.userPrefs = new UserPrefs(userPrefs);
-        filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
+        filteredFriends = new FilteredList<>(this.gameMates.getFriendList());
     }
 
     public ModelManager() {
-        this(new AddressBook(), new UserPrefs());
+        this(new GameMates(), new UserPrefs());
     }
 
     //=========== UserPrefs ==================================================================================
@@ -57,57 +57,57 @@ public class ModelManager implements Model {
         userPrefs.setGuiSettings(guiSettings);
     }
 
-    //=========== AddressBook ================================================================================
+    //=========== GameMates ================================================================================
 
     @Override
-    public void setAddressBook(ReadOnlyAddressBook addressBook) {
-        this.addressBook.resetData(addressBook);
+    public void setGameMates(ReadOnlyGameMates gameMates) {
+        this.gameMates.resetData(gameMates);
     }
 
     @Override
-    public ReadOnlyAddressBook getAddressBook() {
-        return addressBook;
+    public ReadOnlyGameMates getGameMates() {
+        return gameMates;
     }
 
     @Override
-    public boolean hasPerson(Person person) {
-        requireNonNull(person);
-        return addressBook.hasPerson(person);
+    public boolean hasFriend(Friend friend) {
+        requireNonNull(friend);
+        return gameMates.hasFriend(friend);
     }
 
     @Override
-    public void deletePerson(Person target) {
-        addressBook.removePerson(target);
+    public void deleteFriend(Friend target) {
+        gameMates.removeFriend(target);
     }
 
     @Override
-    public void addPerson(Person person) {
-        addressBook.addPerson(person);
-        updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+    public void addFriend(Friend friend) {
+        gameMates.addFriend(friend);
+        updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
     }
 
     @Override
-    public void setPerson(Person target, Person editedPerson) {
-        requireAllNonNull(target, editedPerson);
+    public void setFriend(Friend target, Friend editedFriend) {
+        requireAllNonNull(target, editedFriend);
 
-        addressBook.setPerson(target, editedPerson);
+        gameMates.setFriend(target, editedFriend);
     }
 
-    //=========== Filtered Person List Accessors =============================================================
+    //=========== Filtered Friend List Accessors =============================================================
 
     /**
-     * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
-     * {@code addressBook}
+     * Returns an unmodifiable view of the list of {@code Friend} backed by the internal list of
+     * {@code gameMates}
      */
     @Override
-    public ObservableList<Person> getFilteredPersonList() {
-        return filteredPersons;
+    public ObservableList<Friend> getFilteredFriendList() {
+        return filteredFriends;
     }
 
     @Override
-    public void updateFilteredPersonList(Predicate<Person> predicate) {
+    public void updateFilteredFriendList(Predicate<Friend> predicate) {
         requireNonNull(predicate);
-        filteredPersons.setPredicate(predicate);
+        filteredFriends.setPredicate(predicate);
     }
 
     @Override
@@ -121,9 +121,9 @@ public class ModelManager implements Model {
             return false;
         }
 
-        return addressBook.equals(otherModelManager.addressBook)
+        return gameMates.equals(otherModelManager.gameMates)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredPersons.equals(otherModelManager.filteredPersons);
+                && filteredFriends.equals(otherModelManager.filteredFriends);
     }
 
 }

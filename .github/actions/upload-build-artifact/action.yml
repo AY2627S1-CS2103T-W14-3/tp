@@ -10,12 +10,12 @@ runs:
       env:
         PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
-        name=addressbook
+        name=gamemates
         if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
-          name="addressbook-pr-${PR_NUMBER}"
+          name="gamemates-pr-${PR_NUMBER}"
         fi
         mkdir -p "${RUNNER_TEMP}/build-artifact"
-        cp build/libs/addressbook.jar "${RUNNER_TEMP}/build-artifact/${name}.jar"
+        cp build/libs/gamemates.jar "${RUNNER_TEMP}/build-artifact/${name}.jar"
         printf 'name=%s\n' "$name" >> "$GITHUB_OUTPUT"
 
     - name: Artifact output
