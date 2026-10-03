@@ -53,6 +53,16 @@ public class AddCommandTest {
     }
 
     @Test
+    public void execute_nameDiffersOnlyInCaseAndWhitespace_throwsCommandException() {
+        Friend existingFriend = new FriendBuilder().withName("Melody").build();
+        Friend duplicateFriend = new FriendBuilder().withName("  melody  ").build();
+        ModelStub modelStub = new ModelStubWithFriend(existingFriend);
+        AddCommand addCommand = new AddCommand(duplicateFriend);
+
+        assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_FRIEND, () -> addCommand.execute(modelStub));
+    }
+
+    @Test
     public void equals() {
         Friend alice = new FriendBuilder().withName("Alice").build();
         Friend bob = new FriendBuilder().withName("Bob").build();
