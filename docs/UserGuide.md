@@ -28,7 +28,7 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 
    * `list` : Lists all contacts.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to GameMates.
+   * `add n/John Doe p/98765432 e/johnd@example.com` : Adds a contact named `John Doe` to GameMates.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -77,15 +77,15 @@ Format: `help`
 
 Adds a friend to GameMates.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
+Format: `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​`
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A friend can have any number of tags, including zero.
 </div>
 
 Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+* `add n/John Doe p/98765432 e/johnd@example.com`
+* `add n/Betsy Crowe t/friend e/betsycrowe@example.com p/1234567 t/criminal`
 
 ### Listing all friends: `list`
 
@@ -97,7 +97,7 @@ Format: `list`
 
 Edits an existing friend in GameMates.
 
-Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
+Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [t/TAG]…​`
 
 * Edits the friend at the specified `INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
 * At least one of the optional fields must be provided.
@@ -189,10 +189,10 @@ _Details coming soon ..._
 
 Action | Format, Examples
 --------|------------------
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague`
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
+**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List** | `list`
 **Help** | `help`

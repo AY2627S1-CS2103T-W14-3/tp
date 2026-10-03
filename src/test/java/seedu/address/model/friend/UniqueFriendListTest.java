@@ -3,7 +3,6 @@ package seedu.address.model.friend;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalFriends.ALICE;
@@ -40,7 +39,7 @@ public class UniqueFriendListTest {
     @Test
     public void contains_friendWithSameIdentityFieldsInList_returnsTrue() {
         uniqueFriendList.add(ALICE);
-        Friend editedAlice = new FriendBuilder(ALICE).withAddress(VALID_ADDRESS_BOB).withTags(VALID_TAG_HUSBAND)
+        Friend editedAlice = new FriendBuilder(ALICE).withTags(VALID_TAG_HUSBAND)
                 .build();
         assertTrue(uniqueFriendList.contains(editedAlice));
     }
@@ -83,7 +82,7 @@ public class UniqueFriendListTest {
     @Test
     public void setFriend_editedFriendHasSameIdentity_success() {
         uniqueFriendList.add(ALICE);
-        Friend editedAlice = new FriendBuilder(ALICE).withAddress(VALID_ADDRESS_BOB).withTags(VALID_TAG_HUSBAND)
+        Friend editedAlice = new FriendBuilder(ALICE).withTags(VALID_TAG_HUSBAND)
                 .build();
         uniqueFriendList.setFriend(ALICE, editedAlice);
         UniqueFriendList expectedUniqueFriendList = new UniqueFriendList();

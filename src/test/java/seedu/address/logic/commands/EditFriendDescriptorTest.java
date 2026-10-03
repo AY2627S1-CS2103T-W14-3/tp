@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.DESC_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_EMAIL_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
@@ -48,10 +47,6 @@ public class EditFriendDescriptorTest {
         editedAmy = new EditFriendDescriptorBuilder(DESC_AMY).withEmail(VALID_EMAIL_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
-        // different address -> returns false
-        editedAmy = new EditFriendDescriptorBuilder(DESC_AMY).withAddress(VALID_ADDRESS_BOB).build();
-        assertFalse(DESC_AMY.equals(editedAmy));
-
         // different tags -> returns false
         editedAmy = new EditFriendDescriptorBuilder(DESC_AMY).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(DESC_AMY.equals(editedAmy));
@@ -63,8 +58,7 @@ public class EditFriendDescriptorTest {
         String expected = EditFriendDescriptor.class.getCanonicalName() + "{name="
                 + editFriendDescriptor.getName().orElse(null) + ", phone="
                 + editFriendDescriptor.getPhone().orElse(null) + ", email="
-                + editFriendDescriptor.getEmail().orElse(null) + ", address="
-                + editFriendDescriptor.getAddress().orElse(null) + ", tags="
+                + editFriendDescriptor.getEmail().orElse(null) + ", tags="
                 + editFriendDescriptor.getTags().orElse(null) + "}";
         assertEquals(expected, editFriendDescriptor.toString());
     }
