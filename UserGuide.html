@@ -38,18 +38,18 @@
   </header>
 
   <div class="post-content">
-    <p>AddressBook Level 3 (AB3) is a <strong>desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)</strong> while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, AB3 can help you manage contacts faster than traditional GUI applications.</p>
+    <p>GameMates is a <strong>desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)</strong> while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, GameMates can help you manage contacts faster than traditional GUI applications.</p>
 
 <ul id="markdown-toc">
   <li><a href="#quick-start" id="markdown-toc-quick-start">Quick start</a></li>
   <li>
 <a href="#features" id="markdown-toc-features">Features</a>    <ul>
       <li><a href="#viewing-help-help" id="markdown-toc-viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code></a></li>
-      <li><a href="#adding-a-person-add" id="markdown-toc-adding-a-person-add">Adding a person: <code class="language-plaintext highlighter-rouge">add</code></a></li>
-      <li><a href="#listing-all-persons-list" id="markdown-toc-listing-all-persons-list">Listing all persons: <code class="language-plaintext highlighter-rouge">list</code></a></li>
-      <li><a href="#editing-a-person-edit" id="markdown-toc-editing-a-person-edit">Editing a person: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
-      <li><a href="#locating-persons-by-name-find" id="markdown-toc-locating-persons-by-name-find">Locating persons by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
-      <li><a href="#deleting-a-person-delete" id="markdown-toc-deleting-a-person-delete">Deleting a person: <code class="language-plaintext highlighter-rouge">delete</code></a></li>
+      <li><a href="#adding-a-friend-add" id="markdown-toc-adding-a-friend-add">Adding a friend: <code class="language-plaintext highlighter-rouge">add</code></a></li>
+      <li><a href="#listing-all-friends-list" id="markdown-toc-listing-all-friends-list">Listing all friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
+      <li><a href="#editing-a-friend-edit" id="markdown-toc-editing-a-friend-edit">Editing a friend: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
+      <li><a href="#locating-friends-by-name-find" id="markdown-toc-locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
+      <li><a href="#deleting-a-friend-delete" id="markdown-toc-deleting-a-friend-delete">Deleting a friend: <code class="language-plaintext highlighter-rouge">delete</code></a></li>
       <li><a href="#clearing-all-entries-clear" id="markdown-toc-clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code></a></li>
       <li><a href="#exiting-the-program-exit" id="markdown-toc-exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code></a></li>
       <li><a href="#saving-the-data" id="markdown-toc-saving-the-data">Saving the data</a></li>
@@ -72,13 +72,13 @@
 <strong>Mac users:</strong> Ensure you have the precise JDK version prescribed <a href="https://se-education.org/guides/tutorials/javaInstallationMac.html">here</a>.</p>
   </li>
   <li>
-    <p>Download the latest <code class="language-plaintext highlighter-rouge">.jar</code> file from <a href="https://github.com/se-edu/addressbook-level3/releases">here</a>.</p>
+    <p>Download the latest <code class="language-plaintext highlighter-rouge">.jar</code> file from <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/releases">here</a>.</p>
   </li>
   <li>
-    <p>Copy the file to the folder you want to use as the <em>home folder</em> for your AddressBook.</p>
+    <p>Copy the file to the folder you want to use as the <em>home folder</em> for GameMates.</p>
   </li>
   <li>
-    <p>Open a terminal, <code class="language-plaintext highlighter-rouge">cd</code> to the folder containing the JAR file, and run <code class="language-plaintext highlighter-rouge">java -jar addressbook.jar</code>.<br>
+    <p>Open a terminal, <code class="language-plaintext highlighter-rouge">cd</code> to the folder containing the JAR file, and run <code class="language-plaintext highlighter-rouge">java -jar gamemates.jar</code>.<br>
 A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
 <img src="/tp/images/Ui.png" alt="Ui"></p>
   </li>
@@ -91,7 +91,7 @@ Some example commands you can try:</p>
         <p><code class="language-plaintext highlighter-rouge">list</code> : Lists all contacts.</p>
       </li>
       <li>
-        <p><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01</code> : Adds a contact named <code class="language-plaintext highlighter-rouge">John Doe</code> to the Address Book.</p>
+        <p><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01</code> : Adds a contact named <code class="language-plaintext highlighter-rouge">John Doe</code> to GameMates.</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">delete 3</code> : Deletes the 3rd contact shown in the current list.</p>
@@ -153,16 +153,16 @@ For example, <code class="language-plaintext highlighter-rouge">help 123</code> 
 
 <p>Format: <code class="language-plaintext highlighter-rouge">help</code></p>
 
-<h3 id="adding-a-person-add">Adding a person: <code class="language-plaintext highlighter-rouge">add</code>
+<h3 id="adding-a-friend-add">Adding a friend: <code class="language-plaintext highlighter-rouge">add</code>
 </h3>
 
-<p>Adds a person to the address book.</p>
+<p>Adds a friend to GameMates.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​</code></p>
 
 <div class="alert alert-primary">
 <img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Tip:</strong>
-A person can have any number of tags, including zero.
+A friend can have any number of tags, including zero.
 </div>
 
 <p>Examples:</p>
@@ -171,40 +171,40 @@ A person can have any number of tags, including zero.
   <li><code class="language-plaintext highlighter-rouge">add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal</code></li>
 </ul>
 
-<h3 id="listing-all-persons-list">Listing all persons: <code class="language-plaintext highlighter-rouge">list</code>
+<h3 id="listing-all-friends-list">Listing all friends: <code class="language-plaintext highlighter-rouge">list</code>
 </h3>
 
-<p>Shows a list of all persons in the address book.</p>
+<p>Shows a list of all friends in GameMates.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">list</code></p>
 
-<h3 id="editing-a-person-edit">Editing a person: <code class="language-plaintext highlighter-rouge">edit</code>
+<h3 id="editing-a-friend-edit">Editing a friend: <code class="language-plaintext highlighter-rouge">edit</code>
 </h3>
 
-<p>Edits an existing person in the address book.</p>
+<p>Edits an existing friend in GameMates.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​</code></p>
 
 <ul>
-  <li>Edits the person at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>. The index refers to the index number shown in the displayed person list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
+  <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
   <li>At least one of the optional fields must be provided.</li>
   <li>Existing values will be updated to the input values.</li>
-  <li>When editing tags, all of the person’s existing tags are removed; adding tags is not cumulative.</li>
-  <li>To remove all of a person’s tags, enter <code class="language-plaintext highlighter-rouge">t/</code> without a tag after it.</li>
+  <li>When editing tags, all of the friend’s existing tags are removed; adding tags is not cumulative.</li>
+  <li>To remove all of a friend’s tags, enter <code class="language-plaintext highlighter-rouge">t/</code> without a tag after it.</li>
 </ul>
 
 <p>Examples:</p>
 <ul>
   <li>
-<code class="language-plaintext highlighter-rouge">edit 1 p/91234567 e/johndoe@example.com</code> Edits the phone number and email address of the 1st person to be <code class="language-plaintext highlighter-rouge">91234567</code> and <code class="language-plaintext highlighter-rouge">johndoe@example.com</code> respectively.</li>
+<code class="language-plaintext highlighter-rouge">edit 1 p/91234567 e/johndoe@example.com</code> Edits the phone number and email address of the 1st friend to be <code class="language-plaintext highlighter-rouge">91234567</code> and <code class="language-plaintext highlighter-rouge">johndoe@example.com</code> respectively.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">edit 2 n/Betsy Crower t/</code> Edits the name of the 2nd person to be <code class="language-plaintext highlighter-rouge">Betsy Crower</code> and clears all existing tags.</li>
+<code class="language-plaintext highlighter-rouge">edit 2 n/Betsy Crower t/</code> Edits the name of the 2nd friend to be <code class="language-plaintext highlighter-rouge">Betsy Crower</code> and clears all existing tags.</li>
 </ul>
 
-<h3 id="locating-persons-by-name-find">Locating persons by name: <code class="language-plaintext highlighter-rouge">find</code>
+<h3 id="locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code>
 </h3>
 
-<p>Finds persons whose names contain any of the given keywords.</p>
+<p>Finds friends whose names contain any of the given keywords.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">find KEYWORD [MORE_KEYWORDS]</code></p>
 
@@ -213,7 +213,7 @@ A person can have any number of tags, including zero.
   <li>Keyword order does not matter; for example, <code class="language-plaintext highlighter-rouge">Hans Bo</code> matches <code class="language-plaintext highlighter-rouge">Bo Hans</code>.</li>
   <li>The search considers only names.</li>
   <li>Only full words match; for example, <code class="language-plaintext highlighter-rouge">Han</code> does not match <code class="language-plaintext highlighter-rouge">Hans</code>.</li>
-  <li>Persons matching at least one keyword are returned (an <code class="language-plaintext highlighter-rouge">OR</code> search); for example, <code class="language-plaintext highlighter-rouge">Hans Bo</code> returns <code class="language-plaintext highlighter-rouge">Hans Gruber</code> and <code class="language-plaintext highlighter-rouge">Bo Yang</code>.</li>
+  <li>Friends matching at least one keyword are returned (an <code class="language-plaintext highlighter-rouge">OR</code> search); for example, <code class="language-plaintext highlighter-rouge">Hans Bo</code> returns <code class="language-plaintext highlighter-rouge">Hans Gruber</code> and <code class="language-plaintext highlighter-rouge">Bo Yang</code>.</li>
 </ul>
 
 <p>Examples:</p>
@@ -227,31 +227,31 @@ A person can have any number of tags, including zero.
 </li>
 </ul>
 
-<h3 id="deleting-a-person-delete">Deleting a person: <code class="language-plaintext highlighter-rouge">delete</code>
+<h3 id="deleting-a-friend-delete">Deleting a friend: <code class="language-plaintext highlighter-rouge">delete</code>
 </h3>
 
-<p>Deletes the specified person from the address book.</p>
+<p>Deletes the specified friend from GameMates.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">delete INDEX</code></p>
 
 <ul>
-  <li>Deletes the person at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>.</li>
-  <li>The index refers to the index number shown in the displayed person list.</li>
+  <li>Deletes the friend at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>.</li>
+  <li>The index refers to the index number shown in the displayed friend list.</li>
   <li>The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
 </ul>
 
 <p>Examples:</p>
 <ul>
   <li>
-<code class="language-plaintext highlighter-rouge">list</code> followed by <code class="language-plaintext highlighter-rouge">delete 2</code> deletes the 2nd person in the address book.</li>
+<code class="language-plaintext highlighter-rouge">list</code> followed by <code class="language-plaintext highlighter-rouge">delete 2</code> deletes the 2nd friend in GameMates.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">find Betsy</code> followed by <code class="language-plaintext highlighter-rouge">delete 1</code> deletes the 1st person in the results of the <code class="language-plaintext highlighter-rouge">find</code> command.</li>
+<code class="language-plaintext highlighter-rouge">find Betsy</code> followed by <code class="language-plaintext highlighter-rouge">delete 1</code> deletes the 1st friend in the results of the <code class="language-plaintext highlighter-rouge">find</code> command.</li>
 </ul>
 
 <h3 id="clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code>
 </h3>
 
-<p>Clears all entries from the address book.</p>
+<p>Clears all entries from GameMates.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">clear</code></p>
 
@@ -264,16 +264,16 @@ A person can have any number of tags, including zero.
 
 <h3 id="saving-the-data">Saving the data</h3>
 
-<p>AddressBook automatically saves data after every command. You do not need to save manually.</p>
+<p>GameMates automatically saves data after every command. You do not need to save manually.</p>
 
 <h3 id="editing-the-data-file">Editing the data file</h3>
 
-<p>AddressBook data is saved automatically as a JSON file <code class="language-plaintext highlighter-rouge">[JAR file location]/data/addressbook.json</code>. Advanced users are welcome to update data directly by editing that data file.</p>
+<p>GameMates data is saved automatically as a JSON file <code class="language-plaintext highlighter-rouge">[JAR file location]/data/gamemates.json</code>. The friend list is stored under the <code class="language-plaintext highlighter-rouge">friends</code> key. Advanced users are welcome to update data directly by editing that data file.</p>
 
 <div class="alert alert-warning">
 <img class="emoji" title=":exclamation:" alt=":exclamation:" src="https://github.githubassets.com/images/icons/emoji/unicode/2757.png" height="20" width="20"> <strong>Caution:</strong>
-If your changes make the data file invalid, AddressBook starts with an empty address book at the next run. The invalid file remains on disk until you run a command (AddressBook saves after every command). Still, we recommend backing up the file before editing it.<br>
-Furthermore, certain edits can cause the AddressBook to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+If your changes make the data file invalid, GameMates starts with an empty friend list at the next run. The invalid file remains on disk until you run a command (GameMates saves after every command). Still, we recommend backing up the file before editing it.<br>
+Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
 <h3 id="archiving-data-files-coming-in-v20">Archiving data files <code class="language-plaintext highlighter-rouge">[coming in v2.0]</code>
@@ -286,7 +286,7 @@ Furthermore, certain edits can cause the AddressBook to behave in unexpected way
 <h2 id="faq">FAQ</h2>
 
 <p><strong>Q</strong>: How do I transfer my data to another computer?<br>
-<strong>A</strong>: Install the app on the other computer and overwrite the data file it creates with the data file from your previous AddressBook home folder.</p>
+<strong>A</strong>: Install the app on the other computer and overwrite the data file it creates with the data file from your previous GameMates home folder.</p>
 
 <hr>
 

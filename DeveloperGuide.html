@@ -84,7 +84,7 @@
   <li>
 <a href="#appendix-instructions-for-manual-testing" id="markdown-toc-appendix-instructions-for-manual-testing"><strong>Appendix: Instructions for manual testing</strong></a>    <ul>
       <li><a href="#launch-and-shutdown" id="markdown-toc-launch-and-shutdown">Launch and shutdown</a></li>
-      <li><a href="#deleting-a-person" id="markdown-toc-deleting-a-person">Deleting a person</a></li>
+      <li><a href="#deleting-a-friend" id="markdown-toc-deleting-a-friend">Deleting a friend</a></li>
       <li><a href="#saving-data" id="markdown-toc-saving-data">Saving data</a></li>
     </ul>
   </li>
@@ -123,7 +123,7 @@
 
 <p><strong>Main components of the architecture</strong></p>
 
-<p><strong><code class="language-plaintext highlighter-rouge">Main</code></strong> (consisting of classes <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/Main.java"><code class="language-plaintext highlighter-rouge">Main</code></a> and <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java"><code class="language-plaintext highlighter-rouge">MainApp</code></a>) is in charge of the app launch and shut down.</p>
+<p><strong><code class="language-plaintext highlighter-rouge">Main</code></strong> (consisting of classes <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/Main.java"><code class="language-plaintext highlighter-rouge">Main</code></a> and <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/MainApp.java"><code class="language-plaintext highlighter-rouge">MainApp</code></a>) is in charge of the app launch and shut down.</p>
 <ul>
   <li>At app launch, it initializes the other components in the correct sequence, and connects them up with each other.</li>
   <li>At shut down, it shuts down the other components and invokes cleanup methods where necessary.</li>
@@ -165,13 +165,13 @@
 
 <h3 id="ui-component">UI component</h3>
 
-<p>The <strong>API</strong> of this component is specified in <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/Ui.java"><code class="language-plaintext highlighter-rouge">Ui.java</code></a></p>
+<p>The <strong>API</strong> of this component is specified in <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/ui/Ui.java"><code class="language-plaintext highlighter-rouge">Ui.java</code></a></p>
 
 <p><img src="/tp/images/UiClassDiagram.png" alt="Structure of the UI Component"></p>
 
-<p>The UI consists of a <code class="language-plaintext highlighter-rouge">MainWindow</code> and its parts, such as <code class="language-plaintext highlighter-rouge">CommandBox</code>, <code class="language-plaintext highlighter-rouge">ResultDisplay</code>, <code class="language-plaintext highlighter-rouge">PersonListPanel</code>, and <code class="language-plaintext highlighter-rouge">StatusBarFooter</code>. All of these, including <code class="language-plaintext highlighter-rouge">MainWindow</code>, inherit from the abstract <code class="language-plaintext highlighter-rouge">UiPart</code> class, which captures common behavior among classes that represent visible GUI parts.</p>
+<p>The UI consists of a <code class="language-plaintext highlighter-rouge">MainWindow</code> and its parts, such as <code class="language-plaintext highlighter-rouge">CommandBox</code>, <code class="language-plaintext highlighter-rouge">ResultDisplay</code>, <code class="language-plaintext highlighter-rouge">FriendListPanel</code>, and <code class="language-plaintext highlighter-rouge">StatusBarFooter</code>. All of these, including <code class="language-plaintext highlighter-rouge">MainWindow</code>, inherit from the abstract <code class="language-plaintext highlighter-rouge">UiPart</code> class, which captures common behavior among classes that represent visible GUI parts.</p>
 
-<p>The <code class="language-plaintext highlighter-rouge">UI</code> component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching <code class="language-plaintext highlighter-rouge">.fxml</code> files in <code class="language-plaintext highlighter-rouge">src/main/resources/view</code>. For example, <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml"><code class="language-plaintext highlighter-rouge">MainWindow.fxml</code></a> specifies the layout of <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java"><code class="language-plaintext highlighter-rouge">MainWindow</code></a>.</p>
+<p>The <code class="language-plaintext highlighter-rouge">UI</code> component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching <code class="language-plaintext highlighter-rouge">.fxml</code> files in <code class="language-plaintext highlighter-rouge">src/main/resources/view</code>. For example, <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/resources/view/MainWindow.fxml"><code class="language-plaintext highlighter-rouge">MainWindow.fxml</code></a> specifies the layout of <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java"><code class="language-plaintext highlighter-rouge">MainWindow</code></a>.</p>
 
 <p>The <code class="language-plaintext highlighter-rouge">UI</code> component,</p>
 
@@ -179,12 +179,12 @@
   <li>executes user commands using the <code class="language-plaintext highlighter-rouge">Logic</code> component.</li>
   <li>listens for changes to <code class="language-plaintext highlighter-rouge">Model</code> data so that the UI can be updated with the modified data.</li>
   <li>keeps a reference to the <code class="language-plaintext highlighter-rouge">Logic</code> component, because the <code class="language-plaintext highlighter-rouge">UI</code> relies on the <code class="language-plaintext highlighter-rouge">Logic</code> to execute commands.</li>
-  <li>depends on some classes in the <code class="language-plaintext highlighter-rouge">Model</code> component because it displays <code class="language-plaintext highlighter-rouge">Person</code> objects from the model.</li>
+  <li>depends on some classes in the <code class="language-plaintext highlighter-rouge">Model</code> component because it displays <code class="language-plaintext highlighter-rouge">Friend</code> objects from the model.</li>
 </ul>
 
 <h3 id="logic-component">Logic component</h3>
 
-<p><strong>API</strong> : <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/logic/Logic.java"><code class="language-plaintext highlighter-rouge">Logic.java</code></a></p>
+<p><strong>API</strong> : <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/logic/Logic.java"><code class="language-plaintext highlighter-rouge">Logic.java</code></a></p>
 
 <p>Here’s a (partial) class diagram of the <code class="language-plaintext highlighter-rouge">Logic</code> component:</p>
 
@@ -201,9 +201,9 @@
 <p>How the <code class="language-plaintext highlighter-rouge">Logic</code> component works:</p>
 
 <ol>
-  <li>When <code class="language-plaintext highlighter-rouge">Logic</code> is called upon to execute a command, the command is passed to an <code class="language-plaintext highlighter-rouge">AddressBookParser</code> object, which in turn creates a parser that matches the command (e.g., <code class="language-plaintext highlighter-rouge">DeleteCommandParser</code>) and uses it to parse the command.</li>
+  <li>When <code class="language-plaintext highlighter-rouge">Logic</code> is called upon to execute a command, the command is passed to an <code class="language-plaintext highlighter-rouge">GameMatesParser</code> object, which in turn creates a parser that matches the command (e.g., <code class="language-plaintext highlighter-rouge">DeleteCommandParser</code>) and uses it to parse the command.</li>
   <li>This results in a <code class="language-plaintext highlighter-rouge">Command</code> object (more precisely, an object of one of its subclasses e.g., <code class="language-plaintext highlighter-rouge">DeleteCommand</code>) which is executed by the <code class="language-plaintext highlighter-rouge">LogicManager</code>.</li>
-  <li>The command can communicate with the <code class="language-plaintext highlighter-rouge">Model</code> when it is executed (e.g. to delete a person).<br>
+  <li>The command can communicate with the <code class="language-plaintext highlighter-rouge">Model</code> when it is executed (e.g. to delete a friend).<br>
 Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the <code class="language-plaintext highlighter-rouge">Model</code> to complete the operation.</li>
   <li>The result of the command execution is encapsulated as a <code class="language-plaintext highlighter-rouge">CommandResult</code> object which is returned from <code class="language-plaintext highlighter-rouge">Logic</code>.</li>
 </ol>
@@ -214,26 +214,26 @@ Note that although this is shown as a single step in the diagram above for simpl
 
 <p>How the parsing works:</p>
 <ul>
-  <li>When called upon to parse a user command, the <code class="language-plaintext highlighter-rouge">AddressBookParser</code> class creates an <code class="language-plaintext highlighter-rouge">XYZCommandParser</code> (<code class="language-plaintext highlighter-rouge">XYZ</code> is a placeholder for the specific command name, e.g., <code class="language-plaintext highlighter-rouge">AddCommandParser</code>). The parser uses the other classes shown above to parse the user command and create an <code class="language-plaintext highlighter-rouge">XYZCommand</code> object (e.g., <code class="language-plaintext highlighter-rouge">AddCommand</code>). The <code class="language-plaintext highlighter-rouge">AddressBookParser</code> returns that object as a <code class="language-plaintext highlighter-rouge">Command</code> object.</li>
+  <li>When called upon to parse a user command, the <code class="language-plaintext highlighter-rouge">GameMatesParser</code> class creates an <code class="language-plaintext highlighter-rouge">XYZCommandParser</code> (<code class="language-plaintext highlighter-rouge">XYZ</code> is a placeholder for the specific command name, e.g., <code class="language-plaintext highlighter-rouge">AddCommandParser</code>). The parser uses the other classes shown above to parse the user command and create an <code class="language-plaintext highlighter-rouge">XYZCommand</code> object (e.g., <code class="language-plaintext highlighter-rouge">AddCommand</code>). The <code class="language-plaintext highlighter-rouge">GameMatesParser</code> returns that object as a <code class="language-plaintext highlighter-rouge">Command</code> object.</li>
   <li>All <code class="language-plaintext highlighter-rouge">XYZCommandParser</code> classes, such as <code class="language-plaintext highlighter-rouge">AddCommandParser</code> and <code class="language-plaintext highlighter-rouge">DeleteCommandParser</code>, implement the <code class="language-plaintext highlighter-rouge">Parser</code> interface so they can be treated similarly where appropriate, for example during testing.</li>
 </ul>
 
 <h3 id="model-component">Model component</h3>
-<p><strong>API</strong> : <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java"><code class="language-plaintext highlighter-rouge">Model.java</code></a></p>
+<p><strong>API</strong> : <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java"><code class="language-plaintext highlighter-rouge">Model.java</code></a></p>
 
 <p><img src="images/ModelClassDiagram.png" width="450"></p>
 
 <p>The <code class="language-plaintext highlighter-rouge">Model</code> component,</p>
 
 <ul>
-  <li>stores the address book data i.e., all <code class="language-plaintext highlighter-rouge">Person</code> objects (which are contained in a <code class="language-plaintext highlighter-rouge">UniquePersonList</code> object).</li>
-  <li>stores the <code class="language-plaintext highlighter-rouge">Person</code> objects selected by the current filter, such as search results, in a separate <em>filtered</em> list. It exposes this list as an unmodifiable <code class="language-plaintext highlighter-rouge">ObservableList&lt;Person&gt;</code> that the UI can observe and bind to, so the UI updates when the list changes.</li>
+  <li>stores the GameMates data i.e., all <code class="language-plaintext highlighter-rouge">Friend</code> objects (which are contained in a <code class="language-plaintext highlighter-rouge">UniqueFriendList</code> object).</li>
+  <li>stores the <code class="language-plaintext highlighter-rouge">Friend</code> objects selected by the current filter, such as search results, in a separate <em>filtered</em> list. It exposes this list as an unmodifiable <code class="language-plaintext highlighter-rouge">ObservableList&lt;Friend&gt;</code> that the UI can observe and bind to, so the UI updates when the list changes.</li>
   <li>stores a <code class="language-plaintext highlighter-rouge">UserPrefs</code> object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a <code class="language-plaintext highlighter-rouge">ReadOnlyUserPrefs</code> object.</li>
   <li>does not depend on any of the other three components (as the <code class="language-plaintext highlighter-rouge">Model</code> represents data entities of the domain, they should make sense on their own without depending on other components)</li>
 </ul>
 
 <div class="alert alert-info">
-<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> The alternative, arguably more object-oriented, design below keeps a unique list of tags in <code class="language-plaintext highlighter-rouge">AddressBook</code>, and each <code class="language-plaintext highlighter-rouge">Person</code> references tags from that list. This lets <code class="language-plaintext highlighter-rouge">AddressBook</code> maintain one <code class="language-plaintext highlighter-rouge">Tag</code> object per unique tag instead of each <code class="language-plaintext highlighter-rouge">Person</code> holding its own <code class="language-plaintext highlighter-rouge">Tag</code> objects.<br>
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> The alternative, arguably more object-oriented, design below keeps a unique list of tags in <code class="language-plaintext highlighter-rouge">GameMates</code>, and each <code class="language-plaintext highlighter-rouge">Friend</code> references tags from that list. This lets <code class="language-plaintext highlighter-rouge">GameMates</code> maintain one <code class="language-plaintext highlighter-rouge">Tag</code> object per unique tag instead of each <code class="language-plaintext highlighter-rouge">Friend</code> holding its own <code class="language-plaintext highlighter-rouge">Tag</code> objects.<br>
 
 <img src="images/BetterModelClassDiagram.png" width="450">
 
@@ -241,14 +241,14 @@ Note that although this is shown as a single step in the diagram above for simpl
 
 <h3 id="storage-component">Storage component</h3>
 
-<p><strong>API</strong> : <a href="https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java"><code class="language-plaintext highlighter-rouge">Storage.java</code></a></p>
+<p><strong>API</strong> : <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/storage/Storage.java"><code class="language-plaintext highlighter-rouge">Storage.java</code></a></p>
 
 <p><img src="images/StorageClassDiagram.png" width="550"></p>
 
 <p>The <code class="language-plaintext highlighter-rouge">Storage</code> component,</p>
 <ul>
-  <li>can save both address book data and user preference data in JSON format, and read them back into corresponding objects.</li>
-  <li>is implemented by <code class="language-plaintext highlighter-rouge">StorageManager</code>, which delegates the actual JSON file access to <code class="language-plaintext highlighter-rouge">JsonAddressBookStorage</code> and <code class="language-plaintext highlighter-rouge">JsonUserPrefsStorage</code> (one class per data file).</li>
+  <li>can save both GameMates data and user preference data in JSON format, and read them back into corresponding objects.</li>
+  <li>is implemented by <code class="language-plaintext highlighter-rouge">StorageManager</code>, which delegates the actual JSON file access to <code class="language-plaintext highlighter-rouge">JsonGameMatesStorage</code> and <code class="language-plaintext highlighter-rouge">JsonUserPrefsStorage</code> (one class per data file).</li>
   <li>depends on some classes in the <code class="language-plaintext highlighter-rouge">Model</code> component (because the <code class="language-plaintext highlighter-rouge">Storage</code> component’s job is to save/retrieve objects that belong to the <code class="language-plaintext highlighter-rouge">Model</code>)</li>
 </ul>
 
@@ -266,44 +266,44 @@ Note that although this is shown as a single step in the diagram above for simpl
 
 <h4 id="proposed-implementation">Proposed Implementation</h4>
 
-<p>The proposed undo/redo mechanism is facilitated by <code class="language-plaintext highlighter-rouge">VersionedAddressBook</code>. It extends <code class="language-plaintext highlighter-rouge">AddressBook</code> with an undo/redo history, stored internally as an <code class="language-plaintext highlighter-rouge">addressBookStateList</code> and <code class="language-plaintext highlighter-rouge">currentStatePointer</code>. Additionally, it implements the following operations:</p>
+<p>The proposed undo/redo mechanism is facilitated by <code class="language-plaintext highlighter-rouge">VersionedGameMates</code>. It extends <code class="language-plaintext highlighter-rouge">GameMates</code> with an undo/redo history, stored internally as an <code class="language-plaintext highlighter-rouge">gameMatesStateList</code> and <code class="language-plaintext highlighter-rouge">currentStatePointer</code>. Additionally, it implements the following operations:</p>
 
 <ul>
   <li>
-<code class="language-plaintext highlighter-rouge">VersionedAddressBook#commit()</code> — Saves the current address book state in its history.</li>
+<code class="language-plaintext highlighter-rouge">VersionedGameMates#commit()</code> — Saves the current GameMates state in its history.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">VersionedAddressBook#undo()</code> — Restores the previous address book state from its history.</li>
+<code class="language-plaintext highlighter-rouge">VersionedGameMates#undo()</code> — Restores the previous GameMates state from its history.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">VersionedAddressBook#redo()</code> — Restores a previously undone address book state from its history.</li>
+<code class="language-plaintext highlighter-rouge">VersionedGameMates#redo()</code> — Restores a previously undone GameMates state from its history.</li>
 </ul>
 
-<p>These operations are exposed in the <code class="language-plaintext highlighter-rouge">Model</code> interface as <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, <code class="language-plaintext highlighter-rouge">Model#undoAddressBook()</code> and <code class="language-plaintext highlighter-rouge">Model#redoAddressBook()</code> respectively.</p>
+<p>These operations are exposed in the <code class="language-plaintext highlighter-rouge">Model</code> interface as <code class="language-plaintext highlighter-rouge">Model#commitGameMates()</code>, <code class="language-plaintext highlighter-rouge">Model#undoGameMates()</code> and <code class="language-plaintext highlighter-rouge">Model#redoGameMates()</code> respectively.</p>
 
 <p>Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.</p>
 
-<p>Step 1. The user launches the application for the first time. The <code class="language-plaintext highlighter-rouge">VersionedAddressBook</code> will be initialized with the initial address book state, and the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> pointing to that single address book state.</p>
+<p>Step 1. The user launches the application for the first time. The <code class="language-plaintext highlighter-rouge">VersionedGameMates</code> will be initialized with the initial GameMates state, and the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> pointing to that single GameMates state.</p>
 
 <p><img src="/tp/images/UndoRedoState0.png" alt="UndoRedoState0"></p>
 
-<p>Step 2. The user executes <code class="language-plaintext highlighter-rouge">delete 5</code> command to delete the 5th person in the address book. The <code class="language-plaintext highlighter-rouge">delete</code> command calls <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, causing the modified state of the address book after the <code class="language-plaintext highlighter-rouge">delete 5</code> command executes to be saved in the <code class="language-plaintext highlighter-rouge">addressBookStateList</code>, and the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is shifted to the newly inserted address book state.</p>
+<p>Step 2. The user executes <code class="language-plaintext highlighter-rouge">delete 5</code> command to delete the 5th friend in the GameMates. The <code class="language-plaintext highlighter-rouge">delete</code> command calls <code class="language-plaintext highlighter-rouge">Model#commitGameMates()</code>, causing the modified state of the GameMates after the <code class="language-plaintext highlighter-rouge">delete 5</code> command executes to be saved in the <code class="language-plaintext highlighter-rouge">gameMatesStateList</code>, and the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is shifted to the newly inserted GameMates state.</p>
 
 <p><img src="/tp/images/UndoRedoState1.png" alt="UndoRedoState1"></p>
 
-<p>Step 3. The user executes <code class="language-plaintext highlighter-rouge">add n/David …​</code> to add a new person. The <code class="language-plaintext highlighter-rouge">add</code> command also calls <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, causing another modified address book state to be saved into the <code class="language-plaintext highlighter-rouge">addressBookStateList</code>.</p>
+<p>Step 3. The user executes <code class="language-plaintext highlighter-rouge">add n/David …​</code> to add a new friend. The <code class="language-plaintext highlighter-rouge">add</code> command also calls <code class="language-plaintext highlighter-rouge">Model#commitGameMates()</code>, causing another modified GameMates state to be saved into the <code class="language-plaintext highlighter-rouge">gameMatesStateList</code>.</p>
 
 <p><img src="/tp/images/UndoRedoState2.png" alt="UndoRedoState2"></p>
 
 <div class="alert alert-info">
-<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> If a command fails its execution, it will not call <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, so the address book state will not be saved into the <code class="language-plaintext highlighter-rouge">addressBookStateList</code>.
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> If a command fails its execution, it will not call <code class="language-plaintext highlighter-rouge">Model#commitGameMates()</code>, so the GameMates state will not be saved into the <code class="language-plaintext highlighter-rouge">gameMatesStateList</code>.
 
 </div>
 
-<p>Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the <code class="language-plaintext highlighter-rouge">undo</code> command. The <code class="language-plaintext highlighter-rouge">undo</code> command will call <code class="language-plaintext highlighter-rouge">Model#undoAddressBook()</code>, which will shift the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> once to the left, pointing it to the previous address book state, and restores the address book to that state.</p>
+<p>Step 4. The user now decides that adding the friend was a mistake, and decides to undo that action by executing the <code class="language-plaintext highlighter-rouge">undo</code> command. The <code class="language-plaintext highlighter-rouge">undo</code> command will call <code class="language-plaintext highlighter-rouge">Model#undoGameMates()</code>, which will shift the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> once to the left, pointing it to the previous GameMates state, and restores the GameMates to that state.</p>
 
 <p><img src="/tp/images/UndoRedoState3.png" alt="UndoRedoState3"></p>
 
 <div class="alert alert-info">
-<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> If the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is at index 0, pointing to the initial AddressBook state, then there are no previous AddressBook states to restore. The <code class="language-plaintext highlighter-rouge">undo</code> command uses <code class="language-plaintext highlighter-rouge">Model#canUndoAddressBook()</code> to check if this is the case. If so, it will return an error to the user rather
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> If the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is at index 0, pointing to the initial GameMates state, then there are no previous GameMates states to restore. The <code class="language-plaintext highlighter-rouge">undo</code> command uses <code class="language-plaintext highlighter-rouge">Model#canUndoGameMates()</code> to check if this is the case. If so, it will return an error to the user rather
 than attempting to perform the undo.
 
 </div>
@@ -321,18 +321,18 @@ than attempting to perform the undo.
 
 <p><img src="/tp/images/UndoSequenceDiagram-Model.png" alt="UndoSequenceDiagram"></p>
 
-<p>The <code class="language-plaintext highlighter-rouge">redo</code> command does the opposite — it calls <code class="language-plaintext highlighter-rouge">Model#redoAddressBook()</code>, which shifts the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> once to the right, pointing to the previously undone state, and restores the address book to that state.</p>
+<p>The <code class="language-plaintext highlighter-rouge">redo</code> command does the opposite — it calls <code class="language-plaintext highlighter-rouge">Model#redoGameMates()</code>, which shifts the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> once to the right, pointing to the previously undone state, and restores the GameMates to that state.</p>
 
 <div class="alert alert-info">
-<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> If the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is at index <code class="language-plaintext highlighter-rouge">addressBookStateList.size() - 1</code>, pointing to the latest address book state, then there are no undone AddressBook states to restore. The <code class="language-plaintext highlighter-rouge">redo</code> command uses <code class="language-plaintext highlighter-rouge">Model#canRedoAddressBook()</code> to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
+<img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> If the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is at index <code class="language-plaintext highlighter-rouge">gameMatesStateList.size() - 1</code>, pointing to the latest GameMates state, then there are no undone GameMates states to restore. The <code class="language-plaintext highlighter-rouge">redo</code> command uses <code class="language-plaintext highlighter-rouge">Model#canRedoGameMates()</code> to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
 
 </div>
 
-<p>Step 5. The user then decides to execute the command <code class="language-plaintext highlighter-rouge">list</code>. Commands that do not modify the address book, such as <code class="language-plaintext highlighter-rouge">list</code>, will usually not call <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>, <code class="language-plaintext highlighter-rouge">Model#undoAddressBook()</code> or <code class="language-plaintext highlighter-rouge">Model#redoAddressBook()</code>. Thus, the <code class="language-plaintext highlighter-rouge">addressBookStateList</code> remains unchanged.</p>
+<p>Step 5. The user then decides to execute the command <code class="language-plaintext highlighter-rouge">list</code>. Commands that do not modify the GameMates, such as <code class="language-plaintext highlighter-rouge">list</code>, will usually not call <code class="language-plaintext highlighter-rouge">Model#commitGameMates()</code>, <code class="language-plaintext highlighter-rouge">Model#undoGameMates()</code> or <code class="language-plaintext highlighter-rouge">Model#redoGameMates()</code>. Thus, the <code class="language-plaintext highlighter-rouge">gameMatesStateList</code> remains unchanged.</p>
 
 <p><img src="/tp/images/UndoRedoState4.png" alt="UndoRedoState4"></p>
 
-<p>Step 6. The user executes <code class="language-plaintext highlighter-rouge">clear</code>, which calls <code class="language-plaintext highlighter-rouge">Model#commitAddressBook()</code>. Since the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is not pointing at the end of the <code class="language-plaintext highlighter-rouge">addressBookStateList</code>, all address book states after the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> will be purged. Reason: It no longer makes sense to redo the <code class="language-plaintext highlighter-rouge">add n/David …​</code> command. This is the behavior that most modern desktop applications follow.</p>
+<p>Step 6. The user executes <code class="language-plaintext highlighter-rouge">clear</code>, which calls <code class="language-plaintext highlighter-rouge">Model#commitGameMates()</code>. Since the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> is not pointing at the end of the <code class="language-plaintext highlighter-rouge">gameMatesStateList</code>, all GameMates states after the <code class="language-plaintext highlighter-rouge">currentStatePointer</code> will be purged. Reason: It no longer makes sense to redo the <code class="language-plaintext highlighter-rouge">add n/David …​</code> command. This is the behavior that most modern desktop applications follow.</p>
 
 <p><img src="/tp/images/UndoRedoState5.png" alt="UndoRedoState5"></p>
 
@@ -346,7 +346,7 @@ than attempting to perform the undo.
 
 <ul>
   <li>
-<strong>Alternative 1 (current choice):</strong> Saves the entire address book.
+<strong>Alternative 1 (current choice):</strong> Saves the entire GameMates.
     <ul>
       <li>Pros: Easy to implement.</li>
       <li>Cons: May have performance issues in terms of memory usage.</li>
@@ -356,7 +356,7 @@ than attempting to perform the undo.
 <strong>Alternative 2:</strong> Individual command knows how to undo/redo by
 itself.
     <ul>
-      <li>Pros: Will use less memory (e.g. for <code class="language-plaintext highlighter-rouge">delete</code>, just save the person being deleted).</li>
+      <li>Pros: Will use less memory (e.g. for <code class="language-plaintext highlighter-rouge">delete</code>, just save the friend being deleted).</li>
       <li>Cons: We must ensure that the implementation of each individual command is correct.</li>
     </ul>
   </li>
@@ -910,15 +910,15 @@ Expected: The GUI opens with a set of sample contacts. The window size may not b
   </li>
 </ol>
 
-<h3 id="deleting-a-person">Deleting a person</h3>
+<h3 id="deleting-a-friend">Deleting a friend</h3>
 
 <ol>
   <li>
-    <p>Deleting a person while all persons are being shown</p>
+    <p>Deleting a friend while all friends are being shown</p>
 
     <ol>
       <li>
-        <p>Prerequisites: List all persons using the <code class="language-plaintext highlighter-rouge">list</code> command, with multiple persons in the list.</p>
+        <p>Prerequisites: List all friends using the <code class="language-plaintext highlighter-rouge">list</code> command, with multiple friends in the list.</p>
       </li>
       <li>
         <p>Test case: <code class="language-plaintext highlighter-rouge">delete 1</code><br>
@@ -926,7 +926,7 @@ Expected: The first contact is deleted from the list. The status message shows t
       </li>
       <li>
         <p>Test case: <code class="language-plaintext highlighter-rouge">delete 0</code><br>
-Expected: No person is deleted. The status message shows error details.</p>
+Expected: No friend is deleted. The status message shows error details.</p>
       </li>
       <li>
         <p>Other incorrect delete commands to try: <code class="language-plaintext highlighter-rouge">delete</code>, <code class="language-plaintext highlighter-rouge">delete x</code>, <code class="language-plaintext highlighter-rouge">...</code> (where x is larger than the list size)<br>
