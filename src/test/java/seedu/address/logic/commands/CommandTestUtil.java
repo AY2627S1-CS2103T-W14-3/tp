@@ -17,6 +17,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.Name;
 import seedu.address.model.friend.NameContainsKeywordsPredicate;
 import seedu.address.testutil.EditFriendDescriptorBuilder;
 
@@ -47,8 +48,8 @@ public class CommandTestUtil {
     public static final String TAG_DESC_FRIEND = " " + PREFIX_TAG + VALID_TAG_FRIEND;
     public static final String TAG_DESC_HUSBAND = " " + PREFIX_TAG + VALID_TAG_HUSBAND;
 
-    public static final String INVALID_NAME_DESC = " " + PREFIX_NAME + "James&"; // '&' not allowed in names
-    public static final String INVALID_PHONE_DESC = " " + PREFIX_PHONE + "911a"; // 'a' not allowed in phones
+    public static final String INVALID_NAME_DESC = " " + PREFIX_NAME + "a".repeat(Name.MAX_LENGTH + 1); // too long
+    public static final String INVALID_PHONE_DESC = " " + PREFIX_PHONE + "+659123456a"; // 'a' not allowed in phones
     public static final String INVALID_EMAIL_DESC = " " + PREFIX_EMAIL + "bob!yahoo"; // missing '@' symbol
     public static final String INVALID_ADDRESS_DESC = " " + PREFIX_ADDRESS; // empty string not allowed for addresses
     public static final String INVALID_TAG_DESC = " " + PREFIX_TAG + "hubby*"; // '*' not allowed in tags

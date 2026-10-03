@@ -18,8 +18,8 @@ import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
 
 public class JsonAdaptedFriendTest {
-    private static final String INVALID_NAME = "R@chel";
-    private static final String INVALID_PHONE = "+651234";
+    private static final String INVALID_NAME = "a".repeat(Name.MAX_LENGTH + 1);
+    private static final String INVALID_PHONE = "+659123456a";
     private static final String INVALID_ADDRESS = " ";
     private static final String INVALID_EMAIL = "example.com";
     private static final String INVALID_TAG = "#friend";
@@ -62,10 +62,33 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
+    public void toModelType_plainPhone_returnsFriend() throws Exception {
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, "91234567", VALID_EMAIL, VALID_ADDRESS,
+                VALID_TAGS);
+        assertEquals("91234567", friend.toModelType().getPhone().value);
+    }
+
+    @Test
+    public void toModelType_phoneWithSurroundingWhitespace_throwsIllegalValueException() {
+        // stored data is not trimmed; only user input is
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, " 91234567", VALID_EMAIL, VALID_ADDRESS,
+                VALID_TAGS);
+        assertThrows(IllegalValueException.class, Phone.MESSAGE_CONSTRAINTS, friend::toModelType);
+    }
+
+    @Test
     public void toModelType_nullPhone_throwsIllegalValueException() {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, null, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
+    }
+
+    @Test
+    public void toModelType_tooLongEmail_throwsIllegalValueException() {
+        String tooLongEmail = "a".repeat(65) + "@example.com";
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, tooLongEmail, VALID_ADDRESS,
+                VALID_TAGS);
+        assertThrows(IllegalValueException.class, Email.MESSAGE_CONSTRAINTS, friend::toModelType);
     }
 
     @Test

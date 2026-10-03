@@ -19,14 +19,14 @@ import seedu.address.model.friend.Phone;
 import seedu.address.model.tag.Tag;
 
 public class ParserUtilTest {
-    private static final String INVALID_NAME = "R@chel";
-    private static final String INVALID_PHONE = "+651234";
+    private static final String INVALID_NAME = "a".repeat(Name.MAX_LENGTH + 1);
+    private static final String INVALID_PHONE = "+659123456a";
     private static final String INVALID_ADDRESS = " ";
     private static final String INVALID_EMAIL = "example.com";
     private static final String INVALID_TAG = "#friend";
 
     private static final String VALID_NAME = "Rachel Walker";
-    private static final String VALID_PHONE = "123456";
+    private static final String VALID_PHONE = "+6591234567";
     private static final String VALID_ADDRESS = "123 Main Street #0505";
     private static final String VALID_EMAIL = "rachel@example.com";
     private static final String VALID_TAG_1 = "friend";
@@ -78,6 +78,21 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseName_lengthBoundaries_validatesAfterTrimming() throws Exception {
+        assertEquals("a", ParserUtil.parseName(WHITESPACE + "a" + WHITESPACE).fullName);
+        String maxLengthName = "a".repeat(Name.MAX_LENGTH);
+        assertEquals(maxLengthName, ParserUtil.parseName(WHITESPACE + maxLengthName + WHITESPACE).fullName);
+        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, ()
+                -> ParserUtil.parseName("a".repeat(Name.MAX_LENGTH + 1)));
+        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseName(WHITESPACE));
+    }
+
+    @Test
+    public void parseName_punctuation_throwsParseException() {
+        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseName("O'Connor-Jane"));
+    }
+
+    @Test
     public void parsePhone_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parsePhone((String) null));
     }
@@ -124,6 +139,31 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parsePhone_lengthBoundaries_validatesAfterTrimming() throws Exception {
+        assertEquals(new Phone("+12"), ParserUtil.parsePhone(WHITESPACE + "+12" + WHITESPACE));
+        String maxLengthPhone = "+" + "1".repeat(15);
+        assertEquals(new Phone(maxLengthPhone),
+                ParserUtil.parsePhone(WHITESPACE + maxLengthPhone + WHITESPACE));
+        assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, ()
+                -> ParserUtil.parsePhone("+" + "1".repeat(16)));
+        assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, () -> ParserUtil.parsePhone(WHITESPACE));
+    }
+
+    @Test
+    public void parsePhone_plainNumber_returnsPhone() throws Exception {
+        assertEquals(new Phone("91234567"), ParserUtil.parsePhone(WHITESPACE + "91234567" + WHITESPACE));
+    }
+
+    @Test
+    public void parsePhone_unsupportedFormats_throwsParseException() {
+        String[] invalidPhones = {"12", "+06591234567", "+65 (1234)-5678.;#",
+            "+6591234567 ext 123", "+６５９１２３４５６７", "+", "+1"};
+        for (String phone : invalidPhones) {
+            assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, () -> ParserUtil.parsePhone(phone));
+        }
+    }
+
+    @Test
     public void parseEmail_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parseEmail((String) null));
     }
@@ -147,6 +187,27 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseEmail_lengthBoundaries_validatesAfterTrimming() throws Exception {
+        assertEquals(new Email("a@b"), ParserUtil.parseEmail(WHITESPACE + "a@b" + WHITESPACE));
+        String maxLengthEmail = "a".repeat(64) + "@" + "b".repeat(63) + "." + "c".repeat(63)
+                + "." + "d".repeat(61);
+        assertEquals(new Email(maxLengthEmail),
+                ParserUtil.parseEmail(WHITESPACE + maxLengthEmail + WHITESPACE));
+        assertThrows(ParseException.class, Email.MESSAGE_CONSTRAINTS, ()
+                -> ParserUtil.parseEmail(maxLengthEmail + "d"));
+        assertThrows(ParseException.class, Email.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseEmail(WHITESPACE));
+    }
+
+    @Test
+    public void parseEmail_malformedAddresses_throwsParseException() {
+        String[] invalidEmails = {"@", "user@", "user@@example.com", "user..name@example.com",
+            "user@-example.com", "user name@example.com"};
+        for (String email : invalidEmails) {
+            assertThrows(ParseException.class, Email.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseEmail(email));
+        }
+    }
+
+    @Test
     public void parseTag_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parseTag(null));
     }
@@ -167,6 +228,14 @@ public class ParserUtilTest {
         String tagWithWhitespace = WHITESPACE + VALID_TAG_1 + WHITESPACE;
         Tag expectedTag = new Tag(VALID_TAG_1);
         assertEquals(expectedTag, ParserUtil.parseTag(tagWithWhitespace));
+    }
+
+    @Test
+    public void parseTag_unsupportedFormats_throwsParseException() {
+        String[] invalidTags = {"", WHITESPACE, "best friend", "best-friend", "caf\u00e9"};
+        for (String tag : invalidTags) {
+            assertThrows(ParseException.class, Tag.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseTag(tag));
+        }
     }
 
     @Test
