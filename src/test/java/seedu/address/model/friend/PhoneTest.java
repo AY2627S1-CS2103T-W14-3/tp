@@ -24,26 +24,46 @@ public class PhoneTest {
         // null phone number
         assertThrows(NullPointerException.class, () -> Phone.isValidPhone(null));
 
-        // invalid phone numbers
-        assertFalse(Phone.isValidPhone("")); // empty string
-        assertFalse(Phone.isValidPhone(" ")); // spaces only
-        assertFalse(Phone.isValidPhone("91")); // less than 3 numbers
-        assertFalse(Phone.isValidPhone("phone")); // non-numeric
-        assertFalse(Phone.isValidPhone("9011p041")); // alphabets within digits
-        assertFalse(Phone.isValidPhone("9312 1534")); // spaces within digits
+        // Invalid formats, including national numbers and unsupported separators/extensions.
+        String[] invalidPhones = {
+            "", " ", "+", "+1", "12", "+0", "+06591234567", "++6591234567", "+65+91234567", "9123+4567",
+            "９１２３４５６７", "91234567\n", "\t91234567", "+65９１２３４５６７", "9123456a", "-91234567",
+            "+65 91234567", "+65(9123)4567", "+65-9123-4567", "+65.91234567", "+6591234567;123",
+            "+6591234567#123", "+6591234567 ext 123", "+659123456a", "+６５９１２３４５６７",
+            "+65\t91234567", "+6591234567\n", " +6591234567", "+6591234567 "
+        };
+        for (String phone : invalidPhones) {
+            assertFalse(Phone.isValidPhone(phone), phone);
+        }
 
-        // valid phone numbers
-        assertTrue(Phone.isValidPhone("911")); // exactly 3 numbers
-        assertTrue(Phone.isValidPhone("93121534"));
-        assertTrue(Phone.isValidPhone("124293842033123")); // long phone numbers
+        // Valid international formats; assignment and national number lengths are not checked.
+        assertTrue(Phone.isValidPhone("+6591234567"));
+        assertTrue(Phone.isValidPhone("+14155552671"));
+        assertTrue(Phone.isValidPhone("+442071838750"));
+
+        // Valid plain numbers without a '+' prefix
+        assertTrue(Phone.isValidPhone("91234567"));
+        assertTrue(Phone.isValidPhone("911"));
+        assertTrue(Phone.isValidPhone("006591234567"));
+    }
+
+    @Test
+    public void isValidPhone_lengthBoundaries() {
+        assertTrue(Phone.isValidPhone("+12")); // minimum accepted syntax length, not a verified number
+        assertTrue(Phone.isValidPhone("+" + "1".repeat(15))); // '+' is excluded from the digit limit
+        assertFalse(Phone.isValidPhone("+" + "1".repeat(16)));
+        assertTrue(Phone.isValidPhone("123")); // minimum plain number length
+        assertFalse(Phone.isValidPhone("12"));
+        assertTrue(Phone.isValidPhone("1".repeat(15)));
+        assertFalse(Phone.isValidPhone("1".repeat(16)));
     }
 
     @Test
     public void equals() {
-        Phone phone = new Phone("999");
+        Phone phone = new Phone("+6591234567");
 
         // same values -> returns true
-        assertTrue(phone.equals(new Phone("999")));
+        assertTrue(phone.equals(new Phone("+6591234567")));
 
         // same object -> returns true
         assertTrue(phone.equals(phone));
@@ -55,6 +75,6 @@ public class PhoneTest {
         assertFalse(phone.equals(5.0f));
 
         // different values -> returns false
-        assertFalse(phone.equals(new Phone("995")));
+        assertFalse(phone.equals(new Phone("+6598765432")));
     }
 }

@@ -87,6 +87,42 @@ Examples:
 * `add n/John Doe p/98765432 e/johnd@example.com`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com p/1234567 t/criminal`
 
+Names are trimmed before validation, must not be blank and may contain at most 100 characters.
+Only ASCII letters, digits and spaces are accepted. Names are compared case-insensitively,
+so `john doe` and `John Doe` are the same friend.
+
+Tag names must be non-empty and contain only ASCII letters and digits (no spaces or symbols).
+
+Phone numbers can be entered with or without an international prefix, for example `91234567` or `+6591234567` (Singapore):
+
+* Without a prefix: 3–15 ASCII digits, e.g. `91234567`.
+* With a prefix: `+` followed by the country calling code and national number (2–15 digits in total, first digit `1`–`9`),
+  following [ITU-T E.164](https://www.itu.int/rec/T-REC-E.164/), e.g. `+6591234567` or `+14155552671`.
+* Surrounding whitespace is trimmed. Internal spaces, parentheses, hyphens, dots, letters and extensions are rejected.
+* GameMates does not infer a country code: `91234567` and `+6591234567` are stored as typed and are treated as different numbers.
+
+<div markdown="span" class="alert alert-warning">
+Phone validation only checks the format. It does not verify assigned country codes, country-specific number
+lengths or whether a number is active, so a number passing this check is not necessarily callable.
+The same rules apply when editing a friend or loading saved data.
+</div>
+
+Email addresses are trimmed before validation and must use ASCII `local-part@domain` syntax:
+
+* The entire address may contain at most 254 characters, with at most 64 before `@`.
+* The local part accepts letters, digits and the punctuation in ``!#$%&'*+/=?^_`{|}~-``.
+  Dots may separate non-empty parts, so leading, trailing and consecutive dots are rejected.
+* Each domain label (a part between dots) must contain 1–63 letters, digits or hyphens and must start
+  and end with a letter or digit. Single-label domains such as `user@localhost` are accepted.
+* Quoted local parts, address literals such as `user@[127.0.0.1]`, internal whitespace and non-ASCII
+  characters are not supported. Validation checks the format; it does not verify that a mailbox exists.
+
+<div markdown="span" class="alert alert-info">
+These rules use a practical subset of [RFC 5322's dot-atom syntax](https://www.rfc-editor.org/rfc/rfc5322#section-3.2.3)
+and [RFC 5321's SMTP length limits](https://www.rfc-editor.org/rfc/rfc5321#section-4.5.3.1).
+The 254-character address limit leaves room for the enclosing `<` and `>` in the 256-octet SMTP path limit.
+</div>
+
 ### Listing all friends: `list`
 
 Shows a list of all friends in GameMates.

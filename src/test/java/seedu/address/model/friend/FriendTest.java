@@ -40,14 +40,14 @@ public class FriendTest {
         editedAlice = new FriendBuilder(ALICE).withName(VALID_NAME_BOB).build();
         assertFalse(ALICE.isSameFriend(editedAlice));
 
-        // name differs in case, all other attributes same -> returns false
+        // name differs in case, all other attributes same -> returns true
         Friend editedBob = new FriendBuilder(BOB).withName(VALID_NAME_BOB.toLowerCase()).build();
-        assertFalse(BOB.isSameFriend(editedBob));
+        assertTrue(BOB.isSameFriend(editedBob));
 
-        // name has trailing spaces, all other attributes same -> returns false
+        // name has trailing spaces, all other attributes same -> returns true
         String nameWithTrailingSpaces = VALID_NAME_BOB + " ";
         editedBob = new FriendBuilder(BOB).withName(nameWithTrailingSpaces).build();
-        assertFalse(BOB.isSameFriend(editedBob));
+        assertTrue(BOB.isSameFriend(editedBob));
     }
 
     @Test

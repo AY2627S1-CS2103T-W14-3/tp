@@ -39,6 +39,8 @@ public class ParserUtil {
     /**
      * Parses a {@code String name} into a {@code Name}.
      * Leading and trailing whitespaces will be trimmed.
+     * The trimmed value must contain only alphanumeric characters and spaces, and be at most
+     * {@value Name#MAX_LENGTH} characters long.
      *
      * @throws ParseException if the given {@code name} is invalid.
      */
@@ -54,6 +56,8 @@ public class ParserUtil {
     /**
      * Parses a {@code String phone} into a {@code Phone}.
      * Leading and trailing whitespaces will be trimmed.
+     * The trimmed value may be a plain number (e.g. 91234567) or an international number with a '+' and country
+     * code (e.g. +6591234567). Separators and extensions are not accepted, and no country code is added.
      *
      * @throws ParseException if the given {@code phone} is invalid.
      */
@@ -69,6 +73,8 @@ public class ParserUtil {
     /**
      * Parses a {@code String email} into an {@code Email}.
      * Leading and trailing whitespaces will be trimmed.
+     * The trimmed value must be an ASCII {@code local-part@domain} address of at most 254 characters, as
+     * described in the User Guide. Only the format is checked, not whether the mailbox exists.
      *
      * @throws ParseException if the given {@code email} is invalid.
      */
