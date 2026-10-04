@@ -10,11 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import seedu.address.commons.exceptions.IllegalValueException;
-import seedu.address.model.friend.Address;
-import seedu.address.model.friend.Email;
-import seedu.address.model.friend.Friend;
-import seedu.address.model.friend.Name;
-import seedu.address.model.friend.Phone;
+import seedu.address.model.friend.*;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -101,9 +97,12 @@ class JsonAdaptedFriend {
             throw new IllegalValueException(Address.MESSAGE_CONSTRAINTS);
         }
         final Address modelAddress = new Address(address);
+        // TODO: support JSON storage with remarks
+        final Remark modelRemark = new Remark("");
 
         final Set<Tag> modelTags = new HashSet<>(friendTags);
-        return new Friend(modelName, modelPhone, modelEmail, modelAddress, modelTags);
+
+        return new Friend(modelName, modelPhone, modelEmail, modelAddress, modelRemark, modelTags);
     }
 
 }

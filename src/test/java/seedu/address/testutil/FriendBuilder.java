@@ -3,11 +3,7 @@ package seedu.address.testutil;
 import java.util.HashSet;
 import java.util.Set;
 
-import seedu.address.model.friend.Address;
-import seedu.address.model.friend.Email;
-import seedu.address.model.friend.Friend;
-import seedu.address.model.friend.Name;
-import seedu.address.model.friend.Phone;
+import seedu.address.model.friend.*;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.util.SampleDataUtil;
 
@@ -20,11 +16,13 @@ public class FriendBuilder {
     public static final String DEFAULT_PHONE = "85355255";
     public static final String DEFAULT_EMAIL = "amy@gmail.com";
     public static final String DEFAULT_ADDRESS = "123, Jurong West Ave 6, #08-111";
+    public static final String DEFAULT_REMARK = "";
 
     private Name name;
     private Phone phone;
     private Email email;
     private Address address;
+    private Remark remark;
     private Set<Tag> tags;
 
     /**
@@ -35,6 +33,7 @@ public class FriendBuilder {
         phone = new Phone(DEFAULT_PHONE);
         email = new Email(DEFAULT_EMAIL);
         address = new Address(DEFAULT_ADDRESS);
+        remark = new Remark(DEFAULT_REMARK);
         tags = new HashSet<>();
     }
 
@@ -46,6 +45,7 @@ public class FriendBuilder {
         phone = friendToCopy.getPhone();
         email = friendToCopy.getEmail();
         address = friendToCopy.getAddress();
+        remark = friendToCopy.getRemark();
         tags = new HashSet<>(friendToCopy.getTags());
     }
 
@@ -89,8 +89,17 @@ public class FriendBuilder {
         return this;
     }
 
+    /**
+     * Sets the {@code Remark} of the {@code Friend} that we are building.
+     */
+    public FriendBuilder withRemark(String remark) {
+        this.remark = new Remark(remark);
+        return this;
+    }
+
+
     public Friend build() {
-        return new Friend(name, phone, email, address, tags);
+        return new Friend(name, phone, email, address, remark, tags);
     }
 
 }

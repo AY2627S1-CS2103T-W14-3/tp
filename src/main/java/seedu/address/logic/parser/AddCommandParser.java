@@ -12,11 +12,7 @@ import java.util.stream.Stream;
 
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.friend.Address;
-import seedu.address.model.friend.Email;
-import seedu.address.model.friend.Friend;
-import seedu.address.model.friend.Name;
-import seedu.address.model.friend.Phone;
+import seedu.address.model.friend.*;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -43,9 +39,10 @@ public class AddCommandParser implements Parser<AddCommand> {
         Phone phone = ParserUtil.parsePhone(argMultimap.getValue(PREFIX_PHONE).get());
         Email email = ParserUtil.parseEmail(argMultimap.getValue(PREFIX_EMAIL).get());
         Address address = ParserUtil.parseAddress(argMultimap.getValue(PREFIX_ADDRESS).get());
+        Remark remark = new Remark("");
         Set<Tag> tagList = ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG));
 
-        Friend friend = new Friend(name, phone, email, address, tagList);
+        Friend friend = new Friend(name, phone, email, address, remark, tagList);
 
         return new AddCommand(friend);
     }

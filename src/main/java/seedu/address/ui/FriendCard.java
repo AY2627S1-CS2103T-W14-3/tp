@@ -53,6 +53,7 @@ public class FriendCard extends UiPart<Region> {
         name.setText(friend.getName().fullName);
         phone.setText(friend.getPhone().value);
         address.setText(friend.getAddress().value);
+        remark.setText(friend.getRemark().remark);
         email.setText(friend.getEmail().value);
         friend.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))

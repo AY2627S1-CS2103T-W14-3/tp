@@ -101,7 +101,7 @@ public class EditCommand extends Command {
         Address updatedAddress = editFriendDescriptor.getAddress().orElse(friendToEdit.getAddress());
         Set<Tag> updatedTags = editFriendDescriptor.getTags().orElse(friendToEdit.getTags());
 
-        return new Friend(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags);
+        return new Friend(updatedName, updatedPhone, updatedEmail, updatedAddress, friendToEdit.getRemark(), updatedTags);
     }
 
     @Override
