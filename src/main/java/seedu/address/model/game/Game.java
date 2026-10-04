@@ -9,7 +9,6 @@ import java.util.Locale;
  * Represents a Game in GameMates.
  * Guarantees: immutable; gameName is valid as declared in {@link #isValidGameName(String)}
  */
-
 public class Game {
 
     public static final String MESSAGE_CONSTRAINTS =
