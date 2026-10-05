@@ -16,6 +16,8 @@ import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
+import seedu.address.model.game.GameName;
+import seedu.address.model.game.Username;
 import seedu.address.model.tag.Tag;
 
 public class ParserUtilTest {
@@ -23,14 +25,18 @@ public class ParserUtilTest {
     private static final String INVALID_PHONE = "+651234";
     private static final String INVALID_ADDRESS = " ";
     private static final String INVALID_EMAIL = "example.com";
+    private static final String INVALID_GAME_NAME = "!!!";
     private static final String INVALID_TAG = "#friend";
+    private static final String INVALID_USERNAME = "!!!";
 
     private static final String VALID_NAME = "Rachel Walker";
     private static final String VALID_PHONE = "123456";
     private static final String VALID_ADDRESS = "123 Main Street #0505";
     private static final String VALID_EMAIL = "rachel@example.com";
+    private static final String VALID_GAME_NAME = "Counter-Strike 2";
     private static final String VALID_TAG_1 = "friend";
     private static final String VALID_TAG_2 = "neighbour";
+    private static final String VALID_USERNAME = "ShadowStrikerXx";
 
     private static final String WHITESPACE = " \t\r\n";
 
@@ -144,6 +150,52 @@ public class ParserUtilTest {
         String emailWithWhitespace = WHITESPACE + VALID_EMAIL + WHITESPACE;
         Email expectedEmail = new Email(VALID_EMAIL);
         assertEquals(expectedEmail, ParserUtil.parseEmail(emailWithWhitespace));
+    }
+
+    @Test
+    public void parseGameName_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseGameName(null));
+    }
+
+    @Test
+    public void parseGameName_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseGameName(INVALID_GAME_NAME));
+    }
+
+    @Test
+    public void parseGameName_validValueWithoutWhitespace_returnsGameName() throws Exception {
+        GameName expectedGameName = new GameName(VALID_GAME_NAME);
+        assertEquals(expectedGameName, ParserUtil.parseGameName(VALID_GAME_NAME));
+    }
+
+    @Test
+    public void parseGameName_validValueWithWhitespace_returnsTrimmedGameName() throws Exception {
+        String gameNameWithWhitespace = WHITESPACE + VALID_GAME_NAME + WHITESPACE;
+        GameName expectedGameName = new GameName(VALID_GAME_NAME);
+        assertEquals(expectedGameName, ParserUtil.parseGameName(gameNameWithWhitespace));
+    }
+
+    @Test
+    public void parseUsername_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseUsername(null));
+    }
+
+    @Test
+    public void parseUsername_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseUsername(INVALID_USERNAME));
+    }
+
+    @Test
+    public void parseUsername_validValueWithoutWhitespace_returnsUsername() throws Exception {
+        Username expectedUsername = new Username(VALID_USERNAME);
+        assertEquals(expectedUsername, ParserUtil.parseUsername(VALID_USERNAME));
+    }
+
+    @Test
+    public void parseUsername_validValueWithWhitespace_returnsTrimmedUsername() throws Exception {
+        String usernameWithWhitespace = WHITESPACE + VALID_USERNAME + WHITESPACE;
+        Username expectedUsername = new Username(VALID_USERNAME);
+        assertEquals(expectedUsername, ParserUtil.parseUsername(usernameWithWhitespace));
     }
 
     @Test

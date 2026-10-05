@@ -13,6 +13,8 @@ import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
+import seedu.address.model.game.GameName;
+import seedu.address.model.game.Username;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -93,6 +95,36 @@ public class ParserUtil {
             throw new ParseException(Email.MESSAGE_CONSTRAINTS);
         }
         return new Email(trimmedEmail);
+    }
+
+    /**
+     * Parses a {@code String gameName} into a {@code GameName}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code gameName} is invalid.
+     */
+    public static GameName parseGameName(String gameName) throws ParseException {
+        requireNonNull(gameName);
+        String trimmedGameName = gameName.trim();
+        if (!GameName.isValidGameName(trimmedGameName)) {
+            throw new ParseException(GameName.MESSAGE_CONSTRAINTS);
+        }
+        return new GameName(trimmedGameName);
+    }
+
+    /**
+     * Parses a {@code String username} into a {@code Username}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code username} is invalid.
+     */
+    public static Username parseUsername(String username) throws ParseException {
+        requireNonNull(username);
+        String trimmedUsername = username.trim();
+        if (!Username.isValidUsername(trimmedUsername)) {
+            throw new ParseException(Username.MESSAGE_CONSTRAINTS);
+        }
+        return new Username(trimmedUsername);
     }
 
     /**

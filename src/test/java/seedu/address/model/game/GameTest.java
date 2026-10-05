@@ -10,79 +10,73 @@ import org.junit.jupiter.api.Test;
 
 public class GameTest {
 
+    private static final GameName VALORANT = new GameName("Valorant");
+    private static final GameName MINECRAFT = new GameName("Minecraft");
+    private static final Username SHADOW_STRIKER = new Username("ShadowStrikerXx");
+    private static final Username PIXEL_MINER = new Username("PixelMiner");
+
     @Test
     public void constructor_null_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> new Game(null));
+        assertThrows(NullPointerException.class, () -> new Game(null, SHADOW_STRIKER));
+        assertThrows(NullPointerException.class, () -> new Game(VALORANT, null));
     }
 
     @Test
-    public void constructor_invalidGameName_throwsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> new Game(""));
+    public void getters_returnFields() {
+        Game game = new Game(VALORANT, SHADOW_STRIKER);
+
+        assertEquals(VALORANT, game.getGameName());
+        assertEquals(SHADOW_STRIKER, game.getUsername());
     }
 
     @Test
-    public void isValidGameName() {
-        // null game name
-        assertFalse(Game.isValidGameName(null));
+    public void isSameGame() {
+        Game game = new Game(VALORANT, SHADOW_STRIKER);
 
-        // invalid game names
-        assertFalse(Game.isValidGameName("")); // empty string
-        assertFalse(Game.isValidGameName("   ")); // spaces only
-        assertFalse(Game.isValidGameName("!!!")); // no letter or digit
-        assertFalse(Game.isValidGameName("A".repeat(Game.MAX_GAME_NAME_LENGTH + 1))); // 51 characters
-        assertFalse(Game.isValidGameName("Valorant\nMinecraft")); // contains newline
+        // same object -> returns true
+        assertTrue(game.isSameGame(game));
 
-        // valid game names
-        assertTrue(Game.isValidGameName("Valorant"));
-        assertTrue(Game.isValidGameName("12345")); // digits are allowed
-        assertTrue(Game.isValidGameName("Counter-Strike 2")); // punctuation and spaces are allowed
-        assertTrue(Game.isValidGameName("  League of Legends  ")); // outer spaces are trimmed
-        assertTrue(Game.isValidGameName("Pokémon")); // printable Unicode characters are allowed
-    }
+        // null -> returns false
+        assertFalse(game.isSameGame(null));
 
-    @Test
-    public void constructor_trimsOuterSpaces() {
-        Game game = new Game("  Valorant  ");
+        // same game name, different username -> returns true
+        assertTrue(game.isSameGame(new Game(new GameName("VALORANT"), PIXEL_MINER)));
 
-        assertEquals("Valorant", game.gameName);
+        // different game name -> returns false
+        assertFalse(game.isSameGame(new Game(MINECRAFT, SHADOW_STRIKER)));
     }
 
     @Test
     public void equals() {
-        Game game = new Game("Valorant");
+        Game game = new Game(VALORANT, SHADOW_STRIKER);
 
-        // same value -> returns true
-        assertEquals(new Game("Valorant"), game);
-
-        // same value, different capitalisation -> returns true
-        assertEquals(new Game("VALORANT"), game);
-
-        // same value, with outer spaces -> returns true
-        assertEquals(new Game(" valorant "), game);
+        // same values -> returns true
+        assertEquals(new Game(new GameName("VALORANT"), new Username(" ShadowStrikerXx ")), game);
 
         // null -> returns false
         assertNotEquals(null, game);
 
-        // different type -> returns false
-        Object differentType = 5.0f;
-        assertNotEquals(differentType, game);
+        // different game name -> returns false
+        assertNotEquals(new Game(MINECRAFT, SHADOW_STRIKER), game);
 
-        // different value -> returns false
-        assertNotEquals(new Game("Minecraft"), game);
+        // different username -> returns false
+        assertNotEquals(new Game(VALORANT, PIXEL_MINER), game);
     }
 
     @Test
-    public void hashCode_sameNormalizedName_returnsSameHashCode() {
-        Game firstGame = new Game("Valorant");
-        Game secondGame = new Game(" VALORANT ");
+    public void hashCode_sameValues_returnsSameHashCode() {
+        Game firstGame = new Game(VALORANT, SHADOW_STRIKER);
+        Game secondGame = new Game(new GameName(" VALORANT "), new Username(" ShadowStrikerXx "));
 
         assertEquals(firstGame.hashCode(), secondGame.hashCode());
     }
 
     @Test
-    public void toString_returnsBracketedGameName() {
-        Game game = new Game("Valorant");
+    public void toString_returnsFieldsInExpectedFormat() {
+        Game game = new Game(VALORANT, SHADOW_STRIKER);
+        String expected = Game.class.getCanonicalName()
+                + "{gameName=Valorant, username=ShadowStrikerXx}";
 
-        assertEquals("[Valorant]", game.toString());
+        assertEquals(expected, game.toString());
     }
 }

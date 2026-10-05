@@ -1,58 +1,57 @@
 package seedu.address.model.game;
 
-import static java.util.Objects.requireNonNull;
-import static seedu.address.commons.util.AppUtil.checkArgument;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
-import java.util.Locale;
+import java.util.Objects;
+
+import seedu.address.commons.util.ToStringBuilder;
 
 /**
- * Represents a Game in GameMates.
- * Guarantees: immutable; gameName is valid as declared in {@link #isValidGameName(String)}
+ * Represents a game entry in GameMates.
+ * Guarantees: details are present and not null, field values are validated, immutable.
  */
 public class Game {
 
-    public static final String MESSAGE_CONSTRAINTS =
-            "Game names must contain 1 to 50 printable characters "
-            + "and include at least one letter or digit.";
+    // Identity field
+    private final GameName gameName;
 
-    public static final int MAX_GAME_NAME_LENGTH = 50;
-
-    public final String gameName;
+    // Data field
+    private final Username username;
 
     /**
-     * Constructs a {@code Game}.
-     *
-     * @param gameName A valid game name.
+     * Every field must be present and not null.
      */
-    public Game(String gameName) {
-        requireNonNull(gameName);
-        checkArgument(isValidGameName(gameName), MESSAGE_CONSTRAINTS);
-        this.gameName = gameName.strip();
+    public Game(GameName gameName, Username username) {
+        requireAllNonNull(gameName, username);
+        this.gameName = gameName;
+        this.username = username;
+    }
+
+    public GameName getGameName() {
+        return gameName;
+    }
+
+    public Username getUsername() {
+        return username;
     }
 
     /**
-     * Returns true if a given string is a valid game name.
+     * Returns true if both game entries refer to the same game.
+     * This defines a weaker notion of equality between two games.
      */
-    public static boolean isValidGameName(String test) {
-        if (test == null) {
-            return false;
+    public boolean isSameGame(Game otherGame) {
+        if (otherGame == this) {
+            return true;
         }
 
-        String trimmedName = test.strip();
-
-        return !trimmedName.isEmpty()
-                && trimmedName.length() <= MAX_GAME_NAME_LENGTH
-                && trimmedName.codePoints().anyMatch(Character::isLetterOrDigit)
-                && trimmedName.codePoints().noneMatch(Character::isISOControl);
+        return otherGame != null
+                && otherGame.getGameName().equals(getGameName());
     }
 
     /**
-     * Returns a form used for case-insensitive comparisons.
+     * Returns true if both game entries have the same fields.
+     * This defines a stronger notion of equality between two games.
      */
-    private String getNormalizedName() {
-        return gameName.toLowerCase(Locale.ROOT);
-    }
-
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -63,16 +62,20 @@ public class Game {
             return false;
         }
 
-        return getNormalizedName().equals(otherGame.getNormalizedName());
+        return gameName.equals(otherGame.gameName)
+                && username.equals(otherGame.username);
     }
 
     @Override
     public int hashCode() {
-        return getNormalizedName().hashCode();
+        return Objects.hash(gameName, username);
     }
 
     @Override
     public String toString() {
-        return '[' + gameName + ']';
+        return new ToStringBuilder(this)
+                .add("gameName", gameName)
+                .add("username", username)
+                .toString();
     }
 }
