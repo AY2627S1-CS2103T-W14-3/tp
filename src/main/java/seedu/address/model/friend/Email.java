@@ -5,7 +5,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
  * Represents a Friend's email in GameMates.
- * Guarantees: immutable; is valid as declared in {@link #isValidEmail(String)}
+ * Guarantees: immutable; is absent or valid as declared in {@link #isValidEmail(String)}
  */
 public class Email {
 
@@ -42,6 +42,27 @@ public class Email {
         requireNonNull(email);
         checkArgument(isValidEmail(email), MESSAGE_CONSTRAINTS);
         value = email;
+    }
+
+    /**
+     * Constructs an absent email without accepting blank user input as valid.
+     */
+    private Email() {
+        value = "";
+    }
+
+    /**
+     * Returns an absent email for a friend without this detail.
+     */
+    public static Email empty() {
+        return new Email();
+    }
+
+    /**
+     * Returns whether this detail is absent.
+     */
+    public boolean isEmpty() {
+        return value.isEmpty();
     }
 
     /**

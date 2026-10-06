@@ -49,9 +49,11 @@ public class FriendCard extends UiPart<Region> {
         this.friend = friend;
         id.setText(displayedIndex + ". ");
         name.setText(friend.getName().fullName);
-        phone.setText(friend.getPhone().value);
+        phone.setText("Phone: " + (friend.getPhone().isEmpty() ? "Not provided" : friend.getPhone().value));
         address.setText(friend.getAddress().value);
-        email.setText(friend.getEmail().value);
+        address.setVisible(!friend.getAddress().isEmpty());
+        address.setManaged(!friend.getAddress().isEmpty());
+        email.setText("Email: " + (friend.getEmail().isEmpty() ? "Not provided" : friend.getEmail().value));
         friend.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));

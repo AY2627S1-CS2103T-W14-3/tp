@@ -5,7 +5,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
  * Represents a Friend's address in GameMates.
- * Guarantees: immutable; is valid as declared in {@link #isValidAddress(String)}
+ * Guarantees: immutable; is absent or valid as declared in {@link #isValidAddress(String)}
  */
 public class Address {
 
@@ -28,6 +28,27 @@ public class Address {
         requireNonNull(address);
         checkArgument(isValidAddress(address), MESSAGE_CONSTRAINTS);
         value = address;
+    }
+
+    /**
+     * Constructs an absent address without accepting blank user input as valid.
+     */
+    private Address() {
+        value = "";
+    }
+
+    /**
+     * Returns an absent address for a friend without this detail.
+     */
+    public static Address empty() {
+        return new Address();
+    }
+
+    /**
+     * Returns whether this detail is absent.
+     */
+    public boolean isEmpty() {
+        return value.isEmpty();
     }
 
     /**

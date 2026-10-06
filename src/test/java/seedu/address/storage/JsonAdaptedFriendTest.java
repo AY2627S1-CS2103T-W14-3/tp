@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
+import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
 
@@ -62,10 +63,9 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
-    public void toModelType_nullPhone_throwsIllegalValueException() {
+    public void toModelType_nullPhone_returnsAbsentDetail() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, null, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
-        String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName());
-        assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
+        assertEquals(Phone.empty(), friend.toModelType().getPhone());
     }
 
     @Test
@@ -77,10 +77,9 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
-    public void toModelType_nullEmail_throwsIllegalValueException() {
+    public void toModelType_nullEmail_returnsAbsentDetail() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, null, VALID_ADDRESS, VALID_TAGS);
-        String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Email.class.getSimpleName());
-        assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
+        assertEquals(Email.empty(), friend.toModelType().getEmail());
     }
 
     @Test
@@ -92,10 +91,16 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
-    public void toModelType_nullAddress_throwsIllegalValueException() {
+    public void toModelType_nullAddress_returnsAbsentDetail() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL, null, VALID_TAGS);
-        String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Address.class.getSimpleName());
-        assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
+        assertEquals(Address.empty(), friend.toModelType().getAddress());
+    }
+
+    @Test
+    public void toModelType_emptyContactDetails_roundTrips() throws Exception {
+        Friend nameOnly = new Friend(new Name(VALID_NAME), Phone.empty(), Email.empty(), Address.empty(),
+                java.util.Set.of());
+        assertEquals(nameOnly, new JsonAdaptedFriend(nameOnly).toModelType());
     }
 
     @Test

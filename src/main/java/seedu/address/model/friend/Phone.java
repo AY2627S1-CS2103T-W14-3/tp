@@ -5,7 +5,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
  * Represents a Friend's phone number in GameMates.
- * Guarantees: immutable; is valid as declared in {@link #isValidPhone(String)}
+ * Guarantees: immutable; is absent or valid as declared in {@link #isValidPhone(String)}
  */
 public class Phone {
 
@@ -24,6 +24,27 @@ public class Phone {
         requireNonNull(phone);
         checkArgument(isValidPhone(phone), MESSAGE_CONSTRAINTS);
         value = phone;
+    }
+
+    /**
+     * Constructs an absent phone without accepting blank user input as valid.
+     */
+    private Phone() {
+        value = "";
+    }
+
+    /**
+     * Returns an absent phone for a friend without this detail.
+     */
+    public static Phone empty() {
+        return new Phone();
+    }
+
+    /**
+     * Returns whether this detail is absent.
+     */
+    public boolean isEmpty() {
+        return value.isEmpty();
     }
 
     /**

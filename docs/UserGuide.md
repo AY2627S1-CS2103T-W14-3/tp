@@ -77,15 +77,31 @@ Format: `help`
 
 Adds a friend to GameMates.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
+Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL]`
+
+* Only the name is required. Omitted phone and email details are shown as `Not provided`.
+* Supplied phone and email values must satisfy the existing validation rules. Empty `p/` or `e/` values are rejected.
+* Leading and trailing spaces are removed. Names must be unique, ignoring case and repeated spaces:
+  `John Doe` and `john   doe` identify the same friend.
+* Different friends may share a phone number or email address.
+* Existing optional `a/ADDRESS` and `t/TAG` parameters remain supported.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A friend can have any number of tags, including zero.
 </div>
 
 Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+* `add n/John Doe`
+* `add n/Melody p/12345678 e/melodypew@gmail.com`
+* `add e/joash@example.com n/Joash`
+
+For `add n/John Doe`, the result is:
+
+```text
+Added John Doe.
+  - Phone number: Not provided
+  - Email: Not provided
+```
 
 ### Listing all friends: `list`
 
@@ -189,7 +205,7 @@ _Details coming soon ..._
 
 Action | Format, Examples
 --------|------------------
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add** | `add n/NAME [p/PHONE_NUMBER] [e/EMAIL]` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`

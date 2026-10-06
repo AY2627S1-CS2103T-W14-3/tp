@@ -138,23 +138,35 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_optionalContactDetails_success() {
+        Friend nameOnly = new Friend(new Name(VALID_NAME_BOB), Phone.empty(), Email.empty(),
+                Address.empty(), java.util.Set.of());
+        assertParseSuccess(parser, NAME_DESC_BOB, new AddCommand(nameOnly));
+        Friend phoneOnly = new Friend(new Name(VALID_NAME_BOB), new Phone(VALID_PHONE_BOB), Email.empty(),
+                Address.empty(), java.util.Set.of());
+        assertParseSuccess(parser, PHONE_DESC_BOB + NAME_DESC_BOB, new AddCommand(phoneOnly));
+        Friend emailOnly = new Friend(new Name(VALID_NAME_BOB), Phone.empty(), new Email(VALID_EMAIL_BOB),
+                Address.empty(), java.util.Set.of());
+        assertParseSuccess(parser, EMAIL_DESC_BOB + NAME_DESC_BOB, new AddCommand(emailOnly));
+        Friend both = new Friend(new Name(VALID_NAME_BOB), new Phone(VALID_PHONE_BOB), new Email(VALID_EMAIL_BOB),
+                Address.empty(), java.util.Set.of());
+        assertParseSuccess(parser, EMAIL_DESC_BOB + NAME_DESC_BOB + PHONE_DESC_BOB, new AddCommand(both));
+        assertParseSuccess(parser, " n/  Bob Choo  ", new AddCommand(nameOnly));
+    }
+
+    @Test
+    public void parse_emptySuppliedContactDetails_failure() {
+        assertParseFailure(parser, NAME_DESC_BOB + " p/", Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, NAME_DESC_BOB + " e/  ", Email.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " n/ ", Name.MESSAGE_CONSTRAINTS);
+    }
+
+    @Test
     public void parse_compulsoryFieldMissing_failure() {
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE);
 
         // missing name prefix
         assertParseFailure(parser, VALID_NAME_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
-                expectedMessage);
-
-        // missing phone prefix
-        assertParseFailure(parser, NAME_DESC_BOB + VALID_PHONE_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
-                expectedMessage);
-
-        // missing email prefix
-        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + VALID_EMAIL_BOB + ADDRESS_DESC_BOB,
-                expectedMessage);
-
-        // missing address prefix
-        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + VALID_ADDRESS_BOB,
                 expectedMessage);
 
         // all prefixes missing

@@ -62,7 +62,7 @@ public class Friend {
     }
 
     /**
-     * Returns true if both friends have the same name.
+     * Returns true if both friends have the same name, ignoring case and repeated spaces.
      * This defines a weaker notion of equality between two friends.
      */
     public boolean isSameFriend(Friend otherFriend) {
@@ -71,7 +71,11 @@ public class Friend {
         }
 
         return otherFriend != null
-                && otherFriend.getName().equals(getName());
+                && normaliseName(otherFriend.getName()).equalsIgnoreCase(normaliseName(getName()));
+    }
+
+    private static String normaliseName(Name name) {
+        return name.fullName.trim().replaceAll(" +", " ");
     }
 
     /**
