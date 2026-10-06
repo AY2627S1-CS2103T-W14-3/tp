@@ -1,7 +1,6 @@
 package seedu.address.model.friend;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
  * Represents a Friend's remark in GameMates.

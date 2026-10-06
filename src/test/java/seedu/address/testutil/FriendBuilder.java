@@ -3,7 +3,12 @@ package seedu.address.testutil;
 import java.util.HashSet;
 import java.util.Set;
 
-import seedu.address.model.friend.*;
+import seedu.address.model.friend.Address;
+import seedu.address.model.friend.Email;
+import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.Name;
+import seedu.address.model.friend.Phone;
+import seedu.address.model.friend.Remark;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.util.SampleDataUtil;
 
