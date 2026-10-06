@@ -130,15 +130,24 @@ Examples:
 
 Deletes the specified friend from GameMates.
 
-Format: `delete INDEX`
+Format: `delete FRIEND_INDEX`
 
-* Deletes the friend at the specified `INDEX`.
+* Deletes the friend at the specified `FRIEND_INDEX`.
 * The index refers to the index number shown in the displayed friend list.
 * The index **must be a positive integer** 1, 2, 3, …​
+* Leading and trailing spaces are ignored. The index accepts at most 50 characters and a value from 1 to 2147483647.
+* A successful deletion displays `Successfully deleted FRIEND_NAME.`
 
 Examples:
 * `list` followed by `delete 2` deletes the 2nd friend in GameMates.
 * `find Betsy` followed by `delete 1` deletes the 1st friend in the results of the `find` command.
+
+Errors:
+
+* Missing index: `Error: Please provide a friend index.`
+* Invalid index (such as `0`, `-1`, or `abc`), extra arguments, or an index longer than 50 characters:
+  `Error: Please enter a positive integer as the friend index.`
+* Index outside the displayed list, including an empty list: `Error: Friend index does not exist.`
 
 ### Clearing all entries: `clear`
 
