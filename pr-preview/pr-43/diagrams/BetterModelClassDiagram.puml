@@ -17,5 +17,4 @@ Friend -up-> "*" Tag
 Friend *--> Name
 Friend *--> Phone
 Friend *--> Email
-Friend *--> Address
 @enduml

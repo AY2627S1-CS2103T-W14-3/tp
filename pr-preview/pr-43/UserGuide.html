@@ -91,7 +91,7 @@ Some example commands you can try:</p>
         <p><code class="language-plaintext highlighter-rouge">list</code> : Lists all contacts.</p>
       </li>
       <li>
-        <p><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01</code> : Adds a contact named <code class="language-plaintext highlighter-rouge">John Doe</code> to GameMates.</p>
+        <p><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com</code> : Adds a contact named <code class="language-plaintext highlighter-rouge">John Doe</code> to GameMates.</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">delete 3</code> : Deletes the 3rd contact shown in the current list.</p>
@@ -158,7 +158,7 @@ For example, <code class="language-plaintext highlighter-rouge">help 123</code> 
 
 <p>Adds a friend to GameMates.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​</code></p>
 
 <div class="alert alert-primary">
 <img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Tip:</strong>
@@ -167,8 +167,8 @@ A friend can have any number of tags, including zero.
 
 <p>Examples:</p>
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01</code></li>
-  <li><code class="language-plaintext highlighter-rouge">add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal</code></li>
+  <li><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com</code></li>
+  <li><code class="language-plaintext highlighter-rouge">add n/Betsy Crowe t/friend e/betsycrowe@example.com p/1234567 t/criminal</code></li>
 </ul>
 
 <p>Names are trimmed before validation, must not be blank and may contain at most 100 characters.
@@ -177,20 +177,22 @@ so <code class="language-plaintext highlighter-rouge">john doe</code> and <code 
 
 <p>Tag names must be non-empty and contain only ASCII letters and digits (no spaces or symbols).</p>
 
-<p>Phone numbers can be entered with or without an international prefix, for example <code class="language-plaintext highlighter-rouge">91234567</code> or <code class="language-plaintext highlighter-rouge">+6591234567</code> (Singapore):</p>
+<p>Phone numbers accept formats such as <code class="language-plaintext highlighter-rouge">91234567</code>, <code class="language-plaintext highlighter-rouge">+6591234567</code>, <code class="language-plaintext highlighter-rouge">+65 9123-4567</code> and <code class="language-plaintext highlighter-rouge">(123) 456-7890</code>.</p>
 
 <ul>
-  <li>Without a prefix: 3–15 ASCII digits, e.g. <code class="language-plaintext highlighter-rouge">91234567</code>.</li>
-  <li>With a prefix: <code class="language-plaintext highlighter-rouge">+</code> followed by the country calling code and national number (2–15 digits in total, first digit <code class="language-plaintext highlighter-rouge">1</code>–<code class="language-plaintext highlighter-rouge">9</code>),
-following <a href="https://www.itu.int/rec/T-REC-E.164/">ITU-T E.164</a>, e.g. <code class="language-plaintext highlighter-rouge">+6591234567</code> or <code class="language-plaintext highlighter-rouge">+14155552671</code>.</li>
-  <li>Surrounding whitespace is trimmed. Internal spaces, parentheses, hyphens, dots, letters and extensions are rejected.</li>
-  <li>GameMates does not infer a country code: <code class="language-plaintext highlighter-rouge">91234567</code> and <code class="language-plaintext highlighter-rouge">+6591234567</code> are stored as typed and are treated as different numbers.</li>
+  <li>Use 3–15 ASCII digits without <code class="language-plaintext highlighter-rouge">+</code>, or 2–15 with <code class="language-plaintext highlighter-rouge">+</code>, including the country code.</li>
+  <li>Put <code class="language-plaintext highlighter-rouge">+</code> at the start, immediately before a digit or <code class="language-plaintext highlighter-rouge">(</code>. The first digit after <code class="language-plaintext highlighter-rouge">+</code> must be <code class="language-plaintext highlighter-rouge">1</code>–<code class="language-plaintext highlighter-rouge">9</code>.</li>
+  <li>Digit groups may have any length. Parentheses must enclose digits only and cannot be empty or nested.</li>
+  <li>Use at most one hyphen or space between groups. Separators may differ or be omitted.
+Leading, trailing and consecutive separators are rejected.</li>
+  <li>Dots, letters, non-ASCII digits and extensions are rejected.</li>
+  <li>Command input is trimmed. Saved numbers must already match these rules.</li>
+  <li>Formatting is preserved. <code class="language-plaintext highlighter-rouge">+6591234567</code> and <code class="language-plaintext highlighter-rouge">+65 9123-4567</code> are different phone values.</li>
 </ul>
 
 <div class="alert alert-warning">
-Phone validation only checks the format. It does not verify assigned country codes, country-specific number
-lengths or whether a number is active, so a number passing this check is not necessarily callable.
-The same rules apply when editing a friend or loading saved data.
+Validation checks format only, not country codes, national number lengths or whether a number is active.
+These rules also apply when editing friends and loading saved data.
 </div>
 
 <p>Email addresses are trimmed before validation and must use ASCII <code class="language-plaintext highlighter-rouge">local-part@domain</code> syntax:</p>
@@ -202,7 +204,7 @@ Dots may separate non-empty parts, so leading, trailing and consecutive dots are
   <li>Each domain label (a part between dots) must contain 1–63 letters, digits or hyphens and must start
 and end with a letter or digit. Single-label domains such as <code class="language-plaintext highlighter-rouge">user@localhost</code> are accepted.</li>
   <li>Quoted local parts, address literals such as <code class="language-plaintext highlighter-rouge">user@[127.0.0.1]</code>, internal whitespace and non-ASCII
-characters are not supported. Validation checks the format; it does not verify that a mailbox exists.</li>
+characters are not supported. Validation checks format only, not whether a mailbox exists.</li>
 </ul>
 
 <div class="alert alert-info">
@@ -223,7 +225,7 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 
 <p>Edits an existing friend in GameMates.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [t/TAG]…​</code></p>
 
 <ul>
   <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
@@ -354,7 +356,7 @@ Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g
     <tr>
       <td><strong>Add</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​</code> <br> e.g., <code class="language-plaintext highlighter-rouge">add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague</code>
+<code class="language-plaintext highlighter-rouge">add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​</code> <br> e.g., <code class="language-plaintext highlighter-rouge">add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague</code>
 </td>
     </tr>
     <tr>
@@ -370,7 +372,7 @@ Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g
     <tr>
       <td><strong>Edit</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​</code><br> e.g., <code class="language-plaintext highlighter-rouge">edit 2 n/James Lee e/jameslee@example.com</code>
+<code class="language-plaintext highlighter-rouge">edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…​</code><br> e.g., <code class="language-plaintext highlighter-rouge">edit 2 n/James Lee e/jameslee@example.com</code>
 </td>
     </tr>
     <tr>
