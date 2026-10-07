@@ -28,7 +28,7 @@ public class ParserUtilTest {
     private static final String INVALID_USERNAME = "!!!";
 
     private static final String VALID_NAME = "Rachel Walker";
-    private static final String VALID_PHONE = "+6591234567";
+    private static final String VALID_PHONE = "(123) 456-7890";
     private static final String VALID_EMAIL = "rachel@example.com";
     private static final String VALID_GAME_NAME = "Counter-Strike 2";
     private static final String VALID_TAG_1 = "friend";
@@ -120,23 +120,24 @@ public class ParserUtilTest {
 
     @Test
     public void parsePhone_lengthBoundaries_validatesAfterTrimming() throws Exception {
-        assertEquals(new Phone("+12"), ParserUtil.parsePhone(WHITESPACE + "+12" + WHITESPACE));
-        String maxLengthPhone = "+" + "1".repeat(15);
-        assertEquals(new Phone(maxLengthPhone),
-                ParserUtil.parsePhone(WHITESPACE + maxLengthPhone + WHITESPACE));
-        assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, ()
-                -> ParserUtil.parsePhone("+" + "1".repeat(16)));
+        String phone = "1234567890";
+        assertEquals(new Phone(phone), ParserUtil.parsePhone(WHITESPACE + phone + WHITESPACE));
+        assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, () -> ParserUtil.parsePhone("12"));
+        assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, () -> ParserUtil.parsePhone("1234567890123456"));
         assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, () -> ParserUtil.parsePhone(WHITESPACE));
     }
 
     @Test
-    public void parsePhone_plainNumber_returnsPhone() throws Exception {
-        assertEquals(new Phone("91234567"), ParserUtil.parsePhone(WHITESPACE + "91234567" + WHITESPACE));
+    public void parsePhone_supportedFormats_preservesFormatting() throws Exception {
+        String[] phones = {"91234567", "+6591234567", "+65 9123-4567", "(123) 456-7890"};
+        for (String phone : phones) {
+            assertEquals(new Phone(phone), ParserUtil.parsePhone(WHITESPACE + phone + WHITESPACE));
+        }
     }
 
     @Test
     public void parsePhone_unsupportedFormats_throwsParseException() {
-        String[] invalidPhones = {"12", "+06591234567", "+65 (1234)-5678.;#",
+        String[] invalidPhones = {"123.456.7890", "+65.9123.4567", "12", "+06591234567", "+65 (1234)-5678.;#",
             "+6591234567 ext 123", "+６５９１２３４５６７", "+", "+1"};
         for (String phone : invalidPhones) {
             assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, () -> ParserUtil.parsePhone(phone));

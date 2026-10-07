@@ -93,18 +93,20 @@ so `john doe` and `John Doe` are the same friend.
 
 Tag names must be non-empty and contain only ASCII letters and digits (no spaces or symbols).
 
-Phone numbers can be entered with or without an international prefix, for example `91234567` or `+6591234567` (Singapore):
+Phone numbers accept formats such as `91234567`, `+6591234567`, `+65 9123-4567` and `(123) 456-7890`.
 
-* Without a prefix: 3–15 ASCII digits, e.g. `91234567`.
-* With a prefix: `+` followed by the country calling code and national number (2–15 digits in total, first digit `1`–`9`),
-  following [ITU-T E.164](https://www.itu.int/rec/T-REC-E.164/), e.g. `+6591234567` or `+14155552671`.
-* Surrounding whitespace is trimmed. Internal spaces, parentheses, hyphens, dots, letters and extensions are rejected.
-* GameMates does not infer a country code: `91234567` and `+6591234567` are stored as typed and are treated as different numbers.
+* Use 3–15 ASCII digits without `+`, or 2–15 with `+`, including the country code.
+* Put `+` at the start, immediately before a digit or `(`. The first digit after `+` must be `1`–`9`.
+* Digit groups may have any length. Parentheses must enclose digits only and cannot be empty or nested.
+* Use at most one hyphen or space between groups. Separators may differ or be omitted.
+  Leading, trailing and consecutive separators are rejected.
+* Dots, letters, non-ASCII digits and extensions are rejected.
+* Command input is trimmed. Saved numbers must already match these rules.
+* Formatting is preserved. `+6591234567` and `+65 9123-4567` are different phone values.
 
 <div markdown="span" class="alert alert-warning">
-Phone validation only checks the format. It does not verify assigned country codes, country-specific number
-lengths or whether a number is active, so a number passing this check is not necessarily callable.
-The same rules apply when editing a friend or loading saved data.
+Validation checks format only, not country codes, national number lengths or whether a number is active.
+These rules also apply when editing friends and loading saved data.
 </div>
 
 Email addresses are trimmed before validation and must use ASCII `local-part@domain` syntax:
@@ -115,7 +117,7 @@ Email addresses are trimmed before validation and must use ASCII `local-part@dom
 * Each domain label (a part between dots) must contain 1–63 letters, digits or hyphens and must start
   and end with a letter or digit. Single-label domains such as `user@localhost` are accepted.
 * Quoted local parts, address literals such as `user@[127.0.0.1]`, internal whitespace and non-ASCII
-  characters are not supported. Validation checks the format; it does not verify that a mailbox exists.
+  characters are not supported. Validation checks format only, not whether a mailbox exists.
 
 <div markdown="span" class="alert alert-info">
 These rules use a practical subset of [RFC 5322's dot-atom syntax](https://www.rfc-editor.org/rfc/rfc5322#section-3.2.3)

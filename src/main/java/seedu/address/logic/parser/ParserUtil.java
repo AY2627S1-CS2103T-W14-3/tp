@@ -56,8 +56,8 @@ public class ParserUtil {
     /**
      * Parses a {@code String phone} into a {@code Phone}.
      * Leading and trailing whitespaces will be trimmed.
-     * The trimmed value may be a plain number (e.g. 91234567) or an international number with a '+' and country
-     * code (e.g. +6591234567). Separators and extensions are not accepted, and no country code is added.
+     * The trimmed value must match {@link Phone#VALIDATION_REGEX}, for example {@code (123) 456-7890}.
+     * Accepted country-code prefixes, parentheses and separators are preserved; extensions are rejected.
      *
      * @throws ParseException if the given {@code phone} is invalid.
      */
