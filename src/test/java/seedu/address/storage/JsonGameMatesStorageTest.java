@@ -16,8 +16,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.commons.exceptions.DataLoadingException;
+import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.model.GameMates;
+import seedu.address.model.Model;
+import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyGameMates;
+import seedu.address.model.UserPrefs;
 import seedu.address.model.util.SampleDataUtil;
 
 public class JsonGameMatesStorageTest {
@@ -95,6 +99,22 @@ public class JsonGameMatesStorageTest {
         readBack = jsonGameMatesStorage.readGameMates().get(); // file path not specified
         assertEquals(original, new GameMates(readBack));
 
+    }
+
+    @Test
+    public void readAndSaveGameMates_optionalContacts_surviveReloadAndEdit() throws Exception {
+        Model model = new ModelManager(new GameMates(), new UserPrefs());
+        GameMatesParser parser = new GameMatesParser();
+        parser.parseCommand("add n/Melody").execute(model);
+        parser.parseCommand("add n/Joash p/91234567").execute(model);
+        parser.parseCommand("add n/Felicia e/felicia@example.com").execute(model);
+        Path filePath = testFolder.resolve("optional-contacts.json");
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(filePath);
+        storage.saveGameMates(model.getGameMates());
+        assertEquals(model.getGameMates(), new GameMates(storage.readGameMates().get()));
+        parser.parseCommand("edit 1 p/98765432").execute(model);
+        storage.saveGameMates(model.getGameMates());
+        assertEquals(model.getGameMates(), new GameMates(storage.readGameMates().get()));
     }
 
     @Test

@@ -3,7 +3,6 @@ package seedu.address.model.friend;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_EMAIL_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
@@ -30,7 +29,7 @@ public class FriendTest {
         Game game = new Game(new GameName("Valorant"), new Username("alice"));
         Set<Game> games = new HashSet<>(Set.of(game));
         Friend friend = new Friend(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(),
-                ALICE.getAddress(), games, ALICE.getTags());
+                games, ALICE.getTags());
         games.clear();
         assertEquals(Set.of(game), friend.getGames());
         assertThrows(UnsupportedOperationException.class, () -> friend.getGames().clear());
@@ -40,11 +39,11 @@ public class FriendTest {
     @Test
     public void constructor_nullGamesOrEntries_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Friend(ALICE.getName(), ALICE.getPhone(),
-                ALICE.getEmail(), ALICE.getAddress(), null, ALICE.getTags()));
+                ALICE.getEmail(), null, ALICE.getTags()));
         Set<Game> games = new HashSet<>();
         games.add(null);
         assertThrows(NullPointerException.class, () -> new Friend(ALICE.getName(), ALICE.getPhone(),
-                ALICE.getEmail(), ALICE.getAddress(), games, ALICE.getTags()));
+                ALICE.getEmail(), games, ALICE.getTags()));
     }
 
     @Test
@@ -56,7 +55,7 @@ public class FriendTest {
         assertEquals(friend, reordered);
         assertEquals(friend.hashCode(), reordered.hashCode());
         assertEquals(Objects.hash(friend.getName(), friend.getPhone(), friend.getEmail(),
-                friend.getAddress(), friend.getGames(), friend.getTags()), friend.hashCode());
+                friend.getGames(), friend.getTags()), friend.hashCode());
         assertFalse(friend.equals(ALICE));
         assertTrue(friend.isSameFriend(ALICE));
         Friend changedUsername = new FriendBuilder(ALICE)
@@ -80,21 +79,21 @@ public class FriendTest {
 
         // same name, all other attributes different -> returns true
         Friend editedAlice = new FriendBuilder(ALICE).withPhone(VALID_PHONE_BOB).withEmail(VALID_EMAIL_BOB)
-                .withAddress(VALID_ADDRESS_BOB).withTags(VALID_TAG_HUSBAND).build();
+                .withTags(VALID_TAG_HUSBAND).build();
         assertTrue(ALICE.isSameFriend(editedAlice));
 
         // different name, all other attributes same -> returns false
         editedAlice = new FriendBuilder(ALICE).withName(VALID_NAME_BOB).build();
         assertFalse(ALICE.isSameFriend(editedAlice));
 
-        // name differs in case, all other attributes same -> returns false
+        // name differs in case, all other attributes same -> returns true
         Friend editedBob = new FriendBuilder(BOB).withName(VALID_NAME_BOB.toLowerCase()).build();
-        assertFalse(BOB.isSameFriend(editedBob));
+        assertTrue(BOB.isSameFriend(editedBob));
 
-        // name has trailing spaces, all other attributes same -> returns false
+        // name has trailing spaces, all other attributes same -> returns true
         String nameWithTrailingSpaces = VALID_NAME_BOB + " ";
         editedBob = new FriendBuilder(BOB).withName(nameWithTrailingSpaces).build();
-        assertFalse(BOB.isSameFriend(editedBob));
+        assertTrue(BOB.isSameFriend(editedBob));
     }
 
     @Test
@@ -127,10 +126,6 @@ public class FriendTest {
         editedAlice = new FriendBuilder(ALICE).withEmail(VALID_EMAIL_BOB).build();
         assertFalse(ALICE.equals(editedAlice));
 
-        // different address -> returns false
-        editedAlice = new FriendBuilder(ALICE).withAddress(VALID_ADDRESS_BOB).build();
-        assertFalse(ALICE.equals(editedAlice));
-
         // different tags -> returns false
         editedAlice = new FriendBuilder(ALICE).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(ALICE.equals(editedAlice));
@@ -141,8 +136,7 @@ public class FriendTest {
         Friend friend = new FriendBuilder(ALICE)
                 .withGames(new Game(new GameName("Valorant"), new Username("alice"))).build();
         String expected = Friend.class.getCanonicalName() + "{name=" + friend.getName() + ", phone=" + friend.getPhone()
-                + ", email=" + friend.getEmail() + ", address=" + friend.getAddress()
-                + ", games=" + friend.getGames() + ", tags=" + friend.getTags() + "}";
+                + ", email=" + friend.getEmail() + ", games=" + friend.getGames() + ", tags=" + friend.getTags() + "}";
         assertEquals(expected, friend.toString());
     }
 }

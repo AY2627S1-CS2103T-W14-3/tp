@@ -3,7 +3,6 @@ package seedu.address.testutil;
 import java.util.HashSet;
 import java.util.Set;
 
-import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
@@ -20,12 +19,10 @@ public class FriendBuilder {
     public static final String DEFAULT_NAME = "Amy Bee";
     public static final String DEFAULT_PHONE = "85355255";
     public static final String DEFAULT_EMAIL = "amy@gmail.com";
-    public static final String DEFAULT_ADDRESS = "123, Jurong West Ave 6, #08-111";
 
     private Name name;
     private Phone phone;
     private Email email;
-    private Address address;
     private Set<Game> games;
     private Set<Tag> tags;
 
@@ -36,7 +33,6 @@ public class FriendBuilder {
         name = new Name(DEFAULT_NAME);
         phone = new Phone(DEFAULT_PHONE);
         email = new Email(DEFAULT_EMAIL);
-        address = new Address(DEFAULT_ADDRESS);
         games = new HashSet<>();
         tags = new HashSet<>();
     }
@@ -48,7 +44,6 @@ public class FriendBuilder {
         name = friendToCopy.getName();
         phone = friendToCopy.getPhone();
         email = friendToCopy.getEmail();
-        address = friendToCopy.getAddress();
         games = new HashSet<>(friendToCopy.getGames());
         tags = new HashSet<>(friendToCopy.getTags());
     }
@@ -66,14 +61,6 @@ public class FriendBuilder {
      */
     public FriendBuilder withTags(String ... tags) {
         this.tags = SampleDataUtil.getTagSet(tags);
-        return this;
-    }
-
-    /**
-     * Sets the {@code Address} of the {@code Friend} that we are building.
-     */
-    public FriendBuilder withAddress(String address) {
-        this.address = new Address(address);
         return this;
     }
 
@@ -102,7 +89,7 @@ public class FriendBuilder {
     }
 
     public Friend build() {
-        return new Friend(name, phone, email, address, games, tags);
+        return new Friend(name, phone, email, games, tags);
     }
 
 }

@@ -1,7 +1,6 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
@@ -21,7 +20,6 @@ import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
-import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
@@ -42,7 +40,6 @@ public class EditCommand extends Command {
             + "[" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_PHONE + "PHONE] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
-            + "[" + PREFIX_ADDRESS + "ADDRESS] "
             + "[" + PREFIX_TAG + "TAG]...\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_PHONE + "91234567 "
@@ -98,10 +95,9 @@ public class EditCommand extends Command {
         Name updatedName = editFriendDescriptor.getName().orElse(friendToEdit.getName());
         Phone updatedPhone = editFriendDescriptor.getPhone().orElse(friendToEdit.getPhone());
         Email updatedEmail = editFriendDescriptor.getEmail().orElse(friendToEdit.getEmail());
-        Address updatedAddress = editFriendDescriptor.getAddress().orElse(friendToEdit.getAddress());
         Set<Tag> updatedTags = editFriendDescriptor.getTags().orElse(friendToEdit.getTags());
 
-        return new Friend(updatedName, updatedPhone, updatedEmail, updatedAddress,
+        return new Friend(updatedName, updatedPhone, updatedEmail,
                 friendToEdit.getGames(), updatedTags);
     }
 
@@ -136,7 +132,6 @@ public class EditCommand extends Command {
         private Name name;
         private Phone phone;
         private Email email;
-        private Address address;
         private Set<Tag> tags;
 
         public EditFriendDescriptor() {}
@@ -149,7 +144,6 @@ public class EditCommand extends Command {
             setName(toCopy.name);
             setPhone(toCopy.phone);
             setEmail(toCopy.email);
-            setAddress(toCopy.address);
             setTags(toCopy.tags);
         }
 
@@ -157,7 +151,7 @@ public class EditCommand extends Command {
          * Returns true if at least one field is edited.
          */
         public boolean isAnyFieldEdited() {
-            return CollectionUtil.isAnyNonNull(name, phone, email, address, tags);
+            return CollectionUtil.isAnyNonNull(name, phone, email, tags);
         }
 
         public void setName(Name name) {
@@ -182,14 +176,6 @@ public class EditCommand extends Command {
 
         public Optional<Email> getEmail() {
             return Optional.ofNullable(email);
-        }
-
-        public void setAddress(Address address) {
-            this.address = address;
-        }
-
-        public Optional<Address> getAddress() {
-            return Optional.ofNullable(address);
         }
 
         /**
@@ -223,7 +209,6 @@ public class EditCommand extends Command {
             return Objects.equals(name, otherEditFriendDescriptor.name)
                     && Objects.equals(phone, otherEditFriendDescriptor.phone)
                     && Objects.equals(email, otherEditFriendDescriptor.email)
-                    && Objects.equals(address, otherEditFriendDescriptor.address)
                     && Objects.equals(tags, otherEditFriendDescriptor.tags);
         }
 
@@ -233,7 +218,6 @@ public class EditCommand extends Command {
                     .add("name", name)
                     .add("phone", phone)
                     .add("email", email)
-                    .add("address", address)
                     .add("tags", tags)
                     .toString();
         }

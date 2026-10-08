@@ -28,7 +28,7 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 
    * `list` : Lists all contacts.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to GameMates.
+   * `add n/John Doe p/98765432 e/johnd@example.com` : Adds a contact named `John Doe` to GameMates.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -77,15 +77,60 @@ Format: `help`
 
 Adds a friend to GameMates.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
+Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…`
+
+* Only the name is required. Omitted phone and email details are shown as `Not provided`.
+* Supplied phone and email values must satisfy the validation rules. Empty `p/` or `e/` values are rejected.
+* Leading and trailing spaces are removed. Names must be unique, ignoring case and repeated spaces:
+  `John Doe` and `john   doe` identify the same friend.
+* Different friends may share a phone number or email address.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A friend can have any number of tags, including zero.
 </div>
 
 Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+* `add n/John Doe`
+* `add n/John Doe p/98765432 e/johnd@example.com`
+* `add n/Betsy Crowe t/friend e/betsycrowe@example.com p/1234567 t/criminal`
+
+Names are trimmed before validation, must not be blank and may contain at most 100 characters.
+Only ASCII letters, digits and spaces are accepted. Names are compared case-insensitively,
+so `john doe` and `John Doe` are the same friend.
+
+Tag names must be non-empty and contain only ASCII letters and digits (no spaces or symbols).
+
+Phone numbers accept formats such as `91234567`, `+6591234567`, `+65 9123-4567` and `(123) 456-7890`.
+
+* Use 3–15 ASCII digits without `+`, or 2–15 with `+`, including the country code.
+* Put `+` at the start, immediately before a digit or `(`. The first digit after `+` must be `1`–`9`.
+* Digit groups may have any length. Parentheses must enclose digits only and cannot be empty or nested.
+* Use at most one hyphen or space between groups. Separators may differ or be omitted.
+  Leading, trailing and consecutive separators are rejected.
+* Dots, letters, non-ASCII digits and extensions are rejected.
+* Command input is trimmed. Saved numbers must already match these rules.
+* Formatting is preserved. `+6591234567` and `+65 9123-4567` are different phone values.
+
+<div markdown="span" class="alert alert-warning">
+Validation checks format only, not country codes, national number lengths or whether a number is active.
+These rules also apply when editing friends and loading saved data.
+</div>
+
+Email addresses are trimmed before validation and must use ASCII `local-part@domain` syntax:
+
+* The entire address may contain at most 254 characters, with at most 64 before `@`.
+* The local part accepts letters, digits and the punctuation in ``!#$%&'*+/=?^_`{|}~-``.
+  Dots may separate non-empty parts, so leading, trailing and consecutive dots are rejected.
+* Each domain label (a part between dots) must contain 1–63 letters, digits or hyphens and must start
+  and end with a letter or digit. Single-label domains such as `user@localhost` are accepted.
+* Quoted local parts, address literals such as `user@[127.0.0.1]`, internal whitespace and non-ASCII
+  characters are not supported. Validation checks format only, not whether a mailbox exists.
+
+<div markdown="span" class="alert alert-info">
+These rules use a practical subset of [RFC 5322's dot-atom syntax](https://www.rfc-editor.org/rfc/rfc5322#section-3.2.3)
+and [RFC 5321's SMTP length limits](https://www.rfc-editor.org/rfc/rfc5321#section-4.5.3.1).
+The 254-character address limit leaves room for the enclosing `<` and `>` in the 256-octet SMTP path limit.
+</div>
 
 ### Listing all friends: `list`
 
@@ -97,7 +142,7 @@ Format: `list`
 
 Edits an existing friend in GameMates.
 
-Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
+Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [t/TAG]…​`
 
 * Edits the friend at the specified `INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
 * At least one of the optional fields must be provided.
@@ -189,10 +234,10 @@ _Details coming soon ..._
 
 Action | Format, Examples
 --------|------------------
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague`
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
+**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List** | `list`
 **Help** | `help`

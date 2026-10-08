@@ -1,5 +1,7 @@
 package seedu.address.storage;
 
+import static seedu.address.commons.util.StringUtil.isNullOrEmpty;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import seedu.address.commons.exceptions.IllegalValueException;
-import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
@@ -28,7 +29,6 @@ class JsonAdaptedFriend {
     private final String name;
     private final String phone;
     private final String email;
-    private final String address;
     private final List<JsonAdaptedGame> games = new ArrayList<>();
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
@@ -37,13 +37,11 @@ class JsonAdaptedFriend {
      */
     @JsonCreator
     public JsonAdaptedFriend(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
-            @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("games") List<JsonAdaptedGame> games,
+            @JsonProperty("email") String email, @JsonProperty("games") List<JsonAdaptedGame> games,
             @JsonProperty("tags") List<JsonAdaptedTag> tags) {
         this.name = name;
         this.phone = phone;
         this.email = email;
-        this.address = address;
         if (games != null) {
             this.games.addAll(games);
         }
@@ -59,7 +57,6 @@ class JsonAdaptedFriend {
         name = source.getName().fullName;
         phone = source.getPhone().value;
         email = source.getEmail().value;
-        address = source.getAddress().value;
         games.addAll(source.getGames().stream().map(JsonAdaptedGame::new).collect(Collectors.toList()));
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
@@ -89,32 +86,18 @@ class JsonAdaptedFriend {
         }
         final Name modelName = new Name(name);
 
-        if (phone == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName()));
-        }
-        if (!Phone.isValidPhone(phone)) {
+        if (!isNullOrEmpty(phone) && !Phone.isValidPhone(phone)) {
             throw new IllegalValueException(Phone.MESSAGE_CONSTRAINTS);
         }
-        final Phone modelPhone = new Phone(phone);
+        final Phone modelPhone = isNullOrEmpty(phone) ? Phone.EMPTY : new Phone(phone);
 
-        if (email == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Email.class.getSimpleName()));
-        }
-        if (!Email.isValidEmail(email)) {
+        if (!isNullOrEmpty(email) && !Email.isValidEmail(email)) {
             throw new IllegalValueException(Email.MESSAGE_CONSTRAINTS);
         }
-        final Email modelEmail = new Email(email);
-
-        if (address == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Address.class.getSimpleName()));
-        }
-        if (!Address.isValidAddress(address)) {
-            throw new IllegalValueException(Address.MESSAGE_CONSTRAINTS);
-        }
-        final Address modelAddress = new Address(address);
+        final Email modelEmail = isNullOrEmpty(email) ? Email.EMPTY : new Email(email);
 
         final Set<Tag> modelTags = new HashSet<>(friendTags);
-        return new Friend(modelName, modelPhone, modelEmail, modelAddress, modelGames, modelTags);
+        return new Friend(modelName, modelPhone, modelEmail, modelGames, modelTags);
     }
 
 }

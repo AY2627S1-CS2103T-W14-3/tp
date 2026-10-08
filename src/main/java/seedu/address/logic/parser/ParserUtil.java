@@ -9,7 +9,6 @@ import java.util.Set;
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
@@ -40,6 +39,8 @@ public class ParserUtil {
     /**
      * Parses a {@code String name} into a {@code Name}.
      * Leading and trailing whitespaces will be trimmed.
+     * The trimmed value must contain only alphanumeric characters and spaces, and be at most
+     * {@value Name#MAX_LENGTH} characters long.
      *
      * @throws ParseException if the given {@code name} is invalid.
      */
@@ -55,6 +56,8 @@ public class ParserUtil {
     /**
      * Parses a {@code String phone} into a {@code Phone}.
      * Leading and trailing whitespaces will be trimmed.
+     * The trimmed value must match {@link Phone#VALIDATION_REGEX}, for example {@code (123) 456-7890}.
+     * Accepted country-code prefixes, parentheses and separators are preserved; extensions are rejected.
      *
      * @throws ParseException if the given {@code phone} is invalid.
      */
@@ -68,23 +71,10 @@ public class ParserUtil {
     }
 
     /**
-     * Parses a {@code String address} into an {@code Address}.
-     * Leading and trailing whitespaces will be trimmed.
-     *
-     * @throws ParseException if the given {@code address} is invalid.
-     */
-    public static Address parseAddress(String address) throws ParseException {
-        requireNonNull(address);
-        String trimmedAddress = address.trim();
-        if (!Address.isValidAddress(trimmedAddress)) {
-            throw new ParseException(Address.MESSAGE_CONSTRAINTS);
-        }
-        return new Address(trimmedAddress);
-    }
-
-    /**
      * Parses a {@code String email} into an {@code Email}.
      * Leading and trailing whitespaces will be trimmed.
+     * The trimmed value must be an ASCII {@code local-part@domain} address of at most 254 characters, as
+     * described in the User Guide. Only the format is checked, not whether the mailbox exists.
      *
      * @throws ParseException if the given {@code email} is invalid.
      */

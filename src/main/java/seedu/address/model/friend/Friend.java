@@ -23,24 +23,21 @@ public class Friend {
     private final Email email;
 
     // Data fields
-    private final Address address;
     private final Set<Game> games = new HashSet<>();
     private final Set<Tag> tags = new HashSet<>();
 
     /**
      * Every field must be present and not null.
      */
-    public Friend(Name name, Phone phone, Email email, Address address, Set<Game> games, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, games, tags);
+    public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags) {
+        requireAllNonNull(name, phone, email, games, tags);
         games.forEach(Objects::requireNonNull);
         this.name = name;
         this.phone = phone;
         this.email = email;
-        this.address = address;
         this.games.addAll(games);
         this.tags.addAll(tags);
     }
-
 
     public Name getName() {
         return name;
@@ -52,10 +49,6 @@ public class Friend {
 
     public Email getEmail() {
         return email;
-    }
-
-    public Address getAddress() {
-        return address;
     }
 
     /**
@@ -75,7 +68,7 @@ public class Friend {
     }
 
     /**
-     * Returns true if both friends have the same name.
+     * Returns true if both friends have the same name, ignoring case and repeated spaces.
      * This defines a weaker notion of equality between two friends.
      */
     public boolean isSameFriend(Friend otherFriend) {
@@ -84,7 +77,7 @@ public class Friend {
         }
 
         return otherFriend != null
-                && otherFriend.getName().equals(getName());
+                && name.equals(otherFriend.name);
     }
 
     /**
@@ -105,7 +98,6 @@ public class Friend {
         return name.equals(otherFriend.name)
                 && phone.equals(otherFriend.phone)
                 && email.equals(otherFriend.email)
-                && address.equals(otherFriend.address)
                 && games.equals(otherFriend.games)
                 && tags.equals(otherFriend.tags);
     }
@@ -113,7 +105,7 @@ public class Friend {
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, games, tags);
+        return Objects.hash(name, phone, email, games, tags);
     }
 
     @Override
@@ -122,7 +114,6 @@ public class Friend {
                 .add("name", name)
                 .add("phone", phone)
                 .add("email", email)
-                .add("address", address)
                 .add("games", games)
                 .add("tags", tags)
                 .toString();
