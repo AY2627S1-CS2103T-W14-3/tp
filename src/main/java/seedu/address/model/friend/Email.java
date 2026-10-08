@@ -3,6 +3,8 @@ package seedu.address.model.friend;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+import java.util.regex.Pattern;
+
 /**
  * Represents a Friend's email in GameMates.
  * Guarantees: immutable; is empty or valid as declared in {@link #isValidEmail(String)}
@@ -12,27 +14,18 @@ public class Email {
     /** The empty value representing an omitted email. */
     public static final Email EMPTY = new Email();
 
-    private static final String SPECIAL_CHARACTERS = "+_.-";
-    public static final String MESSAGE_CONSTRAINTS = "Emails should be of the format local-part@domain "
-            + "and adhere to the following constraints:\n"
-            + "1. The local-part should only contain alphanumeric characters and these special characters, excluding "
-            + "the parentheses, (" + SPECIAL_CHARACTERS + "). The local-part may not start or end with any special "
-            + "characters.\n"
-            + "2. The local-part is followed by an '@' and then a domain name. The domain name is made up of domain "
-            + "labels separated by periods.\n"
-            + "The domain name must:\n"
-            + "    - end with a domain label at least 2 characters long\n"
-            + "    - have each domain label start and end with alphanumeric characters\n"
-            + "    - have each domain label consist of alphanumeric characters, separated only by hyphens, if any.";
-    // alphanumeric and special characters
-    private static final String ALPHANUMERIC_NO_UNDERSCORE = "[^\\W_]+"; // alphanumeric characters except underscore
-    private static final String LOCAL_PART_REGEX = "^" + ALPHANUMERIC_NO_UNDERSCORE + "([" + SPECIAL_CHARACTERS + "]"
-            + ALPHANUMERIC_NO_UNDERSCORE + ")*";
-    private static final String DOMAIN_PART_REGEX = ALPHANUMERIC_NO_UNDERSCORE
-            + "(-" + ALPHANUMERIC_NO_UNDERSCORE + ")*";
-    private static final String DOMAIN_LAST_PART_REGEX = "(" + DOMAIN_PART_REGEX + "){2,}$"; // At least two chars
-    private static final String DOMAIN_REGEX = "(" + DOMAIN_PART_REGEX + "\\.)*" + DOMAIN_LAST_PART_REGEX;
-    public static final String VALIDATION_REGEX = LOCAL_PART_REGEX + "@" + DOMAIN_REGEX;
+    public static final String MESSAGE_CONSTRAINTS =
+            "Enter an email like name@example.com (up to 254 characters, no spaces). "
+                    + "See the User Guide for the full format.";
+
+    // RFC 5322 dot-atom syntax, with RFC 5321 domain labels and SMTP length limits.
+    // This practical ASCII subset excludes quoted local parts and address literals.
+    private static final String ATOM_REGEX = "[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+";
+    private static final String LOCAL_PART_REGEX = ATOM_REGEX + "(?:\\." + ATOM_REGEX + ")*";
+    private static final String DOMAIN_LABEL_REGEX = "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?";
+    public static final String VALIDATION_REGEX = LOCAL_PART_REGEX + "@" + DOMAIN_LABEL_REGEX
+            + "(?:\\." + DOMAIN_LABEL_REGEX + ")*";
+    private static final Pattern VALIDATION_PATTERN = Pattern.compile(VALIDATION_REGEX);
 
     public final String value;
 
@@ -62,10 +55,15 @@ public class Email {
     }
 
     /**
-     * Returns true if a given string is a valid email.
+     * Returns true if the string is an ASCII dot-atom email with valid domain labels and SMTP length limits.
+     * Checks syntax only; the domain and mailbox are not verified. The parser trims surrounding whitespace.
      */
     public static boolean isValidEmail(String test) {
-        return test.matches(VALIDATION_REGEX);
+        requireNonNull(test);
+        int localPartLength = test.indexOf('@');
+        // SMTP paths are limited to 256 octets, including the surrounding '<' and '>'.
+        return test.length() <= 254 && localPartLength >= 1 && localPartLength <= 64
+                && VALIDATION_PATTERN.matcher(test).matches();
     }
 
     @Override
