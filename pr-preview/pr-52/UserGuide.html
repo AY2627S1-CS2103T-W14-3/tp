@@ -247,7 +247,7 @@ A friend can have any number of tags, including zero.
   <li>Deletes the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>.</li>
   <li>The index refers to the index number shown in the displayed friend list.</li>
   <li>The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
-  <li>Leading and trailing spaces are ignored. The index accepts at most 50 characters and a value from 1 to 2147483647.</li>
+  <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647.</li>
   <li>A successful deletion displays <code class="language-plaintext highlighter-rouge">Successfully deleted FRIEND_NAME.</code>
 </li>
 </ul>
@@ -265,10 +265,10 @@ A friend can have any number of tags, including zero.
 <ul>
   <li>Missing index: <code class="language-plaintext highlighter-rouge">Error: Please provide a friend index.</code>
 </li>
-  <li>Invalid index (such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">-1</code>, or <code class="language-plaintext highlighter-rouge">abc</code>), extra arguments, or an index longer than 50 characters:
+  <li>Invalid index (such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">-1</code>, or <code class="language-plaintext highlighter-rouge">abc</code>), extra arguments, or a value above 2147483647:
 <code class="language-plaintext highlighter-rouge">Error: Please enter a positive integer as the friend index.</code>
 </li>
-  <li>Index outside the displayed list, including an empty list: <code class="language-plaintext highlighter-rouge">Error: Friend index does not exist.</code>
+  <li>Index outside the displayed list, including an empty list: <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>
 </li>
 </ul>
 
