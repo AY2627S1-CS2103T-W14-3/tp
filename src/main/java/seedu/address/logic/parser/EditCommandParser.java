@@ -1,7 +1,6 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
@@ -16,6 +15,8 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditFriendDescriptor;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.friend.Email;
+import seedu.address.model.friend.Phone;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -38,7 +39,7 @@ public class EditCommandParser implements Parser<EditCommand> {
         try {
             index = ParserUtil.parseIndex(argMultimap.getPreamble());
         } catch (ParseException pe) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE), pe);
+            throw new ParseException(EditCommand.MESSAGE_INVALID_INDEX, pe);
         }
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL);
@@ -49,10 +50,12 @@ public class EditCommandParser implements Parser<EditCommand> {
             editFriendDescriptor.setName(ParserUtil.parseName(argMultimap.getValue(PREFIX_NAME).get()));
         }
         if (argMultimap.getValue(PREFIX_PHONE).isPresent()) {
-            editFriendDescriptor.setPhone(ParserUtil.parsePhone(argMultimap.getValue(PREFIX_PHONE).get()));
+            String value = argMultimap.getValue(PREFIX_PHONE).get();
+            editFriendDescriptor.setPhone(value.isEmpty() ? Phone.EMPTY : ParserUtil.parsePhone(value));
         }
         if (argMultimap.getValue(PREFIX_EMAIL).isPresent()) {
-            editFriendDescriptor.setEmail(ParserUtil.parseEmail(argMultimap.getValue(PREFIX_EMAIL).get()));
+            String value = argMultimap.getValue(PREFIX_EMAIL).get();
+            editFriendDescriptor.setEmail(value.isEmpty() ? Email.EMPTY : ParserUtil.parseEmail(value));
         }
         parseTagsForEdit(argMultimap.getAllValues(PREFIX_TAG)).ifPresent(editFriendDescriptor::setTags);
 
