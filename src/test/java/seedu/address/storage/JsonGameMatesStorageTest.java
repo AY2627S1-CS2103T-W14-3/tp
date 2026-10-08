@@ -18,12 +18,22 @@ import org.junit.jupiter.api.io.TempDir;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.model.GameMates;
 import seedu.address.model.ReadOnlyGameMates;
+import seedu.address.model.util.SampleDataUtil;
 
 public class JsonGameMatesStorageTest {
     private static final Path TEST_DATA_FOLDER = Paths.get("src", "test", "data", "JsonGameMatesStorageTest");
 
     @TempDir
     public Path testFolder;
+
+    @Test
+    public void readAndSaveGameMates_sampleGames_preserved() throws Exception {
+        Path filePath = testFolder.resolve("games.json");
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(filePath);
+        ReadOnlyGameMates original = SampleDataUtil.getSampleGameMates();
+        storage.saveGameMates(original);
+        assertEquals(original, storage.readGameMates().get());
+    }
 
     @Test
     public void readGameMates_nullFilePath_throwsNullPointerException() {

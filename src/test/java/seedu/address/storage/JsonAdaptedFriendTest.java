@@ -12,10 +12,16 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.exceptions.IllegalValueException;
+import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
+import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
+import seedu.address.model.game.Game;
+import seedu.address.model.game.GameName;
+import seedu.address.model.game.Username;
+import seedu.address.testutil.FriendBuilder;
 
 public class JsonAdaptedFriendTest {
     private static final String INVALID_NAME = "R@chel";
@@ -33,6 +39,33 @@ public class JsonAdaptedFriendTest {
             .collect(Collectors.toList());
 
     @Test
+    public void toModelType_games_roundTrips() throws Exception {
+        Friend original = new FriendBuilder(BENSON).withGames(
+                new Game(new GameName("Valorant"), new Username("benson")),
+                new Game(new GameName("Minecraft"), new Username("benson2"))).build();
+        String json = JsonUtil.toJsonString(new JsonAdaptedFriend(original));
+        assertEquals(original, JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType());
+    }
+
+    @Test
+    public void toModelType_missingGames_returnsEmptyGames() throws Exception {
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                VALID_ADDRESS, null, VALID_TAGS);
+        assertEquals(BENSON, friend.toModelType());
+    }
+
+    @Test
+    public void toModelType_invalidGames_throwsIllegalValueException() {
+        for (JsonAdaptedGame game : List.of(new JsonAdaptedGame(" ", "player"),
+                new JsonAdaptedGame("Valorant", " "), new JsonAdaptedGame(null, "player"),
+                new JsonAdaptedGame("Valorant", null))) {
+            JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                    VALID_ADDRESS, List.of(game), VALID_TAGS);
+            assertThrows(IllegalValueException.class, friend::toModelType);
+        }
+    }
+
+    @Test
     public void toModelType_validFriendDetails_returnsFriend() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(BENSON);
         assertEquals(BENSON, friend.toModelType());
@@ -41,14 +74,15 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_invalidName_throwsIllegalValueException() {
         JsonAdaptedFriend friend =
-                new JsonAdaptedFriend(INVALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
+                new JsonAdaptedFriend(INVALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, List.of(), VALID_TAGS);
         String expectedMessage = Name.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
 
     @Test
     public void toModelType_nullName_throwsIllegalValueException() {
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(null, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
+        JsonAdaptedFriend friend =
+                new JsonAdaptedFriend(null, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, List.of(), VALID_TAGS);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Name.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
@@ -56,14 +90,15 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_invalidPhone_throwsIllegalValueException() {
         JsonAdaptedFriend friend =
-                new JsonAdaptedFriend(VALID_NAME, INVALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
+                new JsonAdaptedFriend(VALID_NAME, INVALID_PHONE, VALID_EMAIL, VALID_ADDRESS, List.of(), VALID_TAGS);
         String expectedMessage = Phone.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
 
     @Test
     public void toModelType_nullPhone_throwsIllegalValueException() {
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, null, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
+        JsonAdaptedFriend friend =
+                new JsonAdaptedFriend(VALID_NAME, null, VALID_EMAIL, VALID_ADDRESS, List.of(), VALID_TAGS);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
@@ -71,14 +106,15 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_invalidEmail_throwsIllegalValueException() {
         JsonAdaptedFriend friend =
-                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, INVALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
+                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, INVALID_EMAIL, VALID_ADDRESS, List.of(), VALID_TAGS);
         String expectedMessage = Email.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
 
     @Test
     public void toModelType_nullEmail_throwsIllegalValueException() {
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, null, VALID_ADDRESS, VALID_TAGS);
+        JsonAdaptedFriend friend =
+                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, null, VALID_ADDRESS, List.of(), VALID_TAGS);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Email.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
@@ -86,14 +122,15 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_invalidAddress_throwsIllegalValueException() {
         JsonAdaptedFriend friend =
-                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL, INVALID_ADDRESS, VALID_TAGS);
+                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL, INVALID_ADDRESS, List.of(), VALID_TAGS);
         String expectedMessage = Address.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
 
     @Test
     public void toModelType_nullAddress_throwsIllegalValueException() {
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL, null, VALID_TAGS);
+        JsonAdaptedFriend friend =
+                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL, null, List.of(), VALID_TAGS);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Address.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
@@ -103,7 +140,7 @@ public class JsonAdaptedFriendTest {
         List<JsonAdaptedTag> invalidTags = new ArrayList<>(VALID_TAGS);
         invalidTags.add(new JsonAdaptedTag(INVALID_TAG));
         JsonAdaptedFriend friend =
-                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, invalidTags);
+                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, List.of(), invalidTags);
         assertThrows(IllegalValueException.class, friend::toModelType);
     }
 

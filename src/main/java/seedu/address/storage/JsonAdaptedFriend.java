@@ -15,6 +15,7 @@ import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
+import seedu.address.model.game.Game;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -28,6 +29,7 @@ class JsonAdaptedFriend {
     private final String phone;
     private final String email;
     private final String address;
+    private final List<JsonAdaptedGame> games = new ArrayList<>();
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
@@ -36,11 +38,15 @@ class JsonAdaptedFriend {
     @JsonCreator
     public JsonAdaptedFriend(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
+            @JsonProperty("games") List<JsonAdaptedGame> games,
             @JsonProperty("tags") List<JsonAdaptedTag> tags) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
+        if (games != null) {
+            this.games.addAll(games);
+        }
         if (tags != null) {
             this.tags.addAll(tags);
         }
@@ -54,6 +60,7 @@ class JsonAdaptedFriend {
         phone = source.getPhone().value;
         email = source.getEmail().value;
         address = source.getAddress().value;
+        games.addAll(source.getGames().stream().map(JsonAdaptedGame::new).collect(Collectors.toList()));
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -65,6 +72,10 @@ class JsonAdaptedFriend {
      * @throws IllegalValueException if there were any data constraints violated in the adapted friend.
      */
     public Friend toModelType() throws IllegalValueException {
+        final Set<Game> modelGames = new HashSet<>();
+        for (JsonAdaptedGame game : games) {
+            modelGames.add(game.toModelType());
+        }
         final List<Tag> friendTags = new ArrayList<>();
         for (JsonAdaptedTag tag : tags) {
             friendTags.add(tag.toModelType());
@@ -103,7 +114,7 @@ class JsonAdaptedFriend {
         final Address modelAddress = new Address(address);
 
         final Set<Tag> modelTags = new HashSet<>(friendTags);
-        return new Friend(modelName, modelPhone, modelEmail, modelAddress, modelTags);
+        return new Friend(modelName, modelPhone, modelEmail, modelAddress, modelGames, modelTags);
     }
 
 }

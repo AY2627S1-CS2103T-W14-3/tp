@@ -12,11 +12,57 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalFriends.ALICE;
 import static seedu.address.testutil.TypicalFriends.BOB;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
+import seedu.address.model.game.Game;
+import seedu.address.model.game.GameName;
+import seedu.address.model.game.Username;
 import seedu.address.testutil.FriendBuilder;
 
 public class FriendTest {
+
+    @Test
+    public void games_immutableAndDefensivelyCopied() {
+        Game game = new Game(new GameName("Valorant"), new Username("alice"));
+        Set<Game> games = new HashSet<>(Set.of(game));
+        Friend friend = new Friend(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(),
+                ALICE.getAddress(), games, ALICE.getTags());
+        games.clear();
+        assertEquals(Set.of(game), friend.getGames());
+        assertThrows(UnsupportedOperationException.class, () -> friend.getGames().clear());
+        assertEquals(friend, new FriendBuilder(friend).build());
+    }
+
+    @Test
+    public void constructor_nullGamesOrEntries_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new Friend(ALICE.getName(), ALICE.getPhone(),
+                ALICE.getEmail(), ALICE.getAddress(), null, ALICE.getTags()));
+        Set<Game> games = new HashSet<>();
+        games.add(null);
+        assertThrows(NullPointerException.class, () -> new Friend(ALICE.getName(), ALICE.getPhone(),
+                ALICE.getEmail(), ALICE.getAddress(), games, ALICE.getTags()));
+    }
+
+    @Test
+    public void equalsAndHashCode_includeGamesButIdentityDoesNot() {
+        Game first = new Game(new GameName("Valorant"), new Username("alice"));
+        Game second = new Game(new GameName("Minecraft"), new Username("alice2"));
+        Friend friend = new FriendBuilder(ALICE).withGames(first, second).build();
+        Friend reordered = new FriendBuilder(ALICE).withGames(second, first).build();
+        assertEquals(friend, reordered);
+        assertEquals(friend.hashCode(), reordered.hashCode());
+        assertEquals(Objects.hash(friend.getName(), friend.getPhone(), friend.getEmail(),
+                friend.getAddress(), friend.getGames(), friend.getTags()), friend.hashCode());
+        assertFalse(friend.equals(ALICE));
+        assertTrue(friend.isSameFriend(ALICE));
+        Friend changedUsername = new FriendBuilder(ALICE)
+                .withGames(new Game(new GameName("Valorant"), new Username("other")), second).build();
+        assertFalse(friend.equals(changedUsername));
+    }
 
     @Test
     public void asObservableList_modifyList_throwsUnsupportedOperationException() {
@@ -92,8 +138,11 @@ public class FriendTest {
 
     @Test
     public void toStringMethod() {
-        String expected = Friend.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
-                + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags() + "}";
-        assertEquals(expected, ALICE.toString());
+        Friend friend = new FriendBuilder(ALICE)
+                .withGames(new Game(new GameName("Valorant"), new Username("alice"))).build();
+        String expected = Friend.class.getCanonicalName() + "{name=" + friend.getName() + ", phone=" + friend.getPhone()
+                + ", email=" + friend.getEmail() + ", address=" + friend.getAddress()
+                + ", games=" + friend.getGames() + ", tags=" + friend.getTags() + "}";
+        assertEquals(expected, friend.toString());
     }
 }

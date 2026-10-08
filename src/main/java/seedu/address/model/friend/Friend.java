@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.model.game.Game;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -23,19 +24,23 @@ public class Friend {
 
     // Data fields
     private final Address address;
+    private final Set<Game> games = new HashSet<>();
     private final Set<Tag> tags = new HashSet<>();
 
     /**
      * Every field must be present and not null.
      */
-    public Friend(Name name, Phone phone, Email email, Address address, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, tags);
+    public Friend(Name name, Phone phone, Email email, Address address, Set<Game> games, Set<Tag> tags) {
+        requireAllNonNull(name, phone, email, address, games, tags);
+        games.forEach(Objects::requireNonNull);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.games.addAll(games);
         this.tags.addAll(tags);
     }
+
 
     public Name getName() {
         return name;
@@ -51,6 +56,14 @@ public class Friend {
 
     public Address getAddress() {
         return address;
+    }
+
+    /**
+     * Returns an immutable game set, which throws {@code UnsupportedOperationException}
+     * if modification is attempted.
+     */
+    public Set<Game> getGames() {
+        return Collections.unmodifiableSet(games);
     }
 
     /**
@@ -93,13 +106,14 @@ public class Friend {
                 && phone.equals(otherFriend.phone)
                 && email.equals(otherFriend.email)
                 && address.equals(otherFriend.address)
+                && games.equals(otherFriend.games)
                 && tags.equals(otherFriend.tags);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags);
+        return Objects.hash(name, phone, email, address, games, tags);
     }
 
     @Override
@@ -109,6 +123,7 @@ public class Friend {
                 .add("phone", phone)
                 .add("email", email)
                 .add("address", address)
+                .add("games", games)
                 .add("tags", tags)
                 .toString();
     }
