@@ -3,11 +3,11 @@ package seedu.address.model.friend;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.model.game.Game;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -22,17 +22,27 @@ public class Friend {
     private final Email email;
 
     // Data fields
-    private final Set<Tag> tags = new HashSet<>();
+    private final Set<Game> games;
+    private final Set<Tag> tags;
+
+    /**
+     * Every field must be present and not null.
+     */
+    public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags) {
+        requireAllNonNull(name, phone, email, games, tags);
+        games.forEach(Objects::requireNonNull);
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.games = Collections.unmodifiableSet(games);
+        this.tags = Collections.unmodifiableSet(tags);
+    }
 
     /**
      * Every field must be present and not null.
      */
     public Friend(Name name, Phone phone, Email email, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, tags);
-        this.name = name;
-        this.phone = phone;
-        this.email = email;
-        this.tags.addAll(tags);
+        this(name, phone, email, Collections.emptySet(), tags);
     }
 
     public Name getName() {
@@ -48,11 +58,19 @@ public class Friend {
     }
 
     /**
+     * Returns an immutable game set, which throws {@code UnsupportedOperationException}
+     * if modification is attempted.
+     */
+    public Set<Game> getGames() {
+        return games;
+    }
+
+    /**
      * Returns an immutable tag set, which throws {@code UnsupportedOperationException}
      * if modification is attempted.
      */
     public Set<Tag> getTags() {
-        return Collections.unmodifiableSet(tags);
+        return tags;
     }
 
     /**
@@ -86,13 +104,14 @@ public class Friend {
         return name.equals(otherFriend.name)
                 && phone.equals(otherFriend.phone)
                 && email.equals(otherFriend.email)
+                && games.equals(otherFriend.games)
                 && tags.equals(otherFriend.tags);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, tags);
+        return Objects.hash(name, phone, email, games, tags);
     }
 
     @Override
@@ -101,6 +120,7 @@ public class Friend {
                 .add("name", name)
                 .add("phone", phone)
                 .add("email", email)
+                .add("games", games)
                 .add("tags", tags)
                 .toString();
     }
