@@ -16,6 +16,8 @@ import seedu.address.model.tag.Tag;
  */
 public class Friend {
 
+    public static final Friend DEFAULT_MYSELF = new Friend(new Name("Myself"), Phone.EMPTY, Email.EMPTY, Set.of());
+
     // Identity fields
     private final Name name;
     private final Phone phone;

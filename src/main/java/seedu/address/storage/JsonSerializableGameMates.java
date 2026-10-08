@@ -22,13 +22,16 @@ class JsonSerializableGameMates {
     public static final String MESSAGE_DUPLICATE_FRIEND = "Friends list contains duplicate friend(s).";
 
     private final List<JsonAdaptedFriend> friends = new ArrayList<>();
+    private final JsonAdaptedFriend myself;
 
     /**
-     * Constructs a {@code JsonSerializableGameMates} with the given friends.
+     * Constructs a {@code JsonSerializableGameMates} with the given friends and optional user profile.
      */
     @JsonCreator
-    public JsonSerializableGameMates(@JsonProperty("friends") List<JsonAdaptedFriend> friends) {
+    public JsonSerializableGameMates(@JsonProperty("friends") List<JsonAdaptedFriend> friends,
+            @JsonProperty("myself") JsonAdaptedFriend myself) {
         this.friends.addAll(friends);
+        this.myself = myself;
     }
 
     /**
@@ -37,6 +40,7 @@ class JsonSerializableGameMates {
      * @param source future changes to this will not affect the created {@code JsonSerializableGameMates}.
      */
     public JsonSerializableGameMates(ReadOnlyGameMates source) {
+        myself = new JsonAdaptedFriend(source.getMyself());
         friends.addAll(source.getFriendList().stream().map(JsonAdaptedFriend::new).collect(Collectors.toList()));
     }
 
@@ -47,6 +51,9 @@ class JsonSerializableGameMates {
      */
     public GameMates toModelType() throws IllegalValueException {
         GameMates gameMates = new GameMates();
+        if (myself != null) {
+            gameMates.setMyself(myself.toModelType());
+        }
         for (JsonAdaptedFriend jsonAdaptedFriend : friends) {
             Friend friend = jsonAdaptedFriend.toModelType();
             if (gameMates.hasFriend(friend)) {

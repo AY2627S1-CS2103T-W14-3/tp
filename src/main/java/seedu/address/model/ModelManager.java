@@ -70,6 +70,11 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public void setMyself(Friend myself) {
+        gameMates.setMyself(myself);
+    }
+
+    @Override
     public boolean hasFriend(Friend friend) {
         requireNonNull(friend);
         return gameMates.hasFriend(friend);

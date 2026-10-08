@@ -3,6 +3,7 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.Objects;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
@@ -11,11 +12,13 @@ import seedu.address.model.friend.UniqueFriendList;
 
 /**
  * Wraps all data at the GameMates level.
- * Duplicates are not allowed (by .isSameFriend comparison).
+ * Friend-list duplicates are not allowed (by .isSameFriend comparison).
+ * The user profile is stored separately and does not participate in friend identity checks.
  */
 public class GameMates implements ReadOnlyGameMates {
 
     private final UniqueFriendList friends = new UniqueFriendList();
+    private Friend myself = Friend.DEFAULT_MYSELF;
 
     public GameMates() {}
 
@@ -25,6 +28,16 @@ public class GameMates implements ReadOnlyGameMates {
     public GameMates(ReadOnlyGameMates toBeCopied) {
         this();
         resetData(toBeCopied);
+    }
+
+    @Override
+    public Friend getMyself() {
+        return myself;
+    }
+
+    /** Replaces the user profile independently of the friend list. */
+    public void setMyself(Friend myself) {
+        this.myself = requireNonNull(myself);
     }
 
     //// list overwrite operations
@@ -44,6 +57,7 @@ public class GameMates implements ReadOnlyGameMates {
         requireNonNull(newData);
 
         setFriends(newData.getFriendList());
+        setMyself(newData.getMyself());
     }
 
     //// friend-level operations
@@ -90,6 +104,7 @@ public class GameMates implements ReadOnlyGameMates {
     public String toString() {
         return new ToStringBuilder(this)
                 .add("friends", friends)
+                .add("myself", myself)
                 .toString();
     }
 
@@ -109,11 +124,11 @@ public class GameMates implements ReadOnlyGameMates {
             return false;
         }
 
-        return friends.equals(otherGameMates.friends);
+        return friends.equals(otherGameMates.friends) && myself.equals(otherGameMates.myself);
     }
 
     @Override
     public int hashCode() {
-        return friends.hashCode();
+        return Objects.hash(friends, myself);
     }
 }

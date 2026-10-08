@@ -29,6 +29,33 @@ public class GameMatesTest {
     }
 
     @Test
+    public void myself_isSeparateFromFriends() {
+        gameMates.setMyself(ALICE);
+        assertFalse(gameMates.hasFriend(ALICE));
+        assertTrue(gameMates.getFriendList().isEmpty());
+        gameMates.addFriend(ALICE);
+        gameMates.removeFriend(ALICE);
+        assertEquals(ALICE, gameMates.getMyself());
+    }
+
+    @Test
+    public void myself_copyResetAndEquality_includeProfile() {
+        gameMates.setMyself(ALICE);
+        GameMates copy = new GameMates(gameMates);
+        assertEquals(gameMates, copy);
+        assertEquals(gameMates.hashCode(), copy.hashCode());
+        copy.setMyself(new FriendBuilder(ALICE).withTags(VALID_TAG_HUSBAND).build());
+        assertFalse(gameMates.equals(copy));
+        gameMates.resetData(copy);
+        assertEquals(copy, gameMates);
+    }
+
+    @Test
+    public void setMyself_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> gameMates.setMyself(null));
+    }
+
+    @Test
     public void resetData_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> gameMates.resetData(null));
     }
@@ -82,7 +109,8 @@ public class GameMatesTest {
 
     @Test
     public void toStringMethod() {
-        String expected = GameMates.class.getCanonicalName() + "{friends=" + gameMates.getFriendList() + "}";
+        String expected = GameMates.class.getCanonicalName() + "{friends=" + gameMates.getFriendList()
+                + ", myself=" + gameMates.getMyself() + "}";
         assertEquals(expected, gameMates.toString());
     }
 
@@ -94,6 +122,11 @@ public class GameMatesTest {
 
         GameMatesStub(Collection<Friend> friends) {
             this.friends.setAll(friends);
+        }
+
+        @Override
+        public Friend getMyself() {
+            return new GameMates().getMyself();
         }
 
         @Override

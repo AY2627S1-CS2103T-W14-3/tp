@@ -44,6 +44,9 @@ public class MainWindow extends UiPart<Stage> {
     private MenuItem helpMenuItem;
 
     @FXML
+    private StackPane myselfPanelPlaceholder;
+
+    @FXML
     private StackPane friendListPanelPlaceholder;
 
     @FXML
@@ -114,6 +117,7 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
+        refreshMyselfCard();
         friendListPanel = new FriendListPanel(logic.getFilteredFriendList());
         friendListPanelPlaceholder.getChildren().add(friendListPanel.getRoot());
 
@@ -125,6 +129,10 @@ public class MainWindow extends UiPart<Stage> {
 
         CommandBox commandBox = new CommandBox(this::executeCommand);
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
+    }
+
+    private void refreshMyselfCard() {
+        myselfPanelPlaceholder.getChildren().setAll(new FriendCard(logic.getMyself()).getRoot());
     }
 
     /**
@@ -195,6 +203,8 @@ public class MainWindow extends UiPart<Stage> {
             logger.info("An error occurred while executing command: " + commandText);
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
+        } finally {
+            refreshMyselfCard();
         }
     }
 }

@@ -128,6 +128,11 @@ public class AddCommandTest {
         }
 
         @Override
+        public void setMyself(Friend myself) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public boolean hasFriend(Friend friend) {
             throw new AssertionError("This method should not be called.");
         }
