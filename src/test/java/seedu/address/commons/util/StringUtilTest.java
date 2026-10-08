@@ -10,6 +10,14 @@ import org.junit.jupiter.api.Test;
 
 public class StringUtilTest {
 
+    @Test
+    public void isNullOrEmpty() {
+        assertTrue(StringUtil.isNullOrEmpty(null));
+        assertTrue(StringUtil.isNullOrEmpty(""));
+        assertFalse(StringUtil.isNullOrEmpty(" "));
+        assertFalse(StringUtil.isNullOrEmpty("value"));
+    }
+
     //---------------- Tests for isNonZeroUnsignedInteger --------------------------------------
 
     @Test

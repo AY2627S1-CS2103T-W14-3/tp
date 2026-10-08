@@ -1,5 +1,7 @@
 package seedu.address.storage;
 
+import static seedu.address.commons.util.StringUtil.isNullOrEmpty;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -73,21 +75,15 @@ class JsonAdaptedFriend {
         }
         final Name modelName = new Name(name);
 
-        if (phone == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName()));
-        }
-        if (!Phone.isValidPhone(phone)) {
+        if (!isNullOrEmpty(phone) && !Phone.isValidPhone(phone)) {
             throw new IllegalValueException(Phone.MESSAGE_CONSTRAINTS);
         }
-        final Phone modelPhone = new Phone(phone);
+        final Phone modelPhone = isNullOrEmpty(phone) ? Phone.EMPTY : new Phone(phone);
 
-        if (email == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Email.class.getSimpleName()));
-        }
-        if (!Email.isValidEmail(email)) {
+        if (!isNullOrEmpty(email) && !Email.isValidEmail(email)) {
             throw new IllegalValueException(Email.MESSAGE_CONSTRAINTS);
         }
-        final Email modelEmail = new Email(email);
+        final Email modelEmail = isNullOrEmpty(email) ? Email.EMPTY : new Email(email);
 
         final Set<Tag> modelTags = new HashSet<>(friendTags);
         return new Friend(modelName, modelPhone, modelEmail, modelTags);

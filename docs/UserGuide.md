@@ -77,13 +77,20 @@ Format: `help`
 
 Adds a friend to GameMates.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​`
+Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…`
+
+* Only the name is required. Omitted phone and email details are shown as `Not provided`.
+* Supplied phone and email values must satisfy the validation rules. Empty `p/` or `e/` values are rejected.
+* Leading and trailing spaces are removed. Names must be unique, ignoring case and repeated spaces:
+  `John Doe` and `john   doe` identify the same friend.
+* Different friends may share a phone number or email address.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A friend can have any number of tags, including zero.
 </div>
 
 Examples:
+* `add n/John Doe`
 * `add n/John Doe p/98765432 e/johnd@example.com`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com p/1234567 t/criminal`
 
