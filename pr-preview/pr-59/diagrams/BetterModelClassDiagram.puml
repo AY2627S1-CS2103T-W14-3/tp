@@ -1,0 +1,20 @@
+@startuml
+!include style.puml
+skinparam arrowThickness 1.1
+skinparam arrowColor MODEL_COLOR
+skinparam classBackgroundColor MODEL_COLOR
+
+GameMates *-right-> "1" UniqueFriendList
+GameMates *-right-> "1" UniqueTagList
+UniqueTagList -[hidden]down- UniqueFriendList
+UniqueTagList -[hidden]down- UniqueFriendList
+
+UniqueTagList -right-> "*" Tag
+UniqueFriendList -right-> Friend
+
+Friend -up-> "*" Tag
+
+Friend *--> Name
+Friend *--> Phone
+Friend *--> Email
+@enduml
