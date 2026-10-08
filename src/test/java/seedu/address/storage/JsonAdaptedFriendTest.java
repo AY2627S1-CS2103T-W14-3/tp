@@ -32,6 +32,9 @@ public class JsonAdaptedFriendTest {
     private static final String VALID_NAME = BENSON.getName().toString();
     private static final String VALID_PHONE = BENSON.getPhone().toString();
     private static final String VALID_EMAIL = BENSON.getEmail().toString();
+    private static final List<JsonAdaptedGame> VALID_GAMES = BENSON.getGames().stream()
+            .map(JsonAdaptedGame::new)
+            .collect(Collectors.toList());
     private static final List<JsonAdaptedTag> VALID_TAGS = BENSON.getTags().stream()
             .map(JsonAdaptedTag::new)
             .collect(Collectors.toList());
@@ -79,14 +82,14 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_invalidName_throwsIllegalValueException() {
         JsonAdaptedFriend friend =
-                new JsonAdaptedFriend(INVALID_NAME, VALID_PHONE, VALID_EMAIL, List.of(), VALID_TAGS);
+                new JsonAdaptedFriend(INVALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_GAMES, VALID_TAGS);
         String expectedMessage = Name.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
 
     @Test
     public void toModelType_nullName_throwsIllegalValueException() {
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(null, VALID_PHONE, VALID_EMAIL, List.of(), VALID_TAGS);
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(null, VALID_PHONE, VALID_EMAIL, VALID_GAMES, VALID_TAGS);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Name.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
@@ -94,14 +97,14 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_invalidPhone_throwsIllegalValueException() {
         JsonAdaptedFriend friend =
-                new JsonAdaptedFriend(VALID_NAME, INVALID_PHONE, VALID_EMAIL, List.of(), VALID_TAGS);
+                new JsonAdaptedFriend(VALID_NAME, INVALID_PHONE, VALID_EMAIL, VALID_GAMES, VALID_TAGS);
         String expectedMessage = Phone.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
 
     @Test
     public void toModelType_plainPhone_returnsFriend() throws Exception {
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, "91234567", VALID_EMAIL, List.of(),
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, "91234567", VALID_EMAIL, VALID_GAMES,
                 VALID_TAGS);
         assertEquals("91234567", friend.toModelType().getPhone().value);
     }
@@ -109,21 +112,21 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_phoneWithSurroundingWhitespace_throwsIllegalValueException() {
         // stored data is not trimmed; only user input is
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, " 91234567", VALID_EMAIL, List.of(),
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, " 91234567", VALID_EMAIL, VALID_GAMES,
                 VALID_TAGS);
         assertThrows(IllegalValueException.class, Phone.MESSAGE_CONSTRAINTS, friend::toModelType);
     }
 
     @Test
     public void toModelType_nullPhone_returnsAbsentDetail() throws Exception {
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, null, VALID_EMAIL, List.of(), VALID_TAGS);
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, null, VALID_EMAIL, VALID_GAMES, VALID_TAGS);
         assertEquals(Phone.EMPTY, friend.toModelType().getPhone());
     }
 
     @Test
     public void toModelType_tooLongEmail_throwsIllegalValueException() {
         String tooLongEmail = "a".repeat(65) + "@example.com";
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, tooLongEmail, List.of(),
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, tooLongEmail, VALID_GAMES,
                 VALID_TAGS);
         assertThrows(IllegalValueException.class, Email.MESSAGE_CONSTRAINTS, friend::toModelType);
     }
@@ -131,15 +134,31 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_invalidEmail_throwsIllegalValueException() {
         JsonAdaptedFriend friend =
-                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, INVALID_EMAIL, List.of(), VALID_TAGS);
+                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, INVALID_EMAIL, VALID_GAMES, VALID_TAGS);
         String expectedMessage = Email.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
     }
 
     @Test
     public void toModelType_nullEmail_returnsAbsentDetail() throws Exception {
-        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, null, List.of(), VALID_TAGS);
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, null, VALID_GAMES, VALID_TAGS);
         assertEquals(Email.EMPTY, friend.toModelType().getEmail());
+    }
+
+    @Test
+    public void toModelType_emptyContactDetails_roundTrips() throws Exception {
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, "", "", VALID_GAMES, VALID_TAGS);
+        assertEquals(Phone.EMPTY, friend.toModelType().getPhone());
+        assertEquals(Email.EMPTY, friend.toModelType().getEmail());
+        assertEquals(friend.toModelType(), new JsonAdaptedFriend(friend.toModelType()).toModelType());
+    }
+
+    @Test
+    public void toModelType_whitespaceContactDetails_throwsIllegalValueException() {
+        JsonAdaptedFriend blankPhone = new JsonAdaptedFriend(VALID_NAME, " ", VALID_EMAIL, VALID_GAMES, VALID_TAGS);
+        assertThrows(IllegalValueException.class, Phone.MESSAGE_CONSTRAINTS, blankPhone::toModelType);
+        JsonAdaptedFriend blankEmail = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, " ", VALID_GAMES, VALID_TAGS);
+        assertThrows(IllegalValueException.class, Email.MESSAGE_CONSTRAINTS, blankEmail::toModelType);
     }
 
     @Test
@@ -147,7 +166,7 @@ public class JsonAdaptedFriendTest {
         List<JsonAdaptedTag> invalidTags = new ArrayList<>(VALID_TAGS);
         invalidTags.add(new JsonAdaptedTag(INVALID_TAG));
         JsonAdaptedFriend friend =
-                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL, List.of(), invalidTags);
+                new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_GAMES, invalidTags);
         assertThrows(IllegalValueException.class, friend::toModelType);
     }
 
