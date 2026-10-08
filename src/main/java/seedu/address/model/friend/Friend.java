@@ -65,7 +65,7 @@ public class Friend {
         }
 
         return otherFriend != null
-                && name.isSameName(otherFriend.name);
+                && name.equals(otherFriend.name);
     }
 
     /**

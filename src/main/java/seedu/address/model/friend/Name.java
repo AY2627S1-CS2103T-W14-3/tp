@@ -44,16 +44,6 @@ public class Name {
         return trimmedName.length() <= MAX_LENGTH && trimmedName.matches(VALIDATION_REGEX);
     }
 
-
-    /**
-     * Returns true if the names identify the same friend, ignoring case and repeated spaces.
-     * Exact value equality remains defined by {@link #equals(Object)}.
-     */
-    public boolean isSameName(Name otherName) {
-        return otherName != null
-                && normalisedName().equalsIgnoreCase(otherName.normalisedName());
-    }
-
     private String normalisedName() {
         return fullName.trim().replaceAll(" +", " ");
     }
@@ -74,7 +64,7 @@ public class Name {
             return false;
         }
 
-        return fullName.toLowerCase(Locale.ROOT).equals(otherName.fullName.toLowerCase(Locale.ROOT));
+        return normalisedName().equalsIgnoreCase(otherName.normalisedName());
     }
 
     @Override
