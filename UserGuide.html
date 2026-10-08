@@ -180,6 +180,48 @@ A friend can have any number of tags, including zero.
   <li><code class="language-plaintext highlighter-rouge">add n/Betsy Crowe t/friend e/betsycrowe@example.com p/1234567 t/criminal</code></li>
 </ul>
 
+<p>Names are trimmed before validation, must not be blank and may contain at most 100 characters.
+Only ASCII letters, digits and spaces are accepted. Names are compared case-insensitively,
+so <code class="language-plaintext highlighter-rouge">john doe</code> and <code class="language-plaintext highlighter-rouge">John Doe</code> are the same friend.</p>
+
+<p>Tag names must be non-empty and contain only ASCII letters and digits (no spaces or symbols).</p>
+
+<p>Phone numbers accept formats such as <code class="language-plaintext highlighter-rouge">91234567</code>, <code class="language-plaintext highlighter-rouge">+6591234567</code>, <code class="language-plaintext highlighter-rouge">+65 9123-4567</code> and <code class="language-plaintext highlighter-rouge">(123) 456-7890</code>.</p>
+
+<ul>
+  <li>Use 3–15 ASCII digits without <code class="language-plaintext highlighter-rouge">+</code>, or 2–15 with <code class="language-plaintext highlighter-rouge">+</code>, including the country code.</li>
+  <li>Put <code class="language-plaintext highlighter-rouge">+</code> at the start, immediately before a digit or <code class="language-plaintext highlighter-rouge">(</code>. The first digit after <code class="language-plaintext highlighter-rouge">+</code> must be <code class="language-plaintext highlighter-rouge">1</code>–<code class="language-plaintext highlighter-rouge">9</code>.</li>
+  <li>Digit groups may have any length. Parentheses must enclose digits only and cannot be empty or nested.</li>
+  <li>Use at most one hyphen or space between groups. Separators may differ or be omitted.
+Leading, trailing and consecutive separators are rejected.</li>
+  <li>Dots, letters, non-ASCII digits and extensions are rejected.</li>
+  <li>Command input is trimmed. Saved numbers must already match these rules.</li>
+  <li>Formatting is preserved. <code class="language-plaintext highlighter-rouge">+6591234567</code> and <code class="language-plaintext highlighter-rouge">+65 9123-4567</code> are different phone values.</li>
+</ul>
+
+<div class="alert alert-warning">
+Validation checks format only, not country codes, national number lengths or whether a number is active.
+These rules also apply when editing friends and loading saved data.
+</div>
+
+<p>Email addresses are trimmed before validation and must use ASCII <code class="language-plaintext highlighter-rouge">local-part@domain</code> syntax:</p>
+
+<ul>
+  <li>The entire address may contain at most 254 characters, with at most 64 before <code class="language-plaintext highlighter-rouge">@</code>.</li>
+  <li>The local part accepts letters, digits and the punctuation in <code class="language-plaintext highlighter-rouge">!#$%&amp;'*+/=?^_`{|}~-</code>.
+Dots may separate non-empty parts, so leading, trailing and consecutive dots are rejected.</li>
+  <li>Each domain label (a part between dots) must contain 1–63 letters, digits or hyphens and must start
+and end with a letter or digit. Single-label domains such as <code class="language-plaintext highlighter-rouge">user@localhost</code> are accepted.</li>
+  <li>Quoted local parts, address literals such as <code class="language-plaintext highlighter-rouge">user@[127.0.0.1]</code>, internal whitespace and non-ASCII
+characters are not supported. Validation checks format only, not whether a mailbox exists.</li>
+</ul>
+
+<div class="alert alert-info">
+These rules use a practical subset of <a href="https://www.rfc-editor.org/rfc/rfc5322#section-3.2.3">RFC 5322’s dot-atom syntax</a>
+and <a href="https://www.rfc-editor.org/rfc/rfc5321#section-4.5.3.1">RFC 5321’s SMTP length limits</a>.
+The 254-character address limit leaves room for the enclosing <code class="language-plaintext highlighter-rouge">&lt;</code> and <code class="language-plaintext highlighter-rouge">&gt;</code> in the 256-octet SMTP path limit.
+</div>
+
 <h3 id="listing-all-friends-list">Listing all friends: <code class="language-plaintext highlighter-rouge">list</code>
 </h3>
 
