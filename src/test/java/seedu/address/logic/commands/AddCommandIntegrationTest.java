@@ -12,7 +12,6 @@ import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
-import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
@@ -49,7 +48,7 @@ public class AddCommandIntegrationTest {
         model.updateFilteredFriendList(friend -> false);
         new GameMatesParser().parseCommand("add n/  Melody  ").execute(model);
         Friend added = model.getFilteredFriendList().getLast();
-        assertEquals(new Friend(new Name("Melody"), Phone.empty(), Email.empty(), Address.empty(),
+        assertEquals(new Friend(new Name("Melody"), Phone.empty(), Email.empty(),
                 java.util.Set.of()), added);
         assertEquals(model.getGameMates().getFriendList().size(), model.getFilteredFriendList().size());
     }
