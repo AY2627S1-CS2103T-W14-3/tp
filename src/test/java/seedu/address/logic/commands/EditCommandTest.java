@@ -25,11 +25,9 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.friend.Friend;
-import seedu.address.model.game.Game;
-import seedu.address.model.game.GameName;
-import seedu.address.model.game.Username;
 import seedu.address.testutil.EditFriendDescriptorBuilder;
 import seedu.address.testutil.FriendBuilder;
+import seedu.address.testutil.GameBuilder;
 
 /**
  * Contains integration tests (interaction with the Model) and unit tests for EditCommand.
@@ -42,7 +40,7 @@ public class EditCommandTest {
     public void execute_contactEdit_preservesGames() {
         Friend original = model.getFilteredFriendList().get(0);
         Friend withGames = new FriendBuilder(original)
-                .withGames(new Game(new GameName("Valorant"), new Username("player"))).build();
+                .withGames(new GameBuilder().withGameName("Valorant").withUsername("player").build()).build();
         model.setFriend(original, withGames);
         Friend editedFriend = new FriendBuilder(withGames).withPhone(VALID_PHONE_BOB).build();
         EditCommand command = new EditCommand(INDEX_FIRST_FRIEND,

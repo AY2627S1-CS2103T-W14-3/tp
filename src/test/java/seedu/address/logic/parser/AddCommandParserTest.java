@@ -28,6 +28,8 @@ import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSucces
 import static seedu.address.testutil.TypicalFriends.AMY;
 import static seedu.address.testutil.TypicalFriends.BOB;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.Messages;
@@ -121,17 +123,17 @@ public class AddCommandParserTest {
 
     @Test
     public void parse_optionalContactDetails_success() {
-        Friend nameOnly = new Friend(new Name(VALID_NAME_BOB), Phone.EMPTY, Email.EMPTY, java.util.Set.of(),
-                java.util.Set.of());
+        Friend nameOnly = new Friend(new Name(VALID_NAME_BOB), Phone.EMPTY, Email.EMPTY,
+                Set.of());
         assertParseSuccess(parser, NAME_DESC_BOB, new AddCommand(nameOnly));
         Friend phoneOnly = new Friend(new Name(VALID_NAME_BOB), new Phone(VALID_PHONE_BOB), Email.EMPTY,
-                java.util.Set.of(), java.util.Set.of());
+                Set.of());
         assertParseSuccess(parser, PHONE_DESC_BOB + NAME_DESC_BOB, new AddCommand(phoneOnly));
         Friend emailOnly = new Friend(new Name(VALID_NAME_BOB), Phone.EMPTY, new Email(VALID_EMAIL_BOB),
-                java.util.Set.of(), java.util.Set.of());
+                Set.of());
         assertParseSuccess(parser, EMAIL_DESC_BOB + NAME_DESC_BOB, new AddCommand(emailOnly));
         Friend both = new Friend(new Name(VALID_NAME_BOB), new Phone(VALID_PHONE_BOB), new Email(VALID_EMAIL_BOB),
-                java.util.Set.of(), java.util.Set.of());
+                Set.of());
         assertParseSuccess(parser, EMAIL_DESC_BOB + NAME_DESC_BOB + PHONE_DESC_BOB, new AddCommand(both));
         assertParseSuccess(parser, " n/  Bob Choo  ", new AddCommand(nameOnly));
     }

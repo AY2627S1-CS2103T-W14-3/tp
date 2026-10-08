@@ -5,6 +5,8 @@ import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.testutil.TypicalFriends.getTypicalGameMates;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -48,8 +50,8 @@ public class AddCommandIntegrationTest {
         model.updateFilteredFriendList(friend -> false);
         new GameMatesParser().parseCommand("add n/  Melody  ").execute(model);
         Friend added = model.getFilteredFriendList().getLast();
-        assertEquals(new Friend(new Name("Melody"), Phone.EMPTY, Email.EMPTY, java.util.Set.of(),
-                java.util.Set.of()), added);
+        assertEquals(new Friend(new Name("Melody"), Phone.EMPTY, Email.EMPTY,
+                Set.of()), added);
         assertEquals(model.getGameMates().getFriendList().size(), model.getFilteredFriendList().size());
     }
 

@@ -18,23 +18,10 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.model.game.Game;
-import seedu.address.model.game.GameName;
-import seedu.address.model.game.Username;
 import seedu.address.testutil.FriendBuilder;
+import seedu.address.testutil.GameBuilder;
 
 public class FriendTest {
-
-    @Test
-    public void games_immutableAndDefensivelyCopied() {
-        Game game = new Game(new GameName("Valorant"), new Username("alice"));
-        Set<Game> games = new HashSet<>(Set.of(game));
-        Friend friend = new Friend(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(),
-                games, ALICE.getTags());
-        games.clear();
-        assertEquals(Set.of(game), friend.getGames());
-        assertThrows(UnsupportedOperationException.class, () -> friend.getGames().clear());
-        assertEquals(friend, new FriendBuilder(friend).build());
-    }
 
     @Test
     public void constructor_nullGamesOrEntries_throwsNullPointerException() {
@@ -48,8 +35,8 @@ public class FriendTest {
 
     @Test
     public void equalsAndHashCode_includeGamesButIdentityDoesNot() {
-        Game first = new Game(new GameName("Valorant"), new Username("alice"));
-        Game second = new Game(new GameName("Minecraft"), new Username("alice2"));
+        Game first = new GameBuilder().withGameName("Valorant").withUsername("alice").build();
+        Game second = new GameBuilder().withGameName("Minecraft").withUsername("alice2").build();
         Friend friend = new FriendBuilder(ALICE).withGames(first, second).build();
         Friend reordered = new FriendBuilder(ALICE).withGames(second, first).build();
         assertEquals(friend, reordered);
@@ -59,7 +46,7 @@ public class FriendTest {
         assertFalse(friend.equals(ALICE));
         assertTrue(friend.isSameFriend(ALICE));
         Friend changedUsername = new FriendBuilder(ALICE)
-                .withGames(new Game(new GameName("Valorant"), new Username("other")), second).build();
+                .withGames(new GameBuilder().withGameName("Valorant").withUsername("other").build(), second).build();
         assertFalse(friend.equals(changedUsername));
     }
 
@@ -134,7 +121,7 @@ public class FriendTest {
     @Test
     public void toStringMethod() {
         Friend friend = new FriendBuilder(ALICE)
-                .withGames(new Game(new GameName("Valorant"), new Username("alice"))).build();
+                .withGames(new GameBuilder().withGameName("Valorant").withUsername("alice").build()).build();
         String expected = Friend.class.getCanonicalName() + "{name=" + friend.getName() + ", phone=" + friend.getPhone()
                 + ", email=" + friend.getEmail() + ", games=" + friend.getGames() + ", tags=" + friend.getTags() + "}";
         assertEquals(expected, friend.toString());

@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.game.Game;
-import seedu.address.model.game.GameName;
-import seedu.address.model.game.Username;
+import seedu.address.testutil.GameBuilder;
 
 /**
  * Tests the stored game format and missing-field validation.
@@ -18,7 +17,7 @@ public class JsonAdaptedGameTest {
     @Test
     public void toModelType_flatJson_roundTrips() throws Exception {
         String json = "{\"name\":\"Valorant\",\"username\":\"player\"}";
-        Game expected = new Game(new GameName("Valorant"), new Username("player"));
+        Game expected = new GameBuilder().withGameName("Valorant").withUsername("player").build();
         JsonAdaptedGame adapted = JsonUtil.fromJsonString(json, JsonAdaptedGame.class);
         assertEquals(expected, adapted.toModelType());
         assertEquals(expected, JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonAdaptedGame(expected)),

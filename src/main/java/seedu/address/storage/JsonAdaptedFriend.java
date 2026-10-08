@@ -57,10 +57,10 @@ class JsonAdaptedFriend {
         name = source.getName().fullName;
         phone = source.getPhone().value;
         email = source.getEmail().value;
-        games.addAll(source.getGames().stream().map(JsonAdaptedGame::new).collect(Collectors.toList()));
+        games.addAll(source.getGames().stream().map(JsonAdaptedGame::new).toList());
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     /**

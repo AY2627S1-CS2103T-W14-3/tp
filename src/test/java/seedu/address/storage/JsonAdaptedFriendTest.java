@@ -18,10 +18,8 @@ import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
-import seedu.address.model.game.Game;
-import seedu.address.model.game.GameName;
-import seedu.address.model.game.Username;
 import seedu.address.testutil.FriendBuilder;
+import seedu.address.testutil.GameBuilder;
 
 public class JsonAdaptedFriendTest {
     private static final String INVALID_NAME = "a".repeat(Name.MAX_LENGTH + 1);
@@ -42,8 +40,8 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_games_roundTrips() throws Exception {
         Friend original = new FriendBuilder(BENSON).withGames(
-                new Game(new GameName("Valorant"), new Username("benson")),
-                new Game(new GameName("Minecraft"), new Username("benson2"))).build();
+                new GameBuilder().withGameName("Valorant").withUsername("benson").build(),
+                new GameBuilder().withGameName("Minecraft").withUsername("benson2").build()).build();
         String json = JsonUtil.toJsonString(new JsonAdaptedFriend(original));
         assertEquals(original, JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType());
     }

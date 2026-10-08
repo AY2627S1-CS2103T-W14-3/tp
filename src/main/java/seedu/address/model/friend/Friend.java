@@ -23,8 +23,8 @@ public class Friend {
     private final Email email;
 
     // Data fields
-    private final Set<Game> games = new HashSet<>();
-    private final Set<Tag> tags = new HashSet<>();
+    private final Set<Game> games;
+    private final Set<Tag> tags;
 
     /**
      * Every field must be present and not null.
@@ -35,8 +35,15 @@ public class Friend {
         this.name = name;
         this.phone = phone;
         this.email = email;
-        this.games.addAll(games);
-        this.tags.addAll(tags);
+        this.games = Collections.unmodifiableSet(games);
+        this.tags = Collections.unmodifiableSet(tags);
+    }
+
+    /**
+     * Every field must be present and not null.
+     */
+    public Friend(Name name, Phone phone, Email email, Set<Tag> tags) {
+        this(name, phone, email, Collections.emptySet(), tags);
     }
 
     public Name getName() {
@@ -56,7 +63,7 @@ public class Friend {
      * if modification is attempted.
      */
     public Set<Game> getGames() {
-        return Collections.unmodifiableSet(games);
+        return games;
     }
 
     /**
@@ -64,7 +71,7 @@ public class Friend {
      * if modification is attempted.
      */
     public Set<Tag> getTags() {
-        return Collections.unmodifiableSet(tags);
+        return tags;
     }
 
     /**

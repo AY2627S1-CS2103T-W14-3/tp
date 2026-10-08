@@ -44,7 +44,7 @@ public class AddCommandParser implements Parser<AddCommand> {
                 ? ParserUtil.parseEmail(argMultimap.getValue(PREFIX_EMAIL).get()) : Email.EMPTY;
         Set<Tag> tagList = ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG));
 
-        Friend friend = new Friend(name, phone, email, Set.of(), tagList);
+        Friend friend = new Friend(name, phone, email, tagList);
 
         return new AddCommand(friend);
     }
