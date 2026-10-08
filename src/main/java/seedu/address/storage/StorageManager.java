@@ -2,9 +2,9 @@ package seedu.address.storage;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.logging.Logger;
 
+import io.vavr.control.Option;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.model.ReadOnlyGameMates;
@@ -36,7 +36,7 @@ public class StorageManager implements Storage {
     }
 
     @Override
-    public Optional<UserPrefs> readUserPrefs() throws DataLoadingException {
+    public Option<UserPrefs> readUserPrefs() throws DataLoadingException {
         return userPrefsStorage.readUserPrefs();
     }
 
@@ -54,7 +54,7 @@ public class StorageManager implements Storage {
     }
 
     @Override
-    public Optional<ReadOnlyGameMates> readGameMates() throws DataLoadingException {
+    public Option<ReadOnlyGameMates> readGameMates() throws DataLoadingException {
         logger.fine("Attempting to read data from file: " + gameMatesStorage.getGameMatesFilePath());
         return gameMatesStorage.readGameMates();
     }

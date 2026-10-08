@@ -1,6 +1,6 @@
 package seedu.address.storage;
 
-import static seedu.address.commons.util.StringUtil.isNullOrEmpty;
+import static io.vavr.API.unchecked;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.vavr.control.Option;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
@@ -75,15 +76,19 @@ class JsonAdaptedFriend {
         }
         final Name modelName = new Name(name);
 
-        if (!isNullOrEmpty(phone) && !Phone.isValidPhone(phone)) {
-            throw new IllegalValueException(Phone.MESSAGE_CONSTRAINTS);
-        }
-        final Phone modelPhone = isNullOrEmpty(phone) ? Phone.EMPTY : new Phone(phone);
+        final Phone modelPhone = Option.of(phone).filter(value -> !value.isEmpty()).map(unchecked(value -> {
+            if (!Phone.isValidPhone(value)) {
+                throw new IllegalValueException(Phone.MESSAGE_CONSTRAINTS);
+            }
+            return new Phone(value);
+        })).getOrElse(Phone.EMPTY);
 
-        if (!isNullOrEmpty(email) && !Email.isValidEmail(email)) {
-            throw new IllegalValueException(Email.MESSAGE_CONSTRAINTS);
-        }
-        final Email modelEmail = isNullOrEmpty(email) ? Email.EMPTY : new Email(email);
+        final Email modelEmail = Option.of(email).filter(value -> !value.isEmpty()).map(unchecked(value -> {
+            if (!Email.isValidEmail(value)) {
+                throw new IllegalValueException(Email.MESSAGE_CONSTRAINTS);
+            }
+            return new Email(value);
+        })).getOrElse(Email.EMPTY);
 
         final Set<Tag> modelTags = new HashSet<>(friendTags);
         return new Friend(modelName, modelPhone, modelEmail, modelTags);

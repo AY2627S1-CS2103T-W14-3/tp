@@ -1,12 +1,14 @@
 package seedu.address.storage;
 
+import static io.vavr.API.unchecked;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.logging.Logger;
 
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.exceptions.IllegalValueException;
@@ -33,11 +35,11 @@ public class JsonGameMatesStorage {
 
     /**
      * Returns GameMates data as a {@link ReadOnlyGameMates}.
-     * Returns {@code Optional.empty()} if storage file is not found.
+     * Returns {@code Option.none()} if storage file is not found.
      *
      * @throws DataLoadingException if loading the data from storage failed.
      */
-    public Optional<ReadOnlyGameMates> readGameMates() throws DataLoadingException {
+    public Option<ReadOnlyGameMates> readGameMates() throws DataLoadingException {
         return readGameMates(filePath);
     }
 
@@ -47,21 +49,15 @@ public class JsonGameMatesStorage {
      * @param filePath location of the data. Cannot be null.
      * @throws DataLoadingException if loading the data from storage failed.
      */
-    public Optional<ReadOnlyGameMates> readGameMates(Path filePath) throws DataLoadingException {
+    public Option<ReadOnlyGameMates> readGameMates(Path filePath) throws DataLoadingException {
         requireNonNull(filePath);
 
-        Optional<JsonSerializableGameMates> jsonGameMates = JsonUtil.readJsonFile(
+        Option<JsonSerializableGameMates> jsonGameMates = JsonUtil.readJsonFile(
                 filePath, JsonSerializableGameMates.class);
-        if (!jsonGameMates.isPresent()) {
-            return Optional.empty();
-        }
-
-        try {
-            return Optional.of(jsonGameMates.get().toModelType());
-        } catch (IllegalValueException ive) {
-            logger.info("Illegal values found in " + filePath + ": " + ive.getMessage());
-            throw new DataLoadingException(ive);
-        }
+        return Try.of(() -> jsonGameMates.<ReadOnlyGameMates>map(unchecked(JsonSerializableGameMates::toModelType)))
+                .onFailure(IllegalValueException.class,
+                    ive -> logger.info("Illegal values found in " + filePath + ": " + ive.getMessage()))
+                .getOrElseThrow(DataLoadingException::new);
     }
 
     /**

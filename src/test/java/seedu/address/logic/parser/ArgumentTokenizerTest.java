@@ -50,7 +50,7 @@ public class ArgumentTokenizerTest {
     }
 
     private void assertArgumentAbsent(ArgumentMultimap argMultimap, Prefix prefix) {
-        assertFalse(argMultimap.getValue(prefix).isPresent());
+        assertFalse(argMultimap.getValue(prefix).isDefined());
     }
 
     @Test

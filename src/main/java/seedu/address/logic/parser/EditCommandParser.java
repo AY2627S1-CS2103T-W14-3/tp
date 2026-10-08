@@ -1,5 +1,6 @@
 package seedu.address.logic.parser;
 
+import static io.vavr.API.unchecked;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
@@ -9,9 +10,9 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
+import io.vavr.control.Option;
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditFriendDescriptor;
@@ -45,16 +46,10 @@ public class EditCommandParser implements Parser<EditCommand> {
 
         EditFriendDescriptor editFriendDescriptor = new EditFriendDescriptor();
 
-        if (argMultimap.getValue(PREFIX_NAME).isPresent()) {
-            editFriendDescriptor.setName(ParserUtil.parseName(argMultimap.getValue(PREFIX_NAME).get()));
-        }
-        if (argMultimap.getValue(PREFIX_PHONE).isPresent()) {
-            editFriendDescriptor.setPhone(ParserUtil.parsePhone(argMultimap.getValue(PREFIX_PHONE).get()));
-        }
-        if (argMultimap.getValue(PREFIX_EMAIL).isPresent()) {
-            editFriendDescriptor.setEmail(ParserUtil.parseEmail(argMultimap.getValue(PREFIX_EMAIL).get()));
-        }
-        parseTagsForEdit(argMultimap.getAllValues(PREFIX_TAG)).ifPresent(editFriendDescriptor::setTags);
+        argMultimap.getValue(PREFIX_NAME).map(unchecked(ParserUtil::parseName)).peek(editFriendDescriptor::setName);
+        argMultimap.getValue(PREFIX_PHONE).map(unchecked(ParserUtil::parsePhone)).peek(editFriendDescriptor::setPhone);
+        argMultimap.getValue(PREFIX_EMAIL).map(unchecked(ParserUtil::parseEmail)).peek(editFriendDescriptor::setEmail);
+        parseTagsForEdit(argMultimap.getAllValues(PREFIX_TAG)).peek(editFriendDescriptor::setTags);
 
         if (!editFriendDescriptor.isAnyFieldEdited()) {
             throw new ParseException(EditCommand.MESSAGE_NOT_EDITED);
@@ -68,14 +63,14 @@ public class EditCommandParser implements Parser<EditCommand> {
      * If {@code tags} contains only one element which is an empty string, it will be parsed into a
      * {@code Set<Tag>} containing zero tags.
      */
-    private Optional<Set<Tag>> parseTagsForEdit(Collection<String> tags) throws ParseException {
+    private Option<Set<Tag>> parseTagsForEdit(Collection<String> tags) throws ParseException {
         assert tags != null;
 
         if (tags.isEmpty()) {
-            return Optional.empty();
+            return Option.none();
         }
         Collection<String> tagSet = tags.size() == 1 && tags.contains("") ? Collections.emptySet() : tags;
-        return Optional.of(ParserUtil.parseTags(tagSet));
+        return Option.of(ParserUtil.parseTags(tagSet));
     }
 
 }
