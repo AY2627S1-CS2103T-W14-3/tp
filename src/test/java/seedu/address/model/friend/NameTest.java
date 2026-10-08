@@ -61,6 +61,19 @@ public class NameTest {
     }
 
     @Test
+    public void isSameName_ignoresCaseAndRepeatedSpaces_preservesExactEquality() {
+        Name name = new Name("John Doe");
+        Name variant = new Name("john doe ");
+        assertTrue(name.isSameName(variant));
+        assertTrue(variant.isSameName(name));
+        assertTrue(name.isSameName(name));
+        assertFalse(name.isSameName(new Name("Jane Doe")));
+        assertFalse(name.isSameName(null));
+        assertFalse(name.equals(variant));
+        assertFalse(name.equals(new Name("john doe")));
+    }
+
+    @Test
     public void equals() {
         Name name = new Name("Valid Name");
 

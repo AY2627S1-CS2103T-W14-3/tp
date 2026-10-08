@@ -83,10 +83,9 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
-    public void toModelType_nullPhone_throwsIllegalValueException() {
+    public void toModelType_nullPhone_returnsAbsentDetail() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, null, VALID_EMAIL, VALID_TAGS);
-        String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName());
-        assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
+        assertEquals(Phone.EMPTY, friend.toModelType().getPhone());
     }
 
     @Test
@@ -106,10 +105,25 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
-    public void toModelType_nullEmail_throwsIllegalValueException() {
+    public void toModelType_nullEmail_returnsAbsentDetail() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, null, VALID_TAGS);
-        String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Email.class.getSimpleName());
-        assertThrows(IllegalValueException.class, expectedMessage, friend::toModelType);
+        assertEquals(Email.EMPTY, friend.toModelType().getEmail());
+    }
+
+    @Test
+    public void toModelType_emptyContactDetails_roundTrips() throws Exception {
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, "", "", VALID_TAGS);
+        assertEquals(Phone.EMPTY, friend.toModelType().getPhone());
+        assertEquals(Email.EMPTY, friend.toModelType().getEmail());
+        assertEquals(friend.toModelType(), new JsonAdaptedFriend(friend.toModelType()).toModelType());
+    }
+
+    @Test
+    public void toModelType_whitespaceContactDetails_throwsIllegalValueException() {
+        JsonAdaptedFriend blankPhone = new JsonAdaptedFriend(VALID_NAME, " ", VALID_EMAIL, VALID_TAGS);
+        assertThrows(IllegalValueException.class, Phone.MESSAGE_CONSTRAINTS, blankPhone::toModelType);
+        JsonAdaptedFriend blankEmail = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, " ", VALID_TAGS);
+        assertThrows(IllegalValueException.class, Email.MESSAGE_CONSTRAINTS, blankEmail::toModelType);
     }
 
     @Test

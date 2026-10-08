@@ -45,6 +45,19 @@ public class Name {
     }
 
 
+    /**
+     * Returns true if the names identify the same friend, ignoring case and repeated spaces.
+     * Exact value equality remains defined by {@link #equals(Object)}.
+     */
+    public boolean isSameName(Name otherName) {
+        return otherName != null
+                && normalisedName().equalsIgnoreCase(otherName.normalisedName());
+    }
+
+    private String normalisedName() {
+        return fullName.trim().replaceAll(" +", " ");
+    }
+
     @Override
     public String toString() {
         return fullName;

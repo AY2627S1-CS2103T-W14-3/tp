@@ -7,9 +7,12 @@ import java.util.regex.Pattern;
 
 /**
  * Represents a Friend's email in GameMates.
- * Guarantees: immutable; is valid as declared in {@link #isValidEmail(String)}
+ * Guarantees: immutable; is empty or valid as declared in {@link #isValidEmail(String)}
  */
 public class Email {
+
+    /** The empty value representing an omitted email. */
+    public static final Email EMPTY = new Email();
 
     public static final String MESSAGE_CONSTRAINTS =
             "Enter an email like name@example.com (up to 254 characters, no spaces). "
@@ -35,6 +38,20 @@ public class Email {
         requireNonNull(email);
         checkArgument(isValidEmail(email), MESSAGE_CONSTRAINTS);
         value = email;
+    }
+
+    /**
+     * Constructs an empty email without accepting blank user input as valid.
+     */
+    private Email() {
+        value = "";
+    }
+
+    /**
+     * Returns whether this email is empty, representing an omitted detail.
+     */
+    public boolean isEmpty() {
+        return value.isEmpty();
     }
 
     /**
