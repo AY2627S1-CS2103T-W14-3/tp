@@ -28,6 +28,8 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 
    * `list` : Lists all contacts.
 
+   * `list g/Valorant` : Lists friends who play Valorant.
+
    * `add n/John Doe p/98765432 e/johnd@example.com` : Adds a contact named `John Doe` to GameMates.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
@@ -58,7 +60,7 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
+* Extraneous parameters for commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
@@ -132,11 +134,25 @@ and [RFC 5321's SMTP length limits](https://www.rfc-editor.org/rfc/rfc5321#secti
 The 254-character address limit leaves room for the enclosing `<` and `>` in the 256-octet SMTP path limit.
 </div>
 
-### Listing all friends: `list`
+### Listing and filtering friends: `list`
 
-Shows a list of all friends in GameMates.
+Shows all friends in GameMates, or filters the friend list by game.
 
-Format: `list`
+Format: `list [g/GAME_NAME]`
+
+* `list` shows all friends and clears any previous friend-list filter.
+* `list g/GAME_NAME` shows friends who have a game with that exact name. The match is case-insensitive, so `list g/valorant` matches `Valorant`.
+* Leading and trailing spaces in `GAME_NAME` are ignored, but partial names do not match. For example, `list g/Val` does not match `Valorant`.
+* Only game names are matched; a friend's in-game username is not matched.
+* Multi-word game names are accepted. Only one `g/` prefix may be supplied, and the game name must not be empty.
+* If no friends play the specified game, the friend list is empty and the command reports `0 friend(s) listed!`.
+* Filtering applies only to the friend list. It does not filter or modify the separately stored Myself profile.
+
+Examples:
+
+* `list` shows all friends.
+* `list g/Valorant` shows friends who play `Valorant`.
+* `list g/Stardew Valley` shows friends who play `Stardew Valley`.
 
 ### Editing a friend: `edit`
 
@@ -248,5 +264,5 @@ Action | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
-**List** | `list`
+**List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant`
 **Help** | `help`
