@@ -23,11 +23,15 @@ public class DeleteCommand extends Command {
             + "Parameters: INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 1";
 
-    public static final String MESSAGE_DELETE_FRIEND_SUCCESS = "Deleted friend: %1$s";
+    public static final String MESSAGE_DELETE_FRIEND_SUCCESS = "Successfully deleted %1$s.";
 
     private final Index targetIndex;
 
+    /**
+     * Creates a command to delete the friend at the given displayed index.
+     */
     public DeleteCommand(Index targetIndex) {
+        requireNonNull(targetIndex);
         this.targetIndex = targetIndex;
     }
 
@@ -42,7 +46,7 @@ public class DeleteCommand extends Command {
 
         Friend friendToDelete = lastShownList.get(targetIndex.getZeroBased());
         model.deleteFriend(friendToDelete);
-        return new CommandResult(String.format(MESSAGE_DELETE_FRIEND_SUCCESS, Messages.format(friendToDelete)));
+        return new CommandResult(String.format(MESSAGE_DELETE_FRIEND_SUCCESS, friendToDelete.getName()));
     }
 
     @Override
