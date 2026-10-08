@@ -22,18 +22,16 @@ public class Friend {
     private final Email email;
 
     // Data fields
-    private final Address address;
     private final Set<Tag> tags = new HashSet<>();
 
     /**
      * Every field must be present and not null.
      */
-    public Friend(Name name, Phone phone, Email email, Address address, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, tags);
+    public Friend(Name name, Phone phone, Email email, Set<Tag> tags) {
+        requireAllNonNull(name, phone, email, tags);
         this.name = name;
         this.phone = phone;
         this.email = email;
-        this.address = address;
         this.tags.addAll(tags);
     }
 
@@ -49,10 +47,6 @@ public class Friend {
         return email;
     }
 
-    public Address getAddress() {
-        return address;
-    }
-
     /**
      * Returns an immutable tag set, which throws {@code UnsupportedOperationException}
      * if modification is attempted.
@@ -62,7 +56,7 @@ public class Friend {
     }
 
     /**
-     * Returns true if both friends have the same name.
+     * Returns true if both friends have the same name, ignoring case and repeated spaces.
      * This defines a weaker notion of equality between two friends.
      */
     public boolean isSameFriend(Friend otherFriend) {
@@ -71,7 +65,7 @@ public class Friend {
         }
 
         return otherFriend != null
-                && otherFriend.getName().equals(getName());
+                && name.isSameName(otherFriend.name);
     }
 
     /**
@@ -92,14 +86,13 @@ public class Friend {
         return name.equals(otherFriend.name)
                 && phone.equals(otherFriend.phone)
                 && email.equals(otherFriend.email)
-                && address.equals(otherFriend.address)
                 && tags.equals(otherFriend.tags);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags);
+        return Objects.hash(name, phone, email, tags);
     }
 
     @Override
@@ -108,7 +101,6 @@ public class Friend {
                 .add("name", name)
                 .add("phone", phone)
                 .add("email", email)
-                .add("address", address)
                 .add("tags", tags)
                 .toString();
     }

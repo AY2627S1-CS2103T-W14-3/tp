@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
@@ -38,7 +37,8 @@ public class AddCommandTest {
 
         CommandResult commandResult = new AddCommand(validFriend).execute(modelStub);
 
-        assertEquals(String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(validFriend)),
+        assertEquals(String.format(AddCommand.MESSAGE_SUCCESS, validFriend.getName(),
+                        validFriend.getPhone(), validFriend.getEmail()),
                 commandResult.getFeedbackToUser());
         assertEquals(List.of(validFriend), modelStub.friendsAdded);
     }

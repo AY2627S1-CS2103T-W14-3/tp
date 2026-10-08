@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import seedu.address.logic.commands.EditCommand.EditFriendDescriptor;
-import seedu.address.model.friend.Address;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
@@ -35,7 +34,6 @@ public class EditFriendDescriptorBuilder {
         descriptor.setName(friend.getName());
         descriptor.setPhone(friend.getPhone());
         descriptor.setEmail(friend.getEmail());
-        descriptor.setAddress(friend.getAddress());
         descriptor.setTags(friend.getTags());
     }
 
@@ -60,14 +58,6 @@ public class EditFriendDescriptorBuilder {
      */
     public EditFriendDescriptorBuilder withEmail(String email) {
         descriptor.setEmail(new Email(email));
-        return this;
-    }
-
-    /**
-     * Sets the {@code Address} of the {@code EditFriendDescriptor} that we are building.
-     */
-    public EditFriendDescriptorBuilder withAddress(String address) {
-        descriptor.setAddress(new Address(address));
         return this;
     }
 
