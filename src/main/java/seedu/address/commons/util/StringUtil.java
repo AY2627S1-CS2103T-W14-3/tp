@@ -13,6 +13,13 @@ import java.util.Arrays;
 public class StringUtil {
 
     /**
+     * Returns true if the string is null or empty. Whitespace-only strings are not empty.
+     */
+    public static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
+    }
+
+    /**
      * Returns true if the {@code sentence} contains the {@code word}.
      *   Ignores case, but a full word match is required.
      *   <br>examples:<pre>

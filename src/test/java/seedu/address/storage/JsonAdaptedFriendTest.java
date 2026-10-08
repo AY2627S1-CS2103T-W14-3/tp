@@ -70,7 +70,7 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_nullPhone_returnsAbsentDetail() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, null, VALID_EMAIL, VALID_TAGS);
-        assertEquals(Phone.empty(), friend.toModelType().getPhone());
+        assertEquals(Phone.EMPTY, friend.toModelType().getPhone());
     }
 
     @Test
@@ -84,14 +84,14 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_nullEmail_returnsAbsentDetail() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, null, VALID_TAGS);
-        assertEquals(Email.empty(), friend.toModelType().getEmail());
+        assertEquals(Email.EMPTY, friend.toModelType().getEmail());
     }
 
     @Test
     public void toModelType_emptyContactDetails_roundTrips() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, "", "", VALID_TAGS);
-        assertEquals(Phone.empty(), friend.toModelType().getPhone());
-        assertEquals(Email.empty(), friend.toModelType().getEmail());
+        assertEquals(Phone.EMPTY, friend.toModelType().getPhone());
+        assertEquals(Email.EMPTY, friend.toModelType().getEmail());
         assertEquals(friend.toModelType(), new JsonAdaptedFriend(friend.toModelType()).toModelType());
     }
 

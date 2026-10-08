@@ -5,7 +5,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
  * Represents a Friend's phone number in GameMates.
- * Guarantees: immutable; is absent or valid as declared in {@link #isValidPhone(String)}
+ * Guarantees: immutable; is empty or valid as declared in {@link #isValidPhone(String)}
  */
 public class Phone {
 
@@ -13,6 +13,9 @@ public class Phone {
     public static final String MESSAGE_CONSTRAINTS =
             "Phone numbers should only contain digits, and should be at least 3 digits long";
     public static final String VALIDATION_REGEX = "\\d{3,}";
+    /** The empty value representing an omitted phone number. */
+    public static final Phone EMPTY = new Phone();
+
     public final String value;
 
     /**
@@ -27,21 +30,14 @@ public class Phone {
     }
 
     /**
-     * Constructs an absent phone without accepting blank user input as valid.
+     * Constructs an empty phone number without accepting blank user input as valid.
      */
     private Phone() {
         value = "";
     }
 
     /**
-     * Returns an absent phone for a friend without this detail.
-     */
-    public static Phone empty() {
-        return new Phone();
-    }
-
-    /**
-     * Returns whether this detail is absent.
+     * Returns whether this phone number is empty, representing an omitted detail.
      */
     public boolean isEmpty() {
         return value.isEmpty();

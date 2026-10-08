@@ -48,7 +48,7 @@ public class AddCommandIntegrationTest {
         model.updateFilteredFriendList(friend -> false);
         new GameMatesParser().parseCommand("add n/  Melody  ").execute(model);
         Friend added = model.getFilteredFriendList().getLast();
-        assertEquals(new Friend(new Name("Melody"), Phone.empty(), Email.empty(),
+        assertEquals(new Friend(new Name("Melody"), Phone.EMPTY, Email.EMPTY,
                 java.util.Set.of()), added);
         assertEquals(model.getGameMates().getFriendList().size(), model.getFilteredFriendList().size());
     }

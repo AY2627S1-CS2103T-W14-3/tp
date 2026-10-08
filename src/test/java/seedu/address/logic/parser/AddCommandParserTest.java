@@ -121,13 +121,13 @@ public class AddCommandParserTest {
 
     @Test
     public void parse_optionalContactDetails_success() {
-        Friend nameOnly = new Friend(new Name(VALID_NAME_BOB), Phone.empty(), Email.empty(),
+        Friend nameOnly = new Friend(new Name(VALID_NAME_BOB), Phone.EMPTY, Email.EMPTY,
                 java.util.Set.of());
         assertParseSuccess(parser, NAME_DESC_BOB, new AddCommand(nameOnly));
-        Friend phoneOnly = new Friend(new Name(VALID_NAME_BOB), new Phone(VALID_PHONE_BOB), Email.empty(),
+        Friend phoneOnly = new Friend(new Name(VALID_NAME_BOB), new Phone(VALID_PHONE_BOB), Email.EMPTY,
                 java.util.Set.of());
         assertParseSuccess(parser, PHONE_DESC_BOB + NAME_DESC_BOB, new AddCommand(phoneOnly));
-        Friend emailOnly = new Friend(new Name(VALID_NAME_BOB), Phone.empty(), new Email(VALID_EMAIL_BOB),
+        Friend emailOnly = new Friend(new Name(VALID_NAME_BOB), Phone.EMPTY, new Email(VALID_EMAIL_BOB),
                 java.util.Set.of());
         assertParseSuccess(parser, EMAIL_DESC_BOB + NAME_DESC_BOB, new AddCommand(emailOnly));
         Friend both = new Friend(new Name(VALID_NAME_BOB), new Phone(VALID_PHONE_BOB), new Email(VALID_EMAIL_BOB),

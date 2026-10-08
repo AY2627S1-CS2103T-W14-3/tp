@@ -5,9 +5,12 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
  * Represents a Friend's email in GameMates.
- * Guarantees: immutable; is absent or valid as declared in {@link #isValidEmail(String)}
+ * Guarantees: immutable; is empty or valid as declared in {@link #isValidEmail(String)}
  */
 public class Email {
+
+    /** The empty value representing an omitted email. */
+    public static final Email EMPTY = new Email();
 
     private static final String SPECIAL_CHARACTERS = "+_.-";
     public static final String MESSAGE_CONSTRAINTS = "Emails should be of the format local-part@domain "
@@ -45,21 +48,14 @@ public class Email {
     }
 
     /**
-     * Constructs an absent email without accepting blank user input as valid.
+     * Constructs an empty email without accepting blank user input as valid.
      */
     private Email() {
         value = "";
     }
 
     /**
-     * Returns an absent email for a friend without this detail.
-     */
-    public static Email empty() {
-        return new Email();
-    }
-
-    /**
-     * Returns whether this detail is absent.
+     * Returns whether this email is empty, representing an omitted detail.
      */
     public boolean isEmpty() {
         return value.isEmpty();

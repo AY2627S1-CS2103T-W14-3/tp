@@ -65,11 +65,7 @@ public class Friend {
         }
 
         return otherFriend != null
-                && normaliseName(otherFriend.getName()).equalsIgnoreCase(normaliseName(getName()));
-    }
-
-    private static String normaliseName(Name name) {
-        return name.fullName.trim().replaceAll(" +", " ");
+                && name.isSameName(otherFriend.name);
     }
 
     /**
