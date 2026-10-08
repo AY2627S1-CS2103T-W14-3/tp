@@ -21,7 +21,7 @@ public class DeleteCommandParserTest {
     public void parse_validArgs_returnsDeleteCommand() {
         assertParseSuccess(parser, "1", new DeleteCommand(INDEX_FIRST_FRIEND));
         assertParseSuccess(parser, "  1 ", new DeleteCommand(INDEX_FIRST_FRIEND));
-        assertParseSuccess(parser, "0".repeat(49) + "1", new DeleteCommand(INDEX_FIRST_FRIEND));
+        assertParseSuccess(parser, "0".repeat(100) + "1", new DeleteCommand(INDEX_FIRST_FRIEND));
         assertParseSuccess(parser, String.valueOf(Integer.MAX_VALUE),
                 new DeleteCommand(Index.fromOneBased(Integer.MAX_VALUE)));
     }
@@ -35,7 +35,7 @@ public class DeleteCommandParserTest {
     @Test
     public void parse_invalidArgs_throwsParseException() {
         String[] invalidArgs = {"a", "0", "-1", "+1", "1.5", "1 2", "1 n/Melody",
-            "2147483648", "0".repeat(50) + "1", "1".repeat(50)};
+            "2147483648", "1".repeat(50)};
         for (String args : invalidArgs) {
             assertParseFailure(parser, args, DeleteCommand.MESSAGE_INVALID_INDEX);
         }

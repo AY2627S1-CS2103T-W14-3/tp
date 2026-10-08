@@ -11,8 +11,6 @@ import seedu.address.logic.parser.exceptions.ParseException;
  */
 public class DeleteCommandParser implements Parser<DeleteCommand> {
 
-    private static final int MAX_INDEX_LENGTH = 50;
-
     /**
      * Parses the given {@code String} of arguments in the context of the DeleteCommand
      * and returns a DeleteCommand object for execution.
@@ -23,9 +21,6 @@ public class DeleteCommandParser implements Parser<DeleteCommand> {
         String trimmedArgs = args.trim();
         if (trimmedArgs.isEmpty()) {
             throw new ParseException(DeleteCommand.MESSAGE_MISSING_INDEX);
-        }
-        if (trimmedArgs.length() > MAX_INDEX_LENGTH) {
-            throw new ParseException(DeleteCommand.MESSAGE_INVALID_INDEX);
         }
         try {
             Index index = ParserUtil.parseIndex(trimmedArgs);

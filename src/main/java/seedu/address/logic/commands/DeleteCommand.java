@@ -6,6 +6,7 @@ import java.util.List;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
@@ -26,7 +27,6 @@ public class DeleteCommand extends Command {
     public static final String MESSAGE_MISSING_INDEX = "Error: Please provide a friend index.";
     public static final String MESSAGE_INVALID_INDEX =
             "Error: Please enter a positive integer as the friend index.";
-    public static final String MESSAGE_INDEX_NOT_FOUND = "Error: Friend index does not exist.";
 
     private final Index targetIndex;
 
@@ -44,7 +44,7 @@ public class DeleteCommand extends Command {
         List<Friend> lastShownList = model.getFilteredFriendList();
 
         if (targetIndex.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(MESSAGE_INDEX_NOT_FOUND);
+            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
         }
 
         Friend friendToDelete = lastShownList.get(targetIndex.getZeroBased());
