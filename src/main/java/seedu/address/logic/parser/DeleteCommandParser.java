@@ -1,8 +1,5 @@
 package seedu.address.logic.parser;
 
-import static java.util.Objects.requireNonNull;
-
-import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -17,17 +14,7 @@ public class DeleteCommandParser implements Parser<DeleteCommand> {
      * @throws ParseException if the user input does not conform to the expected format
      */
     public DeleteCommand parse(String args) throws ParseException {
-        requireNonNull(args);
-        String trimmedArgs = args.trim();
-        if (trimmedArgs.isEmpty()) {
-            throw new ParseException(DeleteCommand.MESSAGE_MISSING_INDEX);
-        }
-        try {
-            Index index = ParserUtil.parseIndex(trimmedArgs);
-            return new DeleteCommand(index);
-        } catch (ParseException pe) {
-            throw new ParseException(DeleteCommand.MESSAGE_INVALID_INDEX, pe);
-        }
+        return new DeleteCommand(ParserUtil.parseIndex(args));
     }
 
 }

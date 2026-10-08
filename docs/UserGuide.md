@@ -151,9 +151,9 @@ Examples:
 
 Errors:
 
-* Missing index: `Error: Please provide a friend index.`
+* Missing index: `Please provide an index.`
 * Invalid index (such as `0`, `-1`, or `abc`), extra arguments, or a value above 2147483647:
-  `Error: Please enter a positive integer as the friend index.`
+  `Index must be a positive integer.`
 * Index outside the displayed list, including an empty list: `The friend index provided is invalid.`
 
 ### Clearing all entries: `clear`

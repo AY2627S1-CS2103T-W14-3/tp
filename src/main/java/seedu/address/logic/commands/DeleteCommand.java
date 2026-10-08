@@ -24,9 +24,6 @@ public class DeleteCommand extends Command {
             + "Example: " + COMMAND_WORD + " 1";
 
     public static final String MESSAGE_DELETE_FRIEND_SUCCESS = "Successfully deleted %1$s.";
-    public static final String MESSAGE_MISSING_INDEX = "Error: Please provide a friend index.";
-    public static final String MESSAGE_INVALID_INDEX =
-            "Error: Please enter a positive integer as the friend index.";
 
     private final Index targetIndex;
 
