@@ -309,12 +309,15 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 
 <p>Deletes the specified friend from GameMates.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">delete INDEX</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">delete FRIEND_INDEX</code></p>
 
 <ul>
-  <li>Deletes the friend at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>.</li>
+  <li>Deletes the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>.</li>
   <li>The index refers to the index number shown in the displayed friend list.</li>
   <li>The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
+  <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647.</li>
+  <li>A successful deletion displays <code class="language-plaintext highlighter-rouge">Successfully deleted FRIEND_NAME.</code>
+</li>
 </ul>
 
 <p>Examples:</p>
@@ -323,6 +326,18 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 <code class="language-plaintext highlighter-rouge">list</code> followed by <code class="language-plaintext highlighter-rouge">delete 2</code> deletes the 2nd friend in GameMates.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">find Betsy</code> followed by <code class="language-plaintext highlighter-rouge">delete 1</code> deletes the 1st friend in the results of the <code class="language-plaintext highlighter-rouge">find</code> command.</li>
+</ul>
+
+<p>Errors:</p>
+
+<ul>
+  <li>Missing index: <code class="language-plaintext highlighter-rouge">Please provide an index.</code>
+</li>
+  <li>Invalid index (such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">-1</code>, or <code class="language-plaintext highlighter-rouge">abc</code>), extra arguments, or a value above 2147483647:
+<code class="language-plaintext highlighter-rouge">Index must be a positive integer.</code>
+</li>
+  <li>Index outside the displayed list, including an empty list: <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>
+</li>
 </ul>
 
 <h3 id="clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code>
