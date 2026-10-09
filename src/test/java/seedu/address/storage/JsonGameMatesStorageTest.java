@@ -2,7 +2,8 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static seedu.address.testutil.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static seedu.address.testutil.TypicalFriends.ALICE;
 import static seedu.address.testutil.TypicalFriends.HOON;
 import static seedu.address.testutil.TypicalFriends.IDA;
@@ -15,7 +16,9 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.vavr.control.Option;
 import seedu.address.commons.exceptions.DataLoadingException;
+import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
@@ -44,7 +47,7 @@ public class JsonGameMatesStorageTest {
         assertThrows(NullPointerException.class, () -> readGameMates(null));
     }
 
-    private java.util.Optional<ReadOnlyGameMates> readGameMates(String filePath) throws Exception {
+    private Option<ReadOnlyGameMates> readGameMates(String filePath) throws Exception {
         return new JsonGameMatesStorage(Paths.get(filePath))
                 .readGameMates(addToTestDataPathIfNotNull(filePath));
     }
@@ -57,17 +60,21 @@ public class JsonGameMatesStorageTest {
 
     @Test
     public void read_missingFile_emptyResult() throws Exception {
-        assertFalse(readGameMates("NonExistentFile.json").isPresent());
+        assertFalse(readGameMates("NonExistentFile.json").isDefined());
     }
 
     @Test
     public void read_notJsonFormat_exceptionThrown() {
-        assertThrows(DataLoadingException.class, () -> readGameMates("notJsonFormatGameMates.json"));
+        DataLoadingException exception = assertThrows(
+                DataLoadingException.class, () -> readGameMates("notJsonFormatGameMates.json"));
+        assertInstanceOf(IOException.class, exception.getCause());
     }
 
     @Test
     public void readGameMates_invalidFriendGameMates_throwDataLoadingException() {
-        assertThrows(DataLoadingException.class, () -> readGameMates("invalidFriendGameMates.json"));
+        DataLoadingException exception = assertThrows(
+                DataLoadingException.class, () -> readGameMates("invalidFriendGameMates.json"));
+        assertInstanceOf(IllegalValueException.class, exception.getCause());
     }
 
     @Test

@@ -2,8 +2,8 @@ package seedu.address.storage;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
 
+import io.vavr.control.Option;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.ReadOnlyUserPrefs;
@@ -26,11 +26,11 @@ public class JsonUserPrefsStorage {
 
     /**
      * Returns UserPrefs data from storage.
-     * Returns {@code Optional.empty()} if storage file is not found.
+     * Returns {@code Option.none()} if storage file is not found.
      *
      * @throws DataLoadingException if the loading of data from preference file failed.
      */
-    public Optional<UserPrefs> readUserPrefs() throws DataLoadingException {
+    public Option<UserPrefs> readUserPrefs() throws DataLoadingException {
         return readUserPrefs(filePath);
     }
 
@@ -39,7 +39,7 @@ public class JsonUserPrefsStorage {
      * @param prefsFilePath location of the data. Cannot be null.
      * @throws DataLoadingException if the file format is not as expected.
      */
-    public Optional<UserPrefs> readUserPrefs(Path prefsFilePath) throws DataLoadingException {
+    public Option<UserPrefs> readUserPrefs(Path prefsFilePath) throws DataLoadingException {
         return JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class);
     }
 

@@ -3,7 +3,6 @@ package seedu.address;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
@@ -68,15 +67,12 @@ public class MainApp extends Application {
     private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
         logger.info("Using data file : " + storage.getGameMatesFilePath());
 
-        Optional<ReadOnlyGameMates> gameMatesOptional;
         ReadOnlyGameMates initialData;
         try {
-            gameMatesOptional = storage.readGameMates();
-            if (gameMatesOptional.isEmpty()) {
-                logger.info("Creating a new data file " + storage.getGameMatesFilePath()
-                        + " populated with a sample GameMates.");
-            }
-            initialData = gameMatesOptional.orElseGet(SampleDataUtil::getSampleGameMates);
+            initialData = storage.readGameMates()
+                    .onEmpty(() -> logger.info("Creating a new data file " + storage.getGameMatesFilePath()
+                            + " populated with a sample GameMates."))
+                    .getOrElse(SampleDataUtil::getSampleGameMates);
         } catch (DataLoadingException e) {
             logger.warning("Data file at " + storage.getGameMatesFilePath() + " could not be loaded."
                     + " Will be starting with an empty GameMates.");
@@ -97,11 +93,9 @@ public class MainApp extends Application {
 
         UserPrefs initializedPrefs;
         try {
-            Optional<UserPrefs> prefsOptional = storage.readUserPrefs();
-            if (prefsOptional.isEmpty()) {
-                logger.info("Creating new preference file " + prefsFilePath);
-            }
-            initializedPrefs = prefsOptional.orElse(new UserPrefs());
+            initializedPrefs = storage.readUserPrefs()
+                    .onEmpty(() -> logger.info("Creating new preference file " + prefsFilePath))
+                    .getOrElse(UserPrefs::new);
         } catch (DataLoadingException e) {
             logger.warning("Preference file at " + prefsFilePath + " could not be loaded."
                     + " Using default preferences.");

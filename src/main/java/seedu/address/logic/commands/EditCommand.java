@@ -11,9 +11,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
+import io.vavr.control.Option;
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.CollectionUtil;
 import seedu.address.commons.util.ToStringBuilder;
@@ -92,10 +92,10 @@ public class EditCommand extends Command {
     private static Friend createEditedFriend(Friend friendToEdit, EditFriendDescriptor editFriendDescriptor) {
         assert friendToEdit != null;
 
-        Name updatedName = editFriendDescriptor.getName().orElse(friendToEdit.getName());
-        Phone updatedPhone = editFriendDescriptor.getPhone().orElse(friendToEdit.getPhone());
-        Email updatedEmail = editFriendDescriptor.getEmail().orElse(friendToEdit.getEmail());
-        Set<Tag> updatedTags = editFriendDescriptor.getTags().orElse(friendToEdit.getTags());
+        Name updatedName = editFriendDescriptor.getName().getOrElse(friendToEdit.getName());
+        Phone updatedPhone = editFriendDescriptor.getPhone().getOrElse(friendToEdit.getPhone());
+        Email updatedEmail = editFriendDescriptor.getEmail().getOrElse(friendToEdit.getEmail());
+        Set<Tag> updatedTags = editFriendDescriptor.getTags().getOrElse(friendToEdit.getTags());
 
         return new Friend(updatedName, updatedPhone, updatedEmail,
                 friendToEdit.getGames(), updatedTags);
@@ -158,24 +158,24 @@ public class EditCommand extends Command {
             this.name = name;
         }
 
-        public Optional<Name> getName() {
-            return Optional.ofNullable(name);
+        public Option<Name> getName() {
+            return Option.of(name);
         }
 
         public void setPhone(Phone phone) {
             this.phone = phone;
         }
 
-        public Optional<Phone> getPhone() {
-            return Optional.ofNullable(phone);
+        public Option<Phone> getPhone() {
+            return Option.of(phone);
         }
 
         public void setEmail(Email email) {
             this.email = email;
         }
 
-        public Optional<Email> getEmail() {
-            return Optional.ofNullable(email);
+        public Option<Email> getEmail() {
+            return Option.of(email);
         }
 
         /**
@@ -189,10 +189,10 @@ public class EditCommand extends Command {
         /**
          * Returns an unmodifiable tag set, which throws {@code UnsupportedOperationException}
          * if modification is attempted.
-         * Returns {@code Optional#empty()} if {@code tags} is null.
+         * Returns {@code Option#none()} if {@code tags} is null.
          */
-        public Optional<Set<Tag>> getTags() {
-            return (tags != null) ? Optional.of(Collections.unmodifiableSet(tags)) : Optional.empty();
+        public Option<Set<Tag>> getTags() {
+            return Option.of(tags).map(Collections::unmodifiableSet);
         }
 
         @Override

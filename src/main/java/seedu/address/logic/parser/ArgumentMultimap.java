@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
+import io.vavr.control.Option;
 import seedu.address.logic.Messages;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -38,9 +38,9 @@ public class ArgumentMultimap {
     /**
      * Returns the last value of {@code prefix}.
      */
-    public Optional<String> getValue(Prefix prefix) {
+    public Option<String> getValue(Prefix prefix) {
         List<String> values = getAllValues(prefix);
-        return values.isEmpty() ? Optional.empty() : Optional.of(values.getLast());
+        return values.isEmpty() ? Option.none() : Option.of(values.getLast());
     }
 
     /**
@@ -56,10 +56,11 @@ public class ArgumentMultimap {
     }
 
     /**
-     * Returns the preamble (text before the first valid prefix). Trims any leading/trailing spaces.
+     * Returns the preamble (text before the first valid prefix). Trims any leading/trailing spaces. Empty string
+     * if there is no preamble.
      */
     public String getPreamble() {
-        return getValue(new Prefix("")).orElse("");
+        return getValue(new Prefix("")).getOrElse("");
     }
 
     /**
