@@ -46,11 +46,11 @@
 <a href="#features" id="markdown-toc-features">Features</a>    <ul>
       <li><a href="#viewing-help-help" id="markdown-toc-viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code></a></li>
       <li><a href="#adding-a-friend-add" id="markdown-toc-adding-a-friend-add">Adding a friend: <code class="language-plaintext highlighter-rouge">add</code></a></li>
-      <li><a href="#listing-all-friends-list" id="markdown-toc-listing-all-friends-list">Listing all friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
+      <li><a href="#listing-and-filtering-friends-list" id="markdown-toc-listing-and-filtering-friends-list">Listing and filtering friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
       <li><a href="#editing-a-friend-edit" id="markdown-toc-editing-a-friend-edit">Editing a friend: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
       <li><a href="#locating-friends-by-name-find" id="markdown-toc-locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
       <li><a href="#deleting-a-friend-delete" id="markdown-toc-deleting-a-friend-delete">Deleting a friend: <code class="language-plaintext highlighter-rouge">delete</code></a></li>
-      <li><a href="#clearing-all-friends-clear" id="markdown-toc-clearing-all-friends-clear">Clearing all friends: <code class="language-plaintext highlighter-rouge">clear</code></a></li>
+      <li><a href="#clearing-all-entries-clear" id="markdown-toc-clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code></a></li>
       <li><a href="#exiting-the-program-exit" id="markdown-toc-exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code></a></li>
       <li><a href="#saving-the-data" id="markdown-toc-saving-the-data">Saving the data</a></li>
       <li><a href="#editing-the-data-file" id="markdown-toc-editing-the-data-file">Editing the data file</a></li>
@@ -89,6 +89,9 @@ Some example commands you can try:</p>
     <ul>
       <li>
         <p><code class="language-plaintext highlighter-rouge">list</code> : Lists all contacts.</p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">list g/Valorant</code> : Lists friends who play Valorant.</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com</code> : Adds a contact named <code class="language-plaintext highlighter-rouge">John Doe</code> to GameMates.</p>
@@ -135,7 +138,7 @@ For example, <code class="language-plaintext highlighter-rouge">[t/TAG]…​</c
 For example, if the command specifies <code class="language-plaintext highlighter-rouge">n/NAME p/PHONE_NUMBER</code>, <code class="language-plaintext highlighter-rouge">p/PHONE_NUMBER n/NAME</code> is also acceptable.</p>
     </li>
     <li>
-      <p>Extraneous parameters for commands that take no parameters, such as <code class="language-plaintext highlighter-rouge">help</code>, <code class="language-plaintext highlighter-rouge">list</code>, <code class="language-plaintext highlighter-rouge">exit</code>, and <code class="language-plaintext highlighter-rouge">clear</code>, are ignored.<br>
+      <p>Extraneous parameters for commands that take no parameters, such as <code class="language-plaintext highlighter-rouge">help</code>, <code class="language-plaintext highlighter-rouge">exit</code>, and <code class="language-plaintext highlighter-rouge">clear</code>, are ignored.<br>
 For example, <code class="language-plaintext highlighter-rouge">help 123</code> is interpreted as <code class="language-plaintext highlighter-rouge">help</code>.</p>
     </li>
     <li>
@@ -222,12 +225,35 @@ and <a href="https://www.rfc-editor.org/rfc/rfc5321#section-4.5.3.1">RFC 5321’
 The 254-character address limit leaves room for the enclosing <code class="language-plaintext highlighter-rouge">&lt;</code> and <code class="language-plaintext highlighter-rouge">&gt;</code> in the 256-octet SMTP path limit.
 </div>
 
-<h3 id="listing-all-friends-list">Listing all friends: <code class="language-plaintext highlighter-rouge">list</code>
+<h3 id="listing-and-filtering-friends-list">Listing and filtering friends: <code class="language-plaintext highlighter-rouge">list</code>
 </h3>
 
-<p>Shows a list of all friends in GameMates.</p>
+<p>Shows all friends in GameMates, or filters the friend list by game.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">list</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">list [g/GAME_NAME]</code></p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">list</code> shows all friends and clears any previous friend-list filter.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> shows friends who have a game with that exact name. The match is case-insensitive, so <code class="language-plaintext highlighter-rouge">list g/valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
+  <li>Leading and trailing spaces in <code class="language-plaintext highlighter-rouge">GAME_NAME</code> are ignored, but partial names do not match. For example, <code class="language-plaintext highlighter-rouge">list g/Val</code> does not match <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
+  <li>Only game names are matched; a friend’s in-game username is not matched.</li>
+  <li>Multi-word game names are accepted. Only one <code class="language-plaintext highlighter-rouge">g/</code> prefix may be supplied, and the game name must not be empty.</li>
+  <li>If no friends play the specified game, the friend list is empty and the command reports <code class="language-plaintext highlighter-rouge">0 friend(s) listed!</code>.</li>
+  <li>Filtering applies only to the friend list. It does not filter or modify the separately stored Myself profile.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">list</code> shows all friends.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list g/Valorant</code> shows friends who play <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list g/Stardew Valley</code> shows friends who play <code class="language-plaintext highlighter-rouge">Stardew Valley</code>.</li>
+</ul>
 
 <h3 id="editing-a-friend-edit">Editing a friend: <code class="language-plaintext highlighter-rouge">edit</code>
 </h3>
@@ -283,12 +309,15 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 
 <p>Deletes the specified friend from GameMates.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">delete INDEX</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">delete FRIEND_INDEX</code></p>
 
 <ul>
-  <li>Deletes the friend at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>.</li>
+  <li>Deletes the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>.</li>
   <li>The index refers to the index number shown in the displayed friend list.</li>
   <li>The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
+  <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647.</li>
+  <li>A successful deletion displays <code class="language-plaintext highlighter-rouge">Successfully deleted FRIEND_NAME.</code>
+</li>
 </ul>
 
 <p>Examples:</p>
@@ -299,7 +328,19 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 <code class="language-plaintext highlighter-rouge">find Betsy</code> followed by <code class="language-plaintext highlighter-rouge">delete 1</code> deletes the 1st friend in the results of the <code class="language-plaintext highlighter-rouge">find</code> command.</li>
 </ul>
 
-<h3 id="clearing-all-friends-clear">Clearing all friends: <code class="language-plaintext highlighter-rouge">clear</code>
+<p>Errors:</p>
+
+<ul>
+  <li>Missing index: <code class="language-plaintext highlighter-rouge">Please provide an index.</code>
+</li>
+  <li>Invalid index (such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">-1</code>, or <code class="language-plaintext highlighter-rouge">abc</code>), extra arguments, or a value above 2147483647:
+<code class="language-plaintext highlighter-rouge">Index must be a positive integer.</code>
+</li>
+  <li>Index outside the displayed list, including an empty list: <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>
+</li>
+</ul>
+
+<h3 id="clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code>
 </h3>
 
 <p>Clears all friends from GameMates and preserves your Myself profile.</p>
@@ -393,7 +434,9 @@ Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g
     </tr>
     <tr>
       <td><strong>List</strong></td>
-      <td><code class="language-plaintext highlighter-rouge">list</code></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">list [g/GAME_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">list g/Valorant</code>
+</td>
     </tr>
     <tr>
       <td><strong>Help</strong></td>
