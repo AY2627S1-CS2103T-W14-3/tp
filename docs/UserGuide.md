@@ -212,7 +212,7 @@ Errors:
 
 ### Clearing all entries: `clear`
 
-Clears all entries from GameMates.
+Clears all friends from GameMates and preserves your Myself profile.
 
 Format: `clear`
 
@@ -228,7 +228,8 @@ GameMates automatically saves data after every command. You do not need to save 
 
 ### Editing the data file
 
-GameMates data is saved automatically as a JSON file `[JAR file location]/data/gamemates.json`. The friend list is stored under the `friends` key. Advanced users are welcome to update data directly by editing that data file.
+GameMates data is saved automatically as a JSON file `[JAR file location]/data/gamemates.json`. The friend list is stored under the `friends` key, and your profile is stored separately under `myself`. 
+Advanced users are welcome to update data directly by editing that data file.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If your changes make the data file invalid, GameMates starts with an empty friend list at the next run. The invalid file remains on disk until you run a command (GameMates saves after every command). Still, we recommend backing up the file before editing it.<br>

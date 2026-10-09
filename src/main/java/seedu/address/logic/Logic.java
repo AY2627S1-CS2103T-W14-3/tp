@@ -20,6 +20,9 @@ public interface Logic {
      */
     CommandResult execute(String commandText) throws CommandException, ParseException;
 
+    /** Returns the user profile, separately from the friends. */
+    Friend getMyself();
+
     /** Returns an unmodifiable view of the filtered list of friends */
     ObservableList<Friend> getFilteredFriendList();
 

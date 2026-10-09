@@ -8,6 +8,9 @@ import seedu.address.model.friend.Friend;
  */
 public interface ReadOnlyGameMates {
 
+    /** Returns the user profile, which is separate from the friend list. */
+    Friend getMyself();
+
     /**
      * Returns an unmodifiable view of the friends list.
      * This list will not contain any duplicate friends.

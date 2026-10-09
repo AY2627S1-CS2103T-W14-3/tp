@@ -60,6 +60,11 @@ public class LogicManager implements Logic {
     }
 
     @Override
+    public Friend getMyself() {
+        return model.getGameMates().getMyself();
+    }
+
+    @Override
     public ObservableList<Friend> getFilteredFriendList() {
         return model.getFilteredFriendList();
     }

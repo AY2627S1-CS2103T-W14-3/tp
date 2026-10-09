@@ -116,7 +116,7 @@
     -fx-border-width: 1;
 }
 
-.list-cell .label {
+.list-cell .label, #myselfPanelPlaceholder .label {
     -fx-text-fill: white;
 }
 
