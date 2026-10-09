@@ -24,6 +24,26 @@ import seedu.address.testutil.GameBuilder;
 public class FriendTest {
 
     @Test
+    public void constructor_nullRemark_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new Friend(ALICE.getName(), ALICE.getPhone(),
+                ALICE.getEmail(), ALICE.getGames(), null, ALICE.getTags()));
+    }
+
+    @Test
+    public void equalsAndHashCode_includeRemarkButIdentityDoesNot() {
+        Friend original = new FriendBuilder(ALICE).withRemark("Likes swimming").build();
+        Friend copy = new FriendBuilder(original).build();
+        Friend changed = new FriendBuilder(original).withRemark("Likes football").build();
+        assertEquals(original, copy);
+        assertEquals(original.hashCode(), copy.hashCode());
+        assertEquals(Objects.hash(original.getName(), original.getPhone(), original.getEmail(),
+                original.getGames(), original.getRemark(), original.getTags()), original.hashCode());
+        assertFalse(original.equals(changed));
+        assertTrue(original.isSameFriend(changed));
+        assertEquals(Remark.EMPTY, ALICE.getRemark());
+    }
+
+    @Test
     public void constructor_nullGamesOrEntries_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Friend(ALICE.getName(), ALICE.getPhone(),
                 ALICE.getEmail(), null, ALICE.getTags()));
@@ -42,7 +62,7 @@ public class FriendTest {
         assertEquals(friend, reordered);
         assertEquals(friend.hashCode(), reordered.hashCode());
         assertEquals(Objects.hash(friend.getName(), friend.getPhone(), friend.getEmail(),
-                friend.getGames(), friend.getTags()), friend.hashCode());
+                friend.getGames(), friend.getRemark(), friend.getTags()), friend.hashCode());
         assertFalse(friend.equals(ALICE));
         assertTrue(friend.isSameFriend(ALICE));
         Friend changedUsername = new FriendBuilder(ALICE)
@@ -123,7 +143,8 @@ public class FriendTest {
         Friend friend = new FriendBuilder(ALICE)
                 .withGames(new GameBuilder().withGameName("Valorant").withUsername("alice").build()).build();
         String expected = Friend.class.getCanonicalName() + "{name=" + friend.getName() + ", phone=" + friend.getPhone()
-                + ", email=" + friend.getEmail() + ", games=" + friend.getGames() + ", tags=" + friend.getTags() + "}";
+                + ", email=" + friend.getEmail() + ", games=" + friend.getGames() + ", remark=" + friend.getRemark()
+                + ", tags=" + friend.getTags() + "}";
         assertEquals(expected, friend.toString());
     }
 }
