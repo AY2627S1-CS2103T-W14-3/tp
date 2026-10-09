@@ -1,6 +1,5 @@
 package seedu.address.logic.parser;
 
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.INVALID_EMAIL_DESC;
@@ -44,7 +43,7 @@ public class EditCommandParserTest {
     private static final String TAG_EMPTY = " " + PREFIX_TAG;
 
     private static final String MESSAGE_INVALID_FORMAT =
-            String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE);
+            EditCommand.MESSAGE_INVALID_INDEX;
 
     private EditCommandParser parser = new EditCommandParser();
 
@@ -180,6 +179,33 @@ public class EditCommandParserTest {
 
         assertParseFailure(parser, userInput,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE, PREFIX_EMAIL));
+    }
+
+    @Test
+    public void parse_clearPhoneAndEmail_success() {
+        EditFriendDescriptor descriptor = new EditFriendDescriptor();
+        descriptor.setPhone(Phone.EMPTY);
+        descriptor.setEmail(Email.EMPTY);
+        assertParseSuccess(parser, "1 p/   e/ ", new EditCommand(INDEX_FIRST_FRIEND, descriptor));
+        descriptor = new EditFriendDescriptor();
+        descriptor.setPhone(Phone.EMPTY);
+        assertParseSuccess(parser, "1 p/", new EditCommand(INDEX_FIRST_FRIEND, descriptor));
+        descriptor = new EditFriendDescriptor();
+        descriptor.setEmail(Email.EMPTY);
+        assertParseSuccess(parser, "1 e/", new EditCommand(INDEX_FIRST_FRIEND, descriptor));
+    }
+
+    @Test
+    public void parse_clearName_failure() {
+        assertParseFailure(parser, "1 n/ ", Name.MESSAGE_CONSTRAINTS);
+    }
+
+    @Test
+    public void parse_repeatedContactIncludingRemoval_failure() {
+        assertParseFailure(parser, "1 p/" + PHONE_DESC_AMY,
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE));
+        assertParseFailure(parser, "1" + EMAIL_DESC_AMY + " e/",
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_EMAIL));
     }
 
     @Test
