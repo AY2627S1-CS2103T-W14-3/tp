@@ -29,9 +29,13 @@ public class TypicalFriends {
             .withEmail("johnd@example.com").withPhone("98765432")
             .withTags("owesMoney", "friends").build();
     public static final Friend CARL = new FriendBuilder().withName("Carl Kurz").withPhone("95352563")
-            .withEmail("heinz@example.com").build();
+            .withEmail("heinz@example.com")
+            .withGames(new GameBuilder().withGameName("Minecraft").withUsername("carlBuilder")
+                    .addMeta("Role", "Builder").addMeta("Play style", "Casual").build()).build();
     public static final Friend DANIEL = new FriendBuilder().withName("Daniel Meier").withPhone("87652533")
-            .withEmail("cornelia@example.com").withTags("friends").build();
+            .withEmail("cornelia@example.com").withTags("friends")
+            .withGames(new GameBuilder().withGameName("Valorant").withUsername("danielMain")
+                    .addMeta("Role", "Controller").addMeta("Availability", "Weekends:20:00").build()).build();
     public static final Friend ELLE = new FriendBuilder().withName("Elle Meyer").withPhone("9482224")
             .withEmail("werner@example.com").build();
     public static final Friend FIONA = new FriendBuilder().withName("Fiona Kunz").withPhone("9482427")

@@ -37,10 +37,11 @@ public class EditCommandTest {
     private Model model = new ModelManager(getTypicalGameMates(), new UserPrefs());
 
     @Test
-    public void execute_contactEdit_preservesGames() {
+    public void execute_contactEdit_preservesGamesAndMetadata() {
         Friend original = model.getFilteredFriendList().get(0);
         Friend withGames = new FriendBuilder(original)
-                .withGames(new GameBuilder().withGameName("Valorant").withUsername("player").build()).build();
+                .withGames(new GameBuilder().withGameName("Valorant").withUsername("player")
+                        .addMeta("Role", "Support").addMeta("Availability", "Weekends:20:00").build()).build();
         model.setFriend(original, withGames);
         Friend editedFriend = new FriendBuilder(withGames).withPhone(VALID_PHONE_BOB).build();
         EditCommand command = new EditCommand(INDEX_FIRST_FRIEND,
