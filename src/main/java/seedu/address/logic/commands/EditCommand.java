@@ -97,7 +97,8 @@ public class EditCommand extends Command {
         Email updatedEmail = editFriendDescriptor.getEmail().orElse(friendToEdit.getEmail());
         Set<Tag> updatedTags = editFriendDescriptor.getTags().orElse(friendToEdit.getTags());
 
-        return new Friend(updatedName, updatedPhone, updatedEmail, updatedTags);
+        return new Friend(updatedName, updatedPhone, updatedEmail,
+                friendToEdit.getGames(), updatedTags);
     }
 
     @Override

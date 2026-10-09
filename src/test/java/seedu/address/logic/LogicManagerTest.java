@@ -1,7 +1,7 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
@@ -12,6 +12,7 @@ import static seedu.address.testutil.TypicalFriends.AMY;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -27,6 +29,9 @@ import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyGameMates;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.GameNameMatchesPredicate;
+import seedu.address.model.game.GameName;
+import seedu.address.model.util.SampleDataUtil;
 import seedu.address.storage.JsonGameMatesStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
@@ -60,13 +65,50 @@ public class LogicManagerTest {
     @Test
     public void execute_commandExecutionError_throwsCommandException() {
         String deleteCommand = "delete 9";
-        assertCommandException(deleteCommand, MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        assertCommandException(deleteCommand, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
     }
 
     @Test
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_SUCCESS, model);
+    }
+
+    @Test
+    public void execute_deleteFriend_persistsDeletion() throws Exception {
+        model.addFriend(AMY);
+        CommandResult result = logic.execute("delete 1");
+        assertEquals("Successfully deleted " + AMY.getName() + ".", result.getFeedbackToUser());
+        assertEquals(0, model.getFilteredFriendList().size());
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(temporaryFolder.resolve("gameMates.json"));
+        assertEquals(model.getGameMates(), storage.readGameMates().get());
+    }
+
+    @Test
+    public void execute_listByGame_success() throws Exception {
+        model.setGameMates(SampleDataUtil.getSampleGameMates());
+        GameNameMatchesPredicate predicate = new GameNameMatchesPredicate(new GameName("Valorant"));
+        Model expectedModel = new ModelManager(model.getGameMates(), new UserPrefs());
+        expectedModel.updateFilteredFriendList(predicate);
+
+        String expectedMessage = String.format(Messages.MESSAGE_FRIENDS_LISTED_OVERVIEW, 2);
+        assertCommandSuccess("list g/Valorant", expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_listByGameThenDelete_usesDisplayedFilteredIndex() throws Exception {
+        Friend[] sampleFriends = SampleDataUtil.getSampleFriends();
+        Friend firstValorantFriend = sampleFriends[0];
+        Friend secondValorantFriend = sampleFriends[3];
+        model.setGameMates(SampleDataUtil.getSampleGameMates());
+
+        logic.execute("list g/Valorant");
+        CommandResult result = logic.execute("delete 2");
+
+        assertEquals(String.format(DeleteCommand.MESSAGE_DELETE_FRIEND_SUCCESS,
+                secondValorantFriend.getName()), result.getFeedbackToUser());
+        assertFalse(model.hasFriend(secondValorantFriend));
+        assertEquals(List.of(firstValorantFriend), model.getFilteredFriendList());
     }
 
     @Test
