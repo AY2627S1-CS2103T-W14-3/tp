@@ -37,6 +37,22 @@ public class EditCommandTest {
     private Model model = new ModelManager(getTypicalGameMates(), new UserPrefs());
 
     @Test
+    public void execute_editName_preservesRemarkAndGames() {
+        Friend original = model.getFilteredFriendList().get(INDEX_FIRST_FRIEND.getZeroBased());
+        Friend withRemark = new FriendBuilder(original).withRemark("Likes swimming")
+                .withGames(new GameBuilder()
+                        .withGameName("Valorant").withUsername("player").build()).build();
+        model.setFriend(original, withRemark);
+        Friend expectedFriend = new FriendBuilder(withRemark).withName("Alice Updated").build();
+        EditCommand command = new EditCommand(INDEX_FIRST_FRIEND,
+                new EditFriendDescriptorBuilder().withName("Alice Updated").build());
+        Model expectedModel = new ModelManager(model.getGameMates(), new UserPrefs());
+        expectedModel.setFriend(withRemark, expectedFriend);
+        assertCommandSuccess(command, model,
+                String.format(EditCommand.MESSAGE_EDIT_FRIEND_SUCCESS, Messages.format(expectedFriend)), expectedModel);
+    }
+
+    @Test
     public void execute_contactEdit_preservesGames() {
         Friend original = model.getFilteredFriendList().get(0);
         Friend withGames = new FriendBuilder(original)

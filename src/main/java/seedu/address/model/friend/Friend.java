@@ -25,19 +25,28 @@ public class Friend {
 
     // Data fields
     private final Set<Game> games;
+    private final Remark remark;
     private final Set<Tag> tags;
 
     /**
      * Every field must be present and not null.
      */
-    public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, games, tags);
+    public Friend(Name name, Phone phone, Email email, Set<Game> games, Remark remark, Set<Tag> tags) {
+        requireAllNonNull(name, phone, email, games, remark, tags);
         games.forEach(Objects::requireNonNull);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.games = Collections.unmodifiableSet(games);
+        this.remark = remark;
         this.tags = Collections.unmodifiableSet(tags);
+    }
+
+    /**
+     * Creates a friend with an empty remark.
+     */
+    public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags) {
+        this(name, phone, email, games, Remark.EMPTY, tags);
     }
 
     /**
@@ -65,6 +74,10 @@ public class Friend {
      */
     public Set<Game> getGames() {
         return games;
+    }
+
+    public Remark getRemark() {
+        return remark;
     }
 
     /**
@@ -107,13 +120,14 @@ public class Friend {
                 && phone.equals(otherFriend.phone)
                 && email.equals(otherFriend.email)
                 && games.equals(otherFriend.games)
+                && remark.equals(otherFriend.remark)
                 && tags.equals(otherFriend.tags);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, games, tags);
+        return Objects.hash(name, phone, email, games, remark, tags);
     }
 
     @Override
@@ -123,6 +137,7 @@ public class Friend {
                 .add("phone", phone)
                 .add("email", email)
                 .add("games", games)
+                .add("remark", remark)
                 .add("tags", tags)
                 .toString();
     }

@@ -15,6 +15,7 @@ import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
+import seedu.address.model.friend.Remark;
 import seedu.address.model.game.Game;
 import seedu.address.model.tag.Tag;
 
@@ -28,6 +29,7 @@ class JsonAdaptedFriend {
     private final String name;
     private final String phone;
     private final String email;
+    private final String remark;
     private final List<JsonAdaptedGame> games = new ArrayList<>();
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
@@ -37,10 +39,12 @@ class JsonAdaptedFriend {
     @JsonCreator
     public JsonAdaptedFriend(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("games") List<JsonAdaptedGame> games,
+            @JsonProperty("remark") String remark,
             @JsonProperty("tags") List<JsonAdaptedTag> tags) {
         this.name = name;
         this.phone = phone;
         this.email = email;
+        this.remark = remark;
         if (games != null) {
             this.games.addAll(games);
         }
@@ -50,12 +54,21 @@ class JsonAdaptedFriend {
     }
 
     /**
+     * Constructs a friend without a remark, for existing callers and legacy data.
+     */
+    public JsonAdaptedFriend(String name, String phone, String email, List<JsonAdaptedGame> games,
+            List<JsonAdaptedTag> tags) {
+        this(name, phone, email, games, "", tags);
+    }
+
+    /**
      * Converts a given {@code Friend} into this class for Jackson use.
      */
     public JsonAdaptedFriend(Friend source) {
         name = source.getName().fullName;
         phone = source.getPhone().value;
         email = source.getEmail().value;
+        remark = source.getRemark().value;
         games.addAll(source.getGames().stream().map(JsonAdaptedGame::new).toList());
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
@@ -96,7 +109,8 @@ class JsonAdaptedFriend {
         final Email modelEmail = isNullOrEmpty(email) ? Email.EMPTY : new Email(email);
 
         final Set<Tag> modelTags = new HashSet<>(friendTags);
-        return new Friend(modelName, modelPhone, modelEmail, modelGames, modelTags);
+        final Remark modelRemark = remark == null ? Remark.EMPTY : new Remark(remark);
+        return new Friend(modelName, modelPhone, modelEmail, modelGames, modelRemark, modelTags);
     }
 
 }

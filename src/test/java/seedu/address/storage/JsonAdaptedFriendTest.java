@@ -18,6 +18,7 @@ import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
+import seedu.address.model.friend.Remark;
 import seedu.address.testutil.FriendBuilder;
 import seedu.address.testutil.GameBuilder;
 
@@ -36,6 +37,32 @@ public class JsonAdaptedFriendTest {
     private static final List<JsonAdaptedTag> VALID_TAGS = BENSON.getTags().stream()
             .map(JsonAdaptedTag::new)
             .collect(Collectors.toList());
+
+    @Test
+    public void toModelType_remarkWithSpecialCharacters_roundTrips() throws Exception {
+        Friend original = new FriendBuilder(BENSON).withRemark("玩家: \"hello\"\\notes\nNext line")
+                .withGames(new GameBuilder().withGameName("Valorant").withUsername("benson").build()).build();
+        String json = JsonUtil.toJsonString(new JsonAdaptedFriend(original));
+        assertEquals(original, JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType());
+    }
+
+    @Test
+    public void toModelType_missingOrNullRemark_returnsEmptyRemark() throws Exception {
+        for (String json : new String[] {"{\"name\":\"Legacy Friend\"}",
+            "{\"name\":\"Legacy Friend\",\"remark\":null}"}) {
+            Friend friend = JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType();
+            assertEquals(new Name("Legacy Friend"), friend.getName());
+            assertEquals(Remark.EMPTY, friend.getRemark());
+        }
+    }
+
+    @Test
+    public void toModelType_emptyRemark_roundTrips() throws Exception {
+        String json = JsonUtil.toJsonString(new JsonAdaptedFriend(BENSON));
+        Friend restored = JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType();
+        assertEquals(BENSON, restored);
+        assertEquals(Remark.EMPTY, restored.getRemark());
+    }
 
     @Test
     public void toModelType_games_roundTrips() throws Exception {

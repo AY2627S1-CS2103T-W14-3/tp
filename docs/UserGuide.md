@@ -170,6 +170,25 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st friend to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
 
+### Adding or changing a friend's remark: `remark`
+
+Adds an optional note to a friend, replacing any existing remark.
+
+Format: `remark INDEX r/REMARK`
+
+* `INDEX` is a positive integer referring to the currently displayed friend list.
+* `remark 1 r/` clears the first displayed friend's remark. As in the tutorial, `remark 1` also clears it.
+* Leading and trailing whitespace is trimmed. The remark can contain spaces and punctuation.
+* Supply `r/` at most once. Other prefixes such as `n/` are treated as text inside the remark.
+* After a successful command, the full friend list is displayed.
+* Remarks appear on friend cards and are saved automatically. Editing other details preserves the remark.
+
+Examples:
+
+* `remark 2 r/Likes baseball` sets the second displayed friend's remark.
+* `remark 2 r/Available on Friday evenings` replaces that remark.
+* `remark 2 r/` removes it.
+
 ### Locating friends by name: `find`
 
 Finds friends whose names contain any of the given keywords.
@@ -266,4 +285,5 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant`
+**Remark** | `remark INDEX r/REMARK`<br> e.g., `remark 1 r/Likes baseball`; clear with `remark 1 r/`
 **Help** | `help`

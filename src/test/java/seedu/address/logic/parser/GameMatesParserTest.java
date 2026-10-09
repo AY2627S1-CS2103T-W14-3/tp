@@ -21,10 +21,12 @@ import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.RemarkCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.GameNameMatchesPredicate;
 import seedu.address.model.friend.NameContainsKeywordsPredicate;
+import seedu.address.model.friend.Remark;
 import seedu.address.model.game.GameName;
 import seedu.address.testutil.EditFriendDescriptorBuilder;
 import seedu.address.testutil.FriendBuilder;
@@ -33,6 +35,13 @@ import seedu.address.testutil.FriendUtil;
 public class GameMatesParserTest {
 
     private final GameMatesParser parser = new GameMatesParser();
+
+    @Test
+    public void parseCommand_remark() throws Exception {
+        assertEquals(new RemarkCommand(INDEX_FIRST_FRIEND, new Remark("Likes swimming")),
+                parser.parseCommand("remark 1 r/Likes swimming"));
+        assertEquals(new RemarkCommand(INDEX_FIRST_FRIEND, Remark.EMPTY), parser.parseCommand("remark 1 r/"));
+    }
 
     @Test
     public void parseCommand_add() throws Exception {

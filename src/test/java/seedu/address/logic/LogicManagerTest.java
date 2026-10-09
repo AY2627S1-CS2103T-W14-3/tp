@@ -30,6 +30,7 @@ import seedu.address.model.ReadOnlyGameMates;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.GameNameMatchesPredicate;
+import seedu.address.model.friend.Remark;
 import seedu.address.model.game.GameName;
 import seedu.address.model.util.SampleDataUtil;
 import seedu.address.storage.JsonGameMatesStorage;
@@ -72,6 +73,21 @@ public class LogicManagerTest {
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_SUCCESS, model);
+    }
+
+    @Test
+    public void execute_remarkThenEditThenClear_persistsChanges() throws Exception {
+        model.addFriend(AMY);
+        logic.execute("remark 1 r/Likes swimming");
+        logic.execute("edit 1 n/Amy Updated");
+        Friend expected = new FriendBuilder(AMY).withName("Amy Updated").withRemark("Likes swimming").build();
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(temporaryFolder.resolve("gameMates.json"));
+        assertEquals(expected, model.getFilteredFriendList().get(0));
+        assertEquals(model.getGameMates(), storage.readGameMates().get());
+
+        logic.execute("remark 1 r/");
+        assertEquals(Remark.EMPTY, model.getFilteredFriendList().get(0).getRemark());
+        assertEquals(model.getGameMates(), storage.readGameMates().get());
     }
 
     @Test
