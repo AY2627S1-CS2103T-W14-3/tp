@@ -5,6 +5,8 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import java.util.Locale;
 
+import seedu.address.commons.util.StringUtil;
+
 /**
  * Represents a game's name in GameMates.
  * Guarantees: immutable; is valid as declared in {@link #isValidGameName(String)}
@@ -34,16 +36,7 @@ public class GameName {
      * Returns true if a given string is a valid game name.
      */
     public static boolean isValidGameName(String test) {
-        if (test == null) {
-            return false;
-        }
-
-        String trimmedName = test.strip();
-
-        return !trimmedName.isEmpty()
-                && trimmedName.length() <= MAX_GAME_NAME_LENGTH
-                && trimmedName.codePoints().anyMatch(Character::isLetterOrDigit)
-                && trimmedName.codePoints().noneMatch(Character::isISOControl);
+        return StringUtil.isValidTextField(test, MAX_GAME_NAME_LENGTH);
     }
 
     private String getNormalizedName() {

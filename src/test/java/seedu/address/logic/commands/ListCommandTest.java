@@ -62,7 +62,7 @@ public class ListCommandTest {
         Friend playsMatchingGame = new FriendBuilder(BENSON).withGames(
                 new Game(new GameName("VALORANT"), new Username("playerThree"))).build();
         Friend playsDifferentGame = new FriendBuilder(CARL).withGames(minecraft).build();
-        Friend hasNoGames = new FriendBuilder(DANIEL).build();
+        Friend hasNoGames = new FriendBuilder(DANIEL).withGames().build();
         GameMates gameMates = gameMatesWith(
                 playsMultipleGames, playsMatchingGame, playsDifferentGame, hasNoGames);
         model = new ModelManager(gameMates, new UserPrefs());

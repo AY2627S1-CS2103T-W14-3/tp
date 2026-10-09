@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
@@ -14,6 +15,9 @@ import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
 import seedu.address.model.game.GameName;
 import seedu.address.model.game.Username;
+import seedu.address.model.game.meta.Meta;
+import seedu.address.model.game.meta.MetaKey;
+import seedu.address.model.game.meta.MetaValue;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -100,7 +104,7 @@ public class ParserUtil {
      */
     public static GameName parseGameName(String gameName) throws ParseException {
         requireNonNull(gameName);
-        String trimmedGameName = gameName.trim();
+        String trimmedGameName = gameName.strip();
         if (!GameName.isValidGameName(trimmedGameName)) {
             throw new ParseException(GameName.MESSAGE_CONSTRAINTS);
         }
@@ -115,11 +119,72 @@ public class ParserUtil {
      */
     public static Username parseUsername(String username) throws ParseException {
         requireNonNull(username);
-        String trimmedUsername = username.trim();
+        String trimmedUsername = username.strip();
         if (!Username.isValidUsername(trimmedUsername)) {
             throw new ParseException(Username.MESSAGE_CONSTRAINTS);
         }
         return new Username(trimmedUsername);
+    }
+
+    /**
+     * Parses a metadata key, stripping leading and trailing whitespace.
+     *
+     * @throws ParseException if the key is invalid.
+     */
+    public static MetaKey parseMetaKey(String key) throws ParseException {
+        requireNonNull(key);
+        String trimmedKey = key.strip();
+        if (!MetaKey.isValidMetaKey(trimmedKey)) {
+            throw new ParseException(MetaKey.MESSAGE_CONSTRAINTS);
+        }
+        return new MetaKey(trimmedKey);
+    }
+
+    /**
+     * Parses a metadata value, stripping leading and trailing whitespace and preserving colons.
+     *
+     * @throws ParseException if the value is invalid.
+     */
+    public static MetaValue parseMetaValue(String value) throws ParseException {
+        requireNonNull(value);
+        String trimmedValue = value.strip();
+        if (!MetaValue.isValidMetaValue(trimmedValue)) {
+            throw new ParseException(MetaValue.MESSAGE_CONSTRAINTS);
+        }
+        return new MetaValue(trimmedValue);
+    }
+
+    /**
+     * Parses a metadata pair at the first colon, trimming the key and value independently.
+     *
+     * @throws ParseException if the separator, key or value is invalid.
+     */
+    public static Meta parseMeta(String meta) throws ParseException {
+        requireNonNull(meta);
+        String[] parts = StringUtil.splitAtFirstColon(meta);
+        if (parts.length != 2) {
+            throw new ParseException(Meta.MESSAGE_CONSTRAINTS);
+        }
+        return new Meta(parseMetaKey(parts[0]), parseMetaValue(parts[1]));
+    }
+
+    /**
+     * Parses metadata flags for one game entry, rejecting repeated keys even when values match.
+     *
+     * @throws ParseException if a pair is invalid or a key occurs more than once.
+     */
+    public static Set<Meta> parseMetas(Collection<String> metas) throws ParseException {
+        requireNonNull(metas);
+        Set<Meta> result = new LinkedHashSet<>();
+        Set<MetaKey> keys = new HashSet<>();
+        for (String text : metas) {
+            Meta meta = parseMeta(text);
+            if (!keys.add(meta.getKey())) {
+                throw new ParseException(Meta.MESSAGE_DUPLICATE_KEY);
+            }
+            result.add(meta);
+        }
+        return result;
     }
 
     /**

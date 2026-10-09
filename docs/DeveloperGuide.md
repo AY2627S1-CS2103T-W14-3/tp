@@ -123,6 +123,7 @@ How the parsing works:
 The `Model` component,
 
 * stores the GameMates data i.e., all `Friend` objects (which are contained in a `UniqueFriendList` object).
+* stores each friend's games as `Game` objects, including their game name, username and optional metadata.
 * stores the `Friend` objects selected by the current filter, such as search results, in a separate _filtered_ list. It exposes this list as an unmodifiable `ObservableList<Friend>` that the UI can observe and bind to, so the UI updates when the list changes.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
@@ -143,6 +144,7 @@ The `Model` component,
 The `Storage` component,
 * can save both GameMates data and user preference data in JSON format, and read them back into corresponding objects.
 * is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonGameMatesStorage` and `JsonUserPrefsStorage` (one class per data file).
+* converts game metadata through `JsonAdaptedGame` and `JsonAdaptedMeta`, validating fields and rejecting duplicate keys when loading.
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
 
 ### Common classes
@@ -154,6 +156,60 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 ## **Implementation**
 
 This section describes some noteworthy details on how certain features are implemented.
+
+### Game metadata
+
+Metadata records game-specific details such as a friend's role or play style.
+`Meta`, `MetaKey` and `MetaValue` are immutable classes in `seedu.address.model.game.meta`.
+Each `Meta` contains one key and one value. `Game` copies the supplied metadata collection and
+exposes it as an unmodifiable set through `getMetas()`; the two-argument constructor defaults to an empty set.
+
+#### Validation and equality
+
+Leading and trailing whitespace is removed with `String.strip()` before validation and storage.
+`StringUtil.isValidTextField()` requires non-empty text with at least one letter or digit and no ISO control characters.
+Limits use `String.length()` (UTF-16 units), so supplementary characters count as two.
+This check allows punctuation and does not exclude other Unicode categories, such as format characters.
+`GameName` and `Username` also use this utility.
+
+| Field | Length after trimming | Colon handling | Equality |
+| --- | --- | --- | --- |
+| `MetaKey` | 1–50 | Colons rejected | Case-insensitive using `Locale.ROOT` |
+| `MetaValue` | 1–200 | Colons allowed | Case-sensitive |
+
+Keys must be unique within each game entry, including when repeated pairs have identical values.
+The same key can occur in other games or friends. `Game` enforces this invariant when constructed.
+`Meta.equals()` compares both fields; `Game.equals()` includes metadata, while `isSameGame()` compares only the game name.
+
+#### Parsing
+
+`ParserUtil.parseMeta()` uses `StringUtil.splitAtFirstColon()` and delegates field parsing to
+`parseMetaKey()` and `parseMetaValue()`. For example, ` Role : Support:Mid ` becomes key `Role` and value `Support:Mid`.
+Missing separators and invalid fields cause `ParseException`.
+
+`parseMetas()` parses a collection of raw values and rejects duplicate normalized keys before returning a set.
+Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
+These are parser utilities; command-specific metadata flag handling is not yet implemented.
+
+#### Persistence and testing
+
+`JsonAdaptedGame` stores metadata as a `metas` array of `JsonAdaptedMeta` objects:
+
+```json
+{
+  "name": "Valorant",
+  "username": "player",
+  "metas": [{ "key": "Role", "value": "Support:Mid" }]
+}
+```
+
+Missing or null `metas` fields load as an empty set, preserving compatibility with existing save files.
+Null array entries, invalid fields and duplicate keys cause `IllegalValueException` during model conversion.
+
+Tests cover trimmed length boundaries, Unicode, control characters, colons, case normalization,
+duplicate keys, immutability, JSON round-trips and metadata preservation during contact edits.
+`GameBuilder.addMeta("Role", "Support")` appends a pair; `withMetas(...)` replaces the collection.
+Duplicate keys added through the builder are rejected by `build()`.
 
 ### \[Proposed\] Undo/redo feature
 

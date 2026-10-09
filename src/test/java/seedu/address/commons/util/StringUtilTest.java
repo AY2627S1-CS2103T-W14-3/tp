@@ -1,5 +1,6 @@
 package seedu.address.commons.util;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -9,6 +10,59 @@ import java.io.FileNotFoundException;
 import org.junit.jupiter.api.Test;
 
 public class StringUtilTest {
+
+    @Test
+    public void isValidTextField_invalidInputs_returnsFalse() {
+        assertFalse(StringUtil.isValidTextField(null, 50));
+        for (String input : new String[] {"", "   ", "!!!", "a".repeat(51), "a\nb", "a\tb",
+            "a\u0000b", "a\u007fb", "a\u0085b"}) {
+            assertFalse(StringUtil.isValidTextField(input, 50));
+        }
+        assertFalse(StringUtil.isValidTextField("A", 0));
+        assertFalse(StringUtil.isValidTextField("A", -1));
+    }
+
+    @Test
+    public void isValidTextField_validInputs_returnsTrue() {
+        for (String input : new String[] {"A", "1", "Role!", "Support:Mid", "O'Connor-Jane", "李明",
+            "a😀", "a\u200bb"}) {
+            assertTrue(StringUtil.isValidTextField(input, 50));
+        }
+        assertTrue(StringUtil.isValidTextField(" A ", 1));
+        assertTrue(StringUtil.isValidTextField("  " + "a".repeat(50) + "  ", 50));
+        assertTrue(StringUtil.isValidTextField("a".repeat(200), 200));
+        assertFalse(StringUtil.isValidTextField("a".repeat(201), 200));
+    }
+
+    @Test
+    public void isValidTextField_supplementaryCharacters_countsUtf16Units() {
+        String supplementaryLetter = "\uD801\uDC00";
+        assertTrue(StringUtil.isValidTextField(supplementaryLetter, 2));
+        assertFalse(StringUtil.isValidTextField(supplementaryLetter, 1));
+    }
+
+    @Test
+    public void splitAtFirstColon_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> StringUtil.splitAtFirstColon(null));
+    }
+
+    @Test
+    public void splitAtFirstColon_separatorPresent_preservesFields() {
+        assertArrayEquals(new String[] {"Role", "Support"}, StringUtil.splitAtFirstColon("Role:Support"));
+        assertArrayEquals(new String[] {"Role", "Support:Mid"}, StringUtil.splitAtFirstColon("Role:Support:Mid"));
+        assertArrayEquals(new String[] {" Role ", " Support "}, StringUtil.splitAtFirstColon(" Role : Support "));
+        assertArrayEquals(new String[] {"", "Support"}, StringUtil.splitAtFirstColon(":Support"));
+        assertArrayEquals(new String[] {"Role", ""}, StringUtil.splitAtFirstColon("Role:"));
+        assertArrayEquals(new String[] {"", ""}, StringUtil.splitAtFirstColon(":"));
+        assertArrayEquals(new String[] {"", ":"}, StringUtil.splitAtFirstColon("::"));
+    }
+
+    @Test
+    public void splitAtFirstColon_noSeparator_returnsOriginalString() {
+        assertArrayEquals(new String[] {"Role"}, StringUtil.splitAtFirstColon("Role"));
+        assertArrayEquals(new String[] {""}, StringUtil.splitAtFirstColon(""));
+        assertArrayEquals(new String[] {" "}, StringUtil.splitAtFirstColon(" "));
+    }
 
     @Test
     public void isNullOrEmpty() {

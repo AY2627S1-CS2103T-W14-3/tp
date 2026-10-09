@@ -13,6 +13,9 @@ import seedu.address.model.friend.Phone;
 import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
 import seedu.address.model.game.Username;
+import seedu.address.model.game.meta.Meta;
+import seedu.address.model.game.meta.MetaKey;
+import seedu.address.model.game.meta.MetaValue;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -23,17 +26,24 @@ public class SampleDataUtil {
         return new Friend[]{
             new Friend(new Name("Alex Yeoh"), new Phone("87438807"), new Email("alexyeoh@example.com"),
                     getGameSet(
-                            new Game(new GameName("Valorant"), new Username("alexyeoh")),
-                            new Game(new GameName("Fortnite"), new Username("X_alexYo_X"))),
+                            new Game(new GameName("Valorant"), new Username("alexyeoh"), Set.of(
+                                    new Meta(new MetaKey("Role"), new MetaValue("Controller")),
+                                    new Meta(new MetaKey("Play style"), new MetaValue("Casual")))),
+                            new Game(new GameName("Fortnite"), new Username("X_alexYo_X"), Set.of(
+                                    new Meta(new MetaKey("Preferred mode"), new MetaValue("Zero Build"))))),
                     getTagSet("friends")),
             new Friend(new Name("Bernice Yu"), new Phone("99272758"), new Email("berniceyu@example.com"),
-                    getGameSet(new Game(new GameName("Minecraft"), new Username("berniceyu"))),
+                    getGameSet(new Game(new GameName("Minecraft"), new Username("berniceyu"), Set.of(
+                            new Meta(new MetaKey("Role"), new MetaValue("Builder")),
+                            new Meta(new MetaKey("Availability"), new MetaValue("Weekends:20:00"))))),
                     getTagSet("colleagues", "friends")),
             new Friend(new Name("Charlotte Oliveiro"), new Phone("93210283"), new Email("charlotte@example.com"),
                     getGameSet(new Game(new GameName("Stardew Valley"), new Username("charlotte"))),
                     getTagSet("neighbours")),
             new Friend(new Name("David Li"), new Phone("91031282"), new Email("lidavid@example.com"),
-                    getGameSet(new Game(new GameName("Valorant"), new Username("davidli"))),
+                    getGameSet(new Game(new GameName("Valorant"), new Username("davidli"), Set.of(
+                            new Meta(new MetaKey("Role"), new MetaValue("Sentinel")),
+                            new Meta(new MetaKey("Play style"), new MetaValue("Competitive"))))),
                     getTagSet("family")),
             new Friend(new Name("Irfan Ibrahim"), new Phone("92492021"), new Email("irfan@example.com"),
                     getGameSet(new Game(new GameName("Fortnite"), new Username("irfan"))),
