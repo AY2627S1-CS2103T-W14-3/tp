@@ -35,7 +35,9 @@ public class EditCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the details of the friend identified "
             + "by the index number used in the displayed friend list. "
-            + "Existing values will be overwritten by the input values.\n"
+            + "Supplied name and contact values replace existing values. "
+            + "Each supplied tag is removed if present or added if absent. "
+            + "Use t/ without a value to remove all tags.\n"
             + "Parameters: INDEX (must be a positive integer) "
             + "[" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_PHONE + "[PHONE]] "
@@ -130,7 +132,18 @@ public class EditCommand extends Command {
         Name updatedName = editFriendDescriptor.getName().orElse(friendToEdit.getName());
         Phone updatedPhone = editFriendDescriptor.getPhone().orElse(friendToEdit.getPhone());
         Email updatedEmail = editFriendDescriptor.getEmail().orElse(friendToEdit.getEmail());
-        Set<Tag> updatedTags = editFriendDescriptor.getTags().orElse(friendToEdit.getTags());
+        Set<Tag> updatedTags = new HashSet<>(friendToEdit.getTags());
+        editFriendDescriptor.getTags().ifPresent(tags -> {
+            if (tags.isEmpty()) {
+                updatedTags.clear();
+            } else {
+                for (Tag tag : tags) {
+                    if (!updatedTags.remove(tag)) {
+                        updatedTags.add(tag);
+                    }
+                }
+            }
+        });
 
         return new Friend(updatedName, updatedPhone, updatedEmail,
                 friendToEdit.getGames(), updatedTags);
@@ -160,8 +173,9 @@ public class EditCommand extends Command {
     }
 
     /**
-     * Stores the details to edit the friend with. Each provided field value will replace the
-     * corresponding field value of the friend. Empty phone/email values remove those details.
+     * Stores the details to edit the friend with. Provided name and contact values replace existing values.
+     * Empty phone/email values remove those details. Each supplied tag is removed if present or added if absent.
+     * An empty tag set removes all tags.
      */
     public static class EditFriendDescriptor {
         private Name name;

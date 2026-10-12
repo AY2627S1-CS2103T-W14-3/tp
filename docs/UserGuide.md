@@ -169,13 +169,15 @@ Format: `edit FRIEND_INDEX [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​`
 * Success feedback starts with `Edited NAME` and lists only changed details. Removed contact details are reported
   as `removed phone number` or `removed email`.
 * An index is required to point at the profile to be edited. Editing your own profile without an index is not currently supported.
-* Omit `t/` to keep the friend's existing tags. Supplying one or more `t/TAG` parameters replaces all existing tags with the supplied tags.
+* Omit `t/` to keep the friend's existing tags. Each supplied `t/TAG` removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.
+* Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.
 * To remove all of a friend's tags, enter `t/` without a tag after it.
 
 Examples:
 * `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st friend to be `91234567` and `johndoe@example.com` respectively.
 * `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
 * `edit 2 p/ e/` removes the 2nd friend's phone number and email.
+* `edit 2 t/teammate` removes `teammate` if the 2nd friend already has it, or adds it otherwise. Other tags remain unchanged.
 
 Errors:
 

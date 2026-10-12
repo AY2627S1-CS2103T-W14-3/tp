@@ -97,6 +97,80 @@ public class EditFriendIntegrationTest {
     }
 
     @Test
+    public void execute_existingTag_removesOnlyThatTagFromDisplayedFriend() throws Exception {
+        Friend hidden = addFriend("Melody");
+        Friend original = addFriend("Joash");
+        Friend displayed = new FriendBuilder(original).withTags("friend", "teammate").build();
+        model.setFriend(original, displayed);
+        model.updateFilteredFriendList(friend -> friend.equals(displayed));
+
+        CommandResult result = parser.parseCommand("edit 1 t/friend").execute(model);
+
+        Friend expected = new FriendBuilder(displayed).withTags("teammate").build();
+        assertEquals(expected, model.getGameMates().getFriendList().get(1));
+        assertEquals(hidden, model.getGameMates().getFriendList().getFirst());
+        assertEquals("Edited Joash\n- changed tags to teammate", result.getFeedbackToUser());
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(testFolder.resolve("tags.json"));
+        storage.saveGameMates(model.getGameMates());
+        assertEquals(model.getGameMates(), storage.readGameMates().get());
+    }
+
+    @Test
+    public void execute_newTag_addsTagAndPreservesOtherDetails() throws Exception {
+        Friend original = addFriend("Melody");
+
+        CommandResult result = parser.parseCommand("edit 1 t/teammate").execute(model);
+
+        assertEquals(new FriendBuilder(original).withTags("friend", "teammate").build(),
+                model.getFilteredFriendList().getFirst());
+        assertEquals("Edited Melody\n- changed tags to friend, teammate", result.getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_mixedRepeatedTags_addsAndRemovesEachTagOnce() throws Exception {
+        Friend original = addFriend("Melody");
+        Friend withTags = new FriendBuilder(original).withTags("friend", "teammate").build();
+        model.setFriend(original, withTags);
+
+        parser.parseCommand("edit 1 t/friend t/new t/friend t/new").execute(model);
+
+        assertEquals(new FriendBuilder(withTags).withTags("teammate", "new").build(),
+                model.getFilteredFriendList().getFirst());
+    }
+
+    @Test
+    public void execute_lastExistingTag_removesAllTags() throws Exception {
+        Friend original = addFriend("Melody");
+
+        CommandResult result = parser.parseCommand("edit 1 t/friend").execute(model);
+
+        assertEquals(new FriendBuilder(original).withTags().build(), model.getFilteredFriendList().getFirst());
+        assertEquals("Edited Melody\n- removed tags", result.getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_tagWithDifferentCase_addsSeparateTag() throws Exception {
+        Friend original = addFriend("Melody");
+
+        parser.parseCommand("edit 1 t/Friend").execute(model);
+
+        assertEquals(new FriendBuilder(original).withTags("friend", "Friend").build(),
+                model.getFilteredFriendList().getFirst());
+    }
+
+    @Test
+    public void execute_emptyTag_clearsAllTags() throws Exception {
+        Friend original = addFriend("Melody");
+        Friend withTags = new FriendBuilder(original).withTags("friend", "teammate").build();
+        model.setFriend(original, withTags);
+
+        CommandResult result = parser.parseCommand("edit 1 t/").execute(model);
+
+        assertEquals(new FriendBuilder(withTags).withTags().build(), model.getFilteredFriendList().getFirst());
+        assertEquals("Edited Melody\n- removed tags", result.getFeedbackToUser());
+    }
+
+    @Test
     public void execute_filteredIndex_editsDisplayedFriendAndPreservesOtherFriend() throws Exception {
         Friend hidden = addFriend("Melody");
         Friend displayed = addFriend("Joash");
