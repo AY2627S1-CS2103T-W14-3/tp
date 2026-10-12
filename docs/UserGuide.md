@@ -168,21 +168,22 @@ Format: `edit FRIEND_INDEX [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​`
 * Games remain unchanged when editing friend details.
 * Success feedback starts with `Edited NAME` and lists only changed details. Removed contact details are reported
   as `removed phone number` or `removed email`.
-* An index is required; editing your own profile without an index is not currently supported.
-* When editing tags, all of the friend's existing tags are removed; adding tags is not cumulative.
+* An index is required to point at the profile to be edited. Editing your own profile without an index is not currently supported.
+* Omit `t/` to keep the friend's existing tags. Supplying one or more `t/TAG` parameters replaces all existing tags with the supplied tags.
 * To remove all of a friend's tags, enter `t/` without a tag after it.
 
 Examples:
-*  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st friend to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
+* `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st friend to be `91234567` and `johndoe@example.com` respectively.
+* `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
 * `edit 2 p/ e/` removes the 2nd friend's phone number and email.
 
 Errors:
 
-* Missing or invalid index: `Invalid friend index. Enter a positive integer.`
+* Missing index: `Please provide an index.`
+* Invalid index: `Index must be a positive integer.`
 * Empty displayed list: `No friends are currently displayed. Use list to show all friends.`
 * Index outside the displayed list: `No friend exists at index INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
-* No fields provided: `No details were passed to the command. Use a parameter (p/PHONE_NUMBER, e/EMAIL, n/NAME, etc.) to edit specific details.`
+* No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
 * Duplicate name: `This friend already exists in GameMates.`
 
 ### Locating friends by name: `find`

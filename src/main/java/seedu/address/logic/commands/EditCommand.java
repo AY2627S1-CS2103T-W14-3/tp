@@ -47,11 +47,10 @@ public class EditCommand extends Command {
 
     public static final String MESSAGE_EDIT_FRIEND_SUCCESS = "Edited %1$s";
     public static final String MESSAGE_NOT_EDITED = "No details were passed to the command. "
-            + "Use a parameter (p/PHONE_NUMBER, e/EMAIL, n/NAME, etc.) "
-                    + "to edit specific details.";
+            + "Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) "
+            + "to edit specific details.";
     public static final String MESSAGE_DUPLICATE_FRIEND = "This friend already exists in GameMates.";
 
-    public static final String MESSAGE_INVALID_INDEX = "Invalid friend index. Enter a positive integer.";
     public static final String MESSAGE_EMPTY_LIST =
             "No friends are currently displayed. Use list to show all friends.";
     public static final String MESSAGE_INDEX_NOT_FOUND =
