@@ -7,6 +7,7 @@ import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
+import seedu.address.model.game.Game;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.util.SampleDataUtil;
 
@@ -22,6 +23,7 @@ public class FriendBuilder {
     private Name name;
     private Phone phone;
     private Email email;
+    private Set<Game> games;
     private Set<Tag> tags;
 
     /**
@@ -31,6 +33,7 @@ public class FriendBuilder {
         name = new Name(DEFAULT_NAME);
         phone = new Phone(DEFAULT_PHONE);
         email = new Email(DEFAULT_EMAIL);
+        games = new HashSet<>();
         tags = new HashSet<>();
     }
 
@@ -41,6 +44,7 @@ public class FriendBuilder {
         name = friendToCopy.getName();
         phone = friendToCopy.getPhone();
         email = friendToCopy.getEmail();
+        games = new HashSet<>(friendToCopy.getGames());
         tags = new HashSet<>(friendToCopy.getTags());
     }
 
@@ -76,8 +80,16 @@ public class FriendBuilder {
         return this;
     }
 
+    /**
+     * Sets the games of the friend being built.
+     */
+    public FriendBuilder withGames(Game... games) {
+        this.games = SampleDataUtil.getGameSet(games);
+        return this;
+    }
+
     public Friend build() {
-        return new Friend(name, phone, email, tags);
+        return new Friend(name, phone, email, games, tags);
     }
 
 }

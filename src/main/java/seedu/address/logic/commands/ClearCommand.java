@@ -6,18 +6,20 @@ import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 
 /**
- * Clears GameMates.
+ * Clears the friend list while preserving the user profile.
  */
 public class ClearCommand extends Command {
 
     public static final String COMMAND_WORD = "clear";
-    public static final String MESSAGE_SUCCESS = "GameMates has been cleared!";
+    public static final String MESSAGE_SUCCESS = "Friend list has been cleared!";
 
 
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        model.setGameMates(new GameMates());
+        GameMates cleared = new GameMates();
+        cleared.setMyself(model.getGameMates().getMyself());
+        model.setGameMates(cleared);
         return new CommandResult(MESSAGE_SUCCESS);
     }
 }

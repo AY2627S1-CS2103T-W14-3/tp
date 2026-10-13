@@ -11,11 +11,44 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalFriends.ALICE;
 import static seedu.address.testutil.TypicalFriends.BOB;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
+import seedu.address.model.game.Game;
 import seedu.address.testutil.FriendBuilder;
+import seedu.address.testutil.GameBuilder;
 
 public class FriendTest {
+
+    @Test
+    public void constructor_nullGamesOrEntries_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new Friend(ALICE.getName(), ALICE.getPhone(),
+                ALICE.getEmail(), null, ALICE.getTags()));
+        Set<Game> games = new HashSet<>();
+        games.add(null);
+        assertThrows(NullPointerException.class, () -> new Friend(ALICE.getName(), ALICE.getPhone(),
+                ALICE.getEmail(), games, ALICE.getTags()));
+    }
+
+    @Test
+    public void equalsAndHashCode_includeGamesButIdentityDoesNot() {
+        Game first = new GameBuilder().withGameName("Valorant").withUsername("alice").build();
+        Game second = new GameBuilder().withGameName("Minecraft").withUsername("alice2").build();
+        Friend friend = new FriendBuilder(ALICE).withGames(first, second).build();
+        Friend reordered = new FriendBuilder(ALICE).withGames(second, first).build();
+        assertEquals(friend, reordered);
+        assertEquals(friend.hashCode(), reordered.hashCode());
+        assertEquals(Objects.hash(friend.getName(), friend.getPhone(), friend.getEmail(),
+                friend.getGames(), friend.getTags()), friend.hashCode());
+        assertFalse(friend.equals(ALICE));
+        assertTrue(friend.isSameFriend(ALICE));
+        Friend changedUsername = new FriendBuilder(ALICE)
+                .withGames(new GameBuilder().withGameName("Valorant").withUsername("other").build(), second).build();
+        assertFalse(friend.equals(changedUsername));
+    }
 
     @Test
     public void asObservableList_modifyList_throwsUnsupportedOperationException() {
@@ -87,8 +120,10 @@ public class FriendTest {
 
     @Test
     public void toStringMethod() {
-        String expected = Friend.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
-                + ", email=" + ALICE.getEmail() + ", tags=" + ALICE.getTags() + "}";
-        assertEquals(expected, ALICE.toString());
+        Friend friend = new FriendBuilder(ALICE)
+                .withGames(new GameBuilder().withGameName("Valorant").withUsername("alice").build()).build();
+        String expected = Friend.class.getCanonicalName() + "{name=" + friend.getName() + ", phone=" + friend.getPhone()
+                + ", email=" + friend.getEmail() + ", games=" + friend.getGames() + ", tags=" + friend.getTags() + "}";
+        assertEquals(expected, friend.toString());
     }
 }

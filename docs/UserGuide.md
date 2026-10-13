@@ -28,6 +28,8 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 
    * `list` : Lists all contacts.
 
+   * `list g/Valorant` : Lists friends who play Valorant.
+
    * `add n/John Doe p/98765432 e/johnd@example.com` : Adds a contact named `John Doe` to GameMates.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
@@ -58,7 +60,7 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
+* Extraneous parameters for commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
@@ -132,27 +134,59 @@ and [RFC 5321's SMTP length limits](https://www.rfc-editor.org/rfc/rfc5321#secti
 The 254-character address limit leaves room for the enclosing `<` and `>` in the 256-octet SMTP path limit.
 </div>
 
-### Listing all friends: `list`
+### Listing and filtering friends: `list`
 
-Shows a list of all friends in GameMates.
+Shows all friends in GameMates, or filters the friend list by game.
 
-Format: `list`
+Format: `list [g/GAME_NAME]`
+
+* `list` shows all friends and clears any previous friend-list filter.
+* `list g/GAME_NAME` shows friends who have a game with that exact name. The match is case-insensitive, so `list g/valorant` matches `Valorant`.
+* Leading and trailing spaces in `GAME_NAME` are ignored, but partial names do not match. For example, `list g/Val` does not match `Valorant`.
+* Only game names are matched; a friend's in-game username is not matched.
+* Multi-word game names are accepted. Only one `g/` prefix may be supplied, and the game name must not be empty.
+* If no friends play the specified game, the friend list is empty and the command reports `0 friend(s) listed!`.
+* Filtering applies only to the friend list. It does not filter or modify the separately stored Myself profile.
+
+Examples:
+
+* `list` shows all friends.
+* `list g/Valorant` shows friends who play `Valorant`.
+* `list g/Stardew Valley` shows friends who play `Stardew Valley`.
 
 ### Editing a friend: `edit`
 
 Edits an existing friend in GameMates.
 
-Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [t/TAG]…​`
+Format: `edit FRIEND_INDEX [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​`
 
-* Edits the friend at the specified `INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
+* Edits the friend at the specified `FRIEND_INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
 * At least one of the optional fields must be provided.
-* Existing values will be updated to the input values.
-* When editing tags, all of the friend's existing tags are removed; adding tags is not cumulative.
+* Supplied values are trimmed and validated using the same rules as `add`.
+* Omitted fields remain unchanged. Enter `p/` or `e/` without a value to remove that contact detail.
+* A name cannot be removed. The new name must be unique among other friends, ignoring case and repeated spaces.
+* Games remain unchanged when editing friend details.
+* Success feedback starts with `Edited NAME` and lists only changed details. Removed contact details are reported
+  as `removed phone number` or `removed email`.
+* An index is required to point at the profile to be edited. Editing your own profile without an index is not currently supported.
+* Omit `t/` to keep the friend's existing tags. Each supplied `t/TAG` removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.
+* Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.
 * To remove all of a friend's tags, enter `t/` without a tag after it.
 
 Examples:
-*  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st friend to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
+* `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st friend to be `91234567` and `johndoe@example.com` respectively.
+* `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
+* `edit 2 p/ e/` removes the 2nd friend's phone number and email.
+* `edit 2 t/teammate` removes `teammate` if the 2nd friend already has it, or adds it otherwise. Other tags remain unchanged.
+
+Errors:
+
+* Missing index: `Please provide an index.`
+* Invalid index: `Index must be a positive integer.`
+* Empty displayed list: `No friends are currently displayed. Use list to show all friends.`
+* Index outside the displayed list: `No friend exists at index INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
+* No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
+* Duplicate name: `This friend already exists in GameMates.`
 
 ### Locating friends by name: `find`
 
@@ -175,19 +209,28 @@ Examples:
 
 Deletes the specified friend from GameMates.
 
-Format: `delete INDEX`
+Format: `delete FRIEND_INDEX`
 
-* Deletes the friend at the specified `INDEX`.
+* Deletes the friend at the specified `FRIEND_INDEX`.
 * The index refers to the index number shown in the displayed friend list.
 * The index **must be a positive integer** 1, 2, 3, …​
+* Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647.
+* A successful deletion displays `Successfully deleted FRIEND_NAME.`
 
 Examples:
 * `list` followed by `delete 2` deletes the 2nd friend in GameMates.
 * `find Betsy` followed by `delete 1` deletes the 1st friend in the results of the `find` command.
 
+Errors:
+
+* Missing index: `Please provide an index.`
+* Invalid index (such as `0`, `-1`, or `abc`), extra arguments, or a value above 2147483647:
+  `Index must be a positive integer.`
+* Index outside the displayed list, including an empty list: `The friend index provided is invalid.`
+
 ### Clearing all entries: `clear`
 
-Clears all entries from GameMates.
+Clears all friends from GameMates and preserves your Myself profile.
 
 Format: `clear`
 
@@ -203,7 +246,8 @@ GameMates automatically saves data after every command. You do not need to save 
 
 ### Editing the data file
 
-GameMates data is saved automatically as a JSON file `[JAR file location]/data/gamemates.json`. The friend list is stored under the `friends` key. Advanced users are welcome to update data directly by editing that data file.
+GameMates data is saved automatically as a JSON file `[JAR file location]/data/gamemates.json`. The friend list is stored under the `friends` key, and your profile is stored separately under `myself`. 
+Advanced users are welcome to update data directly by editing that data file.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If your changes make the data file invalid, GameMates starts with an empty friend list at the next run. The invalid file remains on disk until you run a command (GameMates saves after every command). Still, we recommend backing up the file before editing it.<br>
@@ -237,7 +281,7 @@ Action | Format, Examples
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague`
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
+**Edit** | `edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
-**List** | `list`
+**List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant`
 **Help** | `help`

@@ -38,6 +38,17 @@ public class ParserUtilTest {
     private static final String WHITESPACE = " \t\r\n";
 
     @Test
+    public void parseIndex_missingInput_throwsParseException() {
+        assertThrows(ParseException.class, ParserUtil.MESSAGE_MISSING_INDEX, () -> ParserUtil.parseIndex(""));
+        assertThrows(ParseException.class, ParserUtil.MESSAGE_MISSING_INDEX, () -> ParserUtil.parseIndex(WHITESPACE));
+    }
+
+    @Test
+    public void parseIndex_nullInput_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseIndex(null));
+    }
+
+    @Test
     public void parseIndex_invalidInput_throwsParseException() {
         assertThrows(ParseException.class, () -> ParserUtil.parseIndex("10 a"));
     }

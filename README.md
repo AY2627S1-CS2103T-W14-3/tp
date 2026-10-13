@@ -12,6 +12,7 @@ GameMates is optimized for users who prefer a fast command-line workflow while s
 
 ## Features
 * Add, edit, delete, list, and filter friends.
+* Keep your own profile in a separate Myself card.
 * Store optional contact details such as phone numbers and email addresses.
 * Add games to each friend with their in-game username.
 * Record extra game-specific information.

@@ -33,6 +33,9 @@ public interface Model {
      */
     void setGameMates(ReadOnlyGameMates gameMates);
 
+    /** Replaces the user profile independently of the friend list. */
+    void setMyself(Friend myself);
+
     /** Returns the GameMates */
     ReadOnlyGameMates getGameMates();
 

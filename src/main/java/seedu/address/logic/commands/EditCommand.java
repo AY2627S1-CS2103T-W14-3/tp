@@ -12,12 +12,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.vavr.control.Option;
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.CollectionUtil;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Email;
@@ -35,19 +35,28 @@ public class EditCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the details of the friend identified "
             + "by the index number used in the displayed friend list. "
-            + "Existing values will be overwritten by the input values.\n"
+            + "Supplied name and contact values replace existing values. "
+            + "Each supplied tag is removed if present or added if absent. "
+            + "Use t/ without a value to remove all tags.\n"
             + "Parameters: INDEX (must be a positive integer) "
             + "[" + PREFIX_NAME + "NAME] "
-            + "[" + PREFIX_PHONE + "PHONE] "
-            + "[" + PREFIX_EMAIL + "EMAIL] "
+            + "[" + PREFIX_PHONE + "[PHONE]] "
+            + "[" + PREFIX_EMAIL + "[EMAIL]] "
             + "[" + PREFIX_TAG + "TAG]...\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_PHONE + "91234567 "
             + PREFIX_EMAIL + "johndoe@example.com";
 
-    public static final String MESSAGE_EDIT_FRIEND_SUCCESS = "Edited friend: %1$s";
-    public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
+    public static final String MESSAGE_EDIT_FRIEND_SUCCESS = "Edited %1$s";
+    public static final String MESSAGE_NOT_EDITED = "No details were passed to the command. "
+            + "Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) "
+            + "to edit specific details.";
     public static final String MESSAGE_DUPLICATE_FRIEND = "This friend already exists in GameMates.";
+
+    public static final String MESSAGE_EMPTY_LIST =
+            "No friends are currently displayed. Use list to show all friends.";
+    public static final String MESSAGE_INDEX_NOT_FOUND =
+            "No friend exists at index %1$d. Choose an index from 1 to %2$d.";
 
     private final Index index;
     private final EditFriendDescriptor editFriendDescriptor;
@@ -69,8 +78,12 @@ public class EditCommand extends Command {
         requireNonNull(model);
         List<Friend> lastShownList = model.getFilteredFriendList();
 
+        if (lastShownList.isEmpty()) {
+            throw new CommandException(MESSAGE_EMPTY_LIST);
+        }
         if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+            throw new CommandException(String.format(MESSAGE_INDEX_NOT_FOUND,
+                    index.getOneBased(), lastShownList.size()));
         }
 
         Friend friendToEdit = lastShownList.get(index.getZeroBased());
@@ -82,7 +95,31 @@ public class EditCommand extends Command {
 
         model.setFriend(friendToEdit, editedFriend);
         model.updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
-        return new CommandResult(String.format(MESSAGE_EDIT_FRIEND_SUCCESS, Messages.format(editedFriend)));
+        return new CommandResult(formatSuccessMessage(friendToEdit, editedFriend));
+    }
+
+    /**
+     * Formats feedback with only the details whose stored values changed.
+     */
+    static String formatSuccessMessage(Friend original, Friend edited) {
+        StringBuilder feedback = new StringBuilder(String.format(MESSAGE_EDIT_FRIEND_SUCCESS, edited.getName()));
+        if (!original.getName().fullName.equals(edited.getName().fullName)) {
+            feedback.append("\n- changed name to ").append(edited.getName());
+        }
+        if (!original.getPhone().equals(edited.getPhone())) {
+            feedback.append(edited.getPhone().isEmpty() ? "\n- removed phone number"
+                    : "\n- changed phone number to " + edited.getPhone());
+        }
+        if (!original.getEmail().equals(edited.getEmail())) {
+            feedback.append(edited.getEmail().isEmpty() ? "\n- removed email"
+                    : "\n- changed email to " + edited.getEmail());
+        }
+        if (!original.getTags().equals(edited.getTags())) {
+            feedback.append(edited.getTags().isEmpty() ? "\n- removed tags" : "\n- changed tags to "
+                    + edited.getTags().stream().map(tag -> tag.tagName).sorted()
+                            .collect(Collectors.joining(", ")));
+        }
+        return feedback.toString();
     }
 
     /**
@@ -95,9 +132,21 @@ public class EditCommand extends Command {
         Name updatedName = editFriendDescriptor.getName().getOrElse(friendToEdit.getName());
         Phone updatedPhone = editFriendDescriptor.getPhone().getOrElse(friendToEdit.getPhone());
         Email updatedEmail = editFriendDescriptor.getEmail().getOrElse(friendToEdit.getEmail());
-        Set<Tag> updatedTags = editFriendDescriptor.getTags().getOrElse(friendToEdit.getTags());
+        Set<Tag> updatedTags = new HashSet<>(friendToEdit.getTags());
+        editFriendDescriptor.getTags().peek(tags -> {
+            if (tags.isEmpty()) {
+                updatedTags.clear();
+            } else {
+                for (Tag tag : tags) {
+                    if (!updatedTags.remove(tag)) {
+                        updatedTags.add(tag);
+                    }
+                }
+            }
+        });
 
-        return new Friend(updatedName, updatedPhone, updatedEmail, updatedTags);
+        return new Friend(updatedName, updatedPhone, updatedEmail,
+                friendToEdit.getGames(), updatedTags);
     }
 
     @Override
@@ -124,8 +173,9 @@ public class EditCommand extends Command {
     }
 
     /**
-     * Stores the details to edit the friend with. Each non-empty field value will replace the
-     * corresponding field value of the friend.
+     * Stores the details to edit the friend with. Provided name and contact values replace existing values.
+     * Empty phone/email values remove those details. Each supplied tag is removed if present or added if absent.
+     * An empty tag set removes all tags.
      */
     public static class EditFriendDescriptor {
         private Name name;

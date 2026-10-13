@@ -10,6 +10,9 @@ import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
+import seedu.address.model.game.Game;
+import seedu.address.model.game.GameName;
+import seedu.address.model.game.Username;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -17,19 +20,27 @@ import seedu.address.model.tag.Tag;
  */
 public class SampleDataUtil {
     public static Friend[] getSampleFriends() {
-        return new Friend[] {
+        return new Friend[]{
             new Friend(new Name("Alex Yeoh"), new Phone("87438807"), new Email("alexyeoh@example.com"),
-                getTagSet("friends")),
+                    getGameSet(
+                            new Game(new GameName("Valorant"), new Username("alexyeoh")),
+                            new Game(new GameName("Fortnite"), new Username("X_alexYo_X"))),
+                    getTagSet("friends")),
             new Friend(new Name("Bernice Yu"), new Phone("99272758"), new Email("berniceyu@example.com"),
-                getTagSet("colleagues", "friends")),
+                    getGameSet(new Game(new GameName("Minecraft"), new Username("berniceyu"))),
+                    getTagSet("colleagues", "friends")),
             new Friend(new Name("Charlotte Oliveiro"), new Phone("93210283"), new Email("charlotte@example.com"),
-                getTagSet("neighbours")),
+                    getGameSet(new Game(new GameName("Stardew Valley"), new Username("charlotte"))),
+                    getTagSet("neighbours")),
             new Friend(new Name("David Li"), new Phone("91031282"), new Email("lidavid@example.com"),
-                getTagSet("family")),
+                    getGameSet(new Game(new GameName("Valorant"), new Username("davidli"))),
+                    getTagSet("family")),
             new Friend(new Name("Irfan Ibrahim"), new Phone("92492021"), new Email("irfan@example.com"),
-                getTagSet("classmates")),
+                    getGameSet(new Game(new GameName("Fortnite"), new Username("irfan"))),
+                    getTagSet("classmates")),
             new Friend(new Name("Roy Balakrishnan"), new Phone("92624417"), new Email("royb@example.com"),
-                getTagSet("colleagues"))
+                    getGameSet(new Game(new GameName("Minecraft"), new Username("royb"))),
+                    getTagSet("colleagues"))
         };
     }
 
@@ -39,6 +50,13 @@ public class SampleDataUtil {
             sampleAb.addFriend(sampleFriend);
         }
         return sampleAb;
+    }
+
+    /**
+     * Returns a game set containing the games given.
+     */
+    public static Set<Game> getGameSet(Game... games) {
+        return Set.of(games);
     }
 
     /**

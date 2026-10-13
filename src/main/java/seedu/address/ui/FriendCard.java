@@ -39,6 +39,12 @@ public class FriendCard extends UiPart<Region> {
     @FXML
     private FlowPane tags;
 
+    /** Creates an unnumbered card for the user profile. */
+    public FriendCard(Friend friend) {
+        this(friend, 1);
+        id.setText("Myself: ");
+    }
+
     /**
      * Creates a {@code FriendCard} with the given {@code Friend} and index to display.
      */

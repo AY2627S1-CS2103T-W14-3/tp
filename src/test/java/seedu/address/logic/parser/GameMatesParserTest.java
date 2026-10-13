@@ -23,7 +23,9 @@ import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.GameNameMatchesPredicate;
 import seedu.address.model.friend.NameContainsKeywordsPredicate;
+import seedu.address.model.game.GameName;
 import seedu.address.testutil.EditFriendDescriptorBuilder;
 import seedu.address.testutil.FriendBuilder;
 import seedu.address.testutil.FriendUtil;
@@ -83,8 +85,9 @@ public class GameMatesParserTest {
 
     @Test
     public void parseCommand_list() throws Exception {
-        assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD) instanceof ListCommand);
-        assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD + " 3") instanceof ListCommand);
+        assertEquals(new ListCommand(), parser.parseCommand(ListCommand.COMMAND_WORD));
+        assertEquals(new ListCommand(new GameNameMatchesPredicate(new GameName("Valorant"))),
+                parser.parseCommand(ListCommand.COMMAND_WORD + " g/Valorant"));
     }
 
     @Test

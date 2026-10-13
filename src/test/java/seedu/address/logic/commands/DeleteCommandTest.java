@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.logic.commands.CommandTestUtil.showFriendAtIndex;
+import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalFriends.getTypicalGameMates;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_FRIEND;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_FRIEND;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
+import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -33,7 +35,7 @@ public class DeleteCommandTest {
         DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_FRIEND);
 
         String expectedMessage = String.format(DeleteCommand.MESSAGE_DELETE_FRIEND_SUCCESS,
-                Messages.format(friendToDelete));
+                friendToDelete.getName());
 
         ModelManager expectedModel = new ModelManager(model.getGameMates(), new UserPrefs());
         expectedModel.deleteFriend(friendToDelete);
@@ -57,13 +59,24 @@ public class DeleteCommandTest {
         DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_FRIEND);
 
         String expectedMessage = String.format(DeleteCommand.MESSAGE_DELETE_FRIEND_SUCCESS,
-                Messages.format(friendToDelete));
+                friendToDelete.getName());
 
         Model expectedModel = new ModelManager(model.getGameMates(), new UserPrefs());
         expectedModel.deleteFriend(friendToDelete);
         showNoFriend(expectedModel);
 
         assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_firstFilteredIndex_deletesDisplayedFriendInsteadOfFirstStoredFriend() {
+        Friend friendToDelete = model.getFilteredFriendList().get(INDEX_SECOND_FRIEND.getZeroBased());
+        showFriendAtIndex(model, INDEX_SECOND_FRIEND);
+        Model expectedModel = new ModelManager(model.getGameMates(), new UserPrefs());
+        expectedModel.deleteFriend(friendToDelete);
+        showNoFriend(expectedModel);
+        assertCommandSuccess(new DeleteCommand(INDEX_FIRST_FRIEND), model,
+                "Successfully deleted " + friendToDelete.getName() + ".", expectedModel);
     }
 
     @Test
@@ -77,6 +90,35 @@ public class DeleteCommandTest {
         DeleteCommand deleteCommand = new DeleteCommand(outOfBoundIndex);
 
         assertCommandFailure(deleteCommand, model, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void constructor_nullIndex_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new DeleteCommand(null));
+    }
+
+    @Test
+    public void execute_emptyList_throwsCommandException() {
+        Model emptyModel = new ModelManager(new GameMates(), new UserPrefs());
+        assertCommandFailure(new DeleteCommand(INDEX_FIRST_FRIEND), emptyModel,
+                Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void execute_emptyFilteredList_doesNotDeleteHiddenFriends() {
+        showNoFriend(model);
+        assertCommandFailure(new DeleteCommand(INDEX_FIRST_FRIEND), model,
+                Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void execute_lastDisplayedIndex_success() {
+        Index lastIndex = Index.fromOneBased(model.getFilteredFriendList().size());
+        Friend friendToDelete = model.getFilteredFriendList().get(lastIndex.getZeroBased());
+        Model expectedModel = new ModelManager(model.getGameMates(), new UserPrefs());
+        expectedModel.deleteFriend(friendToDelete);
+        assertCommandSuccess(new DeleteCommand(lastIndex), model,
+                "Successfully deleted " + friendToDelete.getName() + ".", expectedModel);
     }
 
     @Test

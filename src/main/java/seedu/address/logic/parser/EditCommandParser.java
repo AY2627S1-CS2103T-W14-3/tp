@@ -2,7 +2,6 @@ package seedu.address.logic.parser;
 
 import static io.vavr.API.unchecked;
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
@@ -17,6 +16,8 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditFriendDescriptor;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.friend.Email;
+import seedu.address.model.friend.Phone;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -34,21 +35,19 @@ public class EditCommandParser implements Parser<EditCommand> {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_TAG);
 
-        Index index;
-
-        try {
-            index = ParserUtil.parseIndex(argMultimap.getPreamble());
-        } catch (ParseException pe) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE), pe);
-        }
+        Index index = ParserUtil.parseIndex(argMultimap.getPreamble());
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL);
 
         EditFriendDescriptor editFriendDescriptor = new EditFriendDescriptor();
 
         argMultimap.getValue(PREFIX_NAME).map(unchecked(ParserUtil::parseName)).peek(editFriendDescriptor::setName);
-        argMultimap.getValue(PREFIX_PHONE).map(unchecked(ParserUtil::parsePhone)).peek(editFriendDescriptor::setPhone);
-        argMultimap.getValue(PREFIX_EMAIL).map(unchecked(ParserUtil::parseEmail)).peek(editFriendDescriptor::setEmail);
+        argMultimap.getValue(PREFIX_PHONE)
+                .map(unchecked(value -> value.isEmpty() ? Phone.EMPTY : ParserUtil.parsePhone(value)))
+                .peek(editFriendDescriptor::setPhone);
+        argMultimap.getValue(PREFIX_EMAIL)
+                .map(unchecked(value -> value.isEmpty() ? Email.EMPTY : ParserUtil.parseEmail(value)))
+                .peek(editFriendDescriptor::setEmail);
         parseTagsForEdit(argMultimap.getAllValues(PREFIX_TAG)).peek(editFriendDescriptor::setTags);
 
         if (!editFriendDescriptor.isAnyFieldEdited()) {
