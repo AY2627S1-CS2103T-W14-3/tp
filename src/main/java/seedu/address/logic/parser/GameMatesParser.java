@@ -15,6 +15,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
+import seedu.address.logic.commands.GameAddCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -52,6 +53,7 @@ public class GameMatesParser {
         logger.fine("Command word: " + commandWord + "; Arguments: " + arguments);
 
         return switch (commandWord) {
+            case GameAddCommand.COMMAND_WORD -> new GameAddCommandParser().parse(arguments);
             case AddCommand.COMMAND_WORD -> new AddCommandParser().parse(arguments);
             case EditCommand.COMMAND_WORD -> new EditCommandParser().parse(arguments);
             case DeleteCommand.COMMAND_WORD -> new DeleteCommandParser().parse(arguments);
