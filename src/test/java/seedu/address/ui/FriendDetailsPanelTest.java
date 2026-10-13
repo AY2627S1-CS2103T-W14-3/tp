@@ -41,7 +41,9 @@ class FriendDetailsPanelTest {
             assertEquals("Phone: 91234567", getLabel(panel, "#phone").getText());
             assertEquals("Email: alice@example.com", getLabel(panel, "#email").getText());
             assertEquals("competitive", getFirstLabelText(getFlowPane(panel, "#tags")));
-            assertEquals("Apex: alice456", getFirstLabelText(getFlowPane(panel, "#games")));
+            VBox gameCard = getFirstGameCard(panel);
+            assertEquals("Apex", getGameCardLabel(gameCard, ".details-game-name").getText());
+            assertEquals("Username: alice456", getGameCardLabel(gameCard, ".details-game-username").getText());
         });
     }
 
@@ -51,7 +53,7 @@ class FriendDetailsPanelTest {
             FriendDetailsPanel panel = new FriendDetailsPanel(new FriendBuilder().withTags().build(), false);
 
             assertEquals("No tags added", getFirstLabelText(getFlowPane(panel, "#tags")));
-            assertEquals("No games added", getFirstLabelText(getFlowPane(panel, "#games")));
+            assertEquals("No games added", getFirstLabelText(getGamesContainer(panel)));
         });
     }
 
@@ -67,7 +69,19 @@ class FriendDetailsPanelTest {
         return (FlowPane) panel.getRoot().lookup(selector);
     }
 
-    private String getFirstLabelText(FlowPane flowPane) {
-        return ((Label) flowPane.getChildren().getFirst()).getText();
+    private VBox getGamesContainer(FriendDetailsPanel panel) {
+        return (VBox) panel.getRoot().lookup("#games");
+    }
+
+    private VBox getFirstGameCard(FriendDetailsPanel panel) {
+        return (VBox) getGamesContainer(panel).getChildren().getFirst();
+    }
+
+    private Label getGameCardLabel(VBox gameCard, String selector) {
+        return (Label) gameCard.lookup(selector);
+    }
+
+    private String getFirstLabelText(javafx.scene.layout.Pane pane) {
+        return ((Label) pane.getChildren().getFirst()).getText();
     }
 }

@@ -23,7 +23,7 @@
     </VBox>
     <VBox spacing="4">
       <Label text="Games" styleClass="details-section-title" />
-      <FlowPane fx:id="games" hgap="7" vgap="5" />
+      <VBox fx:id="games" spacing="6" />
     </VBox>
   </VBox>
 </VBox>

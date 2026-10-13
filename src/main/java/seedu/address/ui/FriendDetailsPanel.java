@@ -41,7 +41,7 @@ public class FriendDetailsPanel extends UiPart<Region> {
     private FlowPane tags;
     @FXML
     @SuppressWarnings("unused")
-    private FlowPane games;
+    private VBox games;
 
     /**
      * Creates a details panel for the user profile or a friend.
@@ -85,8 +85,8 @@ public class FriendDetailsPanel extends UiPart<Region> {
 
         games.getChildren().setAll(friend.getGames().stream()
                 .sorted(Comparator.comparing(game -> game.getGameName().value))
-                .map(game -> createLabel(game.getGameName().value + ": " + game.getUsername().value,
-                        "details-game"))
+                .map(GameDetailsCard::new)
+                .map(GameDetailsCard::getRoot)
                 .toList());
         if (games.getChildren().isEmpty()) {
             games.getChildren().add(createLabel("No games added", "details-empty-value"));

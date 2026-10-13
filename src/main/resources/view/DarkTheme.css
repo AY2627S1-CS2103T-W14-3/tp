@@ -147,9 +147,25 @@
     -fx-font-size: 16px;
 }
 
-.details-tag, .details-game {
+.details-tag {
     -fx-background-color: #3e7b91;
     -fx-padding: 3 7 3 7;
+}
+
+.details-game-card {
+    -fx-background-color: derive(#1d1d1d, 12%);
+    -fx-background-radius: 4;
+    -fx-padding: 8 10 8 10;
+}
+
+.details-game-name {
+    -fx-font-size: 15px;
+}
+
+.details-game-username {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-text-fill: #c7c7c7 !important;
 }
 
 .details-empty-value {
