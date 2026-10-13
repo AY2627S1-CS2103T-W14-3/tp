@@ -260,13 +260,20 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 
 <p>Edits an existing friend in GameMates.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [t/TAG]…​</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">edit FRIEND_INDEX [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​</code></p>
 
 <ul>
-  <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
+  <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
   <li>At least one of the optional fields must be provided.</li>
-  <li>Existing values will be updated to the input values.</li>
-  <li>When editing tags, all of the friend’s existing tags are removed; adding tags is not cumulative.</li>
+  <li>Supplied values are trimmed and validated using the same rules as <code class="language-plaintext highlighter-rouge">add</code>.</li>
+  <li>Omitted fields remain unchanged. Enter <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> without a value to remove that contact detail.</li>
+  <li>A name cannot be removed. The new name must be unique among other friends, ignoring case and repeated spaces.</li>
+  <li>Games remain unchanged when editing friend details.</li>
+  <li>Success feedback starts with <code class="language-plaintext highlighter-rouge">Edited NAME</code> and lists only changed details. Removed contact details are reported
+as <code class="language-plaintext highlighter-rouge">removed phone number</code> or <code class="language-plaintext highlighter-rouge">removed email</code>.</li>
+  <li>An index is required to point at the profile to be edited. Editing your own profile without an index is not currently supported.</li>
+  <li>Omit <code class="language-plaintext highlighter-rouge">t/</code> to keep the friend’s existing tags. Each supplied <code class="language-plaintext highlighter-rouge">t/TAG</code> removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.</li>
+  <li>Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.</li>
   <li>To remove all of a friend’s tags, enter <code class="language-plaintext highlighter-rouge">t/</code> without a tag after it.</li>
 </ul>
 
@@ -276,6 +283,27 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 <code class="language-plaintext highlighter-rouge">edit 1 p/91234567 e/johndoe@example.com</code> Edits the phone number and email address of the 1st friend to be <code class="language-plaintext highlighter-rouge">91234567</code> and <code class="language-plaintext highlighter-rouge">johndoe@example.com</code> respectively.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">edit 2 n/Betsy Crower t/</code> Edits the name of the 2nd friend to be <code class="language-plaintext highlighter-rouge">Betsy Crower</code> and clears all existing tags.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">edit 2 p/ e/</code> removes the 2nd friend’s phone number and email.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">edit 2 t/teammate</code> removes <code class="language-plaintext highlighter-rouge">teammate</code> if the 2nd friend already has it, or adds it otherwise. Other tags remain unchanged.</li>
+</ul>
+
+<p>Errors:</p>
+
+<ul>
+  <li>Missing index: <code class="language-plaintext highlighter-rouge">Please provide an index.</code>
+</li>
+  <li>Invalid index: <code class="language-plaintext highlighter-rouge">Index must be a positive integer.</code>
+</li>
+  <li>Empty displayed list: <code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list to show all friends.</code>
+</li>
+  <li>Index outside the displayed list: <code class="language-plaintext highlighter-rouge">No friend exists at index INDEX. Choose an index from 1 to MAX_LIST_INDEX.</code>
+</li>
+  <li>No fields provided: <code class="language-plaintext highlighter-rouge">No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.</code>
+</li>
+  <li>Duplicate name: <code class="language-plaintext highlighter-rouge">This friend already exists in GameMates.</code>
+</li>
 </ul>
 
 <h3 id="locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code>
@@ -423,7 +451,7 @@ Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g
     <tr>
       <td><strong>Edit</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…​</code><br> e.g., <code class="language-plaintext highlighter-rouge">edit 2 n/James Lee e/jameslee@example.com</code>
+<code class="language-plaintext highlighter-rouge">edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…​</code><br> e.g., <code class="language-plaintext highlighter-rouge">edit 2 n/James Lee e/jameslee@example.com</code>
 </td>
     </tr>
     <tr>
