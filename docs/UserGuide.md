@@ -158,17 +158,35 @@ Examples:
 
 Edits an existing friend in GameMates.
 
-Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [t/TAG]…​`
+Format: `edit FRIEND_INDEX [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​`
 
-* Edits the friend at the specified `INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
+* Edits the friend at the specified `FRIEND_INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
 * At least one of the optional fields must be provided.
-* Existing values will be updated to the input values.
-* When editing tags, all of the friend's existing tags are removed; adding tags is not cumulative.
+* Supplied values are trimmed and validated using the same rules as `add`.
+* Omitted fields remain unchanged. Enter `p/` or `e/` without a value to remove that contact detail.
+* A name cannot be removed. The new name must be unique among other friends, ignoring case and repeated spaces.
+* Games remain unchanged when editing friend details.
+* Success feedback starts with `Edited NAME` and lists only changed details. Removed contact details are reported
+  as `removed phone number` or `removed email`.
+* An index is required to point at the profile to be edited. Editing your own profile without an index is not currently supported.
+* Omit `t/` to keep the friend's existing tags. Each supplied `t/TAG` removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.
+* Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.
 * To remove all of a friend's tags, enter `t/` without a tag after it.
 
 Examples:
-*  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st friend to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
+* `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st friend to be `91234567` and `johndoe@example.com` respectively.
+* `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
+* `edit 2 p/ e/` removes the 2nd friend's phone number and email.
+* `edit 2 t/teammate` removes `teammate` if the 2nd friend already has it, or adds it otherwise. Other tags remain unchanged.
+
+Errors:
+
+* Missing index: `Please provide an index.`
+* Invalid index: `Index must be a positive integer.`
+* Empty displayed list: `No friends are currently displayed. Use list to show all friends.`
+* Index outside the displayed list: `No friend exists at index INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
+* No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
+* Duplicate name: `This friend already exists in GameMates.`
 
 ### Locating friends by name: `find`
 
@@ -263,7 +281,7 @@ Action | Format, Examples
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague`
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
+**Edit** | `edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant`
 **Help** | `help`
