@@ -28,7 +28,7 @@ public class FriendListPanel extends UiPart<Region> {
     public FriendListPanel(ObservableList<Friend> friendList, Consumer<Friend> onFriendSelected) {
         super(FXML);
         friendListView.setItems(friendList);
-        friendListView.setCellFactory(_ -> new FriendListViewCell(friendListView));
+        friendListView.setCellFactory(_ -> new FriendListViewCell());
         friendListView.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) ->
                 onFriendSelected.accept(newValue));
     }
@@ -37,10 +37,6 @@ public class FriendListPanel extends UiPart<Region> {
      * Custom {@code ListCell} that displays the graphics of a {@code Friend} using a {@code FriendCard}.
      */
     private static class FriendListViewCell extends ListCell<Friend> {
-        FriendListViewCell(ListView<Friend> listView) {
-            prefWidthProperty().bind(listView.widthProperty());
-        }
-
         @Override
         protected void updateItem(Friend friend, boolean empty) {
             super.updateItem(friend, empty);
