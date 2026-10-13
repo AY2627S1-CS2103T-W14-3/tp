@@ -44,6 +44,7 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 
 ## Features
 
+<!--suppress HtmlUnknownAttribute -->
 <div markdown="block" class="alert alert-info">
 
 **:information_source: Notes about the command format:**<br>
@@ -66,6 +67,16 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
+### Viewing friend details
+
+The main window has two panels: the friend list on the left and a details panel on the right.
+
+* Click a friend in the left panel to view their name, phone number, email address, tags, games, and in-game usernames
+  in the right panel.
+* On startup, the right panel shows your profile. If no profile details have been added, it shows `No details added`.
+* When a `find` command returns exactly one friend, that friend's details are shown automatically.
+* When no friend is selected, the right panel returns to showing your profile.
+
 ### Viewing help: `help`
 
 Shows a message explaining how to access the help page.
@@ -87,6 +98,7 @@ Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…`
   `John Doe` and `john   doe` identify the same friend.
 * Different friends may share a phone number or email address.
 
+<!--suppress HtmlUnknownAttribute -->
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A friend can have any number of tags, including zero.
 </div>
@@ -113,6 +125,7 @@ Phone numbers accept formats such as `91234567`, `+6591234567`, `+65 9123-4567` 
 * Command input is trimmed. Saved numbers must already match these rules.
 * Formatting is preserved. `+6591234567` and `+65 9123-4567` are different phone values.
 
+<!--suppress HtmlUnknownAttribute -->
 <div markdown="span" class="alert alert-warning">
 Validation checks format only, not country codes, national number lengths or whether a number is active.
 These rules also apply when editing friends and loading saved data.
@@ -128,6 +141,7 @@ Email addresses are trimmed before validation and must use ASCII `local-part@dom
 * Quoted local parts, address literals such as `user@[127.0.0.1]`, internal whitespace and non-ASCII
   characters are not supported. Validation checks format only, not whether a mailbox exists.
 
+<!--suppress HtmlUnknownAttribute -->
 <div markdown="span" class="alert alert-info">
 These rules use a practical subset of [RFC 5322's dot-atom syntax](https://www.rfc-editor.org/rfc/rfc5322#section-3.2.3)
 and [RFC 5321's SMTP length limits](https://www.rfc-editor.org/rfc/rfc5321#section-4.5.3.1).
@@ -249,6 +263,7 @@ GameMates automatically saves data after every command. You do not need to save 
 GameMates data is saved automatically as a JSON file `[JAR file location]/data/gamemates.json`. The friend list is stored under the `friends` key, and your profile is stored separately under `myself`. 
 Advanced users are welcome to update data directly by editing that data file.
 
+<!--suppress HtmlUnknownAttribute -->
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If your changes make the data file invalid, GameMates starts with an empty friend list at the next run. The invalid file remains on disk until you run a command (GameMates saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
@@ -276,12 +291,12 @@ _Details coming soon ..._
 
 ## Command summary
 
-Action | Format, Examples
---------|------------------
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague`
-**Clear** | `clear`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit** | `edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
-**Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
-**List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant`
-**Help** | `help`
+| Action | Format, Examples |
+|--------|------------------|
+| **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague` |
+| **Clear** | `clear` |
+| **Delete** | `delete INDEX`<br> e.g., `delete 3` |
+| **Edit** | `edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com` |
+| **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
+| **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
+| **Help** | `help` |

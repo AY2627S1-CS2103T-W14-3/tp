@@ -17,6 +17,7 @@ import seedu.address.logic.Logic;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.friend.Friend;
 
 /**
  * The Main Window. Provides the basic application layout containing
@@ -28,31 +29,37 @@ public class MainWindow extends UiPart<Stage> {
 
     private final Logger logger = LogsCenter.getLogger(getClass());
 
-    private Stage primaryStage;
-    private Logic logic;
-    private Path dataFilePath;
+    private final Stage primaryStage;
+    private final Logic logic;
+    private final Path dataFilePath;
 
     // Independent Ui parts residing in this Ui container
-    private FriendListPanel friendListPanel;
+    private FriendDetailsPanel friendDetailsPanel;
     private ResultDisplay resultDisplay;
-    private HelpWindow helpWindow;
+    private final HelpWindow helpWindow;
 
     @FXML
+    @SuppressWarnings("unused")
     private StackPane commandBoxPlaceholder;
 
     @FXML
+    @SuppressWarnings("unused")
     private MenuItem helpMenuItem;
 
     @FXML
-    private StackPane myselfPanelPlaceholder;
-
-    @FXML
+    @SuppressWarnings("unused")
     private StackPane friendListPanelPlaceholder;
 
     @FXML
+    @SuppressWarnings("unused")
+    private StackPane friendDetailsPanelPlaceholder;
+
+    @FXML
+    @SuppressWarnings("unused")
     private StackPane resultDisplayPlaceholder;
 
     @FXML
+    @SuppressWarnings("unused")
     private StackPane statusbarPlaceholder;
 
     /**
@@ -117,8 +124,11 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
-        refreshMyselfCard();
-        friendListPanel = new FriendListPanel(logic.getFilteredFriendList());
+        friendDetailsPanel = new FriendDetailsPanel(logic.getMyself(), true);
+        friendDetailsPanelPlaceholder.getChildren().add(friendDetailsPanel.getRoot());
+
+        FriendListPanel friendListPanel = new FriendListPanel(logic.getFilteredFriendList(),
+                this::showFriendDetails);
         friendListPanelPlaceholder.getChildren().add(friendListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
@@ -131,8 +141,19 @@ public class MainWindow extends UiPart<Stage> {
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
     }
 
-    private void refreshMyselfCard() {
-        myselfPanelPlaceholder.getChildren().setAll(new FriendCard(logic.getMyself()).getRoot());
+    private void refreshFriendDetails(CommandResult commandResult) {
+        showFriendDetails(commandResult.getFriendToShow().orElse(null));
+    }
+
+    /**
+     * Shows a selected friend, or the user profile when no friend is selected.
+     */
+    private void showFriendDetails(Friend friend) {
+        if (friend == null) {
+            friendDetailsPanel.setFriend(logic.getMyself(), true);
+        } else {
+            friendDetailsPanel.setFriend(friend, false);
+        }
     }
 
     /**
@@ -175,10 +196,6 @@ public class MainWindow extends UiPart<Stage> {
         primaryStage.hide();
     }
 
-    public FriendListPanel getFriendListPanel() {
-        return friendListPanel;
-    }
-
     /**
      * Executes the command and returns the result.
      *
@@ -189,6 +206,7 @@ public class MainWindow extends UiPart<Stage> {
             CommandResult commandResult = logic.execute(commandText);
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
+            refreshFriendDetails(commandResult);
 
             if (commandResult.isShowHelp()) {
                 handleHelp();
@@ -203,8 +221,6 @@ public class MainWindow extends UiPart<Stage> {
             logger.info("An error occurred while executing command: " + commandText);
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
-        } finally {
-            refreshMyselfCard();
         }
     }
 }
