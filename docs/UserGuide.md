@@ -44,7 +44,6 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 
 ## Features
 
-<!--suppress HtmlUnknownAttribute -->
 <div markdown="block" class="alert alert-info">
 
 **:information_source: Notes about the command format:**<br>
@@ -98,7 +97,6 @@ Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…`
   `John Doe` and `john   doe` identify the same friend.
 * Different friends may share a phone number or email address.
 
-<!--suppress HtmlUnknownAttribute -->
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A friend can have any number of tags, including zero.
 </div>
@@ -125,7 +123,6 @@ Phone numbers accept formats such as `91234567`, `+6591234567`, `+65 9123-4567` 
 * Command input is trimmed. Saved numbers must already match these rules.
 * Formatting is preserved. `+6591234567` and `+65 9123-4567` are different phone values.
 
-<!--suppress HtmlUnknownAttribute -->
 <div markdown="span" class="alert alert-warning">
 Validation checks format only, not country codes, national number lengths or whether a number is active.
 These rules also apply when editing friends and loading saved data.
@@ -141,7 +138,6 @@ Email addresses are trimmed before validation and must use ASCII `local-part@dom
 * Quoted local parts, address literals such as `user@[127.0.0.1]`, internal whitespace and non-ASCII
   characters are not supported. Validation checks format only, not whether a mailbox exists.
 
-<!--suppress HtmlUnknownAttribute -->
 <div markdown="span" class="alert alert-info">
 These rules use a practical subset of [RFC 5322's dot-atom syntax](https://www.rfc-editor.org/rfc/rfc5322#section-3.2.3)
 and [RFC 5321's SMTP length limits](https://www.rfc-editor.org/rfc/rfc5321#section-4.5.3.1).
@@ -263,7 +259,6 @@ GameMates automatically saves data after every command. You do not need to save 
 GameMates data is saved automatically as a JSON file `[JAR file location]/data/gamemates.json`. The friend list is stored under the `friends` key, and your profile is stored separately under `myself`. 
 Advanced users are welcome to update data directly by editing that data file.
 
-<!--suppress HtmlUnknownAttribute -->
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If your changes make the data file invalid, GameMates starts with an empty friend list at the next run. The invalid file remains on disk until you run a command (GameMates saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
