@@ -9,7 +9,7 @@ title: Developer Guide
 
 ## **Acknowledgements**
 
-* _{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}_
+* [Vavr](https://vavr.io/) provides `Option`, `Try`, and checked-function adapters for parsing, edit descriptors, and storage.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -114,6 +114,17 @@ How the parsing works:
 * When called upon to parse a user command, the `GameMatesParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `GameMatesParser` returns that object as a `Command` object.
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
+#### Optional values
+
+Command parsers and edit descriptors use Vavr `Option` to represent omitted values. A missing prefix
+is absent, while a supplied prefix with an empty value is present and subject to validation. Add
+commands default omitted contact details to `Phone.EMPTY` and `Email.EMPTY`. Edits preserve omitted
+fields; a single empty `t/` clears the tags. Descriptor tag getters expose an unmodifiable set, and
+setters retain defensive copies.
+
+Parsing continues to report the first invalid value through `ParseException`. Vavr's checked-function
+adapters propagate the original exception, so invalid input is never treated as an omitted argument.
+
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java)
 
@@ -144,6 +155,14 @@ The `Storage` component,
 * can save both GameMates data and user preference data in JSON format, and read them back into corresponding objects.
 * is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonGameMatesStorage` and `JsonUserPrefsStorage` (one class per data file).
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
+
+Storage reads return Vavr `Option`: missing files are absent, while malformed JSON or invalid stored
+friend data still causes `DataLoadingException`. Vavr `Try` captures JSON read and model conversion
+failures, translating captured failures into checked `DataLoadingException` instances with the original cause.
+Startup uses sample data for a missing GameMates file
+and an empty GameMates for a loading error. Missing or unreadable preferences use default preferences.
+JSON contact fields that are null or empty map to the corresponding empty contact value; invalid
+nonempty values are rejected without trimming.
 
 ### Common classes
 
