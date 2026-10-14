@@ -48,6 +48,16 @@ public class EditCommandParserTest {
     private EditCommandParser parser = new EditCommandParser();
 
     @Test
+    public void parse_myselfSelector_success() {
+        EditFriendDescriptor descriptor = new EditFriendDescriptorBuilder().withName(VALID_NAME_AMY).build();
+        EditCommand expected = new EditCommand(Index.myself(), descriptor);
+        assertParseSuccess(parser, "myself" + NAME_DESC_AMY, expected);
+        assertParseSuccess(parser, "  MYSELF  " + NAME_DESC_AMY, expected);
+        assertParseFailure(parser, "myself", EditCommand.MESSAGE_NOT_EDITED);
+        assertParseFailure(parser, "myself n/", Name.MESSAGE_CONSTRAINTS);
+    }
+
+    @Test
     public void parse_missingParts_failure() {
         // no index specified
         assertParseFailure(parser, VALID_NAME_AMY, MESSAGE_INVALID_FORMAT);

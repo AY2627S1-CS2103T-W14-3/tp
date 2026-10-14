@@ -27,18 +27,18 @@ import seedu.address.model.friend.Phone;
 import seedu.address.model.tag.Tag;
 
 /**
- * Edits the details of an existing friend in GameMates.
+ * Edits the details of an existing friend or the Myself profile in GameMates.
  */
 public class EditCommand extends Command {
 
     public static final String COMMAND_WORD = "edit";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the details of the friend identified "
-            + "by the index number used in the displayed friend list. "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits a friend by its displayed index "
+            + "or your own profile using myself. "
             + "Supplied name and contact values replace existing values. "
             + "Each supplied tag is removed if present or added if absent. "
             + "Use t/ without a value to remove all tags.\n"
-            + "Parameters: INDEX (must be a positive integer) "
+            + "Parameters: INDEX (a positive integer for a friend, or myself for your own profile) "
             + "[" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_PHONE + "[PHONE]] "
             + "[" + PREFIX_EMAIL + "[EMAIL]] "
@@ -62,7 +62,7 @@ public class EditCommand extends Command {
     private final EditFriendDescriptor editFriendDescriptor;
 
     /**
-     * @param index of the friend in the filtered friend list to edit
+     * @param index of the friend in the filtered friend list, or an index selecting Myself
      * @param editFriendDescriptor details to edit the friend with
      */
     public EditCommand(Index index, EditFriendDescriptor editFriendDescriptor) {
@@ -76,6 +76,12 @@ public class EditCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
+        if (index.isMyself()) {
+            Friend original = model.getGameMates().getMyself();
+            Friend edited = createEditedFriend(original, editFriendDescriptor);
+            model.setMyself(edited);
+            return new CommandResult(formatSuccessMessage(original, edited));
+        }
         List<Friend> lastShownList = model.getFilteredFriendList();
 
         if (lastShownList.isEmpty()) {

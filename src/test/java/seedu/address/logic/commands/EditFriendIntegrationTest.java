@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -39,6 +40,69 @@ public class EditFriendIntegrationTest {
                 .withGames(new GameBuilder().build()).build();
         model.addFriend(friend);
         return friend;
+    }
+
+    @Test
+    public void execute_myselfWithoutFriends_updatesDetailsAndSurvivesReload() throws Exception {
+        Friend original = new FriendBuilder().withName("Myself")
+                .withGames(new GameBuilder().build()).withTags("friend").build();
+        model.setMyself(original);
+
+        CommandResult result = parser.parseCommand("edit myself n/Alex Tan p/ e/").execute(model);
+
+        Friend expected = new Friend(new Name("Alex Tan"), Phone.EMPTY, Email.EMPTY,
+                original.getGames(), original.getTags());
+        assertEquals(expected, model.getGameMates().getMyself());
+        assertTrue(model.getFilteredFriendList().isEmpty());
+        assertEquals("Edited Alex Tan\n- changed name to Alex Tan\n- removed phone number\n- removed email",
+                result.getFeedbackToUser());
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(testFolder.resolve("myself.json"));
+        storage.saveGameMates(model.getGameMates());
+        assertEquals(model.getGameMates(), storage.readGameMates().get());
+    }
+
+    @Test
+    public void execute_myselfMatchingFriendName_preservesFriendsAndFilter() throws Exception {
+        Friend hidden = addFriend("Melody");
+        Friend displayed = addFriend("Joash");
+        model.updateFilteredFriendList(friend -> friend.equals(displayed));
+
+        parser.parseCommand("edit myself n/Melody").execute(model);
+
+        assertEquals("Melody", model.getGameMates().getMyself().getName().fullName);
+        assertEquals(List.of(hidden, displayed), model.getGameMates().getFriendList());
+        assertEquals(List.of(displayed), model.getFilteredFriendList());
+    }
+
+    @Test
+    public void execute_myselfTags_toggleAndClearOnlyProfileTags() throws Exception {
+        Friend friend = addFriend("Melody");
+        Friend original = new FriendBuilder().withName("Myself").withTags("friend", "teammate").build();
+        model.setMyself(original);
+
+        parser.parseCommand("edit myself t/friend t/new").execute(model);
+        assertEquals(new FriendBuilder(original).withTags("teammate", "new").build(),
+                model.getGameMates().getMyself());
+
+        parser.parseCommand("edit myself t/").execute(model);
+        assertEquals(new FriendBuilder(original).withTags().build(), model.getGameMates().getMyself());
+        assertEquals(friend, model.getFilteredFriendList().getFirst());
+    }
+
+    @Test
+    public void execute_friendEdit_preservesMyselfAndInvalidProfileEditDoesNotChangeData() throws Exception {
+        addFriend("Melody");
+        Friend myself = model.getGameMates().getMyself();
+        parser.parseCommand("edit 1 n/Joash").execute(model);
+        assertEquals(myself, model.getGameMates().getMyself());
+
+        GameMates before = new GameMates(model.getGameMates());
+        assertThrows(ParseException.class, () -> parser.parseCommand("edit myself n/Alex e/invalid"));
+        assertEquals(before, model.getGameMates());
+        model.updateFilteredFriendList(friend -> false);
+        parser.parseCommand("edit myself e/alex@example.com").execute(model);
+        assertTrue(model.getFilteredFriendList().isEmpty());
+        assertEquals("alex@example.com", model.getGameMates().getMyself().getEmail().value);
     }
 
     @Test
