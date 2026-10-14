@@ -45,7 +45,11 @@
 <a href="#design" id="markdown-toc-design"><strong>Design</strong></a>    <ul>
       <li><a href="#architecture" id="markdown-toc-architecture">Architecture</a></li>
       <li><a href="#ui-component" id="markdown-toc-ui-component">UI component</a></li>
-      <li><a href="#logic-component" id="markdown-toc-logic-component">Logic component</a></li>
+      <li>
+<a href="#logic-component" id="markdown-toc-logic-component">Logic component</a>        <ul>
+          <li><a href="#optional-values" id="markdown-toc-optional-values">Optional values</a></li>
+        </ul>
+      </li>
       <li><a href="#model-component" id="markdown-toc-model-component">Model component</a></li>
       <li><a href="#storage-component" id="markdown-toc-storage-component">Storage component</a></li>
       <li><a href="#common-classes" id="markdown-toc-common-classes">Common classes</a></li>
@@ -95,7 +99,8 @@
 <h2 id="acknowledgements"><strong>Acknowledgements</strong></h2>
 
 <ul>
-  <li><em>{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}</em></li>
+  <li>
+<a href="https://vavr.io/">Vavr</a> provides <code class="language-plaintext highlighter-rouge">Option</code>, <code class="language-plaintext highlighter-rouge">Try</code>, and checked-function adapters for parsing, edit descriptors, and storage.</li>
 </ul>
 
 <hr>
@@ -218,6 +223,17 @@ Note that although this is shown as a single step in the diagram above for simpl
   <li>All <code class="language-plaintext highlighter-rouge">XYZCommandParser</code> classes, such as <code class="language-plaintext highlighter-rouge">AddCommandParser</code> and <code class="language-plaintext highlighter-rouge">DeleteCommandParser</code>, implement the <code class="language-plaintext highlighter-rouge">Parser</code> interface so they can be treated similarly where appropriate, for example during testing.</li>
 </ul>
 
+<h4 id="optional-values">Optional values</h4>
+
+<p>Command parsers and edit descriptors use Vavr <code class="language-plaintext highlighter-rouge">Option</code> to represent omitted values. A missing prefix
+is absent, while a supplied prefix with an empty value is present and subject to validation. Add
+commands default omitted contact details to <code class="language-plaintext highlighter-rouge">Phone.EMPTY</code> and <code class="language-plaintext highlighter-rouge">Email.EMPTY</code>. Edits preserve omitted
+fields; a single empty <code class="language-plaintext highlighter-rouge">t/</code> clears the tags. Descriptor tag getters expose an unmodifiable set, and
+setters retain defensive copies.</p>
+
+<p>Parsing continues to report the first invalid value through <code class="language-plaintext highlighter-rouge">ParseException</code>. Vavr’s checked-function
+adapters propagate the original exception, so invalid input is never treated as an omitted argument.</p>
+
 <h3 id="model-component">Model component</h3>
 <p><strong>API</strong> : <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java"><code class="language-plaintext highlighter-rouge">Model.java</code></a></p>
 
@@ -251,6 +267,14 @@ Note that although this is shown as a single step in the diagram above for simpl
   <li>is implemented by <code class="language-plaintext highlighter-rouge">StorageManager</code>, which delegates the actual JSON file access to <code class="language-plaintext highlighter-rouge">JsonGameMatesStorage</code> and <code class="language-plaintext highlighter-rouge">JsonUserPrefsStorage</code> (one class per data file).</li>
   <li>depends on some classes in the <code class="language-plaintext highlighter-rouge">Model</code> component (because the <code class="language-plaintext highlighter-rouge">Storage</code> component’s job is to save/retrieve objects that belong to the <code class="language-plaintext highlighter-rouge">Model</code>)</li>
 </ul>
+
+<p>Storage reads return Vavr <code class="language-plaintext highlighter-rouge">Option</code>: missing files are absent, while malformed JSON or invalid stored
+friend data still causes <code class="language-plaintext highlighter-rouge">DataLoadingException</code>. Vavr <code class="language-plaintext highlighter-rouge">Try</code> captures JSON read and model conversion
+failures, translating captured failures into checked <code class="language-plaintext highlighter-rouge">DataLoadingException</code> instances with the original cause.
+Startup uses sample data for a missing GameMates file
+and an empty GameMates for a loading error. Missing or unreadable preferences use default preferences.
+JSON contact fields that are null or empty map to the corresponding empty contact value; invalid
+nonempty values are rejected without trimming.</p>
 
 <h3 id="common-classes">Common classes</h3>
 
