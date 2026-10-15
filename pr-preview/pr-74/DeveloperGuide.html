@@ -62,6 +62,13 @@
       <li><a href="#viewing-a-friends-games" id="markdown-toc-viewing-a-friends-games">Viewing a friend’s games</a></li>
       <li><a href="#mvp-integration-and-specification-departures" id="markdown-toc-mvp-integration-and-specification-departures">MVP integration and specification departures</a></li>
       <li>
+<a href="#game-metadata" id="markdown-toc-game-metadata">Game metadata</a>        <ul>
+          <li><a href="#validation-and-equality" id="markdown-toc-validation-and-equality">Validation and equality</a></li>
+          <li><a href="#parsing" id="markdown-toc-parsing">Parsing</a></li>
+          <li><a href="#persistence-and-testing" id="markdown-toc-persistence-and-testing">Persistence and testing</a></li>
+        </ul>
+      </li>
+      <li>
 <a href="#proposed-undoredo-feature" id="markdown-toc-proposed-undoredo-feature">[Proposed] Undo/redo feature</a>        <ul>
           <li><a href="#proposed-implementation" id="markdown-toc-proposed-implementation">Proposed Implementation</a></li>
           <li><a href="#design-considerations" id="markdown-toc-design-considerations">Design considerations:</a></li>
@@ -270,15 +277,16 @@ adapters propagate the original exception, so invalid input is never treated as 
 The profile is not in the friend list. Add/edit commands separately prevent names shared between a friend and the profile.</li>
   <li>exposes an observable <code class="language-plaintext highlighter-rouge">FilteredList&lt;Friend&gt;</code> backed by the stored friends. The filter is a predicate over the
 full list, rather than a second collection of copied friends.</li>
+  <li>stores each friend’s games as <code class="language-plaintext highlighter-rouge">Game</code> objects, including their game name, username and optional metadata.</li>
   <li>stores a <code class="language-plaintext highlighter-rouge">UserPrefs</code> object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a <code class="language-plaintext highlighter-rouge">ReadOnlyUserPrefs</code> object.</li>
   <li>does not depend on any of the other three components (as the <code class="language-plaintext highlighter-rouge">Model</code> represents data entities of the domain, they should make sense on their own without depending on other components)</li>
 </ul>
 
 <p><code class="language-plaintext highlighter-rouge">Friend</code> contains <code class="language-plaintext highlighter-rouge">Name</code>, optional contact values, a set of <code class="language-plaintext highlighter-rouge">Tag</code> objects and a set of <code class="language-plaintext highlighter-rouge">Game</code> objects.
-<code class="language-plaintext highlighter-rouge">Game</code> currently has only <code class="language-plaintext highlighter-rouge">GameName</code> and <code class="language-plaintext highlighter-rouge">Username</code>. Name equality ignores case and collapses repeated ASCII spaces;
+<code class="language-plaintext highlighter-rouge">Game</code> contains <code class="language-plaintext highlighter-rouge">GameName</code>, <code class="language-plaintext highlighter-rouge">Username</code> and an immutable metadata set. Name equality ignores case and collapses repeated ASCII spaces;
 <code class="language-plaintext highlighter-rouge">GameName.equals</code> compares complete names using lower-case normalization with <code class="language-plaintext highlighter-rouge">Locale.ROOT</code>.
-<code class="language-plaintext highlighter-rouge">Username</code> preserves case. <code class="language-plaintext highlighter-rouge">Game.isSameGame</code> compares game names, while full equality also compares usernames.
-There is no metadata collection or metadata validator in this checkout. The set representation alone does not enforce
+<code class="language-plaintext highlighter-rouge">Username</code> preserves case. <code class="language-plaintext highlighter-rouge">Game.isSameGame</code> compares game names, while full equality also compares usernames and metadata.
+The set representation alone does not enforce
 one entry per game name when different usernames are loaded from JSON; do not infer game-command duplicate handling
 from the proposed specification.</p>
 
@@ -299,6 +307,7 @@ from the proposed specification.</p>
 <ul>
   <li>can save both GameMates data and user preference data in JSON format, and read them back into corresponding objects.</li>
   <li>is implemented by <code class="language-plaintext highlighter-rouge">StorageManager</code>, which delegates the actual JSON file access to <code class="language-plaintext highlighter-rouge">JsonGameMatesStorage</code> and <code class="language-plaintext highlighter-rouge">JsonUserPrefsStorage</code> (one class per data file).</li>
+  <li>converts game metadata through <code class="language-plaintext highlighter-rouge">JsonAdaptedGame</code> and <code class="language-plaintext highlighter-rouge">JsonAdaptedMeta</code>, validating fields and rejecting duplicate keys when loading.</li>
   <li>depends on some classes in the <code class="language-plaintext highlighter-rouge">Model</code> component (because the <code class="language-plaintext highlighter-rouge">Storage</code> component’s job is to save/retrieve objects that belong to the <code class="language-plaintext highlighter-rouge">Model</code>)</li>
 </ul>
 
@@ -318,8 +327,8 @@ JAR’s location. <code class="language-plaintext highlighter-rouge">MainApp.ini
 not by <code class="language-plaintext highlighter-rouge">stop</code>. Selection and filter predicates are transient.</p>
 
 <p><code class="language-plaintext highlighter-rouge">JsonSerializableGameMates</code> adapts both <code class="language-plaintext highlighter-rouge">friends</code> and <code class="language-plaintext highlighter-rouge">myself</code>; <code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> adapts games and tags, and
-<code class="language-plaintext highlighter-rouge">JsonAdaptedGame</code> adapts <code class="language-plaintext highlighter-rouge">name</code> and <code class="language-plaintext highlighter-rouge">username</code>. Jackson ignores unknown properties. Such properties, including
-unsupported metadata, disappear on the next serialization. Loading a damaged file does not repair or back it up:
+<code class="language-plaintext highlighter-rouge">JsonAdaptedGame</code> adapts <code class="language-plaintext highlighter-rouge">name</code>, <code class="language-plaintext highlighter-rouge">username</code> and <code class="language-plaintext highlighter-rouge">metas</code>. Jackson ignores unknown properties, which
+disappear on the next serialization. Loading a damaged file does not repair or back it up:
 the next successful command can overwrite it with the fallback data. There is no automatic recovery or atomic
 transaction spanning command execution and file writing.</p>
 
@@ -409,8 +418,9 @@ Parse and execution failures do not refresh the panel, preserving the previous g
 
 <p>The command does not update the model’s friend-list predicate, friends, games, preferences or Myself profile.
 The existing profile fallback and its rendering are preserved. <code class="language-plaintext highlighter-rouge">GameDetailsCard</code> currently renders the available
-<code class="language-plaintext highlighter-rouge">Game.getGameName()</code> and <code class="language-plaintext highlighter-rouge">Game.getUsername()</code> fields. Metadata rendering is an integration dependency: this checkout
-has no metadata field or accessor in <code class="language-plaintext highlighter-rouge">Game</code>. When that model is available, extend the card using its actual API.</p>
+<code class="language-plaintext highlighter-rouge">Game.getGameName()</code> and <code class="language-plaintext highlighter-rouge">Game.getUsername()</code> fields. Metadata storage has merged, but cards do not yet render
+<code class="language-plaintext highlighter-rouge">Game.getMetas()</code>. Extend the card using <code class="language-plaintext highlighter-rouge">Meta.getKey()</code> and <code class="language-plaintext highlighter-rouge">Meta.getValue()</code> and add rendering/preservation tests;
+the command’s original-friend payload already retains metadata without copying or removing it.</p>
 
 <p>Parser and command tests cover errors, exact matching, empty results, displayed-list indexing and unchanged model
 data. JavaFX panel and window tests exercise filtered payloads, empty states, clearing by commands and selection,
@@ -451,7 +461,8 @@ before publishing a complete v1.3 MVP guide.</p>
     <tr>
       <td>Metadata</td>
       <td>Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20).</td>
-      <td>No metadata model, JSON adapter, validator or card rendering is available. <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64">PR #64</a> is pending. Verify its actual API, validation, storage and display before writing user instructions.</td>
+      <td>
+<a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64">PR #64</a> has merged the model, parser utilities and JSON persistence. Command entry and game-card rendering remain unavailable. See <a href="#game-metadata">Game metadata</a> for the implemented API.</td>
     </tr>
     <tr>
       <td>Tags</td>
@@ -497,8 +508,82 @@ game-text validation uses ISO-control rejection rather than a complete Unicode p
 recorded limits; no application fix is included in this documentation change.</p>
 
 <p>Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
-not a current use-case step. Game creation/deletion and metadata cannot yet be demonstrated in this checkout;
+not a current use-case step. Game creation/deletion and metadata entry/display cannot yet be demonstrated in this checkout;
 capture those screenshots after integration. Own-profile editing is available through <code class="language-plaintext highlighter-rouge">edit myself</code>.</p>
+
+<h3 id="game-metadata">Game metadata</h3>
+
+<p>Metadata records game-specific details such as a friend’s role or play style.
+<code class="language-plaintext highlighter-rouge">Meta</code>, <code class="language-plaintext highlighter-rouge">MetaKey</code> and <code class="language-plaintext highlighter-rouge">MetaValue</code> are immutable classes in <code class="language-plaintext highlighter-rouge">seedu.address.model.game.meta</code>.
+Each <code class="language-plaintext highlighter-rouge">Meta</code> contains one key and one value. <code class="language-plaintext highlighter-rouge">Game</code> copies the supplied metadata collection and
+exposes it as an unmodifiable set through <code class="language-plaintext highlighter-rouge">getMetas()</code>; the two-argument constructor defaults to an empty set.</p>
+
+<h4 id="validation-and-equality">Validation and equality</h4>
+
+<p>Leading and trailing whitespace is removed with <code class="language-plaintext highlighter-rouge">String.strip()</code> before validation and storage.
+<code class="language-plaintext highlighter-rouge">StringUtil.isValidTextField()</code> requires non-empty text with at least one letter or digit and no ISO control characters.
+Limits use <code class="language-plaintext highlighter-rouge">String.length()</code> (UTF-16 units), so supplementary characters count as two.
+This check allows punctuation and does not exclude other Unicode categories, such as format characters.
+<code class="language-plaintext highlighter-rouge">GameName</code> and <code class="language-plaintext highlighter-rouge">Username</code> also use this utility.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Length after trimming</th>
+      <th>Colon handling</th>
+      <th>Equality</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">MetaKey</code></td>
+      <td>1–50</td>
+      <td>Colons rejected</td>
+      <td>Case-insensitive using <code class="language-plaintext highlighter-rouge">Locale.ROOT</code>
+</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">MetaValue</code></td>
+      <td>1–200</td>
+      <td>Colons allowed</td>
+      <td>Case-sensitive</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Keys must be unique within each game entry, including when repeated pairs have identical values.
+The same key can occur in other games or friends. <code class="language-plaintext highlighter-rouge">Game</code> enforces this invariant when constructed.
+<code class="language-plaintext highlighter-rouge">Meta.equals()</code> compares both fields; <code class="language-plaintext highlighter-rouge">Game.equals()</code> includes metadata, while <code class="language-plaintext highlighter-rouge">isSameGame()</code> compares only the game name.</p>
+
+<h4 id="parsing">Parsing</h4>
+
+<p><code class="language-plaintext highlighter-rouge">ParserUtil.parseMeta()</code> uses <code class="language-plaintext highlighter-rouge">StringUtil.splitAtFirstColon()</code> and delegates field parsing to
+<code class="language-plaintext highlighter-rouge">parseMetaKey()</code> and <code class="language-plaintext highlighter-rouge">parseMetaValue()</code>. For example, ` Role : Support:Mid ` becomes key <code class="language-plaintext highlighter-rouge">Role</code> and value <code class="language-plaintext highlighter-rouge">Support:Mid</code>.
+Missing separators and invalid fields cause <code class="language-plaintext highlighter-rouge">ParseException</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">parseMetas()</code> parses a collection of raw values and rejects duplicate normalized keys before returning a set.
+Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
+These are parser utilities; command-specific metadata flag handling is not yet implemented.</p>
+
+<h4 id="persistence-and-testing">Persistence and testing</h4>
+
+<p><code class="language-plaintext highlighter-rouge">JsonAdaptedGame</code> stores metadata as a <code class="language-plaintext highlighter-rouge">metas</code> array of <code class="language-plaintext highlighter-rouge">JsonAdaptedMeta</code> objects:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Valorant"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"player"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"metas"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Role"</span><span class="p">,</span><span class="w"> </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Support:Mid"</span><span class="w"> </span><span class="p">}]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Missing or null <code class="language-plaintext highlighter-rouge">metas</code> fields load as an empty set, preserving compatibility with existing save files.
+Null array entries, invalid fields and duplicate keys cause <code class="language-plaintext highlighter-rouge">IllegalValueException</code> during model conversion.</p>
+
+<p>Tests cover trimmed length boundaries, Unicode, control characters, colons, case normalization,
+duplicate keys, immutability, JSON round-trips and metadata preservation during contact edits.
+<code class="language-plaintext highlighter-rouge">GameBuilder.addMeta("Role", "Support")</code> appends a pair; <code class="language-plaintext highlighter-rouge">withMetas(...)</code> replaces the collection.
+Duplicate keys added through the builder are rejected by <code class="language-plaintext highlighter-rouge">build()</code>.</p>
 
 <h3 id="proposed-undoredo-feature">[Proposed] Undo/redo feature</h3>
 
@@ -1012,7 +1097,7 @@ The current recovery procedure is to copy the JSON file while the application is
 
 <h3 id="non-functional-requirements">Non-Functional Requirements</h3>
 
-<p>The following are targets, not measured guarantees. Targets involving game modification or metadata
+<p>The following are targets, not measured guarantees. Targets involving game modification or metadata entry/display
 remain pending integration; startup/performance and large-data capacity need separate measurement.</p>
 
 <h4 id="environment">Environment</h4>
@@ -1028,7 +1113,7 @@ remain pending integration; startup/performance and large-data capacity need sep
 <ol>
   <li>All data should be stored locally in a human-editable JSON file. GameMates should not send any data over the network.</li>
   <li>Successfully saved data should be restored on the next launch from the same working directory. Current data saves
-occur after successful commands; window preferences save on shutdown. Metadata persistence is a pending target.</li>
+occur after successful commands; window preferences save on shutdown. Metadata persistence is implemented in the JSON adapters.</li>
   <li>If the data file is missing, GameMates should start with the sample data without crashing. If the data file is corrupted, GameMates should start with an empty list without crashing.</li>
 </ol>
 
@@ -1072,7 +1157,7 @@ occur after successful commands; window preferences save on shutdown. Metadata p
   <li>
 <strong>User profile</strong>: The current user’s separately stored details, edited using <code class="language-plaintext highlighter-rouge">edit myself ...</code> and preserved by friend-list commands.</li>
   <li>
-<strong>Game entry</strong>: A record that a friend plays a game, containing a game name and in-game username. Metadata is pending integration.</li>
+<strong>Game entry</strong>: A record that a friend plays a game, containing a game name, in-game username and optional metadata.</li>
   <li>
 <strong>Role</strong>: A job or duty a friend plays as in a particular game, for example a friend can play as a <code class="language-plaintext highlighter-rouge">Sniper</code> or a <code class="language-plaintext highlighter-rouge">Healer</code>.</li>
   <li>
@@ -1080,7 +1165,7 @@ occur after successful commands; window preferences save on shutdown. Metadata p
   <li>
 <strong>In-game username/Handle</strong>: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.</li>
   <li>
-<strong>Metadata</strong>: Proposed additional information for a game entry, such as a role, preferred weapon, server or play style; not supported in this checkout.</li>
+<strong>Metadata</strong>: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; command entry and card rendering are not yet supported.</li>
   <li>
 <strong>Metadata key</strong>: The label before the first colon in a metadata item. For example, <code class="language-plaintext highlighter-rouge">Role</code> in <code class="language-plaintext highlighter-rouge">Role:Sentinel</code>.</li>
   <li>
@@ -1281,7 +1366,10 @@ its Minecraft game preserved. The left friend list remains empty. <code class="l
 duplicate name, and <code class="language-plaintext highlighter-rouge">add n/joash updated</code> rejects a name matching the profile.</li>
   <li>Try <code class="language-plaintext highlighter-rouge">edit n/Changed</code>, <code class="language-plaintext highlighter-rouge">gameadd 1 g/Test u/player</code>, and <code class="language-plaintext highlighter-rouge">gamedel 1 g/Valorant</code>.
 Expected: missing-index or unknown-command errors. The profile and game remain unchanged.
-Metadata entry cannot be tested as a working feature because no model or command API exists yet.</li>
+Metadata command entry cannot be tested because no routed command supports it yet. To test storage, close the app,
+add <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code> to the fixture’s Minecraft entry, relaunch and run <code class="language-plaintext highlighter-rouge">list</code>.
+The saved JSON must retain that pair; cards currently show only the game name and username. A missing <code class="language-plaintext highlighter-rouge">metas</code>
+field loads as empty; a repeated key (including case variants) rejects the load and uses the documented fallback.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">find Fixture</code>, then <code class="language-plaintext highlighter-rouge">gamelist 1 g/valorant</code>, then <code class="language-plaintext highlighter-rouge">exit</code>. Relaunch from the same folder.
 Expected: the edited friend phone, friend game and profile game survive, with Joash Updated’s profile displayed

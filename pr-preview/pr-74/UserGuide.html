@@ -613,7 +613,11 @@ Copy <code class="language-plaintext highlighter-rouge">preferences.json</code> 
 <p>If you edit JSON manually, close the app first and keep a backup. Friend entries contain <code class="language-plaintext highlighter-rouge">name</code>, optional
 <code class="language-plaintext highlighter-rouge">phone</code> and <code class="language-plaintext highlighter-rouge">email</code>, <code class="language-plaintext highlighter-rouge">tags</code>, and <code class="language-plaintext highlighter-rouge">games</code>. A game has a <code class="language-plaintext highlighter-rouge">name</code> and <code class="language-plaintext highlighter-rouge">username</code>. Existing files that omit <code class="language-plaintext highlighter-rouge">games</code>
 load with no games; files that omit <code class="language-plaintext highlighter-rouge">myself</code> use the default empty profile. Empty or missing contact fields mean
-<code class="language-plaintext highlighter-rouge">Not provided</code>. Use the same validation rules as command input, and do not add unsupported metadata fields.</p>
+<code class="language-plaintext highlighter-rouge">Not provided</code>. Use the same validation rules as command input. Stored game metadata is supported as an optional
+<code class="language-plaintext highlighter-rouge">metas</code> array, for example <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code>. Keys contain 1–50 characters
+and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
+colons and must be unique per game, ignoring case; values may contain colons. Missing <code class="language-plaintext highlighter-rouge">metas</code> loads as empty.
+Metadata is preserved when saving, but cannot yet be entered through commands or viewed in game cards.</p>
 
 <div class="alert alert-warning">
 <img class="emoji" title=":exclamation:" alt=":exclamation:" src="https://github.githubassets.com/images/icons/emoji/unicode/2757.png" height="20" width="20"> <strong>Caution:</strong>
@@ -621,7 +625,7 @@ If the file is missing, the app starts with sample friends and the default profi
 because of malformed JSON or invalid stored values, it starts with an empty friend list and default profile.
 The original file is not automatically repaired or backed up. The next successful command can overwrite it with
 the current data, so close the app and restore your backup before entering commands if you need to recover it.
-Unknown JSON fields are ignored and are not preserved on the next save. This includes unsupported metadata.
+Unknown JSON fields are ignored and are not preserved on the next save. Use the supported <code class="language-plaintext highlighter-rouge">metas</code> format for metadata.
 </div>
 
 <h3 id="archiving-data-files-coming-in-v20">Archiving data files <code class="language-plaintext highlighter-rouge">[coming in v2.0]</code>
