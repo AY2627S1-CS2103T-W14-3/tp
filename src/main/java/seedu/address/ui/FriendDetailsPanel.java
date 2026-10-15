@@ -10,6 +10,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.game.GameName;
 
 /**
  * A panel that displays the complete details of the user profile or one friend.
@@ -58,6 +59,14 @@ public class FriendDetailsPanel extends UiPart<Region> {
      * Shows {@code friend}'s details. The default profile is represented by an empty state.
      */
     public void setFriend(Friend friend, boolean isMyself) {
+        setFriend(friend, isMyself, null);
+    }
+
+    /**
+     * Shows the original friend's details, optionally filtering only the rendered game cards.
+     * A null filter shows all games. The user profile always shows all its games.
+     */
+    public void setFriend(Friend friend, boolean isMyself, GameName gameFilter) {
         requireNonNull(friend);
         title.setText(isMyself ? "Your details" : "Friend details");
 
@@ -84,12 +93,14 @@ public class FriendDetailsPanel extends UiPart<Region> {
         }
 
         games.getChildren().setAll(friend.getGames().stream()
+                .filter(game -> isMyself || gameFilter == null || gameFilter.equals(game.getGameName()))
                 .sorted(Comparator.comparing(game -> game.getGameName().value))
                 .map(GameDetailsCard::new)
                 .map(GameDetailsCard::getRoot)
                 .toList());
         if (games.getChildren().isEmpty()) {
-            games.getChildren().add(createLabel("No games added", "details-empty-value"));
+            String emptyMessage = isMyself || gameFilter == null ? "No games added" : "No matching game: " + gameFilter;
+            games.getChildren().add(createLabel(emptyMessage, "details-empty-value"));
         }
     }
 

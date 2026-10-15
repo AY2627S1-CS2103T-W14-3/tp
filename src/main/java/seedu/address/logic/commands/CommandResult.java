@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.game.GameName;
 
 /**
  * Represents the result of a command execution.
@@ -24,25 +25,41 @@ public class CommandResult {
     /** The friend whose details the UI should show, when a command has one unambiguous result. */
     private final Friend friendToShow;
 
+    /** An optional filter applied only to the selected friend's game cards. */
+    private final GameName gameFilter;
+
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
     public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
-        this(feedbackToUser, showHelp, exit, null);
+        this(feedbackToUser, showHelp, exit, null, null);
     }
 
     /**
      * Constructs a {@code CommandResult} that asks the UI to show a friend's details.
      */
     public CommandResult(String feedbackToUser, Friend friendToShow) {
-        this(feedbackToUser, false, false, friendToShow);
+        this(feedbackToUser, friendToShow, null);
     }
 
-    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit, Friend friendToShow) {
+    /**
+     * Constructs a result selecting a friend and optionally filtering their displayed games.
+     * A non-null game filter requires a selected friend.
+     */
+    public CommandResult(String feedbackToUser, Friend friendToShow, GameName gameFilter) {
+        this(feedbackToUser, false, false, friendToShow, gameFilter);
+    }
+
+    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit,
+            Friend friendToShow, GameName gameFilter) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
         this.friendToShow = friendToShow;
+        if (gameFilter != null) {
+            requireNonNull(friendToShow);
+        }
+        this.gameFilter = gameFilter;
     }
 
     /**
@@ -72,6 +89,11 @@ public class CommandResult {
         return Optional.ofNullable(friendToShow);
     }
 
+    /** Returns the game-name filter for the details panel, or empty to show all games. */
+    public Optional<GameName> getGameFilter() {
+        return Optional.ofNullable(gameFilter);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -86,12 +108,13 @@ public class CommandResult {
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
                 && exit == otherCommandResult.exit
-                && Objects.equals(friendToShow, otherCommandResult.friendToShow);
+                && Objects.equals(friendToShow, otherCommandResult.friendToShow)
+                && Objects.equals(gameFilter, otherCommandResult.gameFilter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit, friendToShow);
+        return Objects.hash(feedbackToUser, showHelp, exit, friendToShow, gameFilter);
     }
 
     @Override
@@ -101,6 +124,7 @@ public class CommandResult {
                 .add("showHelp", showHelp)
                 .add("exit", exit)
                 .add("friendToShow", getFriendToShow())
+                .add("gameFilter", getGameFilter())
                 .toString();
     }
 

@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.game.GameName;
 import seedu.address.testutil.FriendBuilder;
 import seedu.address.testutil.GameBuilder;
 
@@ -54,6 +55,56 @@ class FriendDetailsPanelTest {
 
             assertEquals("No tags added", getFirstLabelText(getFlowPane(panel, "#tags")));
             assertEquals("No games added", getFirstLabelText(getGamesContainer(panel)));
+        });
+    }
+
+    @Test
+    void setFriend_gameFilter_showsExactMatchWithoutChangingFriend() {
+        FxTestUtil.runAndWait(() -> {
+            Friend friend = new FriendBuilder().withGames(
+                    new GameBuilder().withGameName("Valorant").withUsername("alice123").build(),
+                    new GameBuilder().withGameName("Minecraft").build()).build();
+            FriendDetailsPanel panel = new FriendDetailsPanel(friend, false);
+            panel.setFriend(friend, false, new GameName("valorant"));
+
+            assertEquals(1, getGamesContainer(panel).getChildren().size());
+            assertEquals("Valorant", getGameCardLabel(getFirstGameCard(panel), ".details-game-name").getText());
+            assertEquals("Username: alice123",
+                    getGameCardLabel(getFirstGameCard(panel), ".details-game-username").getText());
+            assertEquals(friend.getName().fullName, getLabel(panel, "#name").getText());
+            assertEquals(2, friend.getGames().size());
+
+            panel.setFriend(friend, false, new GameName("Val"));
+            assertEquals("No matching game: Val", getFirstLabelText(getGamesContainer(panel)));
+            panel.setFriend(friend, false, new GameName("Unknown"));
+            assertEquals("No matching game: Unknown", getFirstLabelText(getGamesContainer(panel)));
+
+            panel.setFriend(friend, false);
+            assertEquals(2, getGamesContainer(panel).getChildren().size());
+        });
+    }
+
+    @Test
+    void setFriend_filterOnFriendWithoutGames_showsNoMatch() {
+        FxTestUtil.runAndWait(() -> {
+            Friend friend = new FriendBuilder().build();
+            FriendDetailsPanel panel = new FriendDetailsPanel(friend, false);
+            panel.setFriend(friend, false, new GameName("Valorant"));
+            assertEquals("No matching game: Valorant", getFirstLabelText(getGamesContainer(panel)));
+            panel.setFriend(friend, false);
+            assertEquals("No games added", getFirstLabelText(getGamesContainer(panel)));
+        });
+    }
+
+    @Test
+    void setFriend_myself_showsAllProfileGames() {
+        FxTestUtil.runAndWait(() -> {
+            Friend profile = new FriendBuilder().withGames(
+                    new GameBuilder().withGameName("Valorant").build(), new GameBuilder().build()).build();
+            FriendDetailsPanel panel = new FriendDetailsPanel(profile, true);
+            panel.setFriend(profile, true, new GameName("Valorant"));
+            assertEquals("Your details", getLabel(panel, "#title").getText());
+            assertEquals(2, getGamesContainer(panel).getChildren().size());
         });
     }
 

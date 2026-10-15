@@ -19,6 +19,7 @@ import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditFriendDescriptor;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
+import seedu.address.logic.commands.GameListCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -75,6 +76,14 @@ public class GameMatesParserTest {
         FindCommand command = (FindCommand) parser.parseCommand(
                 FindCommand.COMMAND_WORD + " " + keywords.stream().collect(Collectors.joining(" ")));
         assertEquals(new FindCommand(new NameContainsKeywordsPredicate(keywords)), command);
+    }
+
+    @Test
+    public void parseCommand_gameList() throws Exception {
+        assertEquals(new GameListCommand(INDEX_FIRST_FRIEND), parser.parseCommand("gamelist 1"));
+        assertEquals(new GameListCommand(INDEX_FIRST_FRIEND, new GameName("Stardew Valley")),
+                parser.parseCommand("gamelist 1 g/Stardew Valley"));
+        assertThrows(ParseException.class, GameListCommand.MESSAGE_USAGE, () -> parser.parseCommand("gamelist"));
     }
 
     @Test
