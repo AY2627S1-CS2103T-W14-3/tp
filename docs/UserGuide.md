@@ -398,14 +398,18 @@ Copy `preferences.json` only if you also want the saved window settings.
 If you edit JSON manually, close the app first and keep a backup. Friend entries contain `name`, optional
 `phone` and `email`, `tags`, and `games`. A game has a `name` and `username`. Existing files that omit `games`
 load with no games; files that omit `myself` use the default empty profile. Empty or missing contact fields mean
-`Not provided`. Use the same validation rules as command input, and do not add unsupported metadata fields.
+`Not provided`. Use the same validation rules as command input. Stored game metadata is supported as an optional
+`metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
+and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
+colons and must be unique per game, ignoring case; values may contain colons. Missing `metas` loads as empty.
+Metadata is preserved when saving, but cannot yet be entered through commands or viewed in game cards.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If the file is missing, the app starts with sample friends and the default profile. If it cannot load the file
 because of malformed JSON or invalid stored values, it starts with an empty friend list and default profile.
 The original file is not automatically repaired or backed up. The next successful command can overwrite it with
 the current data, so close the app and restore your backup before entering commands if you need to recover it.
-Unknown JSON fields are ignored and are not preserved on the next save. This includes unsupported metadata.
+Unknown JSON fields are ignored and are not preserved on the next save. Use the supported `metas` format for metadata.
 </div>
 
 ### Archiving data files `[coming in v2.0]`

@@ -151,14 +151,15 @@ The `Model` component,
   The profile is not in the friend list. Add/edit commands separately prevent names shared between a friend and the profile.
 * exposes an observable `FilteredList<Friend>` backed by the stored friends. The filter is a predicate over the
   full list, rather than a second collection of copied friends.
+* stores each friend's games as `Game` objects, including their game name, username and optional metadata.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
 `Friend` contains `Name`, optional contact values, a set of `Tag` objects and a set of `Game` objects.
-`Game` currently has only `GameName` and `Username`. Name equality ignores case and collapses repeated ASCII spaces;
+`Game` contains `GameName`, `Username` and an immutable metadata set. Name equality ignores case and collapses repeated ASCII spaces;
 `GameName.equals` compares complete names using lower-case normalization with `Locale.ROOT`.
-`Username` preserves case. `Game.isSameGame` compares game names, while full equality also compares usernames.
-There is no metadata collection or metadata validator in this checkout. The set representation alone does not enforce
+`Username` preserves case. `Game.isSameGame` compares game names, while full equality also compares usernames and metadata.
+The set representation alone does not enforce
 one entry per game name when different usernames are loaded from JSON; do not infer game-command duplicate handling
 from the proposed specification.
 
@@ -178,6 +179,7 @@ from the proposed specification.
 The `Storage` component,
 * can save both GameMates data and user preference data in JSON format, and read them back into corresponding objects.
 * is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonGameMatesStorage` and `JsonUserPrefsStorage` (one class per data file).
+* converts game metadata through `JsonAdaptedGame` and `JsonAdaptedMeta`, validating fields and rejecting duplicate keys when loading.
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
 
 Storage reads return Vavr `Option`: missing files are absent, while malformed JSON or invalid stored
@@ -196,8 +198,8 @@ JAR's location. `MainApp.initPrefs` writes initialized preferences at startup an
 not by `stop`. Selection and filter predicates are transient.
 
 `JsonSerializableGameMates` adapts both `friends` and `myself`; `JsonAdaptedFriend` adapts games and tags, and
-`JsonAdaptedGame` adapts `name` and `username`. Jackson ignores unknown properties. Such properties, including
-unsupported metadata, disappear on the next serialization. Loading a damaged file does not repair or back it up:
+`JsonAdaptedGame` adapts `name`, `username` and `metas`. Jackson ignores unknown properties, which
+disappear on the next serialization. Loading a damaged file does not repair or back it up:
 the next successful command can overwrite it with the fallback data. There is no automatic recovery or atomic
 transaction spanning command execution and file writing.
 
@@ -281,8 +283,9 @@ left-hand friend list. The flow is:
 
 The command does not update the model's friend-list predicate, friends, games, preferences or Myself profile.
 The existing profile fallback and its rendering are preserved. `GameDetailsCard` currently renders the available
-`Game.getGameName()` and `Game.getUsername()` fields. Metadata rendering is an integration dependency: this checkout
-has no metadata field or accessor in `Game`. When that model is available, extend the card using its actual API.
+`Game.getGameName()` and `Game.getUsername()` fields. Metadata storage has merged, but cards do not yet render
+`Game.getMetas()`. Extend the card using `Meta.getKey()` and `Meta.getValue()` and add rendering/preservation tests;
+the command's original-friend payload already retains metadata without copying or removing it.
 
 Parser and command tests cover errors, exact matching, empty results, displayed-list indexing and unchanged model
 data. JavaFX panel and window tests exercise filtered payloads, empty states, clearing by commands and selection,
@@ -303,7 +306,7 @@ before publishing a complete v1.3 MVP guide.
 |------|-------------------------|------------------------------------|
 | Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | [PR #69](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/69) has merged: use explicit, case-insensitive `edit myself ...`. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
 | Game add/delete | `gameadd INDEX g/NAME u/USER_NAME [m/KEY:VALUE]...` and `gamedel INDEX g/NAME` (pp. 17–23). | Neither command is routed. [PR #70](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/70) is pending. Add success/error, duplicates, filter preservation and persistence tests after integration. |
-| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | No metadata model, JSON adapter, validator or card rendering is available. [PR #64](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64) is pending. Verify its actual API, validation, storage and display before writing user instructions. |
+| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | [PR #64](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64) has merged the model, parser utilities and JSON persistence. Command entry and game-card rendering remain unavailable. See [Game metadata](#game-metadata) for the implemented API. |
 | Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
 | Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
 | Phone/email | Phone: 1–40 characters from a broad punctuation set. Email: 1–255 characters containing `@` (pp. 5–6). | Phone: 3–15 ASCII digits, or `+` with 2–15, with constrained grouping and no extensions. Email: at most 254 characters, local part at most 64, ASCII dot-atom and valid domain labels. |
@@ -317,8 +320,62 @@ game-text validation uses ISO-control rejection rather than a complete Unicode p
 recorded limits; no application fix is included in this documentation change.
 
 Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
-not a current use-case step. Game creation/deletion and metadata cannot yet be demonstrated in this checkout;
+not a current use-case step. Game creation/deletion and metadata entry/display cannot yet be demonstrated in this checkout;
 capture those screenshots after integration. Own-profile editing is available through `edit myself`.
+
+### Game metadata
+
+Metadata records game-specific details such as a friend's role or play style.
+`Meta`, `MetaKey` and `MetaValue` are immutable classes in `seedu.address.model.game.meta`.
+Each `Meta` contains one key and one value. `Game` copies the supplied metadata collection and
+exposes it as an unmodifiable set through `getMetas()`; the two-argument constructor defaults to an empty set.
+
+#### Validation and equality
+
+Leading and trailing whitespace is removed with `String.strip()` before validation and storage.
+`StringUtil.isValidTextField()` requires non-empty text with at least one letter or digit and no ISO control characters.
+Limits use `String.length()` (UTF-16 units), so supplementary characters count as two.
+This check allows punctuation and does not exclude other Unicode categories, such as format characters.
+`GameName` and `Username` also use this utility.
+
+| Field | Length after trimming | Colon handling | Equality |
+| --- | --- | --- | --- |
+| `MetaKey` | 1–50 | Colons rejected | Case-insensitive using `Locale.ROOT` |
+| `MetaValue` | 1–200 | Colons allowed | Case-sensitive |
+
+Keys must be unique within each game entry, including when repeated pairs have identical values.
+The same key can occur in other games or friends. `Game` enforces this invariant when constructed.
+`Meta.equals()` compares both fields; `Game.equals()` includes metadata, while `isSameGame()` compares only the game name.
+
+#### Parsing
+
+`ParserUtil.parseMeta()` uses `StringUtil.splitAtFirstColon()` and delegates field parsing to
+`parseMetaKey()` and `parseMetaValue()`. For example, ` Role : Support:Mid ` becomes key `Role` and value `Support:Mid`.
+Missing separators and invalid fields cause `ParseException`.
+
+`parseMetas()` parses a collection of raw values and rejects duplicate normalized keys before returning a set.
+Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
+These are parser utilities; command-specific metadata flag handling is not yet implemented.
+
+#### Persistence and testing
+
+`JsonAdaptedGame` stores metadata as a `metas` array of `JsonAdaptedMeta` objects:
+
+```json
+{
+  "name": "Valorant",
+  "username": "player",
+  "metas": [{ "key": "Role", "value": "Support:Mid" }]
+}
+```
+
+Missing or null `metas` fields load as an empty set, preserving compatibility with existing save files.
+Null array entries, invalid fields and duplicate keys cause `IllegalValueException` during model conversion.
+
+Tests cover trimmed length boundaries, Unicode, control characters, colons, case normalization,
+duplicate keys, immutability, JSON round-trips and metadata preservation during contact edits.
+`GameBuilder.addMeta("Role", "Support")` appends a pair; `withMetas(...)` replaces the collection.
+Duplicate keys added through the builder are rejected by `build()`.
 
 ### \[Proposed\] Undo/redo feature
 
@@ -581,7 +638,7 @@ This is a future requirement; there is no working handle-editing command in this
 
 ### Non-Functional Requirements
 
-The following are targets, not measured guarantees. Targets involving game modification or metadata
+The following are targets, not measured guarantees. Targets involving game modification or metadata entry/display
 remain pending integration; startup/performance and large-data capacity need separate measurement.
 
 #### Environment
@@ -594,7 +651,7 @@ remain pending integration; startup/performance and large-data capacity need sep
 
 1. All data should be stored locally in a human-editable JSON file. GameMates should not send any data over the network.
 1. Successfully saved data should be restored on the next launch from the same working directory. Current data saves
-   occur after successful commands; window preferences save on shutdown. Metadata persistence is a pending target.
+   occur after successful commands; window preferences save on shutdown. Metadata persistence is implemented in the JSON adapters.
 1. If the data file is missing, GameMates should start with the sample data without crashing. If the data file is corrupted, GameMates should start with an empty list without crashing.
 
 #### Capacity
@@ -623,11 +680,11 @@ remain pending integration; startup/performance and large-data capacity need sep
 * **Mainstream OS**: Windows, Linux, Unix, or macOS
 * **Friend**: A person stored in GameMates, identified by a unique name and optionally associated with contact details and game entries.
 * **User profile**: The current user's separately stored details, edited using `edit myself ...` and preserved by friend-list commands.
-* **Game entry**: A record that a friend plays a game, containing a game name and in-game username. Metadata is pending integration.
+* **Game entry**: A record that a friend plays a game, containing a game name, in-game username and optional metadata.
 * **Role**: A job or duty a friend plays as in a particular game, for example a friend can play as a `Sniper` or a `Healer`.
 * **Game name**: The user-provided name used to identify a game within one friend’s game entries. Aliases such as “Val” and “Valorant” are treated as different game names.
 * **In-game username/Handle**: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.
-* **Metadata**: Proposed additional information for a game entry, such as a role, preferred weapon, server or play style; not supported in this checkout.
+* **Metadata**: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; command entry and card rendering are not yet supported.
 * **Metadata key**: The label before the first colon in a metadata item. For example, `Role` in `Role:Sentinel`.
 * **Metadata value**: The information after the first colon in a metadata item. For example, `Sentinel` in `Role:Sentinel`.
 * **Friend index**: A positive number representing a friend’s position in the currently displayed friend list.
@@ -749,7 +806,10 @@ This seeds existing data for testing; it is not an own-profile edit command.
    duplicate name, and `add n/joash updated` rejects a name matching the profile.
 3. Try `edit n/Changed`, `gameadd 1 g/Test u/player`, and `gamedel 1 g/Valorant`.
    Expected: missing-index or unknown-command errors. The profile and game remain unchanged.
-   Metadata entry cannot be tested as a working feature because no model or command API exists yet.
+   Metadata command entry cannot be tested because no routed command supports it yet. To test storage, close the app,
+   add `"metas": [{"key": "Role", "value": "Support:Mid"}]` to the fixture's Minecraft entry, relaunch and run `list`.
+   The saved JSON must retain that pair; cards currently show only the game name and username. A missing `metas`
+   field loads as empty; a repeated key (including case variants) rejects the load and uses the documented fallback.
 4. `find Fixture`, then `gamelist 1 g/valorant`, then `exit`. Relaunch from the same folder.
    Expected: the edited friend phone, friend game and profile game survive, with Joash Updated's profile displayed
    and its phone still removed. Filters are reset.
