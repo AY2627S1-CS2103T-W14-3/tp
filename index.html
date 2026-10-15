@@ -37,20 +37,45 @@
     <p><a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/actions"><img src="https://github.com/AY2627S1-CS2103T-W14-3/tp/workflows/Java%20CI/badge.svg" alt="CI Status" /></a>
 <a href="https://codecov.io/gh/AY2627S1-CS2103T-W14-3/tp"><img src="https://codecov.io/gh/AY2627S1-CS2103T-W14-3/tp/graph/badge.svg?token=S4O2ICMM1L" alt="codecov" /></a></p>
 
-<p><img src="/tp/images/Ui.png" alt="Ui" /></p>
+<h2 id="keep-your-gaming-friends-in-one-place">Keep your gaming friends in one place</h2>
 
-<p><strong>GameMates is a desktop application for managing your contact details.</strong> While it has a GUI, most of the user interactions happen using a CLI (Command Line Interface).</p>
+<p>GameMates is a desktop app for gamers who want to remember who they play with and the usernames their friends use
+across games. Manage friends with typed commands and check their details in a visual panel alongside the friend list.
+Your friends and game entries are saved locally for your next session.</p>
+
+<p><img src="/tp/images/Ui.png" alt="GameMates showing a friend and their games beside the friend list" /></p>
+
+<h3 id="what-you-can-do">What you can do</h3>
 
 <ul>
-  <li>If you are interested in using GameMates, head over to the <a href="UserGuide.html#quick-start"><em>Quick Start</em> section of the <strong>User Guide</strong></a>.</li>
-  <li>If you are interested in developing GameMates, the <a href="DeveloperGuide.html"><strong>Developer Guide</strong></a> is a good place to start.</li>
+  <li>Add friends with just a name, optional phone/email details and tags; edit or delete them later.</li>
+  <li>Find friends by name or list friends who play a particular game.</li>
+  <li>View a friend’s games and in-game usernames, or show only one matching game with <code class="language-plaintext highlighter-rouge">gamelist</code>.</li>
+  <li>Edit your own profile using <code class="language-plaintext highlighter-rouge">edit myself</code>, keep it separate from friends, and back up your local data file.</li>
 </ul>
 
-<p><strong>Acknowledgements</strong></p>
+<p>For example, <code class="language-plaintext highlighter-rouge">list g/Valorant</code> lists Valorant players. Then <code class="language-plaintext highlighter-rouge">gamelist 1 g/Valorant</code> shows the first displayed
+player’s Valorant card without changing the filtered friend list.</p>
+
+<p>The current build can view existing game entries. Adding/deleting individual games and metadata entry are pending
+integration; see the <a href="UserGuide.html#your-profile-and-game-entries">User Guide’s current limits</a>.</p>
+
+<h3 id="get-started">Get started</h3>
 
 <ul>
-  <li>Libraries used: <a href="https://openjfx.io/">JavaFX</a>, <a href="https://github.com/FasterXML/jackson">Jackson</a>, <a href="https://github.com/junit-team/junit5">JUnit5</a></li>
+  <li><a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/releases">Download GameMates</a> and follow the
+<a href="UserGuide.html#quick-start">Quick start</a>. Java 25 or later is required.</li>
+  <li>Use the <a href="UserGuide.html">User Guide</a> for command formats, examples, validation and backup steps.</li>
+  <li>Read the <a href="DeveloperGuide.html">Developer Guide</a> for the design, implementation and manual test instructions.</li>
+  <li>Meet the <a href="AboutUs.html">team</a>, browse the <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp">source code</a>, or
+<a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/issues">report a problem</a>.</li>
 </ul>
+
+<h3 id="acknowledgements">Acknowledgements</h3>
+
+<p>GameMates builds on AddressBook-Level3 from the <a href="https://se-education.org/">SE-EDU initiative</a>.
+Libraries include <a href="https://openjfx.io/">JavaFX</a>, <a href="https://github.com/FasterXML/jackson">Jackson</a>,
+<a href="https://vavr.io/">Vavr</a> and <a href="https://junit.org/junit5/">JUnit 5</a>.</p>
 
   </div>
 

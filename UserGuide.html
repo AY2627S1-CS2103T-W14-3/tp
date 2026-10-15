@@ -38,20 +38,28 @@
   </header>
 
   <div class="post-content">
-    <p>GameMates is a <strong>desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)</strong> while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, GameMates can help you manage contacts faster than traditional GUI applications.</p>
+    <p>GameMates helps gamers keep track of friends, their contact details, the games they play and their in-game usernames.
+Type commands to manage your friends, then use the split details panel to check who to invite to a game.
+Your data stays on your computer; browsing the online help and downloading releases require internet access.</p>
+
+<p>This guide describes the commands available in this checkout. Adding or deleting individual games and game
+metadata input are not available yet. You can view and filter games already present in sample or
+saved data. See <a href="#your-profile-and-game-entries">Your profile and game entries</a> for the current limits.</p>
 
 <ul id="markdown-toc">
   <li><a href="#quick-start" id="markdown-toc-quick-start">Quick start</a></li>
   <li>
 <a href="#features" id="markdown-toc-features">Features</a>    <ul>
       <li><a href="#viewing-friend-details" id="markdown-toc-viewing-friend-details">Viewing friend details</a></li>
+      <li><a href="#your-profile-and-game-entries" id="markdown-toc-your-profile-and-game-entries">Your profile and game entries</a></li>
       <li><a href="#viewing-help-help" id="markdown-toc-viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code></a></li>
       <li><a href="#adding-a-friend-add" id="markdown-toc-adding-a-friend-add">Adding a friend: <code class="language-plaintext highlighter-rouge">add</code></a></li>
       <li><a href="#listing-and-filtering-friends-list" id="markdown-toc-listing-and-filtering-friends-list">Listing and filtering friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
+      <li><a href="#viewing-a-friends-games-gamelist" id="markdown-toc-viewing-a-friends-games-gamelist">Viewing a friend’s games: <code class="language-plaintext highlighter-rouge">gamelist</code></a></li>
       <li><a href="#editing-a-friend-or-your-own-profile-edit" id="markdown-toc-editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
       <li><a href="#locating-friends-by-name-find" id="markdown-toc-locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
       <li><a href="#deleting-a-friend-delete" id="markdown-toc-deleting-a-friend-delete">Deleting a friend: <code class="language-plaintext highlighter-rouge">delete</code></a></li>
-      <li><a href="#clearing-all-entries-clear" id="markdown-toc-clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code></a></li>
+      <li><a href="#clearing-the-friend-list-clear" id="markdown-toc-clearing-the-friend-list-clear">Clearing the friend list: <code class="language-plaintext highlighter-rouge">clear</code></a></li>
       <li><a href="#exiting-the-program-exit" id="markdown-toc-exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code></a></li>
       <li><a href="#saving-the-data" id="markdown-toc-saving-the-data">Saving the data</a></li>
       <li><a href="#editing-the-data-file" id="markdown-toc-editing-the-data-file">Editing the data file</a></li>
@@ -80,6 +88,7 @@
   </li>
   <li>
     <p>Open a terminal, <code class="language-plaintext highlighter-rouge">cd</code> to the folder containing the JAR file, and run <code class="language-plaintext highlighter-rouge">java -jar gamemates.jar</code>.<br>
+Keep launching from this folder: it is where GameMates reads and writes your data and preferences.<br>
 A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
 <img src="/tp/images/Ui.png" alt="Ui"></p>
   </li>
@@ -95,13 +104,16 @@ Some example commands you can try:</p>
         <p><code class="language-plaintext highlighter-rouge">list g/Valorant</code> : Lists friends who play Valorant.</p>
       </li>
       <li>
+        <p><code class="language-plaintext highlighter-rouge">gamelist 1 g/Valorant</code> : Shows the first displayed friend’s Valorant card, if present.</p>
+      </li>
+      <li>
         <p><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com</code> : Adds a contact named <code class="language-plaintext highlighter-rouge">John Doe</code> to GameMates.</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">delete 3</code> : Deletes the 3rd contact shown in the current list.</p>
       </li>
       <li>
-        <p><code class="language-plaintext highlighter-rouge">clear</code> : Deletes all contacts.</p>
+        <p><code class="language-plaintext highlighter-rouge">clear</code> : Deletes all friends and their games immediately, while keeping your profile.</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">exit</code> : Exits the app.</p>
@@ -135,16 +147,23 @@ For example, <code class="language-plaintext highlighter-rouge">n/NAME [t/TAG]</
 For example, <code class="language-plaintext highlighter-rouge">[t/TAG]…​</code> may be omitted, or written as <code class="language-plaintext highlighter-rouge">t/friend</code> or <code class="language-plaintext highlighter-rouge">t/friend t/family</code>.</p>
     </li>
     <li>
-      <p>Parameters can be in any order.<br>
+      <p>Prefixed parameters can be in any order. Positional indices must come first.<br>
 For example, if the command specifies <code class="language-plaintext highlighter-rouge">n/NAME p/PHONE_NUMBER</code>, <code class="language-plaintext highlighter-rouge">p/PHONE_NUMBER n/NAME</code> is also acceptable.</p>
+    </li>
+    <li>Use spaces between parameters and lower-case command words and prefixes. Do not type square or angle brackets.
+Quotes are not needed around multiword names. Use only the prefixes documented for each command.</li>
+    <li>Repeating a single-value <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> parameter in <code class="language-plaintext highlighter-rouge">add</code> or <code class="language-plaintext highlighter-rouge">edit</code> is rejected, even with identical values.
+Tags may be repeated; identical tag values are applied once.</li>
+    <li>
+      <p>Friend indices refer to the current left-hand list and range from 1 to 2147483647. Run <code class="language-plaintext highlighter-rouge">list</code> to see all friends
+again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.</p>
     </li>
     <li>
       <p>Extraneous parameters for commands that take no parameters, such as <code class="language-plaintext highlighter-rouge">help</code>, <code class="language-plaintext highlighter-rouge">exit</code>, and <code class="language-plaintext highlighter-rouge">clear</code>, are ignored.<br>
 For example, <code class="language-plaintext highlighter-rouge">help 123</code> is interpreted as <code class="language-plaintext highlighter-rouge">help</code>.</p>
     </li>
-    <li>
-      <p>If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.</p>
-    </li>
+    <li>Wide tables scroll horizontally on narrow screens. If you are using a PDF version, take care when copying
+commands across line breaks: spaces can be lost during copying.</li>
   </ul>
 </div>
 
@@ -157,15 +176,36 @@ For example, <code class="language-plaintext highlighter-rouge">help 123</code> 
 in the right panel.</li>
   <li>On startup, the right panel shows your profile. If no profile details have been added, it shows <code class="language-plaintext highlighter-rouge">No details added</code>.</li>
   <li>When a <code class="language-plaintext highlighter-rouge">find</code> command returns exactly one friend, that friend’s details are shown automatically.</li>
-  <li>When no friend is selected, the right panel returns to showing your profile.</li>
+  <li>Use <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX [g/GAME_NAME]</code> to select a friend and optionally show only one of their games.
+Clicking another friend shows all of that friend’s games.</li>
+  <li>Successful commands other than <code class="language-plaintext highlighter-rouge">gamelist</code> or a single-result <code class="language-plaintext highlighter-rouge">find</code> return the right panel to your profile.
+Clicking a friend selects their details again. Invalid commands keep the existing details display.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> each replace the previous friend-list filter. They do not combine filters.
+Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.</li>
 </ul>
+
+<h3 id="your-profile-and-game-entries">Your profile and game entries</h3>
+
+<p>Your profile is stored separately from your friend list. It appears on startup and after commands such as <code class="language-plaintext highlighter-rouge">list</code>.
+If it contains no details, the right panel shows <code class="language-plaintext highlighter-rouge">No details added</code>. Filtering, deleting friends and <code class="language-plaintext highlighter-rouge">clear</code> do not
+change your stored profile.</p>
+
+<p>Use <code class="language-plaintext highlighter-rouge">edit myself n/Joash</code> to set your own name, or supply other supported edit fields to update your contact details
+and tags. The <code class="language-plaintext highlighter-rouge">myself</code> selector is case-insensitive and works even when the friend list is empty or filtered.
+Omitting the selector, as in <code class="language-plaintext highlighter-rouge">edit n/Joash</code>, is rejected. Profile edits preserve your games and the friend-list filter.</p>
+
+<p>You can view games and usernames already loaded from saved data or the initial sample data using
+<a href="#viewing-a-friends-games-gamelist"><code class="language-plaintext highlighter-rouge">gamelist</code></a>. New friends start with no games.
+<code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> are not recognised commands in this build, and there is no metadata input or display yet.
+Deleting a friend removes that friend’s complete entry, including their games; it does not remove games from
+other friends. Back up your data before <a href="#editing-the-data-file">editing a saved file</a>.</p>
 
 <h3 id="viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code>
 </h3>
 
-<p>Shows a message explaining how to access the help page.</p>
-
-<p><img src="/tp/images/helpMessage.png" alt="help message"></p>
+<p>Opens a separate Help window with the online User Guide link. Click <strong>Copy URL</strong> and paste the link into a browser.
+You can also open Help using the menu or <code class="language-plaintext highlighter-rouge">F1</code>. The command feedback is <code class="language-plaintext highlighter-rouge">Opened help window.</code></p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">help</code></p>
 
@@ -191,6 +231,7 @@ A friend can have any number of tags, including zero.
 </div>
 
 <p>Examples:</p>
+
 <ul>
   <li><code class="language-plaintext highlighter-rouge">add n/John Doe</code></li>
   <li><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com</code></li>
@@ -199,7 +240,9 @@ A friend can have any number of tags, including zero.
 
 <p>Names are trimmed before validation, must not be blank and may contain at most 100 characters.
 Only ASCII letters, digits and spaces are accepted. Names are compared case-insensitively,
-so <code class="language-plaintext highlighter-rouge">john doe</code> and <code class="language-plaintext highlighter-rouge">John Doe</code> are the same friend.</p>
+so <code class="language-plaintext highlighter-rouge">john doe</code> and <code class="language-plaintext highlighter-rouge">John Doe</code> are the same friend.
+To distinguish two people with the same name, use names such as <code class="language-plaintext highlighter-rouge">John Doe School</code> and <code class="language-plaintext highlighter-rouge">John Doe Work</code>.
+Adding a different tag alone does not make a duplicate name unique; parentheses are not valid in names.</p>
 
 <p>Tag names must be non-empty and contain only ASCII letters and digits (no spaces or symbols).</p>
 
@@ -248,7 +291,8 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 
 <ul>
   <li>
-<code class="language-plaintext highlighter-rouge">list</code> shows all friends and clears any previous friend-list filter.</li>
+<code class="language-plaintext highlighter-rouge">list</code> shows all friends and clears any previous friend-list filter. Feedback is <code class="language-plaintext highlighter-rouge">Listed all friends.</code>,
+including when the list is empty.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> shows friends who have a game with that exact name. The match is case-insensitive, so <code class="language-plaintext highlighter-rouge">list g/valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
   <li>Leading and trailing spaces in <code class="language-plaintext highlighter-rouge">GAME_NAME</code> are ignored, but partial names do not match. For example, <code class="language-plaintext highlighter-rouge">list g/Val</code> does not match <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
@@ -256,6 +300,10 @@ The 254-character address limit leaves room for the enclosing <code class="langu
   <li>Multi-word game names are accepted. Only one <code class="language-plaintext highlighter-rouge">g/</code> prefix may be supplied, and the game name must not be empty.</li>
   <li>If no friends play the specified game, the friend list is empty and the command reports <code class="language-plaintext highlighter-rouge">0 friend(s) listed!</code>.</li>
   <li>Filtering applies only to the friend list. It does not filter or modify the separately stored Myself profile.</li>
+  <li>Name filtering uses <a href="#locating-friends-by-name-find"><code class="language-plaintext highlighter-rouge">find</code></a>, not <code class="language-plaintext highlighter-rouge">list n/NAME</code>. A new <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list</code> replaces
+the previous friend-list filter; running them consecutively does not intersect their results.</li>
+  <li>Game-name validation uses the same 1–50-character rules as <code class="language-plaintext highlighter-rouge">gamelist</code>. Empty <code class="language-plaintext highlighter-rouge">g/</code>, extra positional input and
+repeated <code class="language-plaintext highlighter-rouge">g/</code> are rejected. A valid filter returns <code class="language-plaintext highlighter-rouge">N friend(s) listed!</code>.</li>
 </ul>
 
 <p>Examples:</p>
@@ -269,12 +317,132 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 <code class="language-plaintext highlighter-rouge">list g/Stardew Valley</code> shows friends who play <code class="language-plaintext highlighter-rouge">Stardew Valley</code>.</li>
 </ul>
 
+<h3 id="viewing-a-friends-games-gamelist">Viewing a friend’s games: <code class="language-plaintext highlighter-rouge">gamelist</code>
+</h3>
+
+<p>Shows a friend’s details and game cards in the right panel, keeping the friend list and its current filter on the left.
+Each game card shows the game name and in-game username.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">gamelist &lt;FRIEND_INDEX&gt; [g/GAME_NAME]</code></p>
+
+<ul>
+  <li>Replace <code class="language-plaintext highlighter-rouge">&lt;FRIEND_INDEX&gt;</code> with a positive integer; do not type the angle brackets. The index is required and refers
+to the <strong>currently displayed friend list</strong>, including after <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code>.</li>
+  <li>Without <code class="language-plaintext highlighter-rouge">g/</code>, all of the selected friend’s games are shown. This also clears a previous game display filter.</li>
+  <li>With <code class="language-plaintext highlighter-rouge">g/</code>, only a game with the complete matching name is shown. Matching is case-insensitive:
+<code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not. Usernames are not searched.</li>
+  <li>Leading and trailing whitespace in the game name is removed. Game names may contain 1–50 printable characters
+and must include at least one letter or digit. Multiword names are accepted.</li>
+  <li>Put the index before the optional filter. Only one <code class="language-plaintext highlighter-rouge">g/</code> is allowed, even if repeated values are identical.
+Unknown prefixes and extra words before <code class="language-plaintext highlighter-rouge">g/</code> are rejected. All words after <code class="language-plaintext highlighter-rouge">g/</code> form the game name;
+whitespace-separated tokens such as <code class="language-plaintext highlighter-rouge">x/</code> are treated as parameter prefixes, not part of the name.</li>
+  <li>An absent game is a successful empty result, including when the friend has no games. Stored friend details,
+game entries and your Myself profile are unchanged. Invalid commands leave the previous details display unchanged.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">gamelist 1</code> shows all games of the first displayed friend.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">gamelist 2 g/Valorant</code> shows only the second displayed friend’s Valorant entry.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">gamelist 2 g/minecraft</code> matches the stored name <code class="language-plaintext highlighter-rouge">Minecraft</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">gamelist 1 g/Stardew Valley</code> accepts a multiword name.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">find David</code> followed by <code class="language-plaintext highlighter-rouge">gamelist 1</code> shows the games of the first friend in those search results.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list g/Minecraft</code> followed by <code class="language-plaintext highlighter-rouge">gamelist 1</code> shows all games of the first displayed Minecraft player,
+while the left panel continues showing only Minecraft players.</li>
+</ul>
+
+<p><img src="/tp/images/gamelistFiltered.png" alt="Only the matching game appears in the right-hand panel"></p>
+
+<p><img src="/tp/images/gamelistNoMatch.png" alt="A valid filter with no matching game keeps the friend details visible"></p>
+
+<p>Feedback (placeholders below are replaced with actual values):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Result</th>
+      <th>Feedback</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>All games</td>
+      <td><code class="language-plaintext highlighter-rouge">Listed GAME_COUNT game(s) that FRIEND_NAME plays:</code></td>
+    </tr>
+    <tr>
+      <td>Matching game</td>
+      <td>
+<code class="language-plaintext highlighter-rouge">Showing GAME_NAME for FRIEND_NAME:</code> (uses the stored game-name spelling)</td>
+    </tr>
+    <tr>
+      <td>No matching game</td>
+      <td>
+<code class="language-plaintext highlighter-rouge">FRIEND_NAME does not have GAME_NAME.</code> (uses your trimmed filter); the panel shows <code class="language-plaintext highlighter-rouge">No matching game: GAME_NAME</code>
+</td>
+    </tr>
+    <tr>
+      <td>No games, without a filter</td>
+      <td>
+<code class="language-plaintext highlighter-rouge">FRIEND_NAME has no games added yet.</code>; the panel shows <code class="language-plaintext highlighter-rouge">No games added</code>
+</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Errors:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Input problem</th>
+      <th>Feedback</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Missing index, unknown prefix or extra positional argument</td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid command format. Usage: gamelist &lt;FRIEND_INDEX&gt; [g/GAME_NAME]</code></td>
+    </tr>
+    <tr>
+      <td>Malformed, zero, negative or overflowing index</td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid friend index. Enter a positive integer.</code></td>
+    </tr>
+    <tr>
+      <td>Positive index outside the displayed list</td>
+      <td><code class="language-plaintext highlighter-rouge">No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.</code></td>
+    </tr>
+    <tr>
+      <td>Empty displayed list</td>
+      <td><code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list to show all friends.</code></td>
+    </tr>
+    <tr>
+      <td>Invalid game name, including empty <code class="language-plaintext highlighter-rouge">g/</code>
+</td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.</code></td>
+    </tr>
+    <tr>
+      <td>Repeated <code class="language-plaintext highlighter-rouge">g/</code>
+</td>
+      <td><code class="language-plaintext highlighter-rouge">Only one game can be filtered per command. Run gamelist separately for each game.</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><code class="language-plaintext highlighter-rouge">gamelist myself</code> is not supported; the existing profile view remains available when no friend is selected.</p>
+
 <h3 id="editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code>
 </h3>
 
 <p>Edits an existing friend or your separately stored Myself profile in GameMates.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code></p>
 
 <ul>
   <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
@@ -292,10 +460,14 @@ as <code class="language-plaintext highlighter-rouge">removed phone number</code
   <li>A friend index or <code class="language-plaintext highlighter-rouge">myself</code> is required. Editing Myself works even when no friends are displayed and preserves the current friend-list filter.</li>
   <li>Omit <code class="language-plaintext highlighter-rouge">t/</code> to keep the friend’s existing tags. Each supplied <code class="language-plaintext highlighter-rouge">t/TAG</code> removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.</li>
   <li>Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.</li>
-  <li>To remove all of a friend’s tags, enter <code class="language-plaintext highlighter-rouge">t/</code> without a tag after it.</li>
+  <li>To remove all of a friend’s tags, enter <code class="language-plaintext highlighter-rouge">t/</code> without a tag after it.
+Use that empty prefix on its own; combining it with non-empty tags is rejected.</li>
+  <li>A successful friend edit shows all friends again, preserving the friend’s games and your profile. A successful
+<code class="language-plaintext highlighter-rouge">edit myself</code> shows your updated profile on the right and keeps the current friend-list filter.</li>
 </ul>
 
 <p>Examples:</p>
+
 <ul>
   <li>
 <code class="language-plaintext highlighter-rouge">edit 1 p/91234567 e/johndoe@example.com</code> Edits the phone number and email address of the 1st friend to be <code class="language-plaintext highlighter-rouge">91234567</code> and <code class="language-plaintext highlighter-rouge">johndoe@example.com</code> respectively.</li>
@@ -326,6 +498,8 @@ as <code class="language-plaintext highlighter-rouge">removed phone number</code
 </li>
   <li>Duplicate name: <code class="language-plaintext highlighter-rouge">This friend already exists in GameMates.</code>
 </li>
+  <li>Adding or renaming a friend to your profile’s name: <code class="language-plaintext highlighter-rouge">This name is already used by your Myself profile.</code>
+</li>
 </ul>
 
 <h3 id="locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code>
@@ -341,15 +515,19 @@ as <code class="language-plaintext highlighter-rouge">removed phone number</code
   <li>The search considers only names.</li>
   <li>Only full words match; for example, <code class="language-plaintext highlighter-rouge">Han</code> does not match <code class="language-plaintext highlighter-rouge">Hans</code>.</li>
   <li>Friends matching at least one keyword are returned (an <code class="language-plaintext highlighter-rouge">OR</code> search); for example, <code class="language-plaintext highlighter-rouge">Hans Bo</code> returns <code class="language-plaintext highlighter-rouge">Hans Gruber</code> and <code class="language-plaintext highlighter-rouge">Bo Yang</code>.</li>
+  <li>Searching starts from all friends, replacing any previous name or game filter. <code class="language-plaintext highlighter-rouge">find</code> does not accept <code class="language-plaintext highlighter-rouge">n/</code> or
+<code class="language-plaintext highlighter-rouge">g/</code> as filter syntax; such text is treated as literal name keywords.</li>
+  <li>Feedback is <code class="language-plaintext highlighter-rouge">N friend(s) listed!</code>. No matches is a successful empty list. Exactly one result also opens that
+friend’s complete details and games on the right. An empty keyword list is rejected with usage instructions.</li>
 </ul>
 
 <p>Examples:</p>
+
 <ul>
   <li>
 <code class="language-plaintext highlighter-rouge">find John</code> returns <code class="language-plaintext highlighter-rouge">john</code> and <code class="language-plaintext highlighter-rouge">John Doe</code>
 </li>
-  <li>
-<code class="language-plaintext highlighter-rouge">find alex david</code> returns <code class="language-plaintext highlighter-rouge">Alex Yeoh</code>, <code class="language-plaintext highlighter-rouge">David Li</code><br>
+  <li>With the initial sample data, <code class="language-plaintext highlighter-rouge">find alex david</code> returns <code class="language-plaintext highlighter-rouge">Alex Yeoh</code>, <code class="language-plaintext highlighter-rouge">David Li</code>.<br>
 <img src="/tp/images/findAlexDavidResult.png" alt="result for 'find alex david'">
 </li>
 </ul>
@@ -368,9 +546,12 @@ as <code class="language-plaintext highlighter-rouge">removed phone number</code
   <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647.</li>
   <li>A successful deletion displays <code class="language-plaintext highlighter-rouge">Successfully deleted FRIEND_NAME.</code>
 </li>
+  <li>Deletion happens immediately, with no confirmation dialog and no undo command. The friend’s games are deleted
+with the friend; other friends and your stored profile are preserved. The current friend-list filter stays active.</li>
 </ul>
 
 <p>Examples:</p>
+
 <ul>
   <li>
 <code class="language-plaintext highlighter-rouge">list</code> followed by <code class="language-plaintext highlighter-rouge">delete 2</code> deletes the 2nd friend in GameMates.</li>
@@ -390,12 +571,15 @@ as <code class="language-plaintext highlighter-rouge">removed phone number</code
 </li>
 </ul>
 
-<h3 id="clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code>
+<h3 id="clearing-the-friend-list-clear">Clearing the friend list: <code class="language-plaintext highlighter-rouge">clear</code>
 </h3>
 
 <p>Clears all friends from GameMates and preserves your Myself profile.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">clear</code></p>
+
+<p>The command takes effect immediately, with no confirmation or undo. Feedback is <code class="language-plaintext highlighter-rouge">Friend list has been cleared!</code>.
+All friends and their game entries are removed. Back up your data file first if you may need them again.</p>
 
 <h3 id="exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code>
 </h3>
@@ -406,30 +590,56 @@ as <code class="language-plaintext highlighter-rouge">removed phone number</code
 
 <h3 id="saving-the-data">Saving the data</h3>
 
-<p>GameMates automatically saves data after every command. You do not need to save manually.</p>
+<p>GameMates saves the complete friend list, games and stored profile after every command that parses and executes
+successfully, including viewing commands such as <code class="language-plaintext highlighter-rouge">list</code> and <code class="language-plaintext highlighter-rouge">gamelist</code>. You do not need a save command.
+The active friend-list filter, selection and game display filter are not saved; a new launch shows all friends and
+your profile. Window size and position are stored separately in <code class="language-plaintext highlighter-rouge">preferences.json</code> when you close the main window
+or use <code class="language-plaintext highlighter-rouge">exit</code>.</p>
+
+<p>If saving fails, an error beginning <code class="language-plaintext highlighter-rouge">Could not save data</code> appears. A friend change may already be visible in the
+running application even though it was not written to disk. Restore write access to the data folder and run a
+successful command such as <code class="language-plaintext highlighter-rouge">list</code> to try saving again before closing the app.</p>
 
 <h3 id="editing-the-data-file">Editing the data file</h3>
 
-<p>GameMates data is saved automatically as a JSON file <code class="language-plaintext highlighter-rouge">[JAR file location]/data/gamemates.json</code>. The friend list is stored under the <code class="language-plaintext highlighter-rouge">friends</code> key, and your profile is stored separately under <code class="language-plaintext highlighter-rouge">myself</code>. 
-Advanced users are welcome to update data directly by editing that data file.</p>
+<p>GameMates uses <code class="language-plaintext highlighter-rouge">data/gamemates.json</code> relative to the folder from which you launch it. If you follow Quick start,
+this is the folder containing the JAR. Launching the same JAR from a different folder uses different data.
+The status bar shows the data path. Friends are stored under <code class="language-plaintext highlighter-rouge">friends</code>, and your profile is stored under <code class="language-plaintext highlighter-rouge">myself</code>.</p>
+
+<p>To back up or transfer your data, close the app and copy <code class="language-plaintext highlighter-rouge">data/gamemates.json</code> to a safe location. To restore it,
+close the destination app, back up its current file, replace it with your copy and relaunch from the same folder.
+Copy <code class="language-plaintext highlighter-rouge">preferences.json</code> only if you also want the saved window settings.</p>
+
+<p>If you edit JSON manually, close the app first and keep a backup. Friend entries contain <code class="language-plaintext highlighter-rouge">name</code>, optional
+<code class="language-plaintext highlighter-rouge">phone</code> and <code class="language-plaintext highlighter-rouge">email</code>, <code class="language-plaintext highlighter-rouge">tags</code>, and <code class="language-plaintext highlighter-rouge">games</code>. A game has a <code class="language-plaintext highlighter-rouge">name</code> and <code class="language-plaintext highlighter-rouge">username</code>. Existing files that omit <code class="language-plaintext highlighter-rouge">games</code>
+load with no games; files that omit <code class="language-plaintext highlighter-rouge">myself</code> use the default empty profile. Empty or missing contact fields mean
+<code class="language-plaintext highlighter-rouge">Not provided</code>. Use the same validation rules as command input. Stored game metadata is supported as an optional
+<code class="language-plaintext highlighter-rouge">metas</code> array, for example <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code>. Keys contain 1–50 characters
+and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
+colons and must be unique per game, ignoring case; values may contain colons. Missing <code class="language-plaintext highlighter-rouge">metas</code> loads as empty.
+Metadata is preserved when saving, but cannot yet be entered through commands or viewed in game cards.</p>
 
 <div class="alert alert-warning">
 <img class="emoji" title=":exclamation:" alt=":exclamation:" src="https://github.githubassets.com/images/icons/emoji/unicode/2757.png" height="20" width="20"> <strong>Caution:</strong>
-If your changes make the data file invalid, GameMates starts with an empty friend list at the next run. The invalid file remains on disk until you run a command (GameMates saves after every command). Still, we recommend backing up the file before editing it.<br>
-Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+If the file is missing, the app starts with sample friends and the default profile. If it cannot load the file
+because of malformed JSON or invalid stored values, it starts with an empty friend list and default profile.
+The original file is not automatically repaired or backed up. The next successful command can overwrite it with
+the current data, so close the app and restore your backup before entering commands if you need to recover it.
+Unknown JSON fields are ignored and are not preserved on the next save. Use the supported <code class="language-plaintext highlighter-rouge">metas</code> format for metadata.
 </div>
 
 <h3 id="archiving-data-files-coming-in-v20">Archiving data files <code class="language-plaintext highlighter-rouge">[coming in v2.0]</code>
 </h3>
 
-<p><em>Details coming soon …</em></p>
+<p>Future proposal only: automatic archiving is not implemented. Use the manual backup procedure above.</p>
 
 <hr>
 
 <h2 id="faq">FAQ</h2>
 
 <p><strong>Q</strong>: How do I transfer my data to another computer?<br>
-<strong>A</strong>: Install the app on the other computer and overwrite the data file it creates with the data file from your previous GameMates home folder.</p>
+<strong>A</strong>: Follow the backup and restore steps in <a href="#editing-the-data-file">Editing the data file</a>. Keep both apps closed
+while copying the file, then launch the destination app from its usual data folder.</p>
 
 <hr>
 
@@ -440,6 +650,9 @@ Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g
 <strong>When using multiple screens</strong>, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the <code class="language-plaintext highlighter-rouge">preferences.json</code> file created by the application before running the application again.</li>
   <li>
 <strong>If you minimize the Help Window</strong> and then run the <code class="language-plaintext highlighter-rouge">help</code> command (or use the <code class="language-plaintext highlighter-rouge">Help</code> menu, or the keyboard shortcut <code class="language-plaintext highlighter-rouge">F1</code>) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.</li>
+  <li>
+<strong>A data file containing only <code class="language-plaintext highlighter-rouge">null</code> can prevent startup.</strong> The usual empty-data fallback does not handle this
+case. Close the app and restore a valid <code class="language-plaintext highlighter-rouge">data/gamemates.json</code> backup before relaunching.</li>
 </ol>
 
 <hr>
@@ -457,7 +670,7 @@ Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g
     <tr>
       <td><strong>Add</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​</code> <br> e.g., <code class="language-plaintext highlighter-rouge">add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague</code>
+<code class="language-plaintext highlighter-rouge">add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…</code> <br> e.g., <code class="language-plaintext highlighter-rouge">add n/James Ho t/friend</code>
 </td>
     </tr>
     <tr>
@@ -467,19 +680,25 @@ Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g
     <tr>
       <td><strong>Delete</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">delete INDEX</code><br> e.g., <code class="language-plaintext highlighter-rouge">delete 3</code>
+<code class="language-plaintext highlighter-rouge">delete FRIEND_INDEX</code><br> e.g., <code class="language-plaintext highlighter-rouge">delete 3</code>
 </td>
     </tr>
     <tr>
       <td><strong>Edit</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…​</code><br> e.g., <code class="language-plaintext highlighter-rouge">edit 2 n/James Lee e/jameslee@example.com</code>
+<code>edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., <code class="language-plaintext highlighter-rouge">edit myself n/Joash</code> or <code class="language-plaintext highlighter-rouge">edit 2 n/James Lee e/jameslee@example.com</code>
 </td>
     </tr>
     <tr>
       <td><strong>Find</strong></td>
       <td>
 <code class="language-plaintext highlighter-rouge">find KEYWORD [MORE_KEYWORDS]</code><br> e.g., <code class="language-plaintext highlighter-rouge">find James Jake</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Game list</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">gamelist &lt;FRIEND_INDEX&gt; [g/GAME_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">gamelist 2 g/Valorant</code>
 </td>
     </tr>
     <tr>
@@ -492,8 +711,15 @@ Furthermore, certain edits can cause GameMates to behave in unexpected ways (e.g
       <td><strong>Help</strong></td>
       <td><code class="language-plaintext highlighter-rouge">help</code></td>
     </tr>
+    <tr>
+      <td><strong>Exit</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">exit</code></td>
+    </tr>
   </tbody>
 </table>
+
+<p>The summary lists available commands only. <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gamedel</code> and metadata entry are pending;
+they are not additional working commands in this build.</p>
 
   </div>
 
