@@ -26,6 +26,7 @@ public class GameListCommandParserTest {
         GameListCommand expected = new GameListCommand(INDEX_FIRST_FRIEND, new GameName("Stardew Valley"));
         assertParseSuccess(parser, "1 g/Stardew Valley", expected);
         assertParseSuccess(parser, " \t1 \tg/  Stardew Valley  \n", expected);
+        assertParseSuccess(parser, "\n1\ng/  Stardew Valley  \n", expected);
         assertParseSuccess(parser, "1 g/stardew valley", expected);
         assertParseSuccess(parser, "2 g/minecraft",
                 new GameListCommand(Index.fromOneBased(2), new GameName("Minecraft")));
@@ -41,7 +42,7 @@ public class GameListCommandParserTest {
 
     @Test
     public void parse_missingIndex_failure() {
-        for (String input : new String[]{"", " \t\n ", "g/Valorant", " g/Valorant"}) {
+        for (String input : new String[]{"", " \t\n ", "g/Valorant", " g/Valorant", "\tg/Valorant"}) {
             assertParseFailure(parser, input, GameListCommand.MESSAGE_USAGE);
         }
     }
@@ -66,7 +67,7 @@ public class GameListCommandParserTest {
     @Test
     public void parse_repeatedGameFilter_failure() {
         for (String input : new String[]{"1 g/Valorant g/Minecraft", "1 g/Valorant g/Valorant",
-            "1 g/ g/Valorant", "1 g/Valorant\tg/Valorant", "1 g/ g/"}) {
+            "1 g/ g/Valorant", "1 g/Valorant\tg/Valorant", "1 g/Valorant\ng/Valorant", "1 g/ g/"}) {
             assertParseFailure(parser, input, GameListCommand.MESSAGE_REPEATED_GAME);
         }
     }
