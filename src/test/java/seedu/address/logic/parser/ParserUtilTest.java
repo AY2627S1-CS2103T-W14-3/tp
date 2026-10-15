@@ -6,6 +6,7 @@ import static seedu.address.logic.parser.ParserUtil.MESSAGE_INVALID_INDEX;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_FRIEND;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +18,9 @@ import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
 import seedu.address.model.game.GameName;
 import seedu.address.model.game.Username;
+import seedu.address.model.game.meta.Meta;
+import seedu.address.model.game.meta.MetaKey;
+import seedu.address.model.game.meta.MetaValue;
 import seedu.address.model.tag.Tag;
 
 public class ParserUtilTest {
@@ -36,6 +40,142 @@ public class ParserUtilTest {
     private static final String VALID_USERNAME = "ShadowStrikerXx";
 
     private static final String WHITESPACE = " \t\r\n";
+
+    @Test
+    public void parseGameFields_outerControlCharacters_rejected() {
+        for (String input : new String[] {"\u0000Player", "Player\u0000", "\u001bPlayer", "Player\u001b"}) {
+            assertThrows(ParseException.class, () -> ParserUtil.parseGameName(input));
+            assertThrows(ParseException.class, () -> ParserUtil.parseUsername(input));
+            assertThrows(ParseException.class, () -> ParserUtil.parseMeta(input + ":Support"));
+            assertThrows(ParseException.class, () -> ParserUtil.parseMeta("Role:" + input));
+        }
+    }
+
+    @Test
+    public void parseGameFields_unicodeWhitespace_trimmedConsistently() throws Exception {
+        String input = "\u2003Player\u2003";
+        assertEquals(new GameName("Player"), ParserUtil.parseGameName(input));
+        assertEquals(new Username("Player"), ParserUtil.parseUsername(input));
+        assertEquals(new Meta(new MetaKey("Role"), new MetaValue("Player")),
+                ParserUtil.parseMeta("\u2003Role\u2003:" + input));
+    }
+
+    @Test
+    public void parseMetaKey_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseMetaKey(null));
+    }
+
+    @Test
+    public void parseMetaKey_invalid_throwsParseException() {
+        for (String input : List.of("", " ", "!!!", "Role:Type", "k".repeat(51), "a\nb", "a\u0000b")) {
+            assertThrows(ParseException.class, MetaKey.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseMetaKey(input));
+        }
+    }
+
+    @Test
+    public void parseMetaKey_valid_trimsAndPreservesCase() throws Exception {
+        for (String input : List.of("A", "1", "Play style!", "角色", "k".repeat(MetaKey.MAX_LENGTH))) {
+            assertEquals(input, ParserUtil.parseMetaKey("\u2003 " + input + " \u2003").value);
+        }
+    }
+
+    @Test
+    public void parseMetaValue_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseMetaValue(null));
+    }
+
+    @Test
+    public void parseMetaValue_invalid_throwsParseException() {
+        for (String input : List.of("", " ", "!!!", ":", "v".repeat(201), "a\tb", "a\u0000b")) {
+            assertThrows(ParseException.class, MetaValue.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseMetaValue(input));
+        }
+    }
+
+    @Test
+    public void parseMetaValue_valid_trimsAndPreservesColons() throws Exception {
+        for (String input : List.of("A", "1", "Support:Mid", ":Support:", "角色", "v".repeat(MetaValue.MAX_LENGTH))) {
+            assertEquals(input, ParserUtil.parseMetaValue("\u2003 " + input + " \u2003").value);
+        }
+    }
+
+    @Test
+    public void parseMeta_validPair_splitsAtFirstColon() throws Exception {
+        Meta expected = new Meta(new MetaKey("Role"), new MetaValue("Support:Mid"));
+        assertEquals(expected, ParserUtil.parseMeta("  Role  :  Support:Mid  "));
+        assertEquals(expected, ParserUtil.parseMeta(expected.toString()));
+    }
+
+    @Test
+    public void parseMeta_valueWithEdgeColons_preservesColons() throws Exception {
+        for (String value : List.of(":Support", "Support:", ":Support:", "Support::Mid")) {
+            assertEquals(new Meta(new MetaKey("Role"), new MetaValue(value)), ParserUtil.parseMeta("Role:" + value));
+        }
+    }
+
+    @Test
+    public void parseMeta_lengthBoundaries_validatesTrimmedFields() throws Exception {
+        String key = "k".repeat(MetaKey.MAX_LENGTH);
+        String value = "v".repeat(MetaValue.MAX_LENGTH);
+        assertEquals(new Meta(new MetaKey(key), new MetaValue(value)),
+                ParserUtil.parseMeta("  " + key + "  :  " + value + "  "));
+        assertThrows(ParseException.class, MetaKey.MESSAGE_CONSTRAINTS, ()
+                -> ParserUtil.parseMeta(key + "k:" + value));
+        assertThrows(ParseException.class, MetaValue.MESSAGE_CONSTRAINTS, ()
+                -> ParserUtil.parseMeta(key + ":" + value + "v"));
+        for (String input : List.of("", "Role", ":Support", "Role:", ":", "::")) {
+            assertThrows(ParseException.class, () -> ParserUtil.parseMeta(input));
+        }
+    }
+
+    @Test
+    public void parseMetas_nullElement_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseMetas(Arrays.asList("Role:Support", null)));
+    }
+
+    @Test
+    public void parseMetas_internalSpacesInKeys_remainDistinct() throws Exception {
+        assertEquals(Set.of(ParserUtil.parseMeta("Play style:Casual"), ParserUtil.parseMeta("Play  style:Competitive")),
+                ParserUtil.parseMetas(List.of("Play style:Casual", "Play  style:Competitive")));
+    }
+
+    @Test
+    public void parseMeta_invalidPair_throwsParseException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseMeta(null));
+        assertThrows(ParseException.class, Meta.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseMeta("Role Support"));
+        for (String key : List.of("", " ", "!!!", "a".repeat(51), "a\nb")) {
+            assertThrows(ParseException.class, MetaKey.MESSAGE_CONSTRAINTS, ()
+                    -> ParserUtil.parseMeta(key + ":Support"));
+        }
+        for (String value : List.of("", " ", ":", "a".repeat(201), "a\tb")) {
+            assertThrows(ParseException.class, MetaValue.MESSAGE_CONSTRAINTS, ()
+                    -> ParserUtil.parseMeta("Role:" + value));
+        }
+    }
+
+    @Test
+    public void parseMetas_uniqueKeys_success() throws Exception {
+        assertEquals(Set.of(), ParserUtil.parseMetas(List.of()));
+        assertEquals(Set.of(ParserUtil.parseMeta("Role:Support"), ParserUtil.parseMeta("Style:Support")),
+                ParserUtil.parseMetas(List.of("Role:Support", "Style:Support")));
+    }
+
+    @Test
+    public void parseMetas_repeatedFlags_throwsParseException() {
+        Prefix metaPrefix = new Prefix("m/");
+        ArgumentMultimap arguments = ArgumentTokenizer.tokenize(" m/Role:Support m/role:Mid", metaPrefix);
+        assertThrows(ParseException.class, Meta.MESSAGE_DUPLICATE_KEY, ()
+                -> ParserUtil.parseMetas(arguments.getAllValues(metaPrefix)));
+    }
+
+    @Test
+    public void parseMetas_duplicateKeys_throwsParseException() {
+        for (String duplicate : List.of("Role:Support", "role:Mid", " ROLE : Mid ")) {
+            assertThrows(ParseException.class, Meta.MESSAGE_DUPLICATE_KEY, ()
+                    -> ParserUtil.parseMetas(List.of("Role:Support", duplicate)));
+        }
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseMetas(null));
+        assertThrows(ParseException.class, () -> ParserUtil.parseMetas(List.of("Role:Support", "invalid")));
+    }
 
     @Test
     public void parseIndex_missingInput_throwsParseException() {

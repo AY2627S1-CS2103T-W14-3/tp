@@ -38,6 +38,18 @@ public class JsonAdaptedFriendTest {
             .collect(Collectors.toList());
 
     @Test
+    public void toModelType_gameMetadata_roundTrips() throws Exception {
+        // Metadata keys are scoped to each game, so the same key may occur in both games.
+        Friend original = new FriendBuilder(BENSON).withGames(
+                new GameBuilder().withGameName("Valorant").withUsername("player!")
+                        .addMeta("Role", "Support:Mid").build(),
+                new GameBuilder().withGameName("Minecraft").withUsername("player2")
+                        .addMeta("role", "Builder").build()).build();
+        String json = JsonUtil.toJsonString(new JsonAdaptedFriend(original));
+        assertEquals(original, JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType());
+    }
+
+    @Test
     public void toModelType_games_roundTrips() throws Exception {
         Friend original = new FriendBuilder(BENSON).withGames(
                 new GameBuilder().withGameName("Valorant").withUsername("benson").build(),
