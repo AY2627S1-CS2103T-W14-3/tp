@@ -38,6 +38,17 @@ public class IndexTest {
     }
 
     @Test
+    public void myselfIndex_selectsProfileWithoutFriendListPosition() {
+        Index myself = Index.myself();
+        assertTrue(myself.isMyself());
+        assertEquals(myself, Index.myself());
+        assertFalse(myself.equals(Index.fromOneBased(1)));
+        assertFalse(Index.fromOneBased(1).isMyself());
+        assertThrows(IllegalStateException.class, myself::getZeroBased);
+        assertThrows(IllegalStateException.class, myself::getOneBased);
+    }
+
+    @Test
     public void equals() {
         final Index fifthFriendIndex = Index.fromOneBased(5);
 
