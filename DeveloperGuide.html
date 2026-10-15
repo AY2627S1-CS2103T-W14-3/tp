@@ -58,6 +58,13 @@
   <li>
 <a href="#implementation" id="markdown-toc-implementation"><strong>Implementation</strong></a>    <ul>
       <li>
+<a href="#game-metadata" id="markdown-toc-game-metadata">Game metadata</a>        <ul>
+          <li><a href="#validation-and-equality" id="markdown-toc-validation-and-equality">Validation and equality</a></li>
+          <li><a href="#parsing" id="markdown-toc-parsing">Parsing</a></li>
+          <li><a href="#persistence-and-testing" id="markdown-toc-persistence-and-testing">Persistence and testing</a></li>
+        </ul>
+      </li>
+      <li>
 <a href="#proposed-undoredo-feature" id="markdown-toc-proposed-undoredo-feature">[Proposed] Undo/redo feature</a>        <ul>
           <li><a href="#proposed-implementation" id="markdown-toc-proposed-implementation">Proposed Implementation</a></li>
           <li><a href="#design-considerations" id="markdown-toc-design-considerations">Design considerations:</a></li>
@@ -243,6 +250,7 @@ adapters propagate the original exception, so invalid input is never treated as 
 
 <ul>
   <li>stores the GameMates data i.e., all <code class="language-plaintext highlighter-rouge">Friend</code> objects (which are contained in a <code class="language-plaintext highlighter-rouge">UniqueFriendList</code> object).</li>
+  <li>stores each friend’s games as <code class="language-plaintext highlighter-rouge">Game</code> objects, including their game name, username and optional metadata.</li>
   <li>stores the <code class="language-plaintext highlighter-rouge">Friend</code> objects selected by the current filter, such as search results, in a separate <em>filtered</em> list. It exposes this list as an unmodifiable <code class="language-plaintext highlighter-rouge">ObservableList&lt;Friend&gt;</code> that the UI can observe and bind to, so the UI updates when the list changes.</li>
   <li>stores a <code class="language-plaintext highlighter-rouge">UserPrefs</code> object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a <code class="language-plaintext highlighter-rouge">ReadOnlyUserPrefs</code> object.</li>
   <li>does not depend on any of the other three components (as the <code class="language-plaintext highlighter-rouge">Model</code> represents data entities of the domain, they should make sense on their own without depending on other components)</li>
@@ -265,6 +273,7 @@ adapters propagate the original exception, so invalid input is never treated as 
 <ul>
   <li>can save both GameMates data and user preference data in JSON format, and read them back into corresponding objects.</li>
   <li>is implemented by <code class="language-plaintext highlighter-rouge">StorageManager</code>, which delegates the actual JSON file access to <code class="language-plaintext highlighter-rouge">JsonGameMatesStorage</code> and <code class="language-plaintext highlighter-rouge">JsonUserPrefsStorage</code> (one class per data file).</li>
+  <li>converts game metadata through <code class="language-plaintext highlighter-rouge">JsonAdaptedGame</code> and <code class="language-plaintext highlighter-rouge">JsonAdaptedMeta</code>, validating fields and rejecting duplicate keys when loading.</li>
   <li>depends on some classes in the <code class="language-plaintext highlighter-rouge">Model</code> component (because the <code class="language-plaintext highlighter-rouge">Storage</code> component’s job is to save/retrieve objects that belong to the <code class="language-plaintext highlighter-rouge">Model</code>)</li>
 </ul>
 
@@ -285,6 +294,80 @@ nonempty values are rejected without trimming.</p>
 <h2 id="implementation"><strong>Implementation</strong></h2>
 
 <p>This section describes some noteworthy details on how certain features are implemented.</p>
+
+<h3 id="game-metadata">Game metadata</h3>
+
+<p>Metadata records game-specific details such as a friend’s role or play style.
+<code class="language-plaintext highlighter-rouge">Meta</code>, <code class="language-plaintext highlighter-rouge">MetaKey</code> and <code class="language-plaintext highlighter-rouge">MetaValue</code> are immutable classes in <code class="language-plaintext highlighter-rouge">seedu.address.model.game.meta</code>.
+Each <code class="language-plaintext highlighter-rouge">Meta</code> contains one key and one value. <code class="language-plaintext highlighter-rouge">Game</code> copies the supplied metadata collection and
+exposes it as an unmodifiable set through <code class="language-plaintext highlighter-rouge">getMetas()</code>; the two-argument constructor defaults to an empty set.</p>
+
+<h4 id="validation-and-equality">Validation and equality</h4>
+
+<p>Leading and trailing whitespace is removed with <code class="language-plaintext highlighter-rouge">String.strip()</code> before validation and storage.
+<code class="language-plaintext highlighter-rouge">StringUtil.isValidTextField()</code> requires non-empty text with at least one letter or digit and no ISO control characters.
+Limits use <code class="language-plaintext highlighter-rouge">String.length()</code> (UTF-16 units), so supplementary characters count as two.
+This check allows punctuation and does not exclude other Unicode categories, such as format characters.
+<code class="language-plaintext highlighter-rouge">GameName</code> and <code class="language-plaintext highlighter-rouge">Username</code> also use this utility.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Length after trimming</th>
+      <th>Colon handling</th>
+      <th>Equality</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">MetaKey</code></td>
+      <td>1–50</td>
+      <td>Colons rejected</td>
+      <td>Case-insensitive using <code class="language-plaintext highlighter-rouge">Locale.ROOT</code>
+</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">MetaValue</code></td>
+      <td>1–200</td>
+      <td>Colons allowed</td>
+      <td>Case-sensitive</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Keys must be unique within each game entry, including when repeated pairs have identical values.
+The same key can occur in other games or friends. <code class="language-plaintext highlighter-rouge">Game</code> enforces this invariant when constructed.
+<code class="language-plaintext highlighter-rouge">Meta.equals()</code> compares both fields; <code class="language-plaintext highlighter-rouge">Game.equals()</code> includes metadata, while <code class="language-plaintext highlighter-rouge">isSameGame()</code> compares only the game name.</p>
+
+<h4 id="parsing">Parsing</h4>
+
+<p><code class="language-plaintext highlighter-rouge">ParserUtil.parseMeta()</code> uses <code class="language-plaintext highlighter-rouge">StringUtil.splitAtFirstColon()</code> and delegates field parsing to
+<code class="language-plaintext highlighter-rouge">parseMetaKey()</code> and <code class="language-plaintext highlighter-rouge">parseMetaValue()</code>. For example, ` Role : Support:Mid ` becomes key <code class="language-plaintext highlighter-rouge">Role</code> and value <code class="language-plaintext highlighter-rouge">Support:Mid</code>.
+Missing separators and invalid fields cause <code class="language-plaintext highlighter-rouge">ParseException</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">parseMetas()</code> parses a collection of raw values and rejects duplicate normalized keys before returning a set.
+Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
+These are parser utilities; command-specific metadata flag handling is not yet implemented.</p>
+
+<h4 id="persistence-and-testing">Persistence and testing</h4>
+
+<p><code class="language-plaintext highlighter-rouge">JsonAdaptedGame</code> stores metadata as a <code class="language-plaintext highlighter-rouge">metas</code> array of <code class="language-plaintext highlighter-rouge">JsonAdaptedMeta</code> objects:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Valorant"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"player"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"metas"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Role"</span><span class="p">,</span><span class="w"> </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Support:Mid"</span><span class="w"> </span><span class="p">}]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Missing or null <code class="language-plaintext highlighter-rouge">metas</code> fields load as an empty set, preserving compatibility with existing save files.
+Null array entries, invalid fields and duplicate keys cause <code class="language-plaintext highlighter-rouge">IllegalValueException</code> during model conversion.</p>
+
+<p>Tests cover trimmed length boundaries, Unicode, control characters, colons, case normalization,
+duplicate keys, immutability, JSON round-trips and metadata preservation during contact edits.
+<code class="language-plaintext highlighter-rouge">GameBuilder.addMeta("Role", "Support")</code> appends a pair; <code class="language-plaintext highlighter-rouge">withMetas(...)</code> replaces the collection.
+Duplicate keys added through the builder are rejected by <code class="language-plaintext highlighter-rouge">build()</code>.</p>
 
 <h3 id="proposed-undoredo-feature">[Proposed] Undo/redo feature</h3>
 
