@@ -44,10 +44,11 @@
   <li><a href="#quick-start" id="markdown-toc-quick-start">Quick start</a></li>
   <li>
 <a href="#features" id="markdown-toc-features">Features</a>    <ul>
+      <li><a href="#viewing-friend-details" id="markdown-toc-viewing-friend-details">Viewing friend details</a></li>
       <li><a href="#viewing-help-help" id="markdown-toc-viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code></a></li>
       <li><a href="#adding-a-friend-add" id="markdown-toc-adding-a-friend-add">Adding a friend: <code class="language-plaintext highlighter-rouge">add</code></a></li>
       <li><a href="#listing-and-filtering-friends-list" id="markdown-toc-listing-and-filtering-friends-list">Listing and filtering friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
-      <li><a href="#editing-a-friend-edit" id="markdown-toc-editing-a-friend-edit">Editing a friend: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
+      <li><a href="#editing-a-friend-or-your-own-profile-edit" id="markdown-toc-editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
       <li><a href="#locating-friends-by-name-find" id="markdown-toc-locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
       <li><a href="#deleting-a-friend-delete" id="markdown-toc-deleting-a-friend-delete">Deleting a friend: <code class="language-plaintext highlighter-rouge">delete</code></a></li>
       <li><a href="#clearing-all-entries-clear" id="markdown-toc-clearing-all-entries-clear">Clearing all entries: <code class="language-plaintext highlighter-rouge">clear</code></a></li>
@@ -147,6 +148,18 @@ For example, <code class="language-plaintext highlighter-rouge">help 123</code> 
   </ul>
 </div>
 
+<h3 id="viewing-friend-details">Viewing friend details</h3>
+
+<p>The main window has two panels: the friend list on the left and a details panel on the right.</p>
+
+<ul>
+  <li>Click a friend in the left panel to view their name, phone number, email address, tags, games, and in-game usernames
+in the right panel.</li>
+  <li>On startup, the right panel shows your profile. If no profile details have been added, it shows <code class="language-plaintext highlighter-rouge">No details added</code>.</li>
+  <li>When a <code class="language-plaintext highlighter-rouge">find</code> command returns exactly one friend, that friend’s details are shown automatically.</li>
+  <li>When no friend is selected, the right panel returns to showing your profile.</li>
+</ul>
+
 <h3 id="viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code>
 </h3>
 
@@ -168,6 +181,7 @@ For example, <code class="language-plaintext highlighter-rouge">help 123</code> 
   <li>Supplied phone and email values must satisfy the validation rules. Empty <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> values are rejected.</li>
   <li>Leading and trailing spaces are removed. Names must be unique, ignoring case and repeated spaces:
 <code class="language-plaintext highlighter-rouge">John Doe</code> and <code class="language-plaintext highlighter-rouge">john   doe</code> identify the same friend.</li>
+  <li>A friend’s name must also differ from your Myself profile’s name under the same comparison rules.</li>
   <li>Different friends may share a phone number or email address.</li>
 </ul>
 
@@ -255,23 +269,27 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 <code class="language-plaintext highlighter-rouge">list g/Stardew Valley</code> shows friends who play <code class="language-plaintext highlighter-rouge">Stardew Valley</code>.</li>
 </ul>
 
-<h3 id="editing-a-friend-edit">Editing a friend: <code class="language-plaintext highlighter-rouge">edit</code>
+<h3 id="editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code>
 </h3>
 
-<p>Edits an existing friend in GameMates.</p>
+<p>Edits an existing friend or your separately stored Myself profile in GameMates.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">edit FRIEND_INDEX [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​</code></p>
 
 <ul>
   <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
+  <li>Use <code class="language-plaintext highlighter-rouge">myself</code> instead of <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> to edit your own profile, for example <code class="language-plaintext highlighter-rouge">edit myself n/Alex Tan</code>. The selector is case-insensitive.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">|</code> means “or”: enter either a friend index or <code class="language-plaintext highlighter-rouge">myself</code>. Do not type the <code class="language-plaintext highlighter-rouge">|</code> character.</li>
   <li>At least one of the optional fields must be provided.</li>
   <li>Supplied values are trimmed and validated using the same rules as <code class="language-plaintext highlighter-rouge">add</code>.</li>
   <li>Omitted fields remain unchanged. Enter <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> without a value to remove that contact detail.</li>
   <li>A name cannot be removed. The new name must be unique among other friends, ignoring case and repeated spaces.</li>
+  <li>Your own profile’s name must also be unique among all friends, ignoring case and repeated spaces. Adding or renaming a friend to match your own profile’s name is rejected.</li>
   <li>Games remain unchanged when editing friend details.</li>
   <li>Success feedback starts with <code class="language-plaintext highlighter-rouge">Edited NAME</code> and lists only changed details. Removed contact details are reported
 as <code class="language-plaintext highlighter-rouge">removed phone number</code> or <code class="language-plaintext highlighter-rouge">removed email</code>.</li>
-  <li>An index is required to point at the profile to be edited. Editing your own profile without an index is not currently supported.</li>
+  <li>A friend index or <code class="language-plaintext highlighter-rouge">myself</code> is required. Editing Myself works even when no friends are displayed and preserves the current friend-list filter.</li>
   <li>Omit <code class="language-plaintext highlighter-rouge">t/</code> to keep the friend’s existing tags. Each supplied <code class="language-plaintext highlighter-rouge">t/TAG</code> removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.</li>
   <li>Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.</li>
   <li>To remove all of a friend’s tags, enter <code class="language-plaintext highlighter-rouge">t/</code> without a tag after it.</li>
@@ -287,6 +305,10 @@ as <code class="language-plaintext highlighter-rouge">removed phone number</code
 <code class="language-plaintext highlighter-rouge">edit 2 p/ e/</code> removes the 2nd friend’s phone number and email.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">edit 2 t/teammate</code> removes <code class="language-plaintext highlighter-rouge">teammate</code> if the 2nd friend already has it, or adds it otherwise. Other tags remain unchanged.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">edit myself n/Alex Tan p/91234567</code> updates your own name and phone number.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">edit myself p/ e/ t/</code> clears your own phone number, email and tags while preserving your name and games.</li>
 </ul>
 
 <p>Errors:</p>
