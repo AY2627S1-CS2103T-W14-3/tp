@@ -14,6 +14,8 @@ box Model MODEL_COLOR_T1
 participant "m:Model" as Model MODEL_COLOR
 end box
 
+participant ":Storage" as Storage STORAGE_COLOR
+
 [-> LogicManager : execute("delete 1")
 activate LogicManager
 
@@ -49,7 +51,13 @@ deactivate GameMatesParser
 LogicManager -> DeleteCommand : execute(m)
 activate DeleteCommand
 
-DeleteCommand -> Model : deleteFriend(1)
+DeleteCommand -> Model : getFilteredFriendList()
+activate Model
+Model --> DeleteCommand : displayedFriends
+deactivate Model
+note right of DeleteCommand: Resolve index 1 to a Friend\nin the displayed list.
+
+DeleteCommand -> Model : deleteFriend(friendToDelete)
 activate Model
 
 Model --> DeleteCommand
@@ -65,6 +73,11 @@ deactivate CommandResult
 DeleteCommand --> LogicManager : r
 deactivate DeleteCommand
 
-[<--LogicManager
+LogicManager -> Model : getGameMates()
+Model --> LogicManager : gameMates
+LogicManager -> Storage : saveGameMates(gameMates)
+Storage --> LogicManager
+
+[<--LogicManager : r
 deactivate LogicManager
 @enduml

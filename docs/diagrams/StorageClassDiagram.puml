@@ -1,4 +1,5 @@
 @startuml
+!pragma layout smetana
 !include style.puml
 skinparam arrowThickness 1.1
 skinparam arrowColor STORAGE_COLOR
@@ -18,6 +19,9 @@ Class JsonGameMatesStorage
 Class JsonSerializableGameMates
 Class JsonAdaptedFriend
 Class JsonAdaptedTag
+Class JsonAdaptedGame
+Class JsonAdaptedGameName
+Class JsonAdaptedUsername
 }
 
 }
@@ -31,6 +35,10 @@ StorageManager -down-> "1" JsonGameMatesStorage
 
 JsonGameMatesStorage ..> JsonSerializableGameMates
 JsonSerializableGameMates --> "*" JsonAdaptedFriend
+JsonSerializableGameMates --> "0..1 myself" JsonAdaptedFriend
 JsonAdaptedFriend --> "*" JsonAdaptedTag
+JsonAdaptedFriend --> "*" JsonAdaptedGame
+JsonAdaptedGame --> "1" JsonAdaptedGameName
+JsonAdaptedGame --> "1" JsonAdaptedUsername
 
 @enduml

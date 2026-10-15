@@ -11,6 +11,9 @@ title: Developer Guide
 
 * [Vavr](https://vavr.io/) provides `Option`, `Try`, and checked-function adapters for parsing, edit descriptors, and storage.
 
+This guide distinguishes implemented behaviour from the [pending MVP integration](#mvp-integration-and-specification-departures).
+The requirements and explicitly proposed features below describe product goals, not a claim that every goal is implemented.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
@@ -72,7 +75,10 @@ The **API** of this component is specified in [`Ui.java`](https://github.com/AY2
 
 ![Structure of the UI Component](images/UiClassDiagram.png)
 
-The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `FriendListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
+The UI consists of `MainWindow`, `CommandBox`, `ResultDisplay`, `FriendListPanel`, `FriendDetailsPanel`,
+`GameDetailsCard`, `HelpWindow` and `StatusBarFooter`. These inherit from `UiPart`, which loads matching FXML layouts.
+`MainWindow.fxml` keeps the observable friend list on the left of a `SplitPane` and the details panel on the right.
+`FriendDetailsPanel` renders contact details, tags and sorted game cards; it does not replace the friend list.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
 
@@ -82,6 +88,12 @@ The `UI` component,
 * listens for changes to `Model` data so that the UI can be updated with the modified data.
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component because it displays `Friend` objects from the model.
+
+`FriendListPanel` sends selection changes to a consumer owned by `MainWindow`. Command-driven selection uses
+`CommandResult.friendToShow` and `gameFilter`, described under [Viewing a friend's games](#viewing-a-friends-games).
+Successful results without a friend payload show `Logic.getMyself()`; a single-result `find` selects that friend.
+Parse or command failures update feedback without explicitly refreshing details. A game filter is applied only
+while rendering cards, preserving both the model and the left-hand friend-list predicate.
 
 ### Logic component
 
@@ -100,11 +112,13 @@ The sequence diagram below illustrates the interactions within the `Logic` compo
 
 How the `Logic` component works:
 
-1. When `Logic` is called upon to execute a command, the command is passed to an `GameMatesParser` object, which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
+1. When `Logic` is called upon to execute a command, the command is passed to a `GameMatesParser` object, which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
 1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteCommand`) which is executed by the `LogicManager`.
 1. The command can communicate with the `Model` when it is executed (e.g. to delete a friend).<br>
    Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the `Model` to complete the operation.
-1. The result of the command execution is encapsulated as a `CommandResult` object which is returned from `Logic`.
+1. The command creates a `CommandResult`. `LogicManager` saves the complete `ReadOnlyGameMates` through `Storage`
+   before returning it to the UI. Saving applies to viewing commands too. Parse and execution failures skip saving;
+   an I/O error after execution is translated into a `CommandException` without rolling back the in-memory change.
 
 Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
 
@@ -133,11 +147,21 @@ adapters propagate the original exception, so invalid input is never treated as 
 
 The `Model` component,
 
-* stores the GameMates data i.e., all `Friend` objects (which are contained in a `UniqueFriendList` object).
+* stores friends in `GameMates` through `UniqueFriendList`, plus a separate `Friend myself` profile with a default value.
+  The profile is not in the friend list. Add/edit commands separately prevent names shared between a friend and the profile.
+* exposes an observable `FilteredList<Friend>` backed by the stored friends. The filter is a predicate over the
+  full list, rather than a second collection of copied friends.
 * stores each friend's games as `Game` objects, including their game name, username and optional metadata.
-* stores the `Friend` objects selected by the current filter, such as search results, in a separate _filtered_ list. It exposes this list as an unmodifiable `ObservableList<Friend>` that the UI can observe and bind to, so the UI updates when the list changes.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
+
+`Friend` contains `Name`, optional contact values, a set of `Tag` objects and a set of `Game` objects.
+`Game` contains `GameName`, `Username` and an immutable metadata set. Name equality ignores case and collapses repeated ASCII spaces;
+`GameName.equals` compares complete names using lower-case normalization with `Locale.ROOT`.
+`Username` preserves case. `Game.isSameGame` compares game names, while full equality also compares usernames and metadata.
+The set representation alone does not enforce
+one entry per game name when different usernames are loaded from JSON; do not infer game-command duplicate handling
+from the proposed specification.
 
 <div markdown="span" class="alert alert-info">:information_source: **Note:** The alternative, arguably more object-oriented, design below keeps a unique list of tags in `GameMates`, and each `Friend` references tags from that list. This lets `GameMates` maintain one `Tag` object per unique tag instead of each `Friend` holding its own `Tag` objects.<br>
 
@@ -164,7 +188,25 @@ failures, translating captured failures into checked `DataLoadingException` inst
 Startup uses sample data for a missing GameMates file
 and an empty GameMates for a loading error. Missing or unreadable preferences use default preferences.
 JSON contact fields that are null or empty map to the corresponding empty contact value; invalid
-nonempty values are rejected without trimming.
+nonempty contact values are rejected without trimming. Missing `games` or `tags` load as empty sets, and missing
+`myself` retains `Friend.DEFAULT_MYSELF`. Stored games require valid `name` and `username` values. Duplicate friend
+names reject the whole data load, including a previously parsed profile; startup uses a new empty `GameMates`.
+
+`MainApp` resolves `data/gamemates.json` and `preferences.json` relative to the process working directory, not the
+JAR's location. `MainApp.initPrefs` writes initialized preferences at startup and `stop` writes them again at shutdown;
+`MainWindow.handleExit` first records the current window dimensions and position. The data model is saved by commands,
+not by `stop`. Selection and filter predicates are transient.
+
+`JsonSerializableGameMates` adapts both `friends` and `myself`; `JsonAdaptedFriend` adapts games and tags, and
+`JsonAdaptedGame` adapts `name`, `username` and `metas`. Jackson ignores unknown properties, which
+disappear on the next serialization. Loading a damaged file does not repair or back it up:
+the next successful command can overwrite it with the fallback data. There is no automatic recovery or atomic
+transaction spanning command execution and file writing.
+
+Known loading exception: a JSON file containing only the literal `null` reaches `JsonUtil.readJsonFile`'s
+`requireNonNull` outside its captured conversion, throwing `NullPointerException` rather than `DataLoadingException`.
+It bypasses the normal empty-data fallback and can prevent startup. This needs an application fix separately;
+the documentation change does not alter the loader.
 
 ### Common classes
 
@@ -175,6 +217,111 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 ## **Implementation**
 
 This section describes some noteworthy details on how certain features are implemented.
+
+### Friend creation, editing and deletion
+
+`AddCommandParser` requires `n/` and uses `Phone.EMPTY` and `Email.EMPTY` for omitted contact values.
+`ParserUtil` trims supplied values before calling their model validators. `ArgumentMultimap` rejects duplicate
+single-value name/contact prefixes and collects repeated tags into a set. `UniqueFriendList` rejects names equal
+under `Friend.isSameFriend`, so different phone/email values or tags do not distinguish duplicate names.
+
+`EditCommandParser` requires a numeric index or case-insensitive `myself`, represented by `Index.myself()`.
+An omitted selector is rejected. `EditCommand` handles the profile selector before accessing a friend-list index,
+updates `Model.setMyself` without resetting the friend filter, and returns feedback that displays the profile.
+Add/edit commands reject names shared between a friend and the profile. `EditFriendDescriptor` uses
+optional values to distinguish omission from a supplied empty contact field. `EditCommand` resolves the index against
+`Model.getFilteredFriendList()` and constructs a new friend with the original games. Name/contact values replace
+existing values. Supplied tags are toggled by set membership; duplicates in one command are deduplicated, and a
+single empty `t/` clears all tags. Empty and non-empty tag parameters together fail validation.
+After a successful add or friend edit, the model resets the friend-list predicate to show all friends.
+Editing Myself preserves that predicate, including an empty displayed list.
+
+`DeleteCommand` uses the same displayed-list indexing but keeps the current predicate. It removes the entire friend
+and their games immediately; there is no confirmation state. Its out-of-range/empty-list error is the shared generic
+message, while `EditCommand` and `GameListCommand` distinguish empty lists and give a displayed range.
+`ClearCommand` replaces the friends with an empty `GameMates` while copying the existing profile.
+
+The implemented contact rules differ from the submitted draft: names are 1–100 ASCII alphanumeric
+characters/spaces, phones validate digit counts and grouping, and emails validate ASCII dot-atom/domain syntax
+with length limits. The [User Guide](UserGuide.html#adding-a-friend-add) specifies the accepted input for users.
+No phone, email, game name or username is verified against an external service.
+`GameName` and `Username` trim with `String.strip()`, count UTF-16 code units with `String.length()`, require a
+letter/digit code point and reject ISO control code points. This is not a general Unicode printability test.
+
+### Name and game filtering
+
+`FindCommand` installs `NameContainsKeywordsPredicate`: any full name word matching any supplied keyword, ignoring
+case, is sufficient. `ListCommand` either installs `PREDICATE_SHOW_ALL_FRIENDS` or `GameNameMatchesPredicate`, which
+tests whether any of a friend's games has the exact `GameName`. Both operate over all stored friends and replace
+the previous predicate; they do not intersect filters. `find` does not parse prefixes and `list` does not parse `n/`.
+The `find` parser only requires a non-empty keyword list; there is no 255-character keyword validation.
+No-match queries return successful empty results. Filtering never includes or edits the separate profile.
+
+### Viewing a friend's games
+
+`gamelist <FRIEND_INDEX> [g/GAME_NAME]` selects a friend for the right-hand details panel without changing the
+left-hand friend list. The flow is:
+
+1. `GameMatesParser` routes `gamelist` to `GameListCommandParser`. The parser requires one positional index before
+   at most one `g/` filter. It recognizes prefixes at whitespace boundaries so unknown prefixes and repeated
+   `g/` tokens cannot silently become part of a multiword game name. Other words after `g/` belong to the name.
+   Index parsing uses `ParserUtil.parseIndex`, and game validation uses the existing `GameName` rules.
+   Command-specific errors are translated locally, leaving other commands' validation and messages unchanged.
+2. `GameListCommand.execute` resolves the index against `Model.getFilteredFriendList()`, so indices remain correct
+   after both name searches and game-based friend filtering. It checks empty and out-of-range lists before lookup.
+   It uses `GameName.equals` for exact, case-insensitive matching. No match and no games return successful results.
+3. `CommandResult` carries the original `Friend` in `friendToShow` and an optional `GameName` in `gameFilter`.
+   The filter requires a selected friend, participates in equality, hashing and diagnostic output, and defaults
+   to empty in the existing constructors. Feedback uses the stored game name on a match and the trimmed query
+   when there is no match.
+4. `MainWindow.refreshFriendDetails` forwards both payload fields to `FriendDetailsPanel.setFriend`.
+   The panel filters the stream used to construct `GameDetailsCard` instances and displays an explicit empty label
+   if the stream has no entries. It never constructs a replacement friend or modifies the original game set.
+   An unfiltered command clears the game filter. The existing two-argument `setFriend` also clears it, including
+   when `FriendListPanel` reports another selection. A single-result `find` continues selecting the whole friend.
+   Parse and execution failures do not refresh the panel, preserving the previous game display.
+
+The command does not update the model's friend-list predicate, friends, games, preferences or Myself profile.
+The existing profile fallback and its rendering are preserved. `GameDetailsCard` currently renders the available
+`Game.getGameName()` and `Game.getUsername()` fields. Metadata storage has merged, but cards do not yet render
+`Game.getMetas()`. Extend the card using `Meta.getKey()` and `Meta.getValue()` and add rendering/preservation tests;
+the command's original-friend payload already retains metadata without copying or removing it.
+
+Parser and command tests cover errors, exact matching, empty results, displayed-list indexing and unchanged model
+data. JavaFX panel and window tests exercise filtered payloads, empty states, clearing by commands and selection,
+and preservation of the details view after invalid input.
+
+![Command-to-panel flow for a filtered game list](images/GameListSequenceDiagram.png)
+
+### MVP integration and specification departures
+
+Baseline: the *GameMates – Feature Specification* section of the team's
+[shared project document](https://docs.google.com/document/d/1UI16NkQ8w8hXb-8Jez8UDpGYkRc8wbs42XZntx9n_sI/edit),
+CS2103T-W14-3, 20 September 2026, pages 3–26 in the exported feature-spec PDF. Checked on 15 October 2026.
+The table records unresolved differences for team reconciliation; it does not change application behaviour or
+present pending PRs as merged features. Recheck this table and the User Guide against the integrated release
+before publishing a complete v1.3 MVP guide.
+
+| Area | Submitted specification | Current implementation / follow-up |
+|------|-------------------------|------------------------------------|
+| Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | [PR #69](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/69) has merged: use explicit, case-insensitive `edit myself ...`. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
+| Game add/delete | `gameadd INDEX g/NAME u/USER_NAME [m/KEY:VALUE]...` and `gamedel INDEX g/NAME` (pp. 17–23). | Neither command is routed. [PR #70](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/70) is pending. Add success/error, duplicates, filter preservation and persistence tests after integration. |
+| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | [PR #64](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64) has merged the model, parser utilities and JSON persistence. Command entry and game-card rendering remain unavailable. See [Game metadata](#game-metadata) for the implemented API. |
+| Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
+| Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
+| Phone/email | Phone: 1–40 characters from a broad punctuation set. Email: 1–255 characters containing `@` (pp. 5–6). | Phone: 3–15 ASCII digits, or `+` with 2–15, with constrained grouping and no extensions. Email: at most 254 characters, local part at most 64, ASCII dot-atom and valid domain labels. |
+| Friend filtering | Combined `list [n/KEYWORDS] [g/GAME]`, with named empty-result feedback (pp. 14–15). | Separate `find KEYWORD...` and `list [g/GAME]`; a new command replaces the previous filter. Feedback is `Listed all friends.` or `N friend(s) listed!`, including zero. |
+| GUI | Feature-spec mockups replace the friend panel with a game's list (pp. 15, 25); later v1.3 notes call for a split panel. | The adopted split layout matches those later notes: friends stay on the left and details/game cards appear on the right. `gamelist` filters cards only. Retire the earlier mockups. |
+| Errors | Command-specific index and validation wording. | Messages differ across commands; use the verified wording in the User Guide instead of copying spec errors. |
+| Game uniqueness | One username per game name within a friend (pp. 16–19). | `Game.isSameGame` supports name identity, but stored sets use full equality. JSON can contain the same game name with different usernames. Verify enforcement when game commands integrate. |
+
+Additional integration issues found during the audit: root-level JSON `null` bypasses the loading fallback, and
+game-text validation uses ISO-control rejection rather than a complete Unicode printability check. These are
+recorded limits; no application fix is included in this documentation change.
+
+Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
+not a current use-case step. Game creation/deletion and metadata entry/display cannot yet be demonstrated in this checkout;
+capture those screenshots after integration. Own-profile editing is available through `edit myself`.
 
 ### Game metadata
 
@@ -312,11 +459,10 @@ The following activity diagram summarizes what happens when a user executes a ne
   * Pros: Will use less memory (e.g. for `delete`, just save the friend being deleted).
   * Cons: We must ensure that the implementation of each individual command is correct.
 
-_{more aspects and alternatives to be added}_
-
 ### \[Proposed\] Data archiving
 
-_{Explain here how the data archiving feature will be implemented}_
+Future proposal only. No archive command, scheduled backup or retention policy is implemented.
+The current recovery procedure is to copy the JSON file while the application is closed.
 
 
 --------------------------------------------------------------------------------------------------------------------
@@ -348,6 +494,8 @@ _{Explain here how the data archiving feature will be implemented}_
 
 
 ### User stories
+
+These are product requirements, including future work. Implemented availability is recorded in the integration table above.
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
@@ -396,16 +544,16 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
    Use case ends.
 
-**Extensions** 
+**Extensions**
 * 1a. The name field is missing or empty.
 
   * 1a1. GameMates shows an error message.
-    
+
     Use case ends.
 * 1b. A friend with the same name already exists.
 
-  * 1b1. GameMates shows an error message, suggesting the user search first.
-    
+  * 1b1. GameMates shows `This friend already exists in GameMates.`
+
     Use case resumes at step 1.
 
 
@@ -415,27 +563,22 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 1. User requests to list friends.
 2. GameMates shows a list of friends.
 3. User requests to delete a specific friend in the list.
-4. GameMates asks for confirmation.
-5. User confirms.
-6. GameMates deletes the friend.
+4. GameMates immediately deletes the friend and their game entries and shows `Successfully deleted NAME.`
 
    Use case ends.
 
 **Extensions**
 * 2a. The list is empty.
-  
+
   Use case ends.
 * 3a. The given index is invalid.
 
   * 3a1. GameMates shows an error message.
-    
+
     Use case resumes at step 2.
-* 5a. User does not confirm.
-  
-  Use case ends.
+**[Proposed] Use case: Edit a friend's platform handle**
 
-
-**Use case: Edit a friend's platform handle**
+This is a future requirement; there is no working handle-editing command in this checkout.
 
 **MSS**
 1. User requests to list friends.
@@ -447,17 +590,17 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 * 2a. The list is empty.
-  
+
   Use case ends.
 * 3a. The given index is invalid.
 
   * 3a1. GameMates shows an error message.
-    
+
     Use case resumes at step 2.
 * 3b. The specified platform does not exist for that friend.
 
   * 3b1. GameMates shows an error message.
-    
+
     Use case resumes at step 2.
 
 
@@ -473,10 +616,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 1a. No keyword is given.
 
   * 1a1. GameMates shows an error message.
-    
+
     Use case ends.
 * 2a. No friends match the keyword.
-  
+
   Use case ends.
 
 
@@ -490,10 +633,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 * 2a. No friends play that game.
-  
+
   Use case ends.
 
 ### Non-Functional Requirements
+
+The following are targets, not measured guarantees. Targets involving game modification or metadata entry/display
+remain pending integration; startup/performance and large-data capacity need separate measurement.
 
 #### Environment
 
@@ -504,7 +650,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 #### Data
 
 1. All data should be stored locally in a human-editable JSON file. GameMates should not send any data over the network.
-1. Data saved on exit should be fully restored on the next launch, with no loss of friends, game entries or metadata, provided the data file is not edited manually into an invalid format.
+1. Successfully saved data should be restored on the next launch from the same working directory. Current data saves
+   occur after successful commands; window preferences save on shutdown. Metadata persistence is implemented in the JSON adapters.
 1. If the data file is missing, GameMates should start with the sample data without crashing. If the data file is corrupted, GameMates should start with an empty list without crashing.
 
 #### Capacity
@@ -532,18 +679,18 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * **Modern computer**: A computer running a mainstream OS with 16 GB of RAM, a 512 GB SSD, and a mid-range modern processor such as an Intel Core i5 or AMD Ryzen 5.
 * **Mainstream OS**: Windows, Linux, Unix, or macOS
 * **Friend**: A person stored in GameMates, identified by a unique name and optionally associated with contact details and game entries.
-* **User profile**: The current user’s own stored details. It is edited when `edit` is used without a friend index.
-* **Game entry**: A record that a particular friend plays a particular game, including their in-game username and optional metadata.
+* **User profile**: The current user's separately stored details, edited using `edit myself ...` and preserved by friend-list commands.
+* **Game entry**: A record that a friend plays a game, containing a game name, in-game username and optional metadata.
 * **Role**: A job or duty a friend plays as in a particular game, for example a friend can play as a `Sniper` or a `Healer`.
 * **Game name**: The user-provided name used to identify a game within one friend’s game entries. Aliases such as “Val” and “Valorant” are treated as different game names.
 * **In-game username/Handle**: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.
-* **Metadata**: Optional additional information recorded for a game entry, such as a role, preferred weapon, server, or play style.
+* **Metadata**: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; command entry and card rendering are not yet supported.
 * **Metadata key**: The label before the first colon in a metadata item. For example, `Role` in `Role:Sentinel`.
 * **Metadata value**: The information after the first colon in a metadata item. For example, `Sentinel` in `Role:Sentinel`.
 * **Friend index**: A positive number representing a friend’s position in the currently displayed friend list.
 * **Currently displayed list**: The friend list currently shown after any active filters have been applied. Friend indices refer to this list.
 * **Filter**: A condition used to narrow a displayed list, such as a name keyword or game name.
-* **Name keyword**: A word used to match part of a friend’s name.
+* **Name keyword**: A full word matched against a friend's name, ignoring case. A substring such as `Dav` does not match `David`.
 * **Case-insensitive comparison**: A comparison that treats uppercase and lowercase letters as equivalent.
 * **Trimmed value**: A value after its leading and trailing spaces have been removed.
 * **Duplicate**: Two entries considered the same according to the project’s matching rules, and therefore not both allowed.
@@ -552,52 +699,153 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ## **Appendix: Instructions for manual testing**
 
-Given below are instructions to test the app manually.
+### Prerequisites and test isolation
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** These instructions only provide a starting point for testers to work on;
-testers are expected to do more *exploratory* testing.
+Use JDK 25 and a graphical desktop. Build with `./gradlew shadowJar`, then copy `build/libs/gamemates.jar` into
+an empty disposable folder. Open a terminal in that folder and run `java -jar gamemates.jar`.
+Never use a real user's data for deletion, corruption or write-failure tests. Use a new disposable folder for each
+scenario labelled **fresh sample data**; do not run two app instances against the same data file.
+Commands below are entered in the application's command box, not the terminal.
 
-</div>
+### Launch, help and window settings
 
-### Launch and shutdown
+Prerequisite: fresh sample data.
 
-1. Initial launch
+1. Launch from the disposable folder. Expected: six sample friends on the left; the right panel says
+   `Your details` and `No details added`. A missing data file is not a crash.
+2. Enter `help`. Expected: feedback `Opened help window.`, a Help window containing the User Guide URL and
+   **Copy URL** button. Copy and open it in a browser. Close the Help window and press `F1` to reopen it.
+3. Resize/move the main window, then enter `exit`. Relaunch from the same folder.
+   Expected: saved size/position restored, all friends visible, default profile on the right.
 
-   1. Download the JAR file and copy it into an empty folder.
+### Friend creation, editing, identity and tags
 
-   1. Double-click the JAR file.<br>
-      Expected: The GUI opens with a set of sample contacts. The window size may not be optimal.
+Prerequisite: fresh sample data. These steps deliberately add a disposable friend.
 
-1. Saving window preferences
+| Step | Input/action | Expected result |
+|------|--------------|-----------------|
+| 1 | `add n/Joash Test t/duo` | Seven friends. Feedback starts `Added Joash Test.` and shows `Not provided` for phone and email. |
+| 2 | `add n/joash   test t/other` | Duplicate-name error; still seven friends. A different tag does not bypass identity checks. |
+| 3 | `find Joash`, then `edit 1 p/+65 9123-4567 e/joash@example.com t/duo t/casual` | Edits Joash rather than full-list friend 1. All seven friends become visible. Games remain unchanged; `duo` is removed and `casual` added. |
+| 4 | `find Joash`, then click the result | Right panel shows the formatted phone, email and only `casual`. |
+| 5 | `edit 1 p/ e/ t/casual t/casual` | Phone/email removed; `casual` toggled off once. Feedback lists removed details. |
+| 6 | `find Joash`, then `edit 1 t/duo t/casual`, then `find Joash`, then `edit 1 t/` | Both tags are added, then all are cleared. Omitted name/contact fields are preserved. |
+| 7 | `find Joash`, then `gamelist 1` | `Joash Test has no games added yet.` and a `No games added` label. |
 
-   1. Resize the window to an optimal size. Move the window to a different location. Close the window.
+Test invalid input independently: `add`, `add n/`, `add n/Joash-Test`, `add n/Test p/`, `add n/Test p/12`,
+`add n/Test p/9123.4567`, `add n/Test p/123;4`, `add n/Test e/name@`, `add n/Test e/a..b@example.com`,
+`add n/Test n/Test`, and `edit 1 t/ t/duo`. Expected: validation or duplicate-prefix errors and no stored change.
+Also try 100 versus 101 ASCII letters for a name, 15 versus 16 phone digits, and email local parts of 64 versus 65
+letters followed by `@example.com`. Expected: the first in each pair is valid and the second rejected, using fresh
+names or a disposable friend for each attempt. These are syntax checks, not online contact verification.
 
-   1. Relaunch the app by double-clicking the JAR file.<br>
-       Expected: The most recent window size and location are retained.
+### Friend filters and displayed indices
 
-1. _{ more test cases …​ }_
+Prerequisite: fresh sample data.
 
-### Deleting a friend
+1. `find alex david`: expected Alex Yeoh and David Li, with `2 friend(s) listed!`.
+2. `find Dav`: expected zero results; substring matching is not supported. `find david` returns David and opens
+   his details automatically. `find` without keywords reports usage and preserves the current display.
+3. `list g/minecraft`: expected Bernice Yu and Roy Balakrishnan, replacing the David filter.
+4. `gamelist 1`: expected Bernice's Minecraft card, although Bernice was full-list index 2. Both Minecraft players
+   remain on the left. `find Alex` now finds Alex from the full data, not from the two Minecraft results.
+5. `list g/Val`: expected zero results. `list` restores all six friends and returns `Listed all friends.`.
+6. `list n/Alex g/Valorant`: expected invalid-format feedback; combined filtering is not supported.
 
-1. Deleting a friend while all friends are being shown
+### Game cards, empty states and display-filter clearing
 
-   1. Prerequisites: List all friends using the `list` command, with multiple friends in the list.
+Prerequisite: fresh sample data.
 
-   1. Test case: `delete 1`<br>
-      Expected: The first contact is deleted from the list. The status message shows the deleted contact's details.
+1. `gamelist 1`: expected Alex's Fortnite and Valorant cards, each showing a game name and username.
+2. `gamelist 1 g/valorant`: expected `Showing Valorant for Alex Yeoh:` and only his Valorant card.
+3. `gamelist 0`, then `gamelist 2147483648`, then `gamelist 7`: expected index errors; the existing Valorant
+   card stays visible. Try `gamelist`, `gamelist 1 g/`, `gamelist 1 g/Valorant g/Valorant`,
+   `gamelist 1 x/Valorant`, and `gamelist 1 extra`: expected the corresponding usage, empty-name or repeated-filter error.
+4. `gamelist 1 g/Val`: expected `Alex Yeoh does not have Val.` and `No matching game: Val`. This is successful,
+   not an exception. Alex's contact details remain visible, and the left list still has six friends.
+5. `gamelist 1`: expected both cards again. Filter to Valorant again, then click Bernice: expected her Minecraft card,
+   proving that selecting another friend clears the display filter. No stored game entry should be removed.
+6. `gamelist 3 g/Stardew Valley`: expected Charlotte's Stardew Valley card. `find David`, then `gamelist 1`,
+   selects David rather than Alex. `list g/Unknown`, then `gamelist 1`, reports an empty displayed list.
 
-   1. Test case: `delete 0`<br>
-      Expected: No friend is deleted. The status message shows error details.
+### Deletion and clearing
 
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
-      Expected: Similar to previous.
+Prerequisite: fresh sample data. These actions are destructive within the disposable folder.
 
-1. _{ more test cases …​ }_
+1. `list g/Minecraft`, then `delete 1`: expected Bernice is removed immediately, with
+   `Successfully deleted Bernice Yu.`. No confirmation appears. Roy remains in the filtered list, and other friends
+   reappear with `list`. Bernice's games are removed with her, while Roy's Minecraft entry remains.
+2. `delete`, `delete 0`, `delete -1`, `delete x`, `delete 2147483648`, `delete 1 2` and `delete 999`:
+   expected errors without deleting anyone. Missing index reports `Please provide an index.`; malformed values
+   report `Index must be a positive integer.`; an out-of-range index reports `The friend index provided is invalid.`.
+3. `clear`: expected immediate empty list and `Friend list has been cleared!`. `delete 1` then reports the generic
+   invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list. There is no undo.
 
-### Saving data
+### Saved profile, game round trip and pending commands
 
-1. Dealing with missing/corrupted data files
+Prerequisite: a disposable app folder. Close the app and create `data/gamemates.json` with the fixture below.
+This seeds existing data for testing; it is not an own-profile edit command.
 
-   1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
+```json
+{
+  "friends": [{
+    "name": "Fixture Friend", "phone": "", "email": "", "tags": ["duo"],
+    "games": [{"name": "Valorant", "username": "friend123"}]
+  }],
+  "myself": {
+    "name": "Joash", "phone": "91234567", "email": "joash@example.com", "tags": [],
+    "games": [{"name": "Minecraft", "username": "joash123"}]
+  }
+}
+```
 
-1. _{ more test cases …​ }_
+1. Relaunch: expected Joash's profile and Minecraft username on the right. `gamelist 1` shows Fixture Friend's
+   Valorant entry. `edit 1 p/98765432` preserves that entry and shows the unchanged profile after success.
+2. `list g/Unknown`, then `edit MYSELF n/Joash Updated p/`: expected the renamed profile with no phone number and
+   its Minecraft game preserved. The left friend list remains empty. `edit myself n/Fixture Friend` rejects the
+   duplicate name, and `add n/joash updated` rejects a name matching the profile.
+3. Try `edit n/Changed`, `gameadd 1 g/Test u/player`, and `gamedel 1 g/Valorant`.
+   Expected: missing-index or unknown-command errors. The profile and game remain unchanged.
+   Metadata command entry cannot be tested because no routed command supports it yet. To test storage, close the app,
+   add `"metas": [{"key": "Role", "value": "Support:Mid"}]` to the fixture's Minecraft entry, relaunch and run `list`.
+   The saved JSON must retain that pair; cards currently show only the game name and username. A missing `metas`
+   field loads as empty; a repeated key (including case variants) rejects the load and uses the documented fallback.
+4. `find Fixture`, then `gamelist 1 g/valorant`, then `exit`. Relaunch from the same folder.
+   Expected: the edited friend phone, friend game and profile game survive, with Joash Updated's profile displayed
+   and its phone still removed. Filters are reset.
+5. `clear`, then `exit` and relaunch. Expected: no friends, but the same updated profile and Minecraft username.
+
+### Missing, invalid and unwritable files
+
+Prerequisite: independent disposable app folders and closed app instances before each file edit.
+
+| Setup and action | Expected result |
+|------------------|-----------------|
+| Start in an empty folder without `data/gamemates.json`; enter `list`. | Six sample friends and a default profile; the successful command creates the data file. |
+| Save the fixture above, close the app, copy the data file to a backup, then replace its contents with `{broken`. Relaunch without entering commands. | Empty friends and default profile; the malformed file stays on disk. No automatic backup or recovery prompt. Close the app and restore the backup to recover. |
+| Repeat the invalid-file setup, then enter `list`. | `Listed all friends.` with an empty list; the file is overwritten with the empty fallback data. |
+| In a separate disposable folder, replace the data file with the literal `null`, then launch. | Known defect: startup can fail with an uncaught null-value error instead of the empty-data fallback. Restore a valid backup to continue. |
+| In a copy of the valid fixture, use an invalid phone such as `12`, or duplicate the friend with an equal name. Relaunch. | The whole data load fails; empty friends and default profile. Restore the backup before continuing. |
+| Remove the `myself` and `games` properties from a valid copy, then relaunch. | Default profile and a friend with no games. Empty/missing phone and email are accepted; invalid non-empty contacts are not. |
+| Copy the same JAR to a second empty folder and launch there. | A separate sample dataset, not the first folder's saved friends. Restore a backup into the second folder to transfer data. |
+| With the app running, make its data file unwritable for that user (for example `chmod a-w data/gamemates.json` on Linux/macOS). Enter `add n/Unsaved Test`. | A `Could not save data` error. The friend may already be visible in memory; this is not a rolled-back transaction. |
+| Restore write access (`chmod u+w data/gamemates.json`), enter `list`, then exit and relaunch. | The in-memory change is saved and the new friend reloads. Test permissions as a normal user, not root. |
+
+### Documentation preview
+
+Use the repository's Jekyll workflow locally with Ruby 3.3 and Bundler:
+
+```sh
+cd docs
+bundle install
+JEKYLL_ENV=production bundle exec jekyll build --baseurl /tp --destination /tmp/gamemates-docs-site
+```
+
+Serve the generated directory under `/tp/` when checking links, or build with an empty base URL for a local root
+preview. Inspect the User Guide, Developer Guide and home page in a browser: tables, command brackets, code blocks,
+TOC anchors, screenshots, diagrams and mobile-width overflow. The existing `Build docs PR preview` workflow runs
+on open PRs labelled `type.Docs`; this task does not publish a preview or change workflows.
+
+Current screenshots must come from the application, not the specification mockups. `Ui.png` shows both panels,
+`findAlexDavidResult.png` shows name filtering, and `gamelistFiltered.png` / `gamelistNoMatch.png` show card filtering.
+Diagram sources live in `docs/diagrams`; regenerate their matching `docs/images/*.png` after changing a source.
