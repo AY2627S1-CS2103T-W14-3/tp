@@ -44,6 +44,6 @@ public class GameAddCommandParser implements Parser<GameAddCommand> {
      * Returns true if all required prefixes have values present.
      */
     private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
+        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isDefined());
     }
 }
