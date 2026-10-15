@@ -66,6 +66,16 @@ GameMates is a **desktop application for managing contacts, optimized for use th
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
+### Viewing friend details
+
+The main window has two panels: the friend list on the left and a details panel on the right.
+
+* Click a friend in the left panel to view their name, phone number, email address, tags, games, and in-game usernames
+  in the right panel.
+* On startup, the right panel shows your profile. If no profile details have been added, it shows `No details added`.
+* When a `find` command returns exactly one friend, that friend's details are shown automatically.
+* When no friend is selected, the right panel returns to showing your profile.
+
 ### Viewing help: `help`
 
 Shows a message explaining how to access the help page.
@@ -276,12 +286,12 @@ _Details coming soon ..._
 
 ## Command summary
 
-Action | Format, Examples
---------|------------------
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague`
-**Clear** | `clear`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit** | `edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
-**Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
-**List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant`
-**Help** | `help`
+| Action | Format, Examples |
+|--------|------------------|
+| **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com t/friend t/colleague` |
+| **Clear** | `clear` |
+| **Delete** | `delete INDEX`<br> e.g., `delete 3` |
+| **Edit** | `edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com` |
+| **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
+| **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
+| **Help** | `help` |

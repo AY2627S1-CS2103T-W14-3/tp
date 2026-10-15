@@ -30,7 +30,12 @@ jobs:
           java-version: '25'
           java-package: jdk+fx
 
-      - name: Build and check with Gradle
+      - name: Build and check with Gradle (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum ./gradlew build coverage
+
+      - name: Build and check with Gradle (macOS and Windows)
+        if: runner.os != 'Linux'
         run: ./gradlew build coverage
 
       - name: Upload build artifact and pull request comment

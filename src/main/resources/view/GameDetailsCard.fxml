@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<!--suppress XmlUnboundNsPrefix -->
+<VBox spacing="3" styleClass="details-game-card" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1">
+  <Label fx:id="gameName" styleClass="details-game-name" wrapText="true" />
+  <Label fx:id="username" styleClass="details-game-username" wrapText="true" />
+</VBox>
