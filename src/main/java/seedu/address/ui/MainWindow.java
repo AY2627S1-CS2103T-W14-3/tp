@@ -142,7 +142,12 @@ public class MainWindow extends UiPart<Stage> {
     }
 
     private void refreshFriendDetails(CommandResult commandResult) {
-        showFriendDetails(commandResult.getFriendToShow().orElse(null));
+        if (commandResult.getFriendToShow().isPresent()) {
+            friendDetailsPanel.setFriend(commandResult.getFriendToShow().get(), false,
+                    commandResult.getGameFilter().orElse(null));
+        } else {
+            showFriendDetails(null);
+        }
     }
 
     /**

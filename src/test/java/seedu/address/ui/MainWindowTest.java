@@ -1,6 +1,8 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -8,18 +10,24 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.Logic;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.GameMates;
+import seedu.address.model.Model;
+import seedu.address.model.ModelManager;
+import seedu.address.model.UserPrefs;
 import seedu.address.model.friend.Friend;
 import seedu.address.testutil.FriendBuilder;
+import seedu.address.testutil.GameBuilder;
 
 class MainWindowTest {
 
@@ -43,14 +51,87 @@ class MainWindowTest {
         });
     }
 
+    @Test
+    void gameList_commandsAndSelection_filterAndClearGameCards() {
+        FxTestUtil.runAndWait(() -> {
+            Friend alice = new FriendBuilder().withName("Alice").withGames(
+                    new GameBuilder().withGameName("Valorant").build(), new GameBuilder().build()).build();
+            Friend bob = new FriendBuilder().withName("Bob").withGames(
+                    new GameBuilder().withGameName("Stardew Valley").build()).build();
+            StubLogic logic = new StubLogic(alice, bob);
+            MainWindow window = new MainWindow(new Stage(), logic, Path.of("test-data.json"));
+            window.fillInnerParts();
+            window.getRoot().getScene().getRoot().applyCss();
+
+            executeCommand(window, "gamelist 1 g/valorant");
+            assertEquals("Alice", getLabel(window, "#name").getText());
+            assertEquals(1, getGames(window).getChildren().size());
+            assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
+            assertEquals(2, getFriendList(window).getItems().size());
+
+            executeCommand(window, "gamelist 1");
+            assertEquals(2, getGames(window).getChildren().size());
+            executeCommand(window, "gamelist 1 g/Valorant");
+            getFriendList(window).getSelectionModel().select(bob);
+            assertEquals("Bob", getLabel(window, "#name").getText());
+            assertEquals("Stardew Valley", getLabel(window, ".details-game-name").getText());
+
+            executeCommand(window, "gamelist 1 g/Unknown");
+            assertEquals("No matching game: Unknown", ((Label) getGames(window).getChildren().getFirst()).getText());
+            executeCommand(window, "find Alice");
+            assertEquals(2, getGames(window).getChildren().size());
+            assertEquals(1, getFriendList(window).getItems().size());
+
+            executeCommand(window, "gamelist 1 g/minecraft");
+            assertEquals("Minecraft", getLabel(window, ".details-game-name").getText());
+            assertEquals(1, getFriendList(window).getItems().size());
+            assertEquals(2, alice.getGames().size());
+        });
+    }
+
+    @Test
+    void gameList_invalidCommands_preserveDetailsAndGameFilter() {
+        FxTestUtil.runAndWait(() -> {
+            Friend friend = new FriendBuilder().withName("Alice").withGames(
+                    new GameBuilder().withGameName("Valorant").build(), new GameBuilder().build()).build();
+            MainWindow window = new MainWindow(new Stage(), new StubLogic(friend), Path.of("test-data.json"));
+            window.fillInnerParts();
+            window.getRoot().getScene().getRoot().applyCss();
+            executeCommand(window, "gamelist 1 g/Valorant");
+
+            for (String input : new String[]{"gamelist 0", "gamelist 1 g/", "gamelist 2"}) {
+                InvocationTargetException failure = assertThrows(InvocationTargetException.class, () ->
+                        invokeCommand(window, input));
+                Class<? extends Exception> expectedType = input.equals("gamelist 2")
+                        ? CommandException.class : ParseException.class;
+                assertInstanceOf(expectedType, failure.getCause());
+                assertEquals("Alice", getLabel(window, "#name").getText());
+                assertEquals(1, getGames(window).getChildren().size());
+                assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
+            }
+        });
+    }
+
     private void executeCommand(MainWindow mainWindow) {
+        executeCommand(mainWindow, "list");
+    }
+
+    private void executeCommand(MainWindow mainWindow, String commandText) {
         try {
-            Method executeCommand = MainWindow.class.getDeclaredMethod("executeCommand", String.class);
-            executeCommand.setAccessible(true);
-            executeCommand.invoke(mainWindow, "list");
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
+            invokeCommand(mainWindow, commandText);
+        } catch (ReflectiveOperationException exception) {
             throw new AssertionError("Could not execute command through the main window", exception);
         }
+    }
+
+    private void invokeCommand(MainWindow mainWindow, String commandText) throws ReflectiveOperationException {
+        Method executeCommand = MainWindow.class.getDeclaredMethod("executeCommand", String.class);
+        executeCommand.setAccessible(true);
+        executeCommand.invoke(mainWindow, commandText);
+    }
+
+    private VBox getGames(MainWindow mainWindow) {
+        return (VBox) mainWindow.getRoot().getScene().getRoot().lookup("#games");
     }
 
     @SuppressWarnings("unchecked")
@@ -63,11 +144,15 @@ class MainWindowTest {
     }
 
     private static class StubLogic implements Logic {
-        private final ObservableList<Friend> friends;
-        private CommandResult nextResult = new CommandResult("");
+        private final Model model;
+        private CommandResult nextResult;
 
-        StubLogic(Friend friend) {
-            friends = FXCollections.observableArrayList(friend);
+        StubLogic(Friend... friends) {
+            GameMates gameMates = new GameMates();
+            for (Friend friend : friends) {
+                gameMates.addFriend(friend);
+            }
+            model = new ModelManager(gameMates, new UserPrefs());
         }
 
         void setNextResult(CommandResult nextResult) {
@@ -76,7 +161,7 @@ class MainWindowTest {
 
         @Override
         public CommandResult execute(String commandText) throws CommandException, ParseException {
-            return nextResult;
+            return nextResult == null ? new GameMatesParser().parseCommand(commandText).execute(model) : nextResult;
         }
 
         @Override
@@ -86,7 +171,7 @@ class MainWindowTest {
 
         @Override
         public ObservableList<Friend> getFilteredFriendList() {
-            return friends;
+            return model.getFilteredFriendList();
         }
 
         @Override
