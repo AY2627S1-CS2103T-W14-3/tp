@@ -1,10 +1,18 @@
 package seedu.address.model.game;
 
+import static seedu.address.commons.util.AppUtil.checkArgument;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.model.game.meta.Meta;
+import seedu.address.model.game.meta.MetaKey;
 
 /**
  * Represents a game entry in GameMates.
@@ -17,14 +25,31 @@ public class Game {
 
     // Data field
     private final Username username;
+    private final Set<Meta> metas;
 
     /**
      * Every field must be present and not null.
      */
     public Game(GameName gameName, Username username) {
-        requireAllNonNull(gameName, username);
+        this(gameName, username, Collections.emptySet());
+    }
+
+    /**
+     * Constructs a game entry with metadata. Keys must be unique after trimming, ignoring case.
+     * The collection is copied to preserve immutability and checked before any pairs are discarded.
+     */
+    public Game(GameName gameName, Username username, Collection<Meta> metas) {
+        requireAllNonNull(gameName, username, metas);
+        Set<MetaKey> keys = new HashSet<>();
+        Set<Meta> copy = new LinkedHashSet<>();
+        for (Meta meta : metas) {
+            requireAllNonNull(meta);
+            checkArgument(keys.add(meta.getKey()), Meta.MESSAGE_DUPLICATE_KEY);
+            copy.add(meta);
+        }
         this.gameName = gameName;
         this.username = username;
+        this.metas = Collections.unmodifiableSet(copy);
     }
 
     public GameName getGameName() {
@@ -33,6 +58,10 @@ public class Game {
 
     public Username getUsername() {
         return username;
+    }
+
+    public Set<Meta> getMetas() {
+        return metas;
     }
 
     /**
@@ -63,12 +92,13 @@ public class Game {
         }
 
         return gameName.equals(otherGame.gameName)
-                && username.equals(otherGame.username);
+                && username.equals(otherGame.username)
+                && metas.equals(otherGame.metas);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameName, username);
+        return Objects.hash(gameName, username, metas);
     }
 
     @Override
@@ -76,6 +106,7 @@ public class Game {
         return new ToStringBuilder(this)
                 .add("gameName", gameName)
                 .add("username", username)
+                .add("metas", metas)
                 .toString();
     }
 }

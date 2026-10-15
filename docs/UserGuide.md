@@ -95,6 +95,7 @@ Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…`
 * Supplied phone and email values must satisfy the validation rules. Empty `p/` or `e/` values are rejected.
 * Leading and trailing spaces are removed. Names must be unique, ignoring case and repeated spaces:
   `John Doe` and `john   doe` identify the same friend.
+* A friend's name must also differ from your Myself profile's name under the same comparison rules.
 * Different friends may share a phone number or email address.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
@@ -164,21 +165,24 @@ Examples:
 * `list g/Valorant` shows friends who play `Valorant`.
 * `list g/Stardew Valley` shows friends who play `Stardew Valley`.
 
-### Editing a friend: `edit`
+### Editing a friend or your own profile: `edit`
 
-Edits an existing friend in GameMates.
+Edits an existing friend or your separately stored Myself profile in GameMates.
 
-Format: `edit FRIEND_INDEX [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​`
+Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​`
 
 * Edits the friend at the specified `FRIEND_INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
+* Use `myself` instead of `FRIEND_INDEX` to edit your own profile, for example `edit myself n/Alex Tan`. The selector is case-insensitive.
+* `|` means "or": enter either a friend index or `myself`. Do not type the `|` character.
 * At least one of the optional fields must be provided.
 * Supplied values are trimmed and validated using the same rules as `add`.
 * Omitted fields remain unchanged. Enter `p/` or `e/` without a value to remove that contact detail.
 * A name cannot be removed. The new name must be unique among other friends, ignoring case and repeated spaces.
+* Your own profile's name must also be unique among all friends, ignoring case and repeated spaces. Adding or renaming a friend to match your own profile's name is rejected.
 * Games remain unchanged when editing friend details.
 * Success feedback starts with `Edited NAME` and lists only changed details. Removed contact details are reported
   as `removed phone number` or `removed email`.
-* An index is required to point at the profile to be edited. Editing your own profile without an index is not currently supported.
+* A friend index or `myself` is required. Editing Myself works even when no friends are displayed and preserves the current friend-list filter.
 * Omit `t/` to keep the friend's existing tags. Each supplied `t/TAG` removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.
 * Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.
 * To remove all of a friend's tags, enter `t/` without a tag after it.
@@ -188,6 +192,8 @@ Examples:
 * `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
 * `edit 2 p/ e/` removes the 2nd friend's phone number and email.
 * `edit 2 t/teammate` removes `teammate` if the 2nd friend already has it, or adds it otherwise. Other tags remain unchanged.
+* `edit myself n/Alex Tan p/91234567` updates your own name and phone number.
+* `edit myself p/ e/ t/` clears your own phone number, email and tags while preserving your name and games.
 
 Errors:
 

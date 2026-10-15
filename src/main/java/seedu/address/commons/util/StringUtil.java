@@ -13,6 +13,34 @@ import java.util.Arrays;
 public class StringUtil {
 
     /**
+     * Returns whether a text field is non-empty after stripping whitespace, within {@code maxLength},
+     * contains at least one letter or digit, and contains no ISO control characters.
+     * Punctuation and other non-control characters are allowed. Length uses {@link String#length()}.
+     * Null input and non-positive length limits return false.
+     */
+    public static boolean isValidTextField(String text, int maxLength) {
+        if (text == null) {
+            return false;
+        }
+        String trimmedText = text.strip();
+        return !trimmedText.isEmpty()
+                && trimmedText.length() <= maxLength
+                && trimmedText.codePoints().anyMatch(Character::isLetterOrDigit)
+                && trimmedText.codePoints().noneMatch(Character::isISOControl);
+    }
+
+    /**
+     * Splits the string at its first colon, preserving whitespace, empty fields and subsequent colons.
+     * Returns a single-element array containing the original string if no colon is present.
+     *
+     * @throws NullPointerException if {@code text} is null.
+     */
+    public static String[] splitAtFirstColon(String text) {
+        requireNonNull(text);
+        return text.split(":", 2);
+    }
+
+    /**
      * Returns true if the string is null or empty. Whitespace-only strings are not empty.
      */
     public static boolean isNullOrEmpty(String value) {

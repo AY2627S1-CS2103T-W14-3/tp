@@ -35,7 +35,8 @@ public class EditCommandParser implements Parser<EditCommand> {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_TAG);
 
-        Index index = ParserUtil.parseIndex(argMultimap.getPreamble());
+        String target = argMultimap.getPreamble().trim();
+        Index index = target.equalsIgnoreCase("myself") ? Index.myself() : ParserUtil.parseIndex(target);
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL);
 

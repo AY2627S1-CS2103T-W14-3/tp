@@ -3,6 +3,8 @@ package seedu.address.model.game;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+import seedu.address.commons.util.StringUtil;
+
 /**
  * Represents a player's username for a game in GameMates.
  * Guarantees: immutable; is valid as declared in {@link #isValidUsername(String)}
@@ -32,16 +34,7 @@ public class Username {
      * Returns true if a given string is a valid username.
      */
     public static boolean isValidUsername(String test) {
-        if (test == null) {
-            return false;
-        }
-
-        String trimmedUsername = test.strip();
-
-        return !trimmedUsername.isEmpty()
-                && trimmedUsername.length() <= MAX_USERNAME_LENGTH
-                && trimmedUsername.codePoints().anyMatch(Character::isLetterOrDigit)
-                && trimmedUsername.codePoints().noneMatch(Character::isISOControl);
+        return StringUtil.isValidTextField(test, MAX_USERNAME_LENGTH);
     }
 
     @Override

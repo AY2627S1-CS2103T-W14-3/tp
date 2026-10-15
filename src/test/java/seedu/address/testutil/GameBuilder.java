@@ -1,8 +1,14 @@
 package seedu.address.testutil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
 import seedu.address.model.game.Username;
+import seedu.address.model.game.meta.Meta;
+import seedu.address.model.game.meta.MetaKey;
+import seedu.address.model.game.meta.MetaValue;
 
 /**
  * A utility class to help with building Game objects.
@@ -14,6 +20,7 @@ public class GameBuilder {
 
     private Username username;
     private GameName gameName;
+    private List<Meta> metas = new ArrayList<>();
 
     /**
      * Creates a {@code GameBuilder} with the default details.
@@ -29,6 +36,7 @@ public class GameBuilder {
     public GameBuilder(Game gameToCopy) {
         gameName = gameToCopy.getGameName();
         username = gameToCopy.getUsername();
+        metas = new ArrayList<>(gameToCopy.getMetas());
     }
 
     /**
@@ -47,7 +55,24 @@ public class GameBuilder {
         return this;
     }
 
+    /**
+     * Sets the metadata of the game being built.
+     */
+    public GameBuilder withMetas(Meta... metas) {
+        this.metas = new ArrayList<>(List.of(metas));
+        return this;
+    }
+
+    /**
+     * Appends a metadata pair using the model's key and value validation.
+     * Duplicate keys are rejected when the game is built.
+     */
+    public GameBuilder addMeta(String key, String value) {
+        metas.add(new Meta(new MetaKey(key), new MetaValue(value)));
+        return this;
+    }
+
     public Game build() {
-        return new Game(gameName, username);
+        return new Game(gameName, username, metas);
     }
 }

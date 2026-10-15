@@ -34,7 +34,7 @@ public class DeleteCommandParserTest {
 
     @Test
     public void parse_invalidArgs_throwsParseException() {
-        String[] invalidArgs = {"a", "0", "-1", "+1", "1.5", "1 2", "1 n/Melody",
+        String[] invalidArgs = {"a", "myself", "0", "-1", "+1", "1.5", "1 2", "1 n/Melody",
             "2147483648", "1".repeat(50)};
         for (String args : invalidArgs) {
             assertParseFailure(parser, args, ParserUtil.MESSAGE_INVALID_INDEX);
