@@ -38,7 +38,7 @@ public class EditCommand extends Command {
             + "Supplied name and contact values replace existing values. "
             + "Each supplied tag is removed if present or added if absent. "
             + "Use t/ without a value to remove all tags.\n"
-            + "Parameters: INDEX (a positive integer for a friend, or myself for your own profile) "
+            + "Parameters: FRIEND_INDEX|myself (use a positive integer for a friend, or myself for your own profile) "
             + "[" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_PHONE + "[PHONE]] "
             + "[" + PREFIX_EMAIL + "[EMAIL]] "
@@ -52,6 +52,7 @@ public class EditCommand extends Command {
             + "Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) "
             + "to edit specific details.";
     public static final String MESSAGE_DUPLICATE_FRIEND = "This friend already exists in GameMates.";
+    public static final String MESSAGE_DUPLICATE_MYSELF = "This name is already used by your Myself profile.";
 
     public static final String MESSAGE_EMPTY_LIST =
             "No friends are currently displayed. Use list to show all friends.";
@@ -79,6 +80,9 @@ public class EditCommand extends Command {
         if (index.isMyself()) {
             Friend original = model.getGameMates().getMyself();
             Friend edited = createEditedFriend(original, editFriendDescriptor);
+            if (model.hasFriend(edited)) {
+                throw new CommandException(MESSAGE_DUPLICATE_FRIEND);
+            }
             model.setMyself(edited);
             return new CommandResult(formatSuccessMessage(original, edited));
         }
@@ -95,6 +99,9 @@ public class EditCommand extends Command {
         Friend friendToEdit = lastShownList.get(index.getZeroBased());
         Friend editedFriend = createEditedFriend(friendToEdit, editFriendDescriptor);
 
+        if (model.getGameMates().getMyself().isSameFriend(editedFriend)) {
+            throw new CommandException(MESSAGE_DUPLICATE_MYSELF);
+        }
         if (!friendToEdit.isSameFriend(editedFriend) && model.hasFriend(editedFriend)) {
             throw new CommandException(MESSAGE_DUPLICATE_FRIEND);
         }

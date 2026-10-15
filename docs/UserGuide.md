@@ -95,6 +95,7 @@ Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…`
 * Supplied phone and email values must satisfy the validation rules. Empty `p/` or `e/` values are rejected.
 * Leading and trailing spaces are removed. Names must be unique, ignoring case and repeated spaces:
   `John Doe` and `john   doe` identify the same friend.
+* A friend's name must also differ from your Myself profile's name under the same comparison rules.
 * Different friends may share a phone number or email address.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
@@ -168,15 +169,16 @@ Examples:
 
 Edits an existing friend or your separately stored Myself profile in GameMates.
 
-Format: `edit FRIEND_INDEX [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​`
+Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE]] [e/[EMAIL]] [t/TAG]…​`
 
 * Edits the friend at the specified `FRIEND_INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
 * Use `myself` instead of `FRIEND_INDEX` to edit your own profile, for example `edit myself n/Alex Tan`. The selector is case-insensitive.
+* `|` means "or": enter either a friend index or `myself`. Do not type the `|` character.
 * At least one of the optional fields must be provided.
 * Supplied values are trimmed and validated using the same rules as `add`.
 * Omitted fields remain unchanged. Enter `p/` or `e/` without a value to remove that contact detail.
 * A name cannot be removed. The new name must be unique among other friends, ignoring case and repeated spaces.
-* Your own profile can share a name with a friend because it is stored separately from the friend list.
+* Your own profile's name must also be unique among all friends, ignoring case and repeated spaces. Adding or renaming a friend to match your own profile's name is rejected.
 * Games remain unchanged when editing friend details.
 * Success feedback starts with `Edited NAME` and lists only changed details. Removed contact details are reported
   as `removed phone number` or `removed email`.
