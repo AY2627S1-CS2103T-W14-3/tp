@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!--suppress XmlUnboundNsPrefix -->
+<VBox spacing="12" styleClass="friend-details-panel" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1">
+  <padding>
+    <Insets top="18" right="18" bottom="18" left="18" />
+  </padding>
+  <Label fx:id="title" styleClass="details-title" />
+  <Label fx:id="emptyState" text="No details added" styleClass="details-empty-state" wrapText="true" />
+  <VBox fx:id="detailsContainer" spacing="10">
+    <Label fx:id="name" styleClass="details-name" wrapText="true" />
+    <Label fx:id="phone" styleClass="details-value" wrapText="true" />
+    <Label fx:id="email" styleClass="details-value" wrapText="true" />
+    <VBox spacing="4">
+      <Label text="Tags" styleClass="details-section-title" />
+      <FlowPane fx:id="tags" hgap="7" vgap="5" />
+    </VBox>
+    <VBox spacing="4">
+      <Label text="Games" styleClass="details-section-title" />
+      <VBox fx:id="games" spacing="6" />
+    </VBox>
+  </VBox>
+</VBox>

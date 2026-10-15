@@ -18,7 +18,6 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_FRIEND;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.EditCommand.EditFriendDescriptor;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
@@ -48,7 +47,8 @@ public class EditCommandTest {
         Model expectedModel = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
         expectedModel.setFriend(withGames, editedFriend);
         assertCommandSuccess(command, model,
-                String.format(EditCommand.MESSAGE_EDIT_FRIEND_SUCCESS, Messages.format(editedFriend)), expectedModel);
+                EditCommand.formatSuccessMessage(model.getFilteredFriendList().get(INDEX_FIRST_FRIEND.getZeroBased()),
+                        editedFriend), expectedModel);
     }
 
     @Test
@@ -57,7 +57,8 @@ public class EditCommandTest {
         EditFriendDescriptor descriptor = new EditFriendDescriptorBuilder(editedFriend).build();
         EditCommand editCommand = new EditCommand(INDEX_FIRST_FRIEND, descriptor);
 
-        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_FRIEND_SUCCESS, Messages.format(editedFriend));
+        String expectedMessage = EditCommand.formatSuccessMessage(
+                model.getFilteredFriendList().get(INDEX_FIRST_FRIEND.getZeroBased()), editedFriend);
 
         Model expectedModel = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
         expectedModel.setFriend(model.getFilteredFriendList().get(0), editedFriend);
@@ -78,7 +79,8 @@ public class EditCommandTest {
                 .withPhone(VALID_PHONE_BOB).withTags(VALID_TAG_HUSBAND).build();
         EditCommand editCommand = new EditCommand(indexLastFriend, descriptor);
 
-        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_FRIEND_SUCCESS, Messages.format(editedFriend));
+        String expectedMessage = EditCommand.formatSuccessMessage(lastFriend,
+                        editedFriend);
 
         Model expectedModel = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
         expectedModel.setFriend(lastFriend, editedFriend);
@@ -91,7 +93,8 @@ public class EditCommandTest {
         EditCommand editCommand = new EditCommand(INDEX_FIRST_FRIEND, new EditFriendDescriptor());
         Friend editedFriend = model.getFilteredFriendList().get(INDEX_FIRST_FRIEND.getZeroBased());
 
-        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_FRIEND_SUCCESS, Messages.format(editedFriend));
+        String expectedMessage = EditCommand.formatSuccessMessage(
+                model.getFilteredFriendList().get(INDEX_FIRST_FRIEND.getZeroBased()), editedFriend);
 
         Model expectedModel = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
 
@@ -107,7 +110,8 @@ public class EditCommandTest {
         EditCommand editCommand = new EditCommand(INDEX_FIRST_FRIEND,
                 new EditFriendDescriptorBuilder().withName(VALID_NAME_BOB).build());
 
-        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_FRIEND_SUCCESS, Messages.format(editedFriend));
+        String expectedMessage = EditCommand.formatSuccessMessage(
+                model.getFilteredFriendList().get(INDEX_FIRST_FRIEND.getZeroBased()), editedFriend);
 
         Model expectedModel = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
         expectedModel.setFriend(model.getFilteredFriendList().get(0), editedFriend);
@@ -142,7 +146,8 @@ public class EditCommandTest {
         EditFriendDescriptor descriptor = new EditFriendDescriptorBuilder().withName(VALID_NAME_BOB).build();
         EditCommand editCommand = new EditCommand(outOfBoundIndex, descriptor);
 
-        assertCommandFailure(editCommand, model, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        assertCommandFailure(editCommand, model, String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND,
+                outOfBoundIndex.getOneBased(), model.getFilteredFriendList().size()));
     }
 
     /**
@@ -159,7 +164,8 @@ public class EditCommandTest {
         EditCommand editCommand = new EditCommand(outOfBoundIndex,
                 new EditFriendDescriptorBuilder().withName(VALID_NAME_BOB).build());
 
-        assertCommandFailure(editCommand, model, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        assertCommandFailure(editCommand, model, String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND,
+                outOfBoundIndex.getOneBased(), model.getFilteredFriendList().size()));
     }
 
     @Test

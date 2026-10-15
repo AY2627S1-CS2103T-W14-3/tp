@@ -1,5 +1,6 @@
 package seedu.address.logic.parser;
 
+import static io.vavr.API.unchecked;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
@@ -38,10 +39,8 @@ public class AddCommandParser implements Parser<AddCommand> {
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL);
         Name name = ParserUtil.parseName(argMultimap.getValue(PREFIX_NAME).get());
-        Phone phone = argMultimap.getValue(PREFIX_PHONE).isPresent()
-                ? ParserUtil.parsePhone(argMultimap.getValue(PREFIX_PHONE).get()) : Phone.EMPTY;
-        Email email = argMultimap.getValue(PREFIX_EMAIL).isPresent()
-                ? ParserUtil.parseEmail(argMultimap.getValue(PREFIX_EMAIL).get()) : Email.EMPTY;
+        Phone phone = argMultimap.getValue(PREFIX_PHONE).map(unchecked(ParserUtil::parsePhone)).getOrElse(Phone.EMPTY);
+        Email email = argMultimap.getValue(PREFIX_EMAIL).map(unchecked(ParserUtil::parseEmail)).getOrElse(Email.EMPTY);
         Set<Tag> tagList = ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG));
 
         Friend friend = new Friend(name, phone, email, tagList);
@@ -50,11 +49,11 @@ public class AddCommandParser implements Parser<AddCommand> {
     }
 
     /**
-     * Returns true if none of the prefixes contains empty {@code Optional} values in the given
+     * Returns true if none of the prefixes contains empty {@code Option} values in the given
      * {@code ArgumentMultimap}.
      */
     private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
+        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isDefined());
     }
 
 }

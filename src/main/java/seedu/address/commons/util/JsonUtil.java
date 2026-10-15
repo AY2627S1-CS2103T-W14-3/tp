@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -15,6 +14,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
 
@@ -41,32 +42,28 @@ public class JsonUtil {
     }
 
     /**
-     * Returns the JSON object from the given file or {@code Optional.empty()} object if the file is not found.
+     * Returns the JSON object from the given file or {@code Option.none()} object if the file is not found.
      * If any values are missing from the file, default values will be used, as long as the file is a valid JSON file.
      *
      * @param filePath cannot be null.
      * @param classOfObjectToDeserialize JSON file has to correspond to the structure in the class given here.
      * @throws DataLoadingException if loading of the JSON file failed.
      */
-    public static <T> Optional<T> readJsonFile(
+    public static <T> Option<T> readJsonFile(
             Path filePath, Class<T> classOfObjectToDeserialize) throws DataLoadingException {
         requireNonNull(filePath);
 
         if (!Files.exists(filePath)) {
-            return Optional.empty();
+            return Option.none();
         }
         logger.info("JSON file " + filePath + " found.");
 
-        T jsonFile;
+        T jsonFile = Try.of(() -> deserializeObjectFromJsonFile(filePath, classOfObjectToDeserialize))
+                .onFailure(IOException.class,
+                    e -> logger.warning("Error reading from jsonFile file " + filePath + ": " + e))
+                .getOrElseThrow(DataLoadingException::new);
 
-        try {
-            jsonFile = deserializeObjectFromJsonFile(filePath, classOfObjectToDeserialize);
-        } catch (IOException e) {
-            logger.warning("Error reading from jsonFile file " + filePath + ": " + e);
-            throw new DataLoadingException(e);
-        }
-
-        return Optional.of(jsonFile);
+        return Option.of(requireNonNull(jsonFile));
     }
 
     /**

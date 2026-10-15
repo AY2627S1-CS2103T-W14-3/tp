@@ -2,9 +2,12 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.List;
+
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.model.Model;
+import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.NameContainsKeywordsPredicate;
 
 /**
@@ -30,8 +33,10 @@ public class FindCommand extends Command {
     public CommandResult execute(Model model) {
         requireNonNull(model);
         model.updateFilteredFriendList(predicate);
+        List<Friend> matchingFriends = model.getFilteredFriendList();
         return new CommandResult(
-                String.format(Messages.MESSAGE_FRIENDS_LISTED_OVERVIEW, model.getFilteredFriendList().size()));
+                String.format(Messages.MESSAGE_FRIENDS_LISTED_OVERVIEW, matchingFriends.size()),
+                matchingFriends.size() == 1 ? matchingFriends.getFirst() : null);
     }
 
     @Override
