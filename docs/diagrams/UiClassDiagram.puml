@@ -1,4 +1,5 @@
 @startuml
+!pragma layout smetana
 !include style.puml
 skinparam arrowThickness 1.1
 skinparam arrowColor UI_COLOR_T4
@@ -13,6 +14,8 @@ Class HelpWindow
 Class ResultDisplay
 Class FriendListPanel
 Class FriendCard
+Class FriendDetailsPanel
+Class GameDetailsCard
 Class StatusBarFooter
 Class CommandBox
 }
@@ -33,10 +36,12 @@ UiManager -down-> "1" MainWindow
 MainWindow *-down->  "1" CommandBox
 MainWindow *-down-> "1" ResultDisplay
 MainWindow *-down-> "1" FriendListPanel
+MainWindow *-down-> "1" FriendDetailsPanel
 MainWindow *-down-> "1" StatusBarFooter
 MainWindow --> "0..1" HelpWindow
 
 FriendListPanel -down-> "*" FriendCard
+FriendDetailsPanel *-down-> "*" GameDetailsCard
 
 MainWindow -left-|> UiPart
 
@@ -44,10 +49,14 @@ ResultDisplay --|> UiPart
 CommandBox --|> UiPart
 FriendListPanel --|> UiPart
 FriendCard --|> UiPart
+FriendDetailsPanel --|> UiPart
+GameDetailsCard --|> UiPart
 StatusBarFooter --|> UiPart
 HelpWindow --|> UiPart
 
 FriendCard ..> Model
+FriendDetailsPanel ..> Model
+GameDetailsCard ..> Model
 UiManager -right-> Logic
 MainWindow -left-> Logic
 
