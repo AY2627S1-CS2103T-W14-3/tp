@@ -29,6 +29,9 @@ public class GameDeleteCommand extends Command {
     private final Index targetIndex;
     private final GameName gameName;
 
+    /**
+     * Creates a command to remove the game from the friend at the displayed index.
+     */
     public GameDeleteCommand(Index targetIndex, GameName gameName) {
         this.targetIndex = requireNonNull(targetIndex);
         this.gameName = requireNonNull(gameName);

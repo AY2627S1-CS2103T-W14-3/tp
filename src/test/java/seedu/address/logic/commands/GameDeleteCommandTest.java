@@ -22,7 +22,7 @@ public class GameDeleteCommandTest {
     private final Model model = new ModelManager(getTypicalGameMates(), new UserPrefs());
 
     @Test
-    public void execute_existingGame_caseInsensitive_success() {
+    public void execute_existingGameCaseInsensitive_success() {
         Friend original = model.getFilteredFriendList().getFirst();
         Game minecraft = new Game(new GameName("Minecraft"), new Username("builder"));
         Friend withGame = new FriendBuilder(original).withGames(minecraft).build();
