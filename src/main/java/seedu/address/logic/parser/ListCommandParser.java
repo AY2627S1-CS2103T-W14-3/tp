@@ -3,8 +3,7 @@ package seedu.address.logic.parser;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
 
-import java.util.Optional;
-
+import io.vavr.control.Option;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.friend.GameNameMatchesPredicate;
@@ -26,7 +25,7 @@ public class ListCommandParser implements Parser<ListCommand> {
         }
 
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_GAME);
-        Optional<String> gameNameValue = argMultimap.getValue(PREFIX_GAME);
+        Option<String> gameNameValue = argMultimap.getValue(PREFIX_GAME);
         if (!argMultimap.getPreamble().isEmpty()
                 || gameNameValue.isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE));

@@ -7,11 +7,11 @@ import static seedu.address.testutil.Assert.assertThrows;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.vavr.control.Option;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.model.UserPrefs;
@@ -28,14 +28,14 @@ public class JsonUserPrefsStorageTest {
         assertThrows(NullPointerException.class, () -> readUserPrefs(null));
     }
 
-    private Optional<UserPrefs> readUserPrefs(String userPrefsFileInTestDataFolder) throws DataLoadingException {
+    private Option<UserPrefs> readUserPrefs(String userPrefsFileInTestDataFolder) throws DataLoadingException {
         Path prefsFilePath = addToTestDataPathIfNotNull(userPrefsFileInTestDataFolder);
         return new JsonUserPrefsStorage(prefsFilePath).readUserPrefs(prefsFilePath);
     }
 
     @Test
     public void readUserPrefs_missingFile_emptyResult() throws DataLoadingException {
-        assertFalse(readUserPrefs("NonExistentFile.json").isPresent());
+        assertFalse(readUserPrefs("NonExistentFile.json").isDefined());
     }
 
     @Test
