@@ -1,4 +1,5 @@
 @startuml
+!pragma layout smetana
 !include style.puml
 skinparam arrowThickness 1.1
 skinparam arrowColor MODEL_COLOR
@@ -18,6 +19,9 @@ Class Email
 Class Name
 Class Phone
 Class Tag
+Class Game
+Class GameName
+Class Username
 
 Class I #FFFFFF
 }
@@ -36,10 +40,14 @@ UserPrefs .up.|> ReadOnlyUserPrefs
 
 GameMates *--> "1" UniqueFriendList
 UniqueFriendList --> "~* all" Friend
+GameMates --> "1 myself" Friend
 Friend *--> Name
 Friend *--> Phone
 Friend *--> Email
 Friend *--> "*" Tag
+Friend *--> "*" Game
+Game *--> "1" GameName
+Game *--> "1" Username
 
 Friend -[hidden]up--> I
 UniqueFriendList -[hidden]right-> I
