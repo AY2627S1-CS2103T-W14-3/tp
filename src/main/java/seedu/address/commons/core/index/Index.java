@@ -3,7 +3,7 @@ package seedu.address.commons.core.index;
 import seedu.address.commons.util.ToStringBuilder;
 
 /**
- * Represents a zero-based or one-based index.
+ * Represents a zero-based or one-based friend index, or the separately stored Myself profile.
  *
  * {@code Index} should be used right from the start (when parsing in a new user input), so that if the current
  * component wants to communicate with another component, it can send an {@code Index} to avoid having to know what
@@ -11,11 +11,15 @@ import seedu.address.commons.util.ToStringBuilder;
  * convert it back to an int if the index will not be passed to a different component again.
  */
 public class Index {
-    private int zeroBasedIndex;
+    private final int zeroBasedIndex;
+
+    private Index() {
+        zeroBasedIndex = -1;
+    }
 
     /**
      * Index can only be created by calling {@link Index#fromZeroBased(int)} or
-     * {@link Index#fromOneBased(int)}.
+     * {@link Index#fromOneBased(int)}. Use {@link Index#myself()} to select the Myself profile.
      */
     private Index(int zeroBasedIndex) {
         if (zeroBasedIndex < 0) {
@@ -26,11 +30,24 @@ public class Index {
     }
 
     public int getZeroBased() {
+        if (isMyself()) {
+            throw new IllegalStateException("Myself has no friend-list index.");
+        }
         return zeroBasedIndex;
     }
 
     public int getOneBased() {
-        return zeroBasedIndex + 1;
+        return getZeroBased() + 1;
+    }
+
+    /** Creates an index selecting the separately stored Myself profile. */
+    public static Index myself() {
+        return new Index();
+    }
+
+    /** Returns whether this index selects the Myself profile rather than a friend. */
+    public boolean isMyself() {
+        return zeroBasedIndex == -1;
     }
 
     /**

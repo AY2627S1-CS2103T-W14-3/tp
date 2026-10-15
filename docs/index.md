@@ -19,13 +19,13 @@ Your friends and game entries are saved locally for your next session.
 * Add friends with just a name, optional phone/email details and tags; edit or delete them later.
 * Find friends by name or list friends who play a particular game.
 * View a friend's games and in-game usernames, or show only one matching game with `gamelist`.
-* Keep your stored profile separate from the friend list and back up your local data file.
+* Edit your own profile using `edit myself`, keep it separate from friends, and back up your local data file.
 
 For example, `list g/Valorant` lists Valorant players. Then `gamelist 1 g/Valorant` shows the first displayed
 player's Valorant card without changing the filtered friend list.
 
-The current build can view existing game entries. Own-profile editing, adding/deleting individual games and
-metadata entry are pending integration; see the [User Guide's current limits](UserGuide.html#your-profile-and-game-entries).
+The current build can view existing game entries. Adding/deleting individual games and metadata entry are pending
+integration; see the [User Guide's current limits](UserGuide.html#your-profile-and-game-entries).
 
 ### Get started
 

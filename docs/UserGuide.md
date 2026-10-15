@@ -7,8 +7,8 @@ GameMates helps gamers keep track of friends, their contact details, the games t
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer; browsing the online help and downloading releases require internet access.
 
-This guide describes the commands available in this checkout. Own-profile editing, adding or deleting individual
-games, and game metadata input are not available yet. You can view and filter games already present in sample or
+This guide describes the commands available in this checkout. Adding or deleting individual games and game
+metadata input are not available yet. You can view and filter games already present in sample or
 saved data. See [Your profile and game entries](#your-profile-and-game-entries) for the current limits.
 
 * Table of Contents
@@ -104,8 +104,9 @@ Your profile is stored separately from your friend list. It appears on startup a
 If it contains no details, the right panel shows `No details added`. Filtering, deleting friends and `clear` do not
 change your stored profile.
 
-The current build does not provide a command to edit your profile. Neither `edit n/Joash` nor
-`edit myself n/Joash` selects it. `edit` requires a numeric friend index and changes a friend only.
+Use `edit myself n/Joash` to set your own name, or supply other supported edit fields to update your contact details
+and tags. The `myself` selector is case-insensitive and works even when the friend list is empty or filtered.
+Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve your games and the friend-list filter.
 
 You can view games and usernames already loaded from saved data or the initial sample data using
 [`gamelist`](#viewing-a-friends-games-gamelist). New friends start with no games.
@@ -131,6 +132,7 @@ Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…`
 * Supplied phone and email values must satisfy the validation rules. Empty `p/` or `e/` values are rejected.
 * Leading and trailing spaces are removed. Names must be unique, ignoring case and repeated spaces:
   `John Doe` and `john   doe` identify the same friend.
+* A friend's name must also differ from your Myself profile's name under the same comparison rules.
 * Different friends may share a phone number or email address.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
@@ -264,26 +266,30 @@ Errors:
 
 `gamelist myself` is not supported; the existing profile view remains available when no friend is selected.
 
-### Editing a friend: `edit`
+### Editing a friend or your own profile: `edit`
 
-Edits an existing friend in GameMates.
+Edits an existing friend or your separately stored Myself profile in GameMates.
 
-Format: `edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…`
+Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…`
 
 * Edits the friend at the specified `FRIEND_INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
+* Use `myself` instead of `FRIEND_INDEX` to edit your own profile, for example `edit myself n/Alex Tan`. The selector is case-insensitive.
+* `|` means "or": enter either a friend index or `myself`. Do not type the `|` character.
 * At least one of the optional fields must be provided.
 * Supplied values are trimmed and validated using the same rules as `add`.
 * Omitted fields remain unchanged. Enter `p/` or `e/` without a value to remove that contact detail.
 * A name cannot be removed. The new name must be unique among other friends, ignoring case and repeated spaces.
+* Your own profile's name must also be unique among all friends, ignoring case and repeated spaces. Adding or renaming a friend to match your own profile's name is rejected.
 * Games remain unchanged when editing friend details.
 * Success feedback starts with `Edited NAME` and lists only changed details. Removed contact details are reported
   as `removed phone number` or `removed email`.
-* A numeric friend index is required. This command cannot edit your own profile in the current build.
+* A friend index or `myself` is required. Editing Myself works even when no friends are displayed and preserves the current friend-list filter.
 * Omit `t/` to keep the friend's existing tags. Each supplied `t/TAG` removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.
 * Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.
 * To remove all of a friend's tags, enter `t/` without a tag after it.
   Use that empty prefix on its own; combining it with non-empty tags is rejected.
-* A successful edit shows all friends again. Other friends, the edited friend's games and your profile are unchanged.
+* A successful friend edit shows all friends again, preserving the friend's games and your profile. A successful
+  `edit myself` shows your updated profile on the right and keeps the current friend-list filter.
 
 Examples:
 
@@ -291,6 +297,8 @@ Examples:
 * `edit 2 n/Betsy Crower t/` Edits the name of the 2nd friend to be `Betsy Crower` and clears all existing tags.
 * `edit 2 p/ e/` removes the 2nd friend's phone number and email.
 * `edit 2 t/teammate` removes `teammate` if the 2nd friend already has it, or adds it otherwise. Other tags remain unchanged.
+* `edit myself n/Alex Tan p/91234567` updates your own name and phone number.
+* `edit myself p/ e/ t/` clears your own phone number, email and tags while preserving your name and games.
 
 Errors:
 
@@ -300,6 +308,7 @@ Errors:
 * Index outside the displayed list: `No friend exists at index INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
 * Duplicate name: `This friend already exists in GameMates.`
+* Adding or renaming a friend to your profile's name: `This name is already used by your Myself profile.`
 
 ### Locating friends by name: `find`
 
@@ -429,12 +438,12 @@ while copying the file, then launch the destination app from its usual data fold
 | **Add** | `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…` <br> e.g., `add n/James Ho t/friend` |
 | **Clear** | `clear` |
 | **Delete** | `delete FRIEND_INDEX`<br> e.g., `delete 3` |
-| **Edit** | `edit FRIEND_INDEX [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com` |
+| **Edit** | `edit FRIEND_INDEX\|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…`<br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
 | **Game list** | `gamelist <FRIEND_INDEX> [g/GAME_NAME]`<br> e.g., `gamelist 2 g/Valorant` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
 | **Help** | `help` |
 | **Exit** | `exit` |
 
-The summary lists available commands only. Own-profile editing, `gameadd`, `gamedel` and metadata entry are pending;
+The summary lists available commands only. `gameadd`, `gamedel` and metadata entry are pending;
 they are not additional working commands in this build.

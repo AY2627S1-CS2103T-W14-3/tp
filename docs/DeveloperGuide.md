@@ -148,7 +148,7 @@ adapters propagate the original exception, so invalid input is never treated as 
 The `Model` component,
 
 * stores friends in `GameMates` through `UniqueFriendList`, plus a separate `Friend myself` profile with a default value.
-  The profile is not in the friend list and does not participate in duplicate-friend checks.
+  The profile is not in the friend list. Add/edit commands separately prevent names shared between a friend and the profile.
 * exposes an observable `FilteredList<Friend>` backed by the stored friends. The filter is a predicate over the
   full list, rather than a second collection of copied friends.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
@@ -223,12 +223,16 @@ This section describes some noteworthy details on how certain features are imple
 single-value name/contact prefixes and collects repeated tags into a set. `UniqueFriendList` rejects names equal
 under `Friend.isSameFriend`, so different phone/email values or tags do not distinguish duplicate names.
 
-`EditCommandParser` requires an `Index`; it has no omitted-index or `myself` branch. `EditFriendDescriptor` uses
+`EditCommandParser` requires a numeric index or case-insensitive `myself`, represented by `Index.myself()`.
+An omitted selector is rejected. `EditCommand` handles the profile selector before accessing a friend-list index,
+updates `Model.setMyself` without resetting the friend filter, and returns feedback that displays the profile.
+Add/edit commands reject names shared between a friend and the profile. `EditFriendDescriptor` uses
 optional values to distinguish omission from a supplied empty contact field. `EditCommand` resolves the index against
 `Model.getFilteredFriendList()` and constructs a new friend with the original games. Name/contact values replace
 existing values. Supplied tags are toggled by set membership; duplicates in one command are deduplicated, and a
 single empty `t/` clears all tags. Empty and non-empty tag parameters together fail validation.
-After a successful add or edit, the model resets the friend-list predicate to show all friends.
+After a successful add or friend edit, the model resets the friend-list predicate to show all friends.
+Editing Myself preserves that predicate, including an empty displayed list.
 
 `DeleteCommand` uses the same displayed-list indexing but keeps the current predicate. It removes the entire friend
 and their games immediately; there is no confirmation state. Its out-of-range/empty-list error is the shared generic
@@ -297,7 +301,7 @@ before publishing a complete v1.3 MVP guide.
 
 | Area | Submitted specification | Current implementation / follow-up |
 |------|-------------------------|------------------------------------|
-| Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | A numeric friend index is required. Both omitted index and explicit `myself` are rejected. [PR #69](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/69) is pending; reconcile the two descriptions before documenting an edit path. The profile can already be loaded, saved and displayed. |
+| Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | [PR #69](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/69) has merged: use explicit, case-insensitive `edit myself ...`. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
 | Game add/delete | `gameadd INDEX g/NAME u/USER_NAME [m/KEY:VALUE]...` and `gamedel INDEX g/NAME` (pp. 17–23). | Neither command is routed. [PR #70](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/70) is pending. Add success/error, duplicates, filter preservation and persistence tests after integration. |
 | Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | No metadata model, JSON adapter, validator or card rendering is available. [PR #64](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64) is pending. Verify its actual API, validation, storage and display before writing user instructions. |
 | Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
@@ -313,8 +317,8 @@ game-text validation uses ISO-control rejection rather than a complete Unicode p
 recorded limits; no application fix is included in this documentation change.
 
 Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
-not a current use-case step. No screenshots of profile editing, game creation/deletion or metadata are included:
-those actions cannot be demonstrated in this checkout. Capture them from the integrated application after their PRs merge.
+not a current use-case step. Game creation/deletion and metadata cannot yet be demonstrated in this checkout;
+capture those screenshots after integration. Own-profile editing is available through `edit myself`.
 
 ### \[Proposed\] Undo/redo feature
 
@@ -577,7 +581,7 @@ This is a future requirement; there is no working handle-editing command in this
 
 ### Non-Functional Requirements
 
-The following are targets, not measured guarantees. Targets involving game modification, profile editing or metadata
+The following are targets, not measured guarantees. Targets involving game modification or metadata
 remain pending integration; startup/performance and large-data capacity need separate measurement.
 
 #### Environment
@@ -618,7 +622,7 @@ remain pending integration; startup/performance and large-data capacity need sep
 * **Modern computer**: A computer running a mainstream OS with 16 GB of RAM, a 512 GB SSD, and a mid-range modern processor such as an Intel Core i5 or AMD Ryzen 5.
 * **Mainstream OS**: Windows, Linux, Unix, or macOS
 * **Friend**: A person stored in GameMates, identified by a unique name and optionally associated with contact details and game entries.
-* **User profile**: The current user's separately stored details. It can be loaded and displayed, but cannot currently be edited through commands.
+* **User profile**: The current user's separately stored details, edited using `edit myself ...` and preserved by friend-list commands.
 * **Game entry**: A record that a friend plays a game, containing a game name and in-game username. Metadata is pending integration.
 * **Role**: A job or duty a friend plays as in a particular game, for example a friend can play as a `Sniper` or a `Healer`.
 * **Game name**: The user-provided name used to identify a game within one friend’s game entries. Aliases such as “Val” and “Valorant” are treated as different game names.
@@ -740,12 +744,16 @@ This seeds existing data for testing; it is not an own-profile edit command.
 
 1. Relaunch: expected Joash's profile and Minecraft username on the right. `gamelist 1` shows Fixture Friend's
    Valorant entry. `edit 1 p/98765432` preserves that entry and shows the unchanged profile after success.
-2. Try `edit n/Changed`, `edit myself n/Changed`, `gameadd 1 g/Test u/player`, and `gamedel 1 g/Valorant`.
-   Expected: missing-index, invalid-index or unknown-command errors. The profile and game remain unchanged.
+2. `list g/Unknown`, then `edit MYSELF n/Joash Updated p/`: expected the renamed profile with no phone number and
+   its Minecraft game preserved. The left friend list remains empty. `edit myself n/Fixture Friend` rejects the
+   duplicate name, and `add n/joash updated` rejects a name matching the profile.
+3. Try `edit n/Changed`, `gameadd 1 g/Test u/player`, and `gamedel 1 g/Valorant`.
+   Expected: missing-index or unknown-command errors. The profile and game remain unchanged.
    Metadata entry cannot be tested as a working feature because no model or command API exists yet.
-3. `find Fixture`, then `gamelist 1 g/valorant`, then `exit`. Relaunch from the same folder.
-   Expected: the edited phone, friend game and profile game survive, with Joash's profile displayed. Filters are reset.
-4. `clear`, then `exit` and relaunch. Expected: no friends, but the same Joash profile and Minecraft username.
+4. `find Fixture`, then `gamelist 1 g/valorant`, then `exit`. Relaunch from the same folder.
+   Expected: the edited friend phone, friend game and profile game survive, with Joash Updated's profile displayed
+   and its phone still removed. Filters are reset.
+5. `clear`, then `exit` and relaunch. Expected: no friends, but the same updated profile and Minecraft username.
 
 ### Missing, invalid and unwritable files
 
