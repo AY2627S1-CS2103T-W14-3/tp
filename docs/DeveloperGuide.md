@@ -90,7 +90,7 @@ The `UI` component,
 * depends on some classes in the `Model` component because it displays `Friend` objects from the model.
 
 `FriendListPanel` sends selection changes to a consumer owned by `MainWindow`. Command-driven selection uses
-`CommandResult.friendToShow` and `gameFilter`, described under [Viewing a friend's games](#viewing-a-friends-games).
+`CommandResult.friendToShow`, `showMyself` and `gameFilter`, described under [Viewing games](#viewing-games).
 Successful results without a friend payload show `Logic.getMyself()`; a single-result `find` selects that friend.
 Parse or command failures update feedback without explicitly refreshing details. A game filter is applied only
 while rendering cards, preserving both the model and the left-hand friend-list predicate.
@@ -142,7 +142,7 @@ adapters propagate the original exception, so invalid input is never treated as 
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java)
 
-<img src="images/ModelClassDiagram.png" width="450" />
+<img src="images/ModelClassDiagram.png" width="625" />
 
 
 The `Model` component,
@@ -159,9 +159,8 @@ The `Model` component,
 `Game` contains `GameName`, `Username` and an immutable metadata set. Name equality ignores case and collapses repeated ASCII spaces;
 `GameName.equals` compares complete names using lower-case normalization with `Locale.ROOT`.
 `Username` preserves case. `Game.isSameGame` compares game names, while full equality also compares usernames and metadata.
-The set representation alone does not enforce
-one entry per game name when different usernames are loaded from JSON; do not infer game-command duplicate handling
-from the proposed specification.
+`GameAddCommand` rejects an existing game name regardless of username. The set representation alone does not
+enforce this rule when games with different usernames are loaded from JSON.
 
 <div markdown="span" class="alert alert-info">:information_source: **Note:** The alternative, arguably more object-oriented, design below keeps a unique list of tags in `GameMates`, and each `Friend` references tags from that list. This lets `GameMates` maintain one `Tag` object per unique tag instead of each `Friend` holding its own `Tag` objects.<br>
 
@@ -225,12 +224,11 @@ This section describes some noteworthy details on how certain features are imple
 single-value name/contact prefixes and collects repeated tags into a set. `UniqueFriendList` rejects names equal
 under `Friend.isSameFriend`, so different phone/email values or tags do not distinguish duplicate names.
 
-`EditCommandParser` requires a numeric index or case-insensitive `myself`, represented by `Index.myself()`.
-An omitted selector is rejected. `EditCommand` handles the profile selector before accessing a friend-list index,
-updates `Model.setMyself` without resetting the friend filter, and returns feedback that displays the profile.
+`EditCommandParser` requires a numeric index or case-insensitive `myself`; an omitted selector is rejected.
+Target resolution and replacement use the [Myself profile mechanism](#myself-profile) described below.
 Add/edit commands reject names shared between a friend and the profile. `EditFriendDescriptor` uses
-optional values to distinguish omission from a supplied empty contact field. `EditCommand` resolves the index against
-`Model.getFilteredFriendList()` and constructs a new friend with the original games. Name/contact values replace
+optional values to distinguish omission from a supplied empty contact field. `EditCommand` constructs a new friend
+with the original games. Name/contact values replace
 existing values. Supplied tags are toggled by set membership; duplicates in one command are deduplicated, and a
 single empty `t/` clears all tags. Empty and non-empty tag parameters together fail validation.
 After a successful add or friend edit, the model resets the friend-list predicate to show all friends.
@@ -248,6 +246,43 @@ No phone, email, game name or username is verified against an external service.
 `GameName` and `Username` trim with `String.strip()`, count UTF-16 code units with `String.length()`, require a
 letter/digit code point and reject ISO control code points. This is not a general Unicode printability test.
 
+### Myself profile
+
+`GameMates` stores the user's profile as a separate `Friend`, initially `Friend.DEFAULT_MYSELF`.
+`edit`, `gameadd` and `gamedel` accept `myself` independently of the displayed friend list and profile name.
+
+Their syntax uses `FRIEND_INDEX|myself` for either a positive displayed friend index or the case-insensitive
+profile keyword:
+
+```text
+edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…
+gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME
+gamedel FRIEND_INDEX|myself g/GAME_NAME
+```
+
+The existing **Command pattern** encapsulates each request in a command that validates and updates through `Model`.
+A sealed `FriendTarget` interface represents the selected storage location: its nested `Myself` and `ListedFriend`
+records capture the original `Friend`. The class diagram omits unrelated members and shows records as ordinary classes.
+
+![Classes involved in resolving and updating a friend target](images/MyselfTargetClassDiagram.png)
+
+1. The three command parsers use `ParserUtil.parseIndexOrMyself`: case-insensitive `Index.MYSELF_KEYWORD`
+   becomes `Index.myself()`; numeric selectors remain displayed friend indices.
+2. At execution, `ModelManager.resolveFriend(index)` captures the profile or currently displayed friend in a target.
+3. After validation, the command constructs a replacement `Friend`. `ModelManager.setFriend(target, updatedFriend)`
+   uses an exhaustive switch: `Myself` updates the profile; `ListedFriend` updates its captured friend.
+
+The sequence shows `gameadd myself g/Valorant u/player` after parsing. Helper calls and subsequent saving are omitted.
+
+![Successful game addition to the Myself profile](images/MyselfGameAddSequenceDiagram.png)
+
+Capturing the target once prevents later filter changes from redirecting an update. Explicit variants also
+distinguish a profile from an imported friend with the same name. Targets last for one command; they do not
+provide concurrency control. Profile edits and both game commands preserve the friend-list filter.
+
+After success, `LogicManager` saves both `friends` and `myself` through `JsonSerializableGameMates`, and
+`MainWindow` refreshes the profile via `Logic.getMyself()`. Missing `myself` in older JSON retains the default profile.
+
 ### Name and game filtering
 
 `FindCommand` installs `NameContainsKeywordsPredicate`: any full name word matching any supplied keyword, ignoring
@@ -257,24 +292,27 @@ the previous predicate; they do not intersect filters. `find` does not parse pre
 The `find` parser only requires a non-empty keyword list; there is no 255-character keyword validation.
 No-match queries return successful empty results. Filtering never includes or edits the separate profile.
 
-### Viewing a friend's games
+### Viewing games
 
-`gamelist <FRIEND_INDEX> [g/GAME_NAME]` selects a friend for the right-hand details panel without changing the
-left-hand friend list. The flow is:
+`gamelist FRIEND_INDEX|myself [g/GAME_NAME]` selects a friend or the user profile for the right-hand details panel
+without changing the left-hand friend list. The flow is:
 
-1. `GameMatesParser` routes `gamelist` to `GameListCommandParser`. The parser requires one positional index before
-   at most one `g/` filter. It recognizes prefixes at whitespace boundaries so unknown prefixes and repeated
+1. `GameMatesParser` routes `gamelist` to `GameListCommandParser`. The parser requires one positional index or
+   `myself` selector before at most one `g/` filter. It recognizes prefixes at whitespace boundaries so unknown prefixes and repeated
    `g/` tokens cannot silently become part of a multiword game name. Other words after `g/` belong to the name.
-   Index parsing uses `ParserUtil.parseIndex`, and game validation uses the existing `GameName` rules.
+   Selector parsing uses `ParserUtil.parseIndexOrMyself`, and game validation uses the existing `GameName` rules.
    Command-specific errors are translated locally, leaving other commands' validation and messages unchanged.
 2. `GameListCommand.execute` resolves the index against `Model.getFilteredFriendList()`, so indices remain correct
-   after both name searches and game-based friend filtering. It checks empty and out-of-range lists before lookup.
+   after both name searches and game-based friend filtering. It checks empty and out-of-range lists before
+   numeric lookup. `Model.resolveFriend` resolves the selected friend or the separate profile; `myself` works even with an empty displayed list.
    It uses `GameName.equals` for exact, case-insensitive matching. No match and no games return successful results.
-3. `CommandResult` carries the original `Friend` in `friendToShow` and an optional `GameName` in `gameFilter`.
+3. `CommandResult` carries the original `Friend` in `friendToShow` and an optional `GameName` in `gameFilter`,
+   plus `showMyself` to distinguish the profile from a friend with identical details.
    The filter requires a selected friend, participates in equality, hashing and diagnostic output, and defaults
    to empty in the existing constructors. Feedback uses the stored game name on a match and the trimmed query
    when there is no match.
-4. `MainWindow.refreshFriendDetails` forwards both payload fields to `FriendDetailsPanel.setFriend`.
+4. `MainWindow.refreshFriendDetails` forwards the selected friend, profile flag and game filter to
+   `FriendDetailsPanel.setFriend`.
    The panel filters the stream used to construct `GameDetailsCard` instances and displays an explicit empty label
    if the stream has no entries. It never constructs a replacement friend or modifies the original game set.
    An unfiltered command clears the game filter. The existing two-argument `setFriend` also clears it, including
@@ -282,7 +320,8 @@ left-hand friend list. The flow is:
    Parse and execution failures do not refresh the panel, preserving the previous game display.
 
 The command does not update the model's friend-list predicate, friends, games, preferences or Myself profile.
-The existing profile fallback and its rendering are preserved. `GameDetailsCard` currently renders the available
+The profile fallback still shows all profile games; explicit profile selection supports game filtering.
+`GameDetailsCard` currently renders the available
 `Game.getGameName()` and `Game.getUsername()` fields. Metadata storage has merged, but cards do not yet render
 `Game.getMetas()`. Extend the card using `Meta.getKey()` and `Meta.getValue()` and add rendering/preservation tests;
 the command's original-friend payload already retains metadata without copying or removing it.
@@ -304,8 +343,8 @@ before publishing a complete v1.3 MVP guide.
 
 | Area | Submitted specification | Current implementation / follow-up |
 |------|-------------------------|------------------------------------|
-| Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | [PR #69](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/69) has merged: use explicit, case-insensitive `edit myself ...`. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
-| Game add/delete | `gameadd INDEX g/NAME u/USER_NAME [m/KEY:VALUE]...` and `gamedel INDEX g/NAME` (pp. 17–23). | Neither command is routed. [PR #70](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/70) is pending. Add success/error, duplicates, filter preservation and persistence tests after integration. |
+| Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | Use <code>edit FRIEND_INDEX&#124;myself ...</code>. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
+| Game add/delete | Add or delete a friend's game, with optional metadata on addition (pp. 17–23). | Use <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME u/USER_NAME</code> and <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code>. Game metadata input remains unavailable. See [Myself profile](#myself-profile). |
 | Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | [PR #64](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64) has merged the model, parser utilities and JSON persistence. Command entry and game-card rendering remain unavailable. See [Game metadata](#game-metadata) for the implemented API. |
 | Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
 | Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
@@ -313,15 +352,15 @@ before publishing a complete v1.3 MVP guide.
 | Friend filtering | Combined `list [n/KEYWORDS] [g/GAME]`, with named empty-result feedback (pp. 14–15). | Separate `find KEYWORD...` and `list [g/GAME]`; a new command replaces the previous filter. Feedback is `Listed all friends.` or `N friend(s) listed!`, including zero. |
 | GUI | Feature-spec mockups replace the friend panel with a game's list (pp. 15, 25); later v1.3 notes call for a split panel. | The adopted split layout matches those later notes: friends stay on the left and details/game cards appear on the right. `gamelist` filters cards only. Retire the earlier mockups. |
 | Errors | Command-specific index and validation wording. | Messages differ across commands; use the verified wording in the User Guide instead of copying spec errors. |
-| Game uniqueness | One username per game name within a friend (pp. 16–19). | `Game.isSameGame` supports name identity, but stored sets use full equality. JSON can contain the same game name with different usernames. Verify enforcement when game commands integrate. |
+| Game uniqueness | One username per game name within a friend (pp. 16–19). | `gameadd` rejects duplicate game names through `Game.isSameGame`. Stored sets use full equality, so JSON can still contain the same game name with different usernames. |
 
 Additional integration issues found during the audit: root-level JSON `null` bypasses the loading fallback, and
 game-text validation uses ISO-control rejection rather than a complete Unicode printability check. These are
 recorded limits; no application fix is included in this documentation change.
 
 Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
-not a current use-case step. Game creation/deletion and metadata entry/display cannot yet be demonstrated in this checkout;
-capture those screenshots after integration. Own-profile editing is available through `edit myself`.
+not a current use-case step. Game creation/deletion and own-profile editing are available; metadata entry/display
+remains pending.
 
 ### Game metadata
 
@@ -638,8 +677,8 @@ This is a future requirement; there is no working handle-editing command in this
 
 ### Non-Functional Requirements
 
-The following are targets, not measured guarantees. Targets involving game modification or metadata entry/display
-remain pending integration; startup/performance and large-data capacity need separate measurement.
+The following are targets, not measured guarantees. Metadata entry/display remains pending integration;
+startup/performance and large-data capacity need separate measurement.
 
 #### Environment
 
@@ -767,6 +806,10 @@ Prerequisite: fresh sample data.
    proving that selecting another friend clears the display filter. No stored game entry should be removed.
 6. `gamelist 3 g/Stardew Valley`: expected Charlotte's Stardew Valley card. `find David`, then `gamelist 1`,
    selects David rather than Alex. `list g/Unknown`, then `gamelist 1`, reports an empty displayed list.
+7. `gamelist myself`: expected `Your details` and all profile games. `gamelist myself g/Valorant` shows only
+   your Valorant card if present. `find Unknown`, then `gamelist MYSELF`, still selects your profile with the empty
+   friend list unchanged. `gamelist myself g/Unknown` reports no match. If no profile details exist, the panel
+   continues showing `No details added`.
 
 ### Deletion and clearing
 
@@ -781,7 +824,7 @@ Prerequisite: fresh sample data. These actions are destructive within the dispos
 3. `clear`: expected immediate empty list and `Friend list has been cleared!`. `delete 1` then reports the generic
    invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list. There is no undo.
 
-### Saved profile, game round trip and pending commands
+### Saved profile and game round trip
 
 Prerequisite: a disposable app folder. Close the app and create `data/gamemates.json` with the fixture below.
 This seeds existing data for testing; it is not an own-profile edit command.
@@ -804,8 +847,8 @@ This seeds existing data for testing; it is not an own-profile edit command.
 2. `list g/Unknown`, then `edit MYSELF n/Joash Updated p/`: expected the renamed profile with no phone number and
    its Minecraft game preserved. The left friend list remains empty. `edit myself n/Fixture Friend` rejects the
    duplicate name, and `add n/joash updated` rejects a name matching the profile.
-3. Try `edit n/Changed`, `gameadd 1 g/Test u/player`, and `gamedel 1 g/Valorant`.
-   Expected: missing-index or unknown-command errors. The profile and game remain unchanged.
+3. Try `edit n/Changed`: expected a missing-index error. Run `gameadd myself g/Test u/player`, then
+   `gamedel myself g/Test`: expected success and the original Minecraft entry preserved after both commands.
    Metadata command entry cannot be tested because no routed command supports it yet. To test storage, close the app,
    add `"metas": [{"key": "Role", "value": "Support:Mid"}]` to the fixture's Minecraft entry, relaunch and run `list`.
    The saved JSON must retain that pair; cards currently show only the game name and username. A missing `metas`

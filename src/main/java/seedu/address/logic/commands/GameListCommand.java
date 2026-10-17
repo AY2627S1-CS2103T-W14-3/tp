@@ -15,12 +15,13 @@ import seedu.address.model.friend.Friend;
 import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
 
-/** Shows a displayed friend's games without changing the friend list or stored data. */
+/** Shows a displayed friend's or the user's games without changing the friend list or stored data. */
 public class GameListCommand extends Command {
 
     public static final String COMMAND_WORD = "gamelist";
-    public static final String MESSAGE_USAGE = "Invalid command format. Usage: gamelist <FRIEND_INDEX> [g/GAME_NAME]";
-    public static final String MESSAGE_INVALID_INDEX = "Invalid friend index. Enter a positive integer.";
+    public static final String MESSAGE_USAGE = "Invalid command format. Usage: "
+            + "gamelist FRIEND_INDEX|myself [g/GAME_NAME]";
+    public static final String MESSAGE_INVALID_INDEX = "Invalid friend index. Enter a positive integer or myself.";
     public static final String MESSAGE_INVALID_GAME_NAME = "Invalid game name %1$s. "
             + "Enter 1–50 printable characters containing at least one letter or digit.";
     public static final String MESSAGE_REPEATED_GAME = "Only one game can be filtered per command. "
@@ -33,7 +34,7 @@ public class GameListCommand extends Command {
     private final Index friendIndex;
     private final GameName gameFilter;
 
-    /** Creates a command showing all games for the friend at {@code friendIndex}. */
+    /** Creates a command showing all games for the displayed friend or Myself profile at {@code friendIndex}. */
     public GameListCommand(Index friendIndex) {
         this(friendIndex, null);
     }
@@ -47,16 +48,18 @@ public class GameListCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Friend> displayedFriends = model.getFilteredFriendList();
-        if (displayedFriends.isEmpty()) {
-            throw new CommandException(MESSAGE_EMPTY_LIST);
-        }
-        if (friendIndex.getZeroBased() >= displayedFriends.size()) {
-            throw new CommandException(String.format(MESSAGE_INDEX_NOT_FOUND,
-                    friendIndex.getOneBased(), displayedFriends.size()));
+        if (!friendIndex.isMyself()) {
+            List<Friend> displayedFriends = model.getFilteredFriendList();
+            if (displayedFriends.isEmpty()) {
+                throw new CommandException(MESSAGE_EMPTY_LIST);
+            }
+            if (friendIndex.getZeroBased() >= displayedFriends.size()) {
+                throw new CommandException(String.format(MESSAGE_INDEX_NOT_FOUND,
+                        friendIndex.getOneBased(), displayedFriends.size()));
+            }
         }
 
-        Friend friend = displayedFriends.get(friendIndex.getZeroBased());
+        Friend friend = model.resolveFriend(friendIndex).friend();
         String feedback;
         if (gameFilter == null) {
             feedback = friend.getGames().isEmpty()
@@ -70,7 +73,7 @@ public class GameListCommand extends Command {
                     .map(gameName -> String.format(MESSAGE_MATCHING_GAME, gameName, friend.getName()))
                     .orElseGet(() -> String.format(MESSAGE_NO_MATCH, friend.getName(), gameFilter));
         }
-        return new CommandResult(feedback, friend, gameFilter);
+        return new CommandResult(feedback, friend, gameFilter, friendIndex.isMyself());
     }
 
     @Override

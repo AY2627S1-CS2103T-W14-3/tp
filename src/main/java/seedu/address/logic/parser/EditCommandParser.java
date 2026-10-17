@@ -28,6 +28,7 @@ public class EditCommandParser implements Parser<EditCommand> {
     /**
      * Parses the given {@code String} of arguments in the context of the EditCommand
      * and returns an EditCommand object for execution.
+     *
      * @throws ParseException if the user input does not conform to the expected format
      */
     public EditCommand parse(String args) throws ParseException {
@@ -35,8 +36,7 @@ public class EditCommandParser implements Parser<EditCommand> {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_TAG);
 
-        String target = argMultimap.getPreamble().trim();
-        Index index = target.equalsIgnoreCase("myself") ? Index.myself() : ParserUtil.parseIndex(target);
+        Index index = ParserUtil.parseIndexOrMyself(argMultimap.getPreamble());
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL);
 

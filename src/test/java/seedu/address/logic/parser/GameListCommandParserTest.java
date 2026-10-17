@@ -22,6 +22,13 @@ public class GameListCommandParserTest {
     }
 
     @Test
+    public void parse_myself_success() {
+        assertParseSuccess(parser, "myself", new GameListCommand(Index.myself()));
+        assertParseSuccess(parser, " \tMySeLf g/valorant \n",
+                new GameListCommand(Index.myself(), new GameName("Valorant")));
+    }
+
+    @Test
     public void parse_optionalGameFilter_success() {
         GameListCommand expected = new GameListCommand(INDEX_FIRST_FRIEND, new GameName("Stardew Valley"));
         assertParseSuccess(parser, "1 g/Stardew Valley", expected);

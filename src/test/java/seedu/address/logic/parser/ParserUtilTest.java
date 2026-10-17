@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Name;
@@ -40,6 +41,24 @@ public class ParserUtilTest {
     private static final String VALID_USERNAME = "ShadowStrikerXx";
 
     private static final String WHITESPACE = " \t\r\n";
+
+    @Test
+    public void parseIndexOrMyself_validTarget_success() throws Exception {
+        for (String target : List.of(Index.MYSELF_KEYWORD, "MYSELF", "MySeLf")) {
+            assertEquals(Index.myself(), ParserUtil.parseIndexOrMyself(WHITESPACE + target + WHITESPACE));
+        }
+        assertEquals(INDEX_FIRST_FRIEND, ParserUtil.parseIndexOrMyself(WHITESPACE + "1" + WHITESPACE));
+    }
+
+    @Test
+    public void parseIndexOrMyself_invalidTarget_throwsParseException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseIndexOrMyself(null));
+        assertThrows(ParseException.class, ParserUtil.MESSAGE_MISSING_INDEX, ()
+                -> ParserUtil.parseIndexOrMyself(WHITESPACE));
+        for (String target : List.of("0", "myself 1", "my self")) {
+            assertThrows(ParseException.class, MESSAGE_INVALID_INDEX, () -> ParserUtil.parseIndexOrMyself(target));
+        }
+    }
 
     @Test
     public void parseGameFields_outerControlCharacters_rejected() {

@@ -55,6 +55,31 @@ public class GameListCommandTest {
     }
 
     @Test
+    public void execute_myselfWithNoDisplayedFriends_listsAndFiltersProfileGames() {
+        NameContainsKeywordsPredicate predicate = new NameContainsKeywordsPredicate(List.of("Unknown"));
+        model.updateFilteredFriendList(predicate);
+        expectedModel.updateFilteredFriendList(predicate);
+        Friend profile = model.getGameMates().getMyself();
+        assertCommandSuccess(new GameListCommand(Index.myself()), model,
+                new CommandResult("Listed 1 game(s) that Joash plays:", profile, null, true), expectedModel);
+        GameName filter = new GameName("valorant");
+        assertCommandSuccess(new GameListCommand(Index.myself(), filter), model,
+                new CommandResult("Showing Valorant for Joash:", profile, filter, true), expectedModel);
+        GameName missing = new GameName("Val");
+        assertCommandSuccess(new GameListCommand(Index.myself(), missing), model,
+                new CommandResult("Joash does not have Val.", profile, missing, true), expectedModel);
+    }
+
+    @Test
+    public void execute_myselfWithNoGames_successfulEmptyResult() {
+        Model emptyModel = new ModelManager();
+        Friend profile = emptyModel.getGameMates().getMyself();
+        assertCommandSuccess(new GameListCommand(Index.myself()), emptyModel,
+                new CommandResult(String.format(GameListCommand.MESSAGE_NO_GAMES, profile.getName()),
+                        profile, null, true), new ModelManager());
+    }
+
+    @Test
     public void execute_matchingFilter_returnsOriginalFriendAndFilter() throws Exception {
         GameName filter = new GameName("valorant");
         GameListCommand command = new GameListCommand(INDEX_FIRST_FRIEND, filter);
