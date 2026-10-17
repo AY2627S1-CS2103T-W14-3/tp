@@ -142,7 +142,7 @@ adapters propagate the original exception, so invalid input is never treated as 
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java)
 
-<img src="images/ModelClassDiagram.png" width="450" />
+<img src="images/ModelClassDiagram.png" width="625" />
 
 
 The `Model` component,
