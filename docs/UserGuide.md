@@ -94,7 +94,8 @@ The main window has two panels: the friend list on the left and a details panel 
   in the right panel.
 * On startup, the right panel shows your profile. If no profile details have been added, it shows `No details added`.
 * When a `find` command returns exactly one friend, that friend's details are shown automatically.
-* Use `gamelist FRIEND_INDEX [g/GAME_NAME]` to select a friend and optionally show only one of their games.
+* Use `gamelist FRIEND_INDEX|myself [g/GAME_NAME]` to select a friend or your own profile and optionally
+  show only one game.
   Clicking another friend shows all of that friend's games.
 * Successful commands other than `gamelist` or a single-result `find` return the right panel to your profile.
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
@@ -113,7 +114,7 @@ Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve
 
 New friends start with no games. Use [`gameadd`](#adding-a-game-gameadd) and
 [`gamedel`](#deleting-a-game-gamedel) to manage a friend's games or your own games, and
-[`gamelist`](#viewing-a-friends-games-gamelist) to view a friend's entries. Metadata input and display remain unavailable.
+[`gamelist`](#viewing-games-gamelist) to view their entries or your own. Metadata input and display remain unavailable.
 Deleting a friend removes that friend's complete entry, including their games; it does not remove games from
 other friends. Back up your data before [editing a saved file](#editing-the-data-file).
 
@@ -242,28 +243,32 @@ Examples:
 * `gamedel 1 g/Valorant`
 * `gamedel myself g/Minecraft`
 
-### Viewing a friend's games: `gamelist`
+### Viewing games: `gamelist`
 
-Shows a friend's details and game cards in the right panel, keeping the friend list and its current filter on the left.
+Shows a friend's or your own details and game cards in the right panel, keeping the friend list and its current
+filter on the left.
 Each game card shows the game name and in-game username.
 
-Format: `gamelist <FRIEND_INDEX> [g/GAME_NAME]`
+Format: `gamelist FRIEND_INDEX|myself [g/GAME_NAME]`
 
-* Replace `<FRIEND_INDEX>` with a positive integer; do not type the angle brackets. The index is required and refers
-  to the **currently displayed friend list**, including after `find` or `list g/GAME_NAME`.
-* Without `g/`, all of the selected friend's games are shown. This also clears a previous game display filter.
+* Use a positive `FRIEND_INDEX` to select from the **currently displayed friend list**, including after `find`
+  or `list g/GAME_NAME`, or use `myself` to select your own profile. The selector is required.
+* `myself` is case-insensitive and works even when the friend list is empty or filtered. The panel shows `Your details`.
+* Without `g/`, all of the selected person's games are shown. This also clears a previous game display filter.
 * With `g/`, only a game with the complete matching name is shown. Matching is case-insensitive:
   `valorant` matches `Valorant`, but `Val` does not. Usernames are not searched.
 * Leading and trailing whitespace in the game name is removed. Game names may contain 1–50 printable characters
   and must include at least one letter or digit. Multiword names are accepted.
-* Put the index before the optional filter. Only one `g/` is allowed, even if repeated values are identical.
+* Put the selector before the optional filter. Only one `g/` is allowed, even if repeated values are identical.
   Unknown prefixes and extra words before `g/` are rejected. All words after `g/` form the game name;
   whitespace-separated tokens such as `x/` are treated as parameter prefixes, not part of the name.
-* An absent game is a successful empty result, including when the friend has no games. Stored friend details,
+* An absent game is a successful empty result, including when the selected person has no games. Stored friend details,
   game entries and your Myself profile are unchanged. Invalid commands leave the previous details display unchanged.
 
 Examples:
 
+* `gamelist myself` shows all of your games.
+* `gamelist myself g/Valorant` shows only your Valorant entry.
 * `gamelist 1` shows all games of the first displayed friend.
 * `gamelist 2 g/Valorant` shows only the second displayed friend's Valorant entry.
 * `gamelist 2 g/minecraft` matches the stored name `Minecraft`.
@@ -289,14 +294,15 @@ Errors:
 
 | Input problem | Feedback |
 |---------------|----------|
-| Missing index, unknown prefix or extra positional argument | `Invalid command format. Usage: gamelist <FRIEND_INDEX> [g/GAME_NAME]` |
-| Malformed, zero, negative or overflowing index | `Invalid friend index. Enter a positive integer.` |
+| Missing selector, unknown prefix or extra positional argument | <code>Invalid command format. Usage: gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code> |
+| Malformed, zero, negative or overflowing index | `Invalid friend index. Enter a positive integer or myself.` |
 | Positive index outside the displayed list | `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.` |
-| Empty displayed list | `No friends are currently displayed. Use list to show all friends.` |
+| Numeric index with an empty displayed list | `No friends are currently displayed. Use list to show all friends.` |
 | Invalid game name, including empty `g/` | `Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.` |
 | Repeated `g/` | `Only one game can be filtered per command. Run gamelist separately for each game.` |
 
-`gamelist myself` is not supported; the existing profile view remains available when no friend is selected.
+For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
+showing `No details added`.
 
 ### Editing a friend or your own profile: `edit`
 
@@ -478,7 +484,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
 | **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME u/USER_NAME</code><br> e.g., `gameadd myself g/Valorant u/player123` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
-| **Game list** | `gamelist <FRIEND_INDEX> [g/GAME_NAME]`<br> e.g., `gamelist 2 g/Valorant` |
+| **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
 | **Help** | `help` |
 | **Exit** | `exit` |
