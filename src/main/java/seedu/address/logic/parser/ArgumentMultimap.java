@@ -44,6 +44,13 @@ public class ArgumentMultimap {
     }
 
     /**
+     * Returns true if all given prefixes have values present. Empty strings count as present values.
+     */
+    public boolean arePrefixesPresent(Prefix... prefixes) {
+        return Stream.of(prefixes).allMatch(prefix -> getValue(prefix).isDefined());
+    }
+
+    /**
      * Returns all values of {@code prefix}.
      * If the prefix does not exist or has no values, this will return an empty list.
      * Modifying the returned list will not affect the underlying data structure of the ArgumentMultimap.
