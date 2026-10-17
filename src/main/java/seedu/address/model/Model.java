@@ -4,7 +4,9 @@ import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.commons.core.index.Index;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendTarget;
 
 /**
  * The API of the Model component.
@@ -40,6 +42,16 @@ public interface Model {
     ReadOnlyGameMates getGameMates();
 
     /**
+     * Resolves the given displayed index to a friend target, or selects the separately stored Myself
+     * profile when {@code index} is {@link Index#myself()}. The target retains the selected friend
+     * and storage location even if the displayed list changes afterward.
+     *
+     * @throws IndexOutOfBoundsException if a numeric index is outside the filtered friend list.
+     * @throws NullPointerException if {@code index} is null.
+     */
+    FriendTarget resolveFriend(Index index);
+
+    /**
      * Returns true if a friend with the same identity as {@code friend} exists in GameMates.
      */
     boolean hasFriend(Friend friend);
@@ -63,6 +75,16 @@ public interface Model {
      * in GameMates.
      */
     void setFriend(Friend target, Friend editedFriend);
+
+    /**
+     * Replaces the profile or friend selected by a previously resolved {@code target}.
+     * Does not resolve a displayed index again, so filter changes cannot redirect the update.
+     * The same requirements as
+     * {@link #setFriend(Friend, Friend)} apply when updating a friend.
+     *
+     * @throws NullPointerException if any argument is null.
+     */
+    void setFriend(FriendTarget target, Friend editedFriend);
 
     /** Returns an unmodifiable view of the filtered friend list */
     ObservableList<Friend> getFilteredFriendList();

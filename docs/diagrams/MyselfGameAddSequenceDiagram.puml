@@ -1,0 +1,46 @@
+@startuml
+!define LOGIC_COLOR #3333C4
+!define MODEL_COLOR #9D0012
+skinparam Shadowing false
+skinparam DefaultFontName Arial
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+hide footbox
+
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":GameAddCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":GameMates" as Data MODEL_COLOR
+
+Logic -> Command : execute(model)
+activate Command
+Command -> Model : resolveFriend(Index.myself())
+activate Model
+Model -> Data : getMyself()
+activate Data
+Data --> Model : profile
+deactivate Data
+create participant "target:Myself" as Target MODEL_COLOR
+Model -> Target : create(profile)
+Model --> Command : target
+deactivate Model
+Command -> Target : friend()
+activate Target
+Target --> Command : profile
+deactivate Target
+note over Command
+Validate the game addition and
+construct updatedFriend, preserving
+the other profile fields.
+end note
+Command -> Model : setFriend(target, updatedFriend)
+activate Model
+Model -> Data : setMyself(updatedFriend)
+activate Data
+Data --> Model
+deactivate Data
+Model --> Command
+deactivate Model
+Command --> Logic : CommandResult
+deactivate Command
+@enduml
