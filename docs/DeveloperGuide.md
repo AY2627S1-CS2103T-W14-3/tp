@@ -259,7 +259,7 @@ profile keyword:
 
 ```text
 edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…
-gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]
+gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…
 gamedel FRIEND_INDEX|myself g/GAME_NAME
 ```
 
@@ -349,8 +349,8 @@ before publishing a complete v1.3 MVP guide.
 | Area | Submitted specification | Current implementation / follow-up |
 |------|-------------------------|------------------------------------|
 | Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | Use <code>edit FRIEND_INDEX&#124;myself ...</code>. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
-| Game add/delete | Add or delete a friend's game, with optional metadata on addition (pp. 17–23). | Use <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME]</code> and <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code>. Game metadata input remains unavailable. See [Myself profile](#myself-profile). |
-| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | [PR #64](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64) has merged the model, parser utilities and JSON persistence. Command entry and game-card rendering remain unavailable. See [Game metadata](#game-metadata) for the implemented API. |
+| Game add/delete | Add or delete a friend's game, with optional metadata on addition (pp. 17–23). | Use <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code> and <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code>. See [Myself profile](#myself-profile). |
+| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | Model, parser utilities, JSON persistence, command entry through `gameadd` and game-card rendering are implemented. See [Game metadata](#game-metadata) for the implemented API. |
 | Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
 | Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
 | Phone/email | Phone: 1–40 characters from a broad punctuation set. Email: 1–255 characters containing `@` (pp. 5–6). | Phone: 3–15 ASCII digits, or `+` with 2–15, with constrained grouping and no extensions. Email: at most 254 characters, local part at most 64, ASCII dot-atom and valid domain labels. |
@@ -364,8 +364,7 @@ game-text validation uses ISO-control rejection rather than a complete Unicode p
 recorded limits; no application fix is included in this documentation change.
 
 Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
-not a current use-case step. Game creation/deletion and own-profile editing are available; metadata entry/display
-remains pending.
+not a current use-case step. Game creation/deletion, metadata entry/display and own-profile editing are available.
 
 ### Game metadata
 
@@ -399,7 +398,16 @@ Missing separators and invalid fields cause `ParseException`.
 
 `parseMetas()` parses a collection of raw values and rejects duplicate normalized keys before returning a set.
 Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
-These are parser utilities; command-specific metadata flag handling is not yet implemented.
+`GameAddCommandParser` tokenizes the optional, repeatable `CliSyntax.PREFIX_META` (`m/`) alongside `g/` and `u/`.
+It passes all raw metadata values to `parseMetas()` and constructs the `Game` with the validated set.
+Omitting `m/` produces an empty set. Duplicate `g/` or `u/` prefixes remain invalid; repeated `m/` prefixes
+are allowed only for distinct keys. Validation finishes before the command updates either a friend or the profile.
+
+#### Display
+
+`GameDetailsCard` displays each metadata pair as a wrapping `Key: Value` label below the username.
+Pairs are sorted by key ignoring case, preserving the stored spelling and values. The metadata container
+is hidden and unmanaged when empty. Both friend and profile details use these cards, including filtered game views.
 
 #### Persistence and testing
 
@@ -418,6 +426,8 @@ Null array entries, invalid fields and duplicate keys cause `IllegalValueExcepti
 
 Tests cover trimmed length boundaries, Unicode, control characters, colons, case normalization,
 duplicate keys, immutability, JSON round-trips and metadata preservation during contact edits.
+Command tests also cover optional and interleaved metadata flags, malformed input, and addition with metadata
+to displayed friends and `myself`, including filter preservation, duplicate-game rejection and JSON round-trips.
 `GameBuilder.addMeta("Role", "Support")` appends a pair; `withMetas(...)` replaces the collection.
 Duplicate keys added through the builder are rejected by `build()`.
 
@@ -682,8 +692,7 @@ This is a future requirement; there is no working handle-editing command in this
 
 ### Non-Functional Requirements
 
-The following are targets, not measured guarantees. Metadata entry/display remains pending integration;
-startup/performance and large-data capacity need separate measurement.
+The following are targets, not measured guarantees. Startup/performance and large-data capacity need separate measurement.
 
 #### Environment
 

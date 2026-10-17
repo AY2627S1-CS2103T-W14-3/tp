@@ -7,9 +7,8 @@ GameMates helps gamers keep track of friends, their contact details, the games t
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer; browsing the online help and downloading releases require internet access.
 
-This guide describes the commands available in this checkout. Adding or deleting individual games and game
-metadata input are not available yet. You can view and filter games already present in sample or
-saved data. See [Your profile and game entries](#your-profile-and-game-entries) for the current limits.
+This guide describes the commands available in this checkout, including adding games with optional metadata.
+See [Your profile and game entries](#your-profile-and-game-entries) for the current limits.
 
 * Table of Contents
 {:toc}
@@ -90,7 +89,7 @@ saved data. See [Your profile and game entries](#your-profile-and-game-entries) 
 
 The main window has two panels: the friend list on the left and a details panel on the right.
 
-* Click a friend in the left panel to view their name, phone number, email address, tags, games, and in-game usernames
+* Click a friend in the left panel to view their name, phone number, email address, tags, games, in-game usernames and metadata
   in the right panel.
 * On startup, the right panel shows your profile. If no profile details have been added, it shows `No details added`.
 * When a `find` command returns exactly one friend, that friend's details are shown automatically.
@@ -114,7 +113,8 @@ Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve
 
 New friends start with no games. Use [`gameadd`](#adding-a-game-gameadd) and
 [`gamedel`](#deleting-a-game-gamedel) to manage a friend's games or your own games, and
-[`gamelist`](#viewing-games-gamelist) to view their entries or your own. Metadata input and display remain unavailable.
+[`gamelist`](#viewing-games-gamelist) to view their entries or your own. Add metadata with optional `m/KEY:VALUE`
+arguments in `gameadd`; each game card shows its metadata below the username.
 Deleting a friend removes that friend's complete entry, including their games; it does not remove games from
 other friends. Back up your data before [editing a saved file](#editing-the-data-file).
 
@@ -216,24 +216,31 @@ Examples:
 
 ### Adding a game: `gameadd`
 
-Adds a game with an optional in-game username to a friend or your own profile.
+Adds a game with an optional in-game username and metadata (e.g. role or level) to a friend or your own profile.
 
-Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]`
+Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 
-* The game name is required. The username is optional, omit `u/` if you do not know it.
+* The game name is required. The username is optional; omit `u/` if you do not know it.
 * Game names and supplied usernames must contain 1–50 printable characters after trimming,
   including at least one letter or digit.
 * Supplying `u/` without a value, or with only whitespace, is rejected. Omit the prefix instead.
 * Repeated `g/` or `u/` prefixes are rejected, even when the values are identical.
+* Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters;
+  values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.
+* Repeat `m/` for distinct keys, ignoring case. Malformed pairs, empty fields or duplicate keys reject the whole
+  command, even if values match. Omit `m/` entirely for no metadata.
+* A space followed by `g/`, `u/` or `m/` starts a new parameter, even inside quotes; avoid these in field values.
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
+* Metadata appears below the username, sorted by key ignoring case. Long fields wrap; scroll for additional rows.
 
 Examples:
 
 * `gameadd 1 g/Valorant u/player123`
-* `gameadd myself g/Minecraft u/myUsername`
+* `gameadd 1 g/Valorant u/player123 m/Role:Support m/Level:20`
+* `gameadd myself g/Minecraft u/myUsername m/Mode:Creative`
 * `gameadd 1 g/Valorant` adds the game without a username.
-* `gameadd myself g/Stardew Valley` adds a game to your profile without a username.
+* `gameadd myself g/Stardew Valley m/Role:Farmer` adds a game with metadata and no username.
 
 ### Deleting a game: `gamedel`
 
@@ -447,7 +454,7 @@ Existing files that omit `games` load with no games; files that omit `myself` us
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
 colons and must be unique per game, ignoring case; values may contain colons. Missing `metas` loads as empty.
-Metadata is preserved when saving, but cannot yet be entered through commands or viewed in game cards.
+Metadata can be entered through `gameadd`, is preserved when saving and is displayed in game cards.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If the file is missing, the app starts with sample friends and the default profile. If it cannot load the file
@@ -489,7 +496,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Delete** | `delete FRIEND_INDEX`<br> e.g., `delete 3` |
 | **Edit** | <code>edit FRIEND_INDEX&#124;myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
-| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME]</code><br> e.g., `gameadd myself g/Valorant u/player123` or `gameadd 1 g/Minecraft` |
+| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code><br> e.g., `gameadd myself g/Valorant u/player123 m/Role:Support` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
