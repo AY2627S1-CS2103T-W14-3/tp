@@ -8,4 +8,5 @@
       xmlns:fx="http://javafx.com/fxml/1">
   <Label fx:id="gameName" styleClass="details-game-name" wrapText="true" />
   <Label fx:id="username" styleClass="details-game-username" wrapText="true" />
+  <VBox fx:id="metadata" spacing="3" minWidth="0" />
 </VBox>

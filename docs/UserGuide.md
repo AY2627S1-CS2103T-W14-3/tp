@@ -7,9 +7,8 @@ GameMates helps gamers keep track of friends, their contact details, the games t
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer; browsing the online help and downloading releases require internet access.
 
-This guide describes the commands available in this checkout. Adding or deleting individual games and game
-metadata input are not available yet. You can view and filter games already present in sample or
-saved data. See [Your profile and game entries](#your-profile-and-game-entries) for the current limits.
+This guide describes the commands available in this checkout, including adding games with optional metadata.
+See [Your profile and game entries](#your-profile-and-game-entries) for the current limits.
 
 * Table of Contents
 {:toc}
@@ -75,6 +74,9 @@ saved data. See [Your profile and game entries](#your-profile-and-game-entries) 
   Tags may be repeated; identical tag values are applied once.
 * Friend indices refer to the current left-hand list and range from 1 to 2147483647. Run `list` to see all friends
   again before choosing an index. Zero, negative numbers, decimals, a leading `+` and larger integers are rejected.
+* For `edit`, `gameadd` and `gamedel`, `FRIEND_INDEX|myself` means either a displayed friend index or the
+  case-insensitive keyword `myself` for your own profile. Do not type `|`. The selector must come before prefixes;
+  `myself` also works when no friends are displayed.
 
 * Extraneous parameters for commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
@@ -87,7 +89,7 @@ saved data. See [Your profile and game entries](#your-profile-and-game-entries) 
 
 The main window has two panels: the friend list on the left and a details panel on the right.
 
-* Click a friend in the left panel to view their name, phone number, email address, tags, games, and in-game usernames
+* Click a friend in the left panel to view their name, phone number, email address, tags, games, in-game usernames and metadata
   in the right panel.
 * On startup, the right panel shows your profile. If no profile details have been added, it shows `No details added`.
 * When a `find` command returns exactly one friend, that friend's details are shown automatically.
@@ -108,9 +110,10 @@ Use `edit myself n/Joash` to set your own name, or supply other supported edit f
 and tags. The `myself` selector is case-insensitive and works even when the friend list is empty or filtered.
 Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve your games and the friend-list filter.
 
-You can view games and usernames already loaded from saved data or the initial sample data using
-[`gamelist`](#viewing-a-friends-games-gamelist). New friends start with no games.
-`gameadd` and `gamedel` are not recognised commands in this build, and there is no metadata input or display yet.
+New friends start with no games. Use [`gameadd`](#adding-a-game-gameadd) and
+[`gamedel`](#deleting-a-game-gamedel) to manage a friend's games or your own games, and
+[`gamelist`](#viewing-a-friends-games-gamelist) to view a friend's entries. Add metadata with optional `m/KEY:VALUE`
+arguments in `gameadd`; each game card shows its metadata below the username.
 Deleting a friend removes that friend's complete entry, including their games; it does not remove games from
 other friends. Back up your data before [editing a saved file](#editing-the-data-file).
 
@@ -210,6 +213,42 @@ Examples:
 * `list g/Valorant` shows friends who play `Valorant`.
 * `list g/Stardew Valley` shows friends who play `Stardew Valley`.
 
+### Adding a game: `gameadd`
+
+Adds a game, username and optional metadata (e.g. role or level) to a friend or your own profile.
+
+Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME [m/KEY:VALUE]…`
+
+* Game name and username are required, non-empty and limited to 50 characters each, with at least one letter or digit.
+* Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters;
+  values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.
+* Repeat `m/` for distinct keys, ignoring case. Malformed pairs, empty fields or duplicate keys reject the whole
+  command, even if values match. Omit `m/` entirely for no metadata.
+* A space followed by `g/`, `u/` or `m/` starts a new parameter, even inside quotes; avoid these in field values.
+* A game name already present on the selected friend or profile is rejected, ignoring case.
+* Other details and games are preserved. The friend-list filter stays unchanged.
+* Metadata appears below the username, sorted by key ignoring case. Long fields wrap; scroll for additional rows.
+
+Examples:
+
+* `gameadd 1 g/Valorant u/player123`
+* `gameadd 1 g/Valorant u/player123 m/Role:Support m/Level:20`
+* `gameadd myself g/Minecraft u/myUsername m/Mode:Creative`
+
+### Deleting a game: `gamedel`
+
+Removes one game from a friend or your own profile.
+
+Format: `gamedel FRIEND_INDEX|myself g/GAME_NAME`
+
+* The game name is required and matched case-insensitively. A missing game is rejected.
+* Other details and games are preserved. The friend-list filter stays unchanged.
+
+Examples:
+
+* `gamedel 1 g/Valorant`
+* `gamedel myself g/Minecraft`
+
 ### Viewing a friend's games: `gamelist`
 
 Shows a friend's details and game cards in the right panel, keeping the friend list and its current filter on the left.
@@ -305,7 +344,7 @@ Errors:
 * Missing index: `Please provide an index.`
 * Invalid index: `Index must be a positive integer.`
 * Empty displayed list: `No friends are currently displayed. Use list to show all friends.`
-* Index outside the displayed list: `No friend exists at index INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
+* Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
 * Duplicate name: `This friend already exists in GameMates.`
 * Adding or renaming a friend to your profile's name: `This name is already used by your Myself profile.`
@@ -402,7 +441,7 @@ load with no games; files that omit `myself` use the default empty profile. Empt
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
 colons and must be unique per game, ignoring case; values may contain colons. Missing `metas` loads as empty.
-Metadata is preserved when saving, but cannot yet be entered through commands or viewed in game cards.
+Metadata can be entered through `gameadd`, is preserved when saving and is displayed in game cards.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If the file is missing, the app starts with sample friends and the default profile. If it cannot load the file
@@ -444,10 +483,11 @@ while copying the file, then launch the destination app from its usual data fold
 | **Delete** | `delete FRIEND_INDEX`<br> e.g., `delete 3` |
 | **Edit** | <code>edit FRIEND_INDEX&#124;myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
+| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME u/USER_NAME [m/KEY:VALUE]…</code><br> e.g., `gameadd myself g/Valorant u/player123 m/Role:Support` |
+| **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | `gamelist <FRIEND_INDEX> [g/GAME_NAME]`<br> e.g., `gamelist 2 g/Valorant` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
 | **Help** | `help` |
 | **Exit** | `exit` |
 
-The summary lists available commands only. `gameadd`, `gamedel` and metadata entry are pending;
-they are not additional working commands in this build.
+Metadata entry is not supported.

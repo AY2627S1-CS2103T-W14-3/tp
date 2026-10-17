@@ -10,7 +10,9 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.commons.core.index.Index;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendTarget;
 
 /**
  * Represents the in-memory model of the GameMates data.
@@ -75,6 +77,13 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public FriendTarget resolveFriend(Index index) {
+        requireNonNull(index);
+        return index.isMyself() ? new FriendTarget.Myself(gameMates.getMyself())
+                : new FriendTarget.ListedFriend(filteredFriends.get(index.getZeroBased()));
+    }
+
+    @Override
     public boolean hasFriend(Friend friend) {
         requireNonNull(friend);
         return gameMates.hasFriend(friend);
@@ -96,6 +105,15 @@ public class ModelManager implements Model {
         requireAllNonNull(target, editedFriend);
 
         gameMates.setFriend(target, editedFriend);
+    }
+
+    @Override
+    public void setFriend(FriendTarget target, Friend editedFriend) {
+        requireAllNonNull(target, editedFriend);
+        switch (target) {
+            case FriendTarget.Myself _ -> setMyself(editedFriend);
+            case FriendTarget.ListedFriend listed -> setFriend(listed.friend(), editedFriend);
+        }
     }
 
     //=========== Filtered Friend List Accessors =============================================================
