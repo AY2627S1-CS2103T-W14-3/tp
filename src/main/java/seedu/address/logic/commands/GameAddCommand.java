@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME_NAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_META;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_USERNAME;
 
 import java.util.HashSet;
@@ -17,7 +18,7 @@ import seedu.address.model.friend.FriendTarget;
 import seedu.address.model.game.Game;
 
 /**
- * Adds a game and username to a displayed friend or the Myself profile.
+ * Adds a game, username and optional metadata to a displayed friend or the Myself profile.
  */
 public class GameAddCommand extends Command {
 
@@ -26,10 +27,13 @@ public class GameAddCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a game to a friend or your own profile. "
             + "Parameters: FRIEND_INDEX|myself (use a positive integer for a friend, or myself for your own profile) "
             + PREFIX_GAME_NAME + "GAME_NAME "
-            + PREFIX_USERNAME + "USER_NAME\n"
+            + PREFIX_USERNAME + "USER_NAME "
+            + "[" + PREFIX_META + "KEY:VALUE]...\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_GAME_NAME + "Valorant "
-            + PREFIX_USERNAME + "benergy10";
+            + PREFIX_USERNAME + "benergy10 "
+            + PREFIX_META + "Role:Support "
+            + PREFIX_META + "Level:20";
     public static final String MESSAGE_SUCCESS = "Added %1$s to %2$s's games.\nUsername: %3$s";
     public static final String MESSAGE_DUPLICATE_GAME = "%1$s already has %2$s.";
 

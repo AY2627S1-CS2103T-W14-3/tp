@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
@@ -125,7 +126,11 @@ public class MainWindow extends UiPart<Stage> {
      */
     void fillInnerParts() {
         friendDetailsPanel = new FriendDetailsPanel(logic.getMyself(), true);
-        friendDetailsPanelPlaceholder.getChildren().add(friendDetailsPanel.getRoot());
+        ScrollPane detailsScrollPane = new ScrollPane(friendDetailsPanel.getRoot());
+        detailsScrollPane.setFitToWidth(true);
+        detailsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        detailsScrollPane.getStyleClass().add("friend-details-scroll-pane");
+        friendDetailsPanelPlaceholder.getChildren().add(detailsScrollPane);
 
         FriendListPanel friendListPanel = new FriendListPanel(logic.getFilteredFriendList(),
                 this::showFriendDetails);
