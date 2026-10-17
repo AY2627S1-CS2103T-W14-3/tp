@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME_NAME;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
@@ -13,15 +12,17 @@ import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendTarget;
 import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
 
-/** Deletes a game from a friend identified using its displayed index. */
+/** Deletes a game from a displayed friend or the Myself profile. */
 public class GameDeleteCommand extends Command {
 
     public static final String COMMAND_WORD = "gamedel";
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Deletes a game from a friend. "
-            + "Parameters: INDEX (must be a positive integer) " + PREFIX_GAME_NAME + "GAME_NAME\n"
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Deletes a game from a friend or your own profile. "
+            + "Parameters: FRIEND_INDEX|myself (use a positive integer for a friend, or myself for your own profile) "
+            + PREFIX_GAME_NAME + "GAME_NAME\n"
             + "Example: " + COMMAND_WORD + " 1 " + PREFIX_GAME_NAME + "Valorant";
     public static final String MESSAGE_SUCCESS = "Deleted game %1$s from %2$s.";
     public static final String MESSAGE_GAME_NOT_FOUND = "%1$s does not have %2$s.";
@@ -30,7 +31,7 @@ public class GameDeleteCommand extends Command {
     private final GameName gameName;
 
     /**
-     * Creates a command to remove the game from the friend at the displayed index.
+     * Creates a command to remove the game from a displayed friend or the Myself profile.
      */
     public GameDeleteCommand(Index targetIndex, GameName gameName) {
         this.targetIndex = requireNonNull(targetIndex);
@@ -40,23 +41,33 @@ public class GameDeleteCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Friend> displayedFriends = model.getFilteredFriendList();
-        if (targetIndex.getZeroBased() >= displayedFriends.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
-        }
-
-        Friend friend = displayedFriends.get(targetIndex.getZeroBased());
-        Game toDelete = friend.getGames().stream()
-                .filter(game -> game.getGameName().equals(gameName))
-                .findFirst()
-                .orElseThrow(() -> new CommandException(
-                        String.format(MESSAGE_GAME_NOT_FOUND, friend.getName(), gameName)));
+        FriendTarget target = parseTargetFriend(model);
+        Friend friend = target.friend();
+        Game toDelete = parseTargetGame(friend);
         Set<Game> games = new HashSet<>(friend.getGames());
         games.remove(toDelete);
         Friend updatedFriend = new Friend(friend.getName(), friend.getPhone(), friend.getEmail(),
                 games, friend.getTags());
-        model.setFriend(friend, updatedFriend);
+        model.setFriend(target, updatedFriend);
         return new CommandResult(String.format(MESSAGE_SUCCESS, gameName, friend.getName()));
+    }
+
+    /** Resolves the command target and reports invalid displayed indices. */
+    private FriendTarget parseTargetFriend(Model model) throws CommandException {
+        try {
+            return model.resolveFriend(targetIndex);
+        } catch (IndexOutOfBoundsException e) {
+            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        }
+    }
+
+    /** Finds the game to delete, reporting when the selected friend or profile does not have it. */
+    private Game parseTargetGame(Friend friend) throws CommandException {
+        return friend.getGames().stream()
+                .filter(game -> game.getGameName().equals(gameName))
+                .findFirst()
+                .orElseThrow(() -> new CommandException(
+                        String.format(MESSAGE_GAME_NOT_FOUND, friend.getName(), gameName)));
     }
 
     @Override
