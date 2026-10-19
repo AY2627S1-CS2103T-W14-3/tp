@@ -18,6 +18,7 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_FRIEND;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.EditCommand.EditFriendDescriptor;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
@@ -126,7 +127,49 @@ public class EditCommandTest {
         EditFriendDescriptor descriptor = new EditFriendDescriptorBuilder(firstFriend).build();
         EditCommand editCommand = new EditCommand(INDEX_SECOND_FRIEND, descriptor);
 
-        assertCommandFailure(editCommand, model, EditCommand.MESSAGE_DUPLICATE_FRIEND);
+        assertCommandFailure(editCommand, model, Messages.MESSAGE_DUPLICATE_FRIEND);
+    }
+
+    @Test
+    public void execute_friendNameConflictsWithMyself_failure() {
+        String profileName = model.getGameMates().getMyself().getName().fullName;
+        EditCommand command = new EditCommand(INDEX_FIRST_FRIEND,
+                new EditFriendDescriptorBuilder().withName(profileName).build());
+
+        assertCommandFailure(command, model, Messages.MESSAGE_DUPLICATE_MYSELF);
+    }
+
+    @Test
+    public void execute_myselfNameConflictsWithHiddenFriend_failure() {
+        String friendName = model.getFilteredFriendList().getFirst().getName().fullName;
+        model.updateFilteredFriendList(friend -> false);
+        EditCommand command = new EditCommand(Index.myself(),
+                new EditFriendDescriptorBuilder().withName(friendName).build());
+
+        assertCommandFailure(command, model, Messages.MESSAGE_DUPLICATE_FRIEND);
+    }
+
+    @Test
+    public void execute_myselfRetainsIdentityWithNoDisplayedFriends_success() {
+        Friend original = model.getGameMates().getMyself();
+        Friend edited = new FriendBuilder(original).withPhone(VALID_PHONE_BOB).build();
+        model.updateFilteredFriendList(friend -> false);
+        Model expectedModel = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
+        expectedModel.setMyself(edited);
+        expectedModel.updateFilteredFriendList(friend -> false);
+        EditCommand command = new EditCommand(Index.myself(),
+                new EditFriendDescriptorBuilder().withPhone(VALID_PHONE_BOB).build());
+
+        assertCommandSuccess(command, model, EditCommand.formatSuccessMessage(original, edited), expectedModel);
+    }
+
+    @Test
+    public void execute_noDisplayedFriends_failure() {
+        model.updateFilteredFriendList(friend -> false);
+        EditCommand command = new EditCommand(INDEX_FIRST_FRIEND,
+                new EditFriendDescriptorBuilder().withPhone(VALID_PHONE_BOB).build());
+
+        assertCommandFailure(command, model, EditCommand.MESSAGE_EMPTY_LIST);
     }
 
     @Test
@@ -138,7 +181,7 @@ public class EditCommandTest {
         EditCommand editCommand = new EditCommand(INDEX_FIRST_FRIEND,
                 new EditFriendDescriptorBuilder(friendInList).build());
 
-        assertCommandFailure(editCommand, model, EditCommand.MESSAGE_DUPLICATE_FRIEND);
+        assertCommandFailure(editCommand, model, Messages.MESSAGE_DUPLICATE_FRIEND);
     }
 
     @Test

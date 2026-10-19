@@ -8,7 +8,6 @@ import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
@@ -41,7 +40,7 @@ public class GameDeleteCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        FriendTarget target = parseTargetFriend(model);
+        FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
         Friend friend = target.friend();
         Game toDelete = parseTargetGame(friend);
         Set<Game> games = new HashSet<>(friend.getGames());
@@ -50,15 +49,6 @@ public class GameDeleteCommand extends Command {
                 games, friend.getTags());
         model.setFriend(target, updatedFriend);
         return new CommandResult(String.format(MESSAGE_SUCCESS, gameName, friend.getName()));
-    }
-
-    /** Resolves the command target and reports invalid displayed indices. */
-    private FriendTarget parseTargetFriend(Model model) throws CommandException {
-        try {
-            return model.resolveFriend(targetIndex);
-        } catch (IndexOutOfBoundsException e) {
-            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
-        }
     }
 
     /** Finds the game to delete, reporting when the selected friend or profile does not have it. */

@@ -51,8 +51,6 @@ public class EditCommand extends Command {
     public static final String MESSAGE_NOT_EDITED = "No details were passed to the command. "
             + "Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) "
             + "to edit specific details.";
-    public static final String MESSAGE_DUPLICATE_FRIEND = "This friend already exists in GameMates.";
-    public static final String MESSAGE_DUPLICATE_MYSELF = "This name is already used by your Myself profile.";
 
     public static final String MESSAGE_EMPTY_LIST =
             "No friends are currently displayed. Use list to show all friends.";
@@ -77,29 +75,20 @@ public class EditCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        FriendTarget target = parseTargetFriend(model);
+        FriendTarget target = FriendTargetResolver.resolve(model, index, () -> {
+            int displayedCount = model.getFilteredFriendList().size();
+            return displayedCount == 0 ? MESSAGE_EMPTY_LIST
+                    : String.format(MESSAGE_INDEX_NOT_FOUND, index.getOneBased(), displayedCount);
+        });
         Friend friendToEdit = target.friend();
         Friend editedFriend = createEditedFriend(friendToEdit, editFriendDescriptor);
-        checkForDuplicate(model, target, editedFriend);
+        FriendValidator.checkCanEdit(model, target, editedFriend);
 
         model.setFriend(target, editedFriend);
         if (!target.isMyself()) {
             model.updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
         }
         return new CommandResult(formatSuccessMessage(friendToEdit, editedFriend));
-    }
-
-    /** Resolves the command target and reports invalid displayed indices. */
-    private FriendTarget parseTargetFriend(Model model) throws CommandException {
-        try {
-            return model.resolveFriend(index);
-        } catch (IndexOutOfBoundsException e) {
-            int displayedCount = model.getFilteredFriendList().size();
-            if (displayedCount == 0) {
-                throw new CommandException(MESSAGE_EMPTY_LIST);
-            }
-            throw new CommandException(String.format(MESSAGE_INDEX_NOT_FOUND, index.getOneBased(), displayedCount));
-        }
     }
 
     /**
@@ -127,22 +116,6 @@ public class EditCommand extends Command {
 
         return new Friend(updatedName, updatedPhone, updatedEmail,
                 friendToEdit.getGames(), updatedTags);
-    }
-
-    /** Rejects edits that duplicate another friend or the Myself profile. */
-    private void checkForDuplicate(Model model, FriendTarget target, Friend editedFriend) throws CommandException {
-        if (target.isMyself()) {
-            if (model.hasFriend(editedFriend)) {
-                throw new CommandException(MESSAGE_DUPLICATE_FRIEND);
-            }
-        } else {
-            if (model.getGameMates().getMyself().isSameFriend(editedFriend)) {
-                throw new CommandException(MESSAGE_DUPLICATE_MYSELF);
-            }
-            if (!target.friend().isSameFriend(editedFriend) && model.hasFriend(editedFriend)) {
-                throw new CommandException(MESSAGE_DUPLICATE_FRIEND);
-            }
-        }
     }
 
     /**

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
@@ -51,7 +52,7 @@ public class AddCommandTest {
         AddCommand addCommand = new AddCommand(validFriend);
         ModelStub modelStub = new ModelStubWithFriend(validFriend);
 
-        assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_FRIEND, () -> addCommand.execute(modelStub));
+        assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_FRIEND, () -> addCommand.execute(modelStub));
     }
 
     @Test
@@ -61,7 +62,7 @@ public class AddCommandTest {
         ModelStub modelStub = new ModelStubWithFriend(existingFriend);
         AddCommand addCommand = new AddCommand(duplicateFriend);
 
-        assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_FRIEND, () -> addCommand.execute(modelStub));
+        assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_FRIEND, () -> addCommand.execute(modelStub));
     }
 
     @Test

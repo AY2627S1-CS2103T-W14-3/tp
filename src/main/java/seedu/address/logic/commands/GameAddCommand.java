@@ -9,7 +9,6 @@ import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
@@ -50,7 +49,7 @@ public class GameAddCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
-        FriendTarget target = parseTargetFriend(model);
+        FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
         Friend friend = target.friend();
         checkForDuplicate(friend);
         Set<Game> games = new HashSet<>(friend.getGames());
@@ -60,15 +59,6 @@ public class GameAddCommand extends Command {
         model.setFriend(target, updatedFriend);
         return new CommandResult(String.format(MESSAGE_SUCCESS,
                 toAdd.getGameName(), friend.getName(), toAdd.getUsername()));
-    }
-
-    /** Resolves the command target and reports invalid displayed indices. */
-    private FriendTarget parseTargetFriend(Model model) throws CommandException {
-        try {
-            return model.resolveFriend(targetIndex);
-        } catch (IndexOutOfBoundsException e) {
-            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
-        }
     }
 
     /** Rejects adding a game that the selected friend or profile already has. */
