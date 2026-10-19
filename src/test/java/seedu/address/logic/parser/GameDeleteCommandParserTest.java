@@ -31,6 +31,15 @@ public class GameDeleteCommandParserTest {
     }
 
     @Test
+    public void parse_missingIndexWithGamePrefix_failure() {
+        // The leading whitespace lets the tokenizer recognize g/ without an index before it.
+        for (String input : new String[]{" g/Minecraft", " \t g/Minecraft"}) {
+            assertParseFailure(parser, input,
+                    String.format(Messages.MESSAGE_INVALID_COMMAND_FORMAT, GameDeleteCommand.MESSAGE_USAGE));
+        }
+    }
+
+    @Test
     public void parse_invalidIndex_failure() {
         for (String index : new String[]{"zero", "0", "-1", "1.5", "2147483648", "1 extra"}) {
             assertParseFailure(parser, index + " g/Minecraft", ParserUtil.MESSAGE_INVALID_INDEX);
