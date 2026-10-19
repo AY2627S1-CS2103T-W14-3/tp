@@ -260,25 +260,27 @@ gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME
 gamedel FRIEND_INDEX|myself g/GAME_NAME
 ```
 
-The existing **Command pattern** encapsulates each request in a command that validates and updates through `Model`.
-A sealed `FriendTarget` interface represents the selected storage location: its nested `Myself` and `ListedFriend`
-records capture the original `Friend`. The class diagram omits unrelated members and shows records as ordinary classes.
+The sealed `FriendTarget` interface lets these commands update either the profile or a listed friend.
+Its nested `Myself` and `ListedFriend` records retain the selected `Friend` and identify where to apply the update,
+even if the friend-list filter changes.
+The class diagram omits unrelated members and shows records as ordinary classes.
 
 ![Classes involved in resolving and updating a friend target](images/MyselfTargetClassDiagram.png)
 
 1. The three command parsers use `ParserUtil.parseIndexOrMyself`: case-insensitive `Index.MYSELF_KEYWORD`
    becomes `Index.myself()`; numeric selectors remain displayed friend indices.
 2. At execution, `ModelManager.resolveFriend(index)` captures the profile or currently displayed friend in a target.
-3. After validation, the command constructs a replacement `Friend`. `ModelManager.setFriend(target, updatedFriend)`
-   uses an exhaustive switch: `Myself` updates the profile; `ListedFriend` updates its captured friend.
+3. After constructing a replacement `Friend` and completing validation, the command calls
+   `ModelManager.setFriend(target, updatedFriend)`. An exhaustive switch routes `Myself` to the profile and
+   `ListedFriend` to its captured friend.
+
+For profile edits, `EditCommand` constructs the replacement before `FriendValidator` checks for name conflicts
+with all stored friends, including those hidden by the current filter. Profile edits and both game commands
+preserve the friend-list filter.
 
 The sequence shows `gameadd myself g/Valorant u/player` after parsing. Helper calls and subsequent saving are omitted.
 
 ![Successful game addition to the Myself profile](images/MyselfGameAddSequenceDiagram.png)
-
-Capturing the target once prevents later filter changes from redirecting an update. Explicit variants also
-distinguish a profile from an imported friend with the same name. Targets last for one command; they do not
-provide concurrency control. Profile edits and both game commands preserve the friend-list filter.
 
 After success, `LogicManager` saves both `friends` and `myself` through `JsonSerializableGameMates`, and
 `MainWindow` refreshes the profile via `Logic.getMyself()`. Missing `myself` in older JSON retains the default profile.
