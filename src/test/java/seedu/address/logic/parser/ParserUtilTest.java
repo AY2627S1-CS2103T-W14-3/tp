@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Name;
@@ -195,8 +196,9 @@ public class ParserUtilTest {
 
     @Test
     public void parseIndex_outOfRangeInput_throwsParseException() {
-        assertThrows(ParseException.class, MESSAGE_INVALID_INDEX, ()
-            -> ParserUtil.parseIndex(Long.toString(Integer.MAX_VALUE + 1L)));
+        for (String index : List.of("2147483648", "9223372036854775808", "9".repeat(1000))) {
+            assertThrows(ParseException.class, MESSAGE_INVALID_INDEX, () -> ParserUtil.parseIndex(index));
+        }
     }
 
     @Test
@@ -206,6 +208,10 @@ public class ParserUtilTest {
 
         // Leading and trailing whitespaces
         assertEquals(INDEX_FIRST_FRIEND, ParserUtil.parseIndex("  1  "));
+
+        // Upper boundary and leading zeros remain valid
+        assertEquals(Index.fromOneBased(Integer.MAX_VALUE), ParserUtil.parseIndex("2147483647"));
+        assertEquals(INDEX_FIRST_FRIEND, ParserUtil.parseIndex("0".repeat(1000) + "1"));
     }
 
     @Test
