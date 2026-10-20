@@ -37,6 +37,7 @@ See [Your profile and game entries](#your-profile-and-game-entries) for the curr
    * `list g/Valorant` : Lists friends who play Valorant.
 
    * `pin 1` : Keeps the first displayed friend at the top of the list.
+   * `list s/name` : Lists friends in ascending name order.
 
    * `gamelist 1 g/Valorant` : Shows the first displayed friend's Valorant card, if present.
 
@@ -192,15 +193,25 @@ and [RFC 5321's SMTP length limits](https://www.rfc-editor.org/rfc/rfc5321#secti
 The 254-character address limit leaves room for the enclosing `<` and `>` in the 256-octet SMTP path limit.
 </div>
 
-### Listing and filtering friends: `list`
+### Listing, filtering and sorting friends: `list`
 
-Shows active friends in GameMates, optionally filtered by game. Both forms switch to the active view.
+Shows active friends in GameMates, optionally filters the friend list by game, and can sort the displayed friends.
+Both forms switch to the active view.
 
-Format: `list [g/GAME_NAME]`
+Format: `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`
 
 * `list` shows all active friends and clears any previous friend-list filter. Feedback is `Listed all active friends.`,
   including when the list is empty.
 * `list g/GAME_NAME` shows active friends who have a game with that exact name. The match is case-insensitive, so `list g/valorant` matches `Valorant`.
+* `list s/name` orders the displayed friends alphabetically by name, ignoring case.
+* `list s/game` orders friends by the alphabetically first game in each friend's game list, ignoring case. Friends
+  without games appear after friends with games; name breaks ties.
+* `o/asc` explicitly selects ascending order; this is the default. `o/desc` reverses the selected name or game
+  order. An order may only be supplied with `s/`.
+* `list g/GAME_NAME s/NAME|GAME` first filters by game, then sorts the matching friends. Prefixes may be supplied in
+  either order.
+* Omitting `s/` preserves the stored insertion order. Running another `list` command without `s/` clears a sort
+  applied by an earlier `list` command.
 * Leading and trailing spaces in `GAME_NAME` are ignored, but partial names do not match. For example, `list g/Val` does not match `Valorant`.
 * Only game names are matched; a friend's in-game username is not matched.
 * Multi-word game names are accepted. Only one `g/` prefix may be supplied, and the game name must not be empty.
@@ -208,14 +219,19 @@ Format: `list [g/GAME_NAME]`
 * Filtering applies only to the friend list. It does not filter or modify the separately stored Myself profile.
 * Name filtering uses [`find`](#locating-friends-by-name-find), not `list n/NAME`. A new `find` or `list` replaces
   the previous friend-list filter; running them consecutively does not intersect their results.
-* Game-name validation uses the same 1–50-character rules as `gamelist`. Empty `g/`, extra positional input and
-  repeated `g/` are rejected. A valid filter returns `N friend(s) listed!`.
+* Game-name validation uses the same 1–50-character rules as `gamelist`. Empty `g/`, `s/`, or `o/`, extra positional
+  input, unsupported sort/order values, an order without a sort, and repeated prefixes are rejected. Supported sort
+  values are `name` and `game`; supported orders are `asc` and `desc`.
+  A valid game filter returns `N friend(s) listed!`.
 
 Examples:
 
 * `list` shows all active friends.
 * `list g/Valorant` shows friends who play `Valorant`.
 * `list g/Stardew Valley` shows friends who play `Stardew Valley`.
+* `list s/name` shows all friends sorted by name.
+* `list s/game o/desc` shows all friends in descending game order.
+* `list g/Valorant s/game` shows Valorant players sorted by their first game name.
 
 ### Pinning a friend: `pin`
 
@@ -673,7 +689,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
 | **Squad create** | `squad g/GAME_NAME n/NUMBER_OF_PEOPLE`<br> e.g., `squad g/Valorant n/5` |
-| **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
+| **List** | `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`<br> e.g., `list g/Valorant s/name o/desc` |
 | **Pin** | `pin FRIEND_INDEX`<br> e.g., `pin 1` |
 | **Unpin** | `unpin FRIEND_INDEX`<br> e.g., `unpin 1` |
 | **Help** | `help` |

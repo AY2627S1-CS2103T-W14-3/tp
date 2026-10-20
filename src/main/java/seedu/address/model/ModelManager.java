@@ -9,10 +9,12 @@ import java.util.logging.Logger;
 import io.vavr.control.Option;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.core.index.Index;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendSortCriterion;
 import seedu.address.model.friend.FriendTarget;
 
 /**
@@ -25,6 +27,7 @@ public class ModelManager implements Model {
     private final UserPrefs userPrefs;
     private final FilteredList<Friend> filteredFriends;
     private FriendListScope friendListScope = FriendListScope.ACTIVE;
+    private final SortedList<Friend> sortedFriends;
 
     /**
      * Initializes a ModelManager with the given gameMates and userPrefs.
@@ -37,6 +40,7 @@ public class ModelManager implements Model {
         this.gameMates = new GameMates(gameMates);
         this.userPrefs = new UserPrefs(userPrefs);
         filteredFriends = new FilteredList<>(this.gameMates.getFriendList(), friend -> !friend.isArchived());
+        sortedFriends = new SortedList<>(filteredFriends);
     }
 
     public ModelManager() {
@@ -82,7 +86,7 @@ public class ModelManager implements Model {
     public FriendTarget resolveFriend(Index index) {
         requireNonNull(index);
         return index.isMyself() ? new FriendTarget.Myself(gameMates.getMyself())
-                : new FriendTarget.ListedFriend(filteredFriends.get(index.getZeroBased()));
+                : new FriendTarget.ListedFriend(sortedFriends.get(index.getZeroBased()));
     }
 
     @Override
@@ -131,7 +135,7 @@ public class ModelManager implements Model {
      */
     @Override
     public ObservableList<Friend> getFilteredFriendList() {
-        return filteredFriends;
+        return sortedFriends;
     }
 
     @Override
@@ -158,6 +162,18 @@ public class ModelManager implements Model {
     @Override
     public FriendListScope getFriendListScope() {
         return friendListScope;
+    }
+
+    @Override
+    public void sortFilteredFriendList(FriendSortCriterion sortCriterion, boolean isDescending) {
+        requireNonNull(sortCriterion);
+        sortedFriends.setComparator(isDescending
+                ? sortCriterion.comparator().reversed() : sortCriterion.comparator());
+    }
+
+    @Override
+    public void clearFriendListSort() {
+        sortedFriends.setComparator(null);
     }
 
     @Override

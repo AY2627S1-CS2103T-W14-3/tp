@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendSortCriterion;
 import seedu.address.model.friend.FriendTarget;
 import seedu.address.model.friend.NameContainsKeywordsPredicate;
 import seedu.address.testutil.FriendBuilder;
@@ -160,6 +161,33 @@ public class ModelManagerTest {
         assertFalse(search.equals(active));
         active.updateSearchFriendList(PREDICATE_SHOW_ALL_FRIENDS);
         assertEquals(active, search);
+    }
+
+    @Test
+    public void friendListSort_ordersDisplayedFriendsAndCanBeCleared() {
+        modelManager.addFriend(BENSON);
+        modelManager.addFriend(ALICE);
+
+        modelManager.sortFilteredFriendList(FriendSortCriterion.NAME, false);
+        assertEquals(List.of(ALICE, BENSON), modelManager.getFilteredFriendList());
+
+        modelManager.clearFriendListSort();
+        assertEquals(List.of(BENSON, ALICE), modelManager.getFilteredFriendList());
+    }
+
+    @Test
+    public void sortFilteredFriendList_nullSortCriterion_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.sortFilteredFriendList(null, false));
+    }
+
+    @Test
+    public void friendListDescendingSort_ordersDisplayedFriendsInReverse() {
+        modelManager.addFriend(ALICE);
+        modelManager.addFriend(BENSON);
+
+        modelManager.sortFilteredFriendList(FriendSortCriterion.NAME, true);
+
+        assertEquals(List.of(BENSON, ALICE), modelManager.getFilteredFriendList());
     }
 
     @Test
