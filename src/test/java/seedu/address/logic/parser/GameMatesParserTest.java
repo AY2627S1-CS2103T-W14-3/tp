@@ -87,6 +87,23 @@ public class GameMatesParserTest {
     }
 
     @Test
+    public void parseCommand_overflowingIndex_reportsSupportedRange() {
+        for (String index : List.of("2147483648", "9223372036854775808", "9".repeat(1000))) {
+            for (String command : List.of("delete " + index, "edit " + index + " n/Alice",
+                    "gameadd " + index + " g/Valorant u/Alice", "gamedel " + index + " g/Valorant")) {
+                assertThrows(ParseException.class,
+                        "Index must be a positive integer between 1 and 2147483647 (inclusive).", ()
+                            -> parser.parseCommand(command));
+            }
+            for (String command : List.of("gamelist " + index, "gamelist " + index + " g/Valorant")) {
+                assertThrows(ParseException.class,
+                        "Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive).", ()
+                            -> parser.parseCommand(command));
+            }
+        }
+    }
+
+    @Test
     public void parseCommand_help() throws Exception {
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD) instanceof HelpCommand);
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " 3") instanceof HelpCommand);
