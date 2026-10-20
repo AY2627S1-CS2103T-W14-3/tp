@@ -15,12 +15,15 @@ import org.junit.jupiter.api.Test;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.commons.core.index.Index;
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyGameMates;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendTarget;
 import seedu.address.testutil.FriendBuilder;
 
 public class AddCommandTest {
@@ -49,7 +52,7 @@ public class AddCommandTest {
         AddCommand addCommand = new AddCommand(validFriend);
         ModelStub modelStub = new ModelStubWithFriend(validFriend);
 
-        assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_FRIEND, () -> addCommand.execute(modelStub));
+        assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_FRIEND, () -> addCommand.execute(modelStub));
     }
 
     @Test
@@ -59,7 +62,7 @@ public class AddCommandTest {
         ModelStub modelStub = new ModelStubWithFriend(existingFriend);
         AddCommand addCommand = new AddCommand(duplicateFriend);
 
-        assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_FRIEND, () -> addCommand.execute(modelStub));
+        assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_FRIEND, () -> addCommand.execute(modelStub));
     }
 
     @Test
@@ -133,6 +136,11 @@ public class AddCommandTest {
         }
 
         @Override
+        public FriendTarget resolveFriend(Index index) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public boolean hasFriend(Friend friend) {
             throw new AssertionError("This method should not be called.");
         }
@@ -144,6 +152,11 @@ public class AddCommandTest {
 
         @Override
         public void setFriend(Friend target, Friend editedFriend) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void setFriend(FriendTarget target, Friend editedFriend) {
             throw new AssertionError("This method should not be called.");
         }
 

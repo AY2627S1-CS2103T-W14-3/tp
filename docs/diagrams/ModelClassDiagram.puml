@@ -4,6 +4,9 @@
 skinparam arrowThickness 1.1
 skinparam arrowColor MODEL_COLOR
 skinparam classBackgroundColor MODEL_COLOR
+skinparam minClassWidth 100
+skinparam nodesep 30
+skinparam ranksep 50
 
 Package Model as ModelPackage <<Rectangle>>{
 Class "<<interface>>\nReadOnlyGameMates" as ReadOnlyGameMates
@@ -38,16 +41,17 @@ ModelManager -left-> "1" GameMates
 ModelManager -right-> "1" UserPrefs
 UserPrefs .up.|> ReadOnlyUserPrefs
 
-GameMates *--> "1" UniqueFriendList
-UniqueFriendList --> "~* all" Friend
-GameMates --> "1 myself" Friend
+' A small spacer keeps endpoint multiplicities close to, but clear of, arrowheads in Smetana.
+GameMates *--> "1\n<size:6> </size>" UniqueFriendList
+UniqueFriendList --> "*\n<size:6> </size>" Friend : all
+GameMates --> "1\n<size:6> </size>" Friend : myself
 Friend *--> Name
 Friend *--> Phone
 Friend *--> Email
-Friend *--> "*" Tag
-Friend *--> "*" Game
-Game *--> "1" GameName
-Game *--> "1" Username
+Friend *--> "*\n<size:6> </size>" Tag
+Friend *--> "*\n<size:6> </size>" Game
+Game *--> "1\n<size:6> </size>" GameName
+Game *--> "1\n<size:6> </size>" Username
 
 Friend -[hidden]up--> I
 UniqueFriendList -[hidden]right-> I
@@ -55,5 +59,5 @@ UniqueFriendList -[hidden]right-> I
 Name -[hidden]right-> Phone
 Phone -[hidden]right-> Email
 
-ModelManager --> Friend : ~* filtered
+ModelManager --> "*\n<size:6> </size>" Friend : filtered
 @enduml
