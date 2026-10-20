@@ -26,7 +26,7 @@ public class GameAddCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a game to a friend. "
             + "Parameters: INDEX (must be a positive integer) "
             + PREFIX_GAME_NAME + "GAME_NAME "
-            + PREFIX_USERNAME + "USER_NAME\n"
+            + "[" + PREFIX_USERNAME + "USER_NAME]\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_GAME_NAME + "Valorant "
             + PREFIX_USERNAME + "benergy10";
@@ -65,7 +65,8 @@ public class GameAddCommand extends Command {
                 games, friend.getTags());
         model.setFriend(friend, updatedFriend);
         return new CommandResult(String.format(MESSAGE_SUCCESS,
-                toAdd.getGameName(), friend.getName(), toAdd.getUsername()));
+                toAdd.getGameName(), friend.getName(),
+                toAdd.getUsername().isEmpty() ? "Not provided" : toAdd.getUsername()));
     }
 
     @Override

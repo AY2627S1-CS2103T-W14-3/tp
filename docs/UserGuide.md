@@ -213,7 +213,7 @@ Examples:
 ### Viewing a friend's games: `gamelist`
 
 Shows a friend's details and game cards in the right panel, keeping the friend list and its current filter on the left.
-Each game card shows the game name and in-game username.
+Each game card shows the game name and in-game username if provided.
 
 Format: `gamelist <FRIEND_INDEX> [g/GAME_NAME]`
 
@@ -396,8 +396,9 @@ close the destination app, back up its current file, replace it with your copy a
 Copy `preferences.json` only if you also want the saved window settings.
 
 If you edit JSON manually, close the app first and keep a backup. Friend entries contain `name`, optional
-`phone` and `email`, `tags`, and `games`. A game has a `name` and `username`. Existing files that omit `games`
-load with no games; files that omit `myself` use the default empty profile. Empty or missing contact fields mean
+`phone` and `email`, `tags`, and `games`. A game has a required `name` and an optional `username`.
+An empty or missing `username` means no username has been provided; the game entry is still retained.
+Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile. Empty or missing contact fields mean
 `Not provided`. Use the same validation rules as command input. Stored game metadata is supported as an optional
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
