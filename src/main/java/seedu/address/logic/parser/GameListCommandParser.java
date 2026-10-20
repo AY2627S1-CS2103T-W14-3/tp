@@ -10,7 +10,7 @@ import seedu.address.logic.commands.GameListCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.game.GameName;
 
-/** Parses a displayed friend index and at most one game-name filter. */
+/** Parses a displayed friend index or Myself selector and at most one game-name filter. */
 public class GameListCommandParser implements Parser<GameListCommand> {
 
     // The shared tokenizer ignores unknown prefixes, so reject them locally before tokenizing.
@@ -33,7 +33,7 @@ public class GameListCommandParser implements Parser<GameListCommand> {
         }
         Index index;
         try {
-            index = ParserUtil.parseIndex(indexValue);
+            index = ParserUtil.parseIndexOrMyself(indexValue);
         } catch (ParseException e) {
             throw new ParseException(GameListCommand.MESSAGE_INVALID_INDEX, e);
         }

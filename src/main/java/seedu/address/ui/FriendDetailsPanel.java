@@ -64,7 +64,7 @@ public class FriendDetailsPanel extends UiPart<Region> {
 
     /**
      * Shows the original friend's details, optionally filtering only the rendered game cards.
-     * A null filter shows all games. The user profile always shows all its games.
+     * A null filter shows all games, including for the user profile.
      */
     public void setFriend(Friend friend, boolean isMyself, GameName gameFilter) {
         requireNonNull(friend);
@@ -93,13 +93,13 @@ public class FriendDetailsPanel extends UiPart<Region> {
         }
 
         games.getChildren().setAll(friend.getGames().stream()
-                .filter(game -> isMyself || gameFilter == null || gameFilter.equals(game.getGameName()))
+                .filter(game -> gameFilter == null || gameFilter.equals(game.getGameName()))
                 .sorted(Comparator.comparing(game -> game.getGameName().value))
                 .map(GameDetailsCard::new)
                 .map(GameDetailsCard::getRoot)
                 .toList());
         if (games.getChildren().isEmpty()) {
-            String emptyMessage = isMyself || gameFilter == null ? "No games added" : "No matching game: " + gameFilter;
+            String emptyMessage = gameFilter == null ? "No games added" : "No matching game: " + gameFilter;
             games.getChildren().add(createLabel(emptyMessage, "details-empty-value"));
         }
     }
