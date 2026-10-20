@@ -26,11 +26,19 @@ public class Friend {
     // Data fields
     private final Set<Game> games;
     private final Set<Tag> tags;
+    private final boolean pinned;
 
     /**
      * Every field must be present and not null.
      */
     public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags) {
+        this(name, phone, email, games, tags, false);
+    }
+
+    /**
+     * Every field must be present and not null.
+     */
+    public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags, boolean pinned) {
         requireAllNonNull(name, phone, email, games, tags);
         games.forEach(Objects::requireNonNull);
         this.name = name;
@@ -38,6 +46,7 @@ public class Friend {
         this.email = email;
         this.games = Collections.unmodifiableSet(games);
         this.tags = Collections.unmodifiableSet(tags);
+        this.pinned = pinned;
     }
 
     /**
@@ -75,6 +84,11 @@ public class Friend {
         return tags;
     }
 
+    /** Returns whether this friend is pinned to the top of the friend list. */
+    public boolean isPinned() {
+        return pinned;
+    }
+
     /**
      * Returns true if both friends have the same name, ignoring case and repeated spaces.
      * This defines a weaker notion of equality between two friends.
@@ -107,13 +121,14 @@ public class Friend {
                 && phone.equals(otherFriend.phone)
                 && email.equals(otherFriend.email)
                 && games.equals(otherFriend.games)
-                && tags.equals(otherFriend.tags);
+                && tags.equals(otherFriend.tags)
+                && pinned == otherFriend.pinned;
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, games, tags);
+        return Objects.hash(name, phone, email, games, tags, pinned);
     }
 
     @Override
@@ -124,6 +139,7 @@ public class Friend {
                 .add("email", email)
                 .add("games", games)
                 .add("tags", tags)
+                .add("pinned", pinned)
                 .toString();
     }
 

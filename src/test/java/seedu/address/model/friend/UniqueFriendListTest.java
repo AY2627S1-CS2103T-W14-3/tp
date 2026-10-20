@@ -100,6 +100,24 @@ public class UniqueFriendListTest {
     }
 
     @Test
+    public void setFriend_pinnedFriend_movesPinnedFriendToTop() {
+        uniqueFriendList.add(ALICE);
+        uniqueFriendList.add(BOB);
+        Friend pinnedBob = new FriendBuilder(BOB).withPinned(true).build();
+        uniqueFriendList.setFriend(BOB, pinnedBob);
+
+        assertEquals(List.of(pinnedBob, ALICE), uniqueFriendList.asUnmodifiableObservableList());
+    }
+
+    @Test
+    public void setFriends_pinnedFriendAppearsBeforeUnpinnedFriend() {
+        Friend pinnedBob = new FriendBuilder(BOB).withPinned(true).build();
+        uniqueFriendList.setFriends(List.of(ALICE, pinnedBob));
+
+        assertEquals(List.of(pinnedBob, ALICE), uniqueFriendList.asUnmodifiableObservableList());
+    }
+
+    @Test
     public void setFriend_editedFriendHasNonUniqueIdentity_throwsDuplicateFriendException() {
         uniqueFriendList.add(ALICE);
         uniqueFriendList.add(BOB);

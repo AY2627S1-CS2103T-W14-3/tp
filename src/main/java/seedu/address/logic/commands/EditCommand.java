@@ -115,7 +115,7 @@ public class EditCommand extends Command {
         });
 
         return new Friend(updatedName, updatedPhone, updatedEmail,
-                friendToEdit.getGames(), updatedTags);
+                friendToEdit.getGames(), updatedTags, friendToEdit.isPinned());
     }
 
     /**

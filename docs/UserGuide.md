@@ -37,6 +37,8 @@ saved data. See [Your profile and game entries](#your-profile-and-game-entries) 
 
    * `list g/Valorant` : Lists friends who play Valorant.
 
+   * `pin 1` : Keeps the first displayed friend at the top of the list.
+
    * `gamelist 1 g/Valorant` : Shows the first displayed friend's Valorant card, if present.
 
    * `add n/John Doe p/98765432 e/johnd@example.com` : Adds a contact named `John Doe` to GameMates.
@@ -100,6 +102,8 @@ The main window has two panels: the friend list on the left and a details panel 
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
   Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.
+* Pinned friends always appear above unpinned friends. The current ordering is retained within each group; if a list
+  ordering option is used, it applies separately within the pinned and unpinned groups.
 
 ### Your profile and game entries
 
@@ -212,6 +216,38 @@ Examples:
 * `list` shows all friends.
 * `list g/Valorant` shows friends who play `Valorant`.
 * `list g/Stardew Valley` shows friends who play `Stardew Valley`.
+
+### Pinning a friend: `pin`
+
+Keeps a friend in the pinned group at the top of the friend list.
+
+Format: `pin FRIEND_INDEX`
+
+* `FRIEND_INDEX` refers to the current displayed list. The command is unavailable for your separately stored Myself
+  profile.
+* At most five friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
+  is rejected without changing the list.
+* Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
+  filtering the list by game.
+
+Examples:
+
+* `pin 1` pins the first displayed friend.
+* `pin 3` pins the third displayed friend.
+
+### Unpinning a friend: `unpin`
+
+Removes a friend from the pinned group.
+
+Format: `unpin FRIEND_INDEX`
+
+* `FRIEND_INDEX` refers to the current displayed list.
+* Unpinning a friend who is not pinned is rejected without changing the list.
+* The friend is returned to the unpinned group, below all pinned friends.
+
+Examples:
+
+* `unpin 1` unpins the first displayed friend.
 
 ### Adding a game: `gameadd`
 
@@ -480,6 +516,8 @@ while copying the file, then launch the destination app from its usual data fold
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | `gamelist <FRIEND_INDEX> [g/GAME_NAME]`<br> e.g., `gamelist 2 g/Valorant` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
+| **Pin** | `pin FRIEND_INDEX`<br> e.g., `pin 1` |
+| **Unpin** | `unpin FRIEND_INDEX`<br> e.g., `unpin 1` |
 | **Help** | `help` |
 | **Exit** | `exit` |
 

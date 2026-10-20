@@ -25,6 +25,7 @@ public class FriendBuilder {
     private Email email;
     private Set<Game> games;
     private Set<Tag> tags;
+    private boolean pinned;
 
     /**
      * Creates a {@code FriendBuilder} with the default details.
@@ -35,6 +36,7 @@ public class FriendBuilder {
         email = new Email(DEFAULT_EMAIL);
         games = new HashSet<>();
         tags = new HashSet<>();
+        pinned = false;
     }
 
     /**
@@ -46,6 +48,7 @@ public class FriendBuilder {
         email = friendToCopy.getEmail();
         games = new HashSet<>(friendToCopy.getGames());
         tags = new HashSet<>(friendToCopy.getTags());
+        pinned = friendToCopy.isPinned();
     }
 
     /**
@@ -88,8 +91,14 @@ public class FriendBuilder {
         return this;
     }
 
+    /** Sets whether the friend being built is pinned. */
+    public FriendBuilder withPinned(boolean pinned) {
+        this.pinned = pinned;
+        return this;
+    }
+
     public Friend build() {
-        return new Friend(name, phone, email, games, tags);
+        return new Friend(name, phone, email, games, tags, pinned);
     }
 
 }

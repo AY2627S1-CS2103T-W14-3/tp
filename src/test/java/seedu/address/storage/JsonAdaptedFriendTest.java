@@ -83,6 +83,19 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
+    public void toModelType_pinnedFriend_roundTrips() throws Exception {
+        Friend pinnedFriend = new FriendBuilder(BENSON).withPinned(true).build();
+        assertEquals(pinnedFriend, new JsonAdaptedFriend(pinnedFriend).toModelType());
+    }
+
+    @Test
+    public void toModelType_missingPinnedField_defaultsToUnpinnedFriend() throws Exception {
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                VALID_GAMES, VALID_TAGS);
+        assertFalse(friend.toModelType().isPinned());
+    }
+
+    @Test
     public void json_roundTripWithoutAddress_returnsFriend() throws Exception {
         String json = JsonUtil.toJsonString(new JsonAdaptedFriend(BENSON));
         assertFalse(json.contains("\"address\""));

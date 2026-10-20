@@ -156,6 +156,9 @@ The `Model` component,
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
 `Friend` contains `Name`, optional contact values, a set of `Tag` objects and a set of `Game` objects.
+It also has an immutable `pinned` state. `UniqueFriendList` stably partitions friends after additions and
+replacements so pinned friends are always before unpinned friends, while preserving the existing relative order
+within each group. The filtered friend list is backed by this ordering, so the invariant also holds for filters.
 `Game` contains `GameName`, `Username` and an immutable metadata set. Name equality ignores case and collapses repeated ASCII spaces;
 `GameName.equals` compares complete names using lower-case normalization with `Locale.ROOT`.
 `Username` preserves case. `Game.isSameGame` compares game names, while full equality also compares usernames and metadata.
@@ -190,6 +193,8 @@ JSON contact fields that are null or empty map to the corresponding empty contac
 nonempty contact values are rejected without trimming. Missing `games` or `tags` load as empty sets, and missing
 `myself` retains `Friend.DEFAULT_MYSELF`. Stored games require valid `name` and `username` values. Duplicate friend
 names reject the whole data load, including a previously parsed profile; startup uses a new empty `GameMates`.
+`JsonAdaptedFriend` persists a friend's `pinned` boolean. The field is optional when loading: missing or `null`
+values in save files created before pinning was introduced default to `false`.
 
 `MainApp` resolves `data/gamemates.json` and `preferences.json` relative to the process working directory, not the
 JAR's location. `MainApp.initPrefs` writes initialized preferences at startup and `stop` writes them again at shutdown;
