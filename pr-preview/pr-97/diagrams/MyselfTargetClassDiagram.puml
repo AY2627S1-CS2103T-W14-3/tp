@@ -1,0 +1,38 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 90
+skinparam ranksep 65
+skinparam Shadowing false
+skinparam DefaultFontName Arial
+skinparam ArrowFontStyle plain
+skinparam minClassWidth 170
+skinparam classBackgroundColor #9D0012
+skinparam classFontColor #FFFFFF
+skinparam classStereotypeFontColor #FFFFFF
+skinparam classBorderColor #FFFFFF
+skinparam classAttributeFontColor #FFFFFF
+skinparam classAttributeIconSize 0
+hide circle
+hide empty members
+
+interface Model <<interface>> {
+    +resolveFriend(index): FriendTarget
+    +setFriend(target, updatedFriend)
+}
+class ModelManager
+interface FriendTarget <<interface>> {
+    +friend(): Friend
+    +isMyself(): boolean
+}
+class "FriendTarget.Myself" as Myself
+class "FriendTarget.ListedFriend" as ListedFriend
+class Friend
+
+ModelManager .up.|> Model
+ModelManager ..> FriendTarget : creates / inspects
+Myself .up.|> FriendTarget
+ListedFriend .up.|> FriendTarget
+' Keep both multiplicities beside Friend on horizontal associations.
+Myself -right-> "1" Friend : captures
+ListedFriend -left-> "1" Friend : captures
+@enduml
