@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -69,7 +70,7 @@ public class EditFriendIntegrationTest {
         GameMates before = new GameMates(model.getGameMates());
 
         for (String name : List.of("Melody Tan", "MELODY TAN", "melody   tan")) {
-            assertThrows(CommandException.class, EditCommand.MESSAGE_DUPLICATE_FRIEND, ()
+            assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_FRIEND, ()
                     -> parser.parseCommand("edit myself n/" + name + " p/").execute(model));
             assertEquals(before, model.getGameMates());
             assertEquals(List.of(displayed), model.getFilteredFriendList());
@@ -87,7 +88,7 @@ public class EditFriendIntegrationTest {
         GameMates before = new GameMates(model.getGameMates());
 
         for (String name : List.of("Alex Tan", "ALEX TAN", "alex   tan")) {
-            assertThrows(CommandException.class, EditCommand.MESSAGE_DUPLICATE_MYSELF, ()
+            assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_MYSELF, ()
                     -> parser.parseCommand("edit 1 n/" + name + " p/").execute(model));
             assertEquals(before, model.getGameMates());
             assertEquals(List.of(displayed), model.getFilteredFriendList());
@@ -100,7 +101,7 @@ public class EditFriendIntegrationTest {
         GameMates before = new GameMates(model.getGameMates());
 
         for (String name : List.of("Alex Tan", "ALEX TAN", "alex   tan")) {
-            assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_MYSELF, ()
+            assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_MYSELF, ()
                     -> parser.parseCommand("add n/" + name).execute(model));
             assertEquals(before, model.getGameMates());
         }
@@ -294,7 +295,7 @@ public class EditFriendIntegrationTest {
         Friend second = addFriend("Joash");
         model.updateFilteredFriendList(friend -> friend.equals(second));
         GameMates before = new GameMates(model.getGameMates());
-        assertThrows(CommandException.class, EditCommand.MESSAGE_DUPLICATE_FRIEND, ()
+        assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_FRIEND, ()
                 -> parser.parseCommand("edit 1 n/melody   tan p/").execute(model));
         assertEquals(before, model.getGameMates());
     }

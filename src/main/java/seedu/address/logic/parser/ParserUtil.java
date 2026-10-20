@@ -46,6 +46,18 @@ public class ParserUtil {
     }
 
     /**
+     * Parses a positive one-based friend index or the case-insensitive Myself keyword.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the target is neither a valid index nor the Myself keyword.
+     */
+    public static Index parseIndexOrMyself(String target) throws ParseException {
+        requireNonNull(target);
+        String trimmedTarget = target.trim();
+        return trimmedTarget.equalsIgnoreCase(Index.MYSELF_KEYWORD) ? Index.myself() : parseIndex(trimmedTarget);
+    }
+
+    /**
      * Parses a {@code String name} into a {@code Name}.
      * Leading and trailing whitespaces will be trimmed.
      * The trimmed value must contain only alphanumeric characters and spaces, and be at most

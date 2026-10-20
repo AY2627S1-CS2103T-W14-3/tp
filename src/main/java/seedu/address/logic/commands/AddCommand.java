@@ -32,8 +32,6 @@ public class AddCommand extends Command {
             + PREFIX_TAG + "owesMoney";
 
     public static final String MESSAGE_SUCCESS = "Added %1$s.\n  - Phone number: %2$s\n  - Email: %3$s";
-    public static final String MESSAGE_DUPLICATE_FRIEND = "This friend already exists in GameMates.";
-    public static final String MESSAGE_DUPLICATE_MYSELF = "This name is already used by your Myself profile.";
 
     private final Friend toAdd;
 
@@ -49,12 +47,7 @@ public class AddCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
-        if (model.hasFriend(toAdd)) {
-            throw new CommandException(MESSAGE_DUPLICATE_FRIEND);
-        }
-        if (model.getGameMates().getMyself().isSameFriend(toAdd)) {
-            throw new CommandException(MESSAGE_DUPLICATE_MYSELF);
-        }
+        FriendValidator.checkCanAdd(model, toAdd);
 
         model.addFriend(toAdd);
         return new CommandResult(String.format(MESSAGE_SUCCESS, toAdd.getName(),

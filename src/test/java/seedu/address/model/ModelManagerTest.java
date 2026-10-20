@@ -13,7 +13,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.commons.core.index.Index;
+import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendTarget;
 import seedu.address.model.friend.NameContainsKeywordsPredicate;
+import seedu.address.testutil.FriendBuilder;
 import seedu.address.testutil.GameMatesBuilder;
 
 public class ModelManagerTest {
@@ -66,6 +70,60 @@ public class ModelManagerTest {
     public void hasFriend_friendInGameMates_returnsTrue() {
         modelManager.addFriend(ALICE);
         assertTrue(modelManager.hasFriend(ALICE));
+    }
+
+    @Test
+    public void resolveFriend_numericIndex_usesDisplayedList() {
+        assertThrows(IndexOutOfBoundsException.class, () -> modelManager.resolveFriend(Index.fromOneBased(1)));
+        modelManager.addFriend(ALICE);
+        modelManager.addFriend(BENSON);
+        modelManager.updateFilteredFriendList(friend -> friend.equals(BENSON));
+
+        FriendTarget target = modelManager.resolveFriend(Index.fromOneBased(1));
+        assertEquals(BENSON, target.friend());
+        assertFalse(target.isMyself());
+        assertThrows(IndexOutOfBoundsException.class, () -> modelManager.resolveFriend(Index.fromOneBased(2)));
+    }
+
+    @Test
+    public void setFriend_targetAfterFilterChanges_updatesOriginallyResolvedFriend() {
+        modelManager.addFriend(ALICE);
+        modelManager.addFriend(BENSON);
+        Index index = Index.fromOneBased(1);
+        FriendTarget target = modelManager.resolveFriend(index);
+        Friend edited = new FriendBuilder(target.friend()).withPhone("91234567").build();
+        FriendTarget myself = modelManager.resolveFriend(Index.myself());
+        modelManager.updateFilteredFriendList(friend -> friend.equals(BENSON));
+
+        modelManager.setFriend(target, edited);
+
+        assertEquals(List.of(edited, BENSON), modelManager.getGameMates().getFriendList());
+        assertEquals(List.of(BENSON), modelManager.getFilteredFriendList());
+        assertEquals(myself, modelManager.resolveFriend(Index.myself()));
+    }
+
+    @Test
+    public void setFriend_myself_preservesSameNamedFriendAndFilter() {
+        modelManager.setFriend(modelManager.resolveFriend(Index.myself()), ALICE);
+        modelManager.addFriend(ALICE);
+        FriendTarget target = modelManager.resolveFriend(Index.myself());
+        assertTrue(target.isMyself());
+        modelManager.updateFilteredFriendList(friend -> false);
+        Friend edited = new FriendBuilder(ALICE).withPhone("91234567").build();
+
+        modelManager.setFriend(target, edited);
+
+        assertEquals(edited, modelManager.resolveFriend(Index.myself()).friend());
+        assertEquals(List.of(ALICE), modelManager.getGameMates().getFriendList());
+        assertTrue(modelManager.getFilteredFriendList().isEmpty());
+    }
+
+    @Test
+    public void friendTarget_nullArguments_rejected() {
+        assertThrows(NullPointerException.class, () -> modelManager.resolveFriend(null));
+        assertThrows(NullPointerException.class, () -> modelManager.setFriend((FriendTarget) null, BENSON));
+        FriendTarget target = modelManager.resolveFriend(Index.myself());
+        assertThrows(NullPointerException.class, () -> modelManager.setFriend(target, null));
     }
 
     @Test
