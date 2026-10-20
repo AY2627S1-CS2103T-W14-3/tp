@@ -58,6 +58,7 @@
   <li>
 <a href="#implementation" id="markdown-toc-implementation"><strong>Implementation</strong></a>    <ul>
       <li><a href="#friend-creation-editing-and-deletion" id="markdown-toc-friend-creation-editing-and-deletion">Friend creation, editing and deletion</a></li>
+      <li><a href="#myself-profile" id="markdown-toc-myself-profile">Myself profile</a></li>
       <li><a href="#name-and-game-filtering" id="markdown-toc-name-and-game-filtering">Name and game filtering</a></li>
       <li><a href="#viewing-a-friends-games" id="markdown-toc-viewing-a-friends-games">Viewing a friend’s games</a></li>
       <li><a href="#mvp-integration-and-specification-departures" id="markdown-toc-mvp-integration-and-specification-departures">MVP integration and specification departures</a></li>
@@ -104,7 +105,7 @@
       <li><a href="#friend-filters-and-displayed-indices" id="markdown-toc-friend-filters-and-displayed-indices">Friend filters and displayed indices</a></li>
       <li><a href="#game-cards-empty-states-and-display-filter-clearing" id="markdown-toc-game-cards-empty-states-and-display-filter-clearing">Game cards, empty states and display-filter clearing</a></li>
       <li><a href="#deletion-and-clearing" id="markdown-toc-deletion-and-clearing">Deletion and clearing</a></li>
-      <li><a href="#saved-profile-game-round-trip-and-pending-commands" id="markdown-toc-saved-profile-game-round-trip-and-pending-commands">Saved profile, game round trip and pending commands</a></li>
+      <li><a href="#saved-profile-and-game-round-trip" id="markdown-toc-saved-profile-and-game-round-trip">Saved profile and game round trip</a></li>
       <li><a href="#missing-invalid-and-unwritable-files" id="markdown-toc-missing-invalid-and-unwritable-files">Missing, invalid and unwritable files</a></li>
       <li><a href="#documentation-preview" id="markdown-toc-documentation-preview">Documentation preview</a></li>
     </ul>
@@ -268,7 +269,7 @@ adapters propagate the original exception, so invalid input is never treated as 
 <h3 id="model-component">Model component</h3>
 <p><strong>API</strong> : <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java"><code class="language-plaintext highlighter-rouge">Model.java</code></a></p>
 
-<p><img src="images/ModelClassDiagram.png" width="450"></p>
+<p><img src="images/ModelClassDiagram.png" width="625"></p>
 
 <p>The <code class="language-plaintext highlighter-rouge">Model</code> component,</p>
 
@@ -286,9 +287,8 @@ full list, rather than a second collection of copied friends.</li>
 <code class="language-plaintext highlighter-rouge">Game</code> contains <code class="language-plaintext highlighter-rouge">GameName</code>, <code class="language-plaintext highlighter-rouge">Username</code> and an immutable metadata set. Name equality ignores case and collapses repeated ASCII spaces;
 <code class="language-plaintext highlighter-rouge">GameName.equals</code> compares complete names using lower-case normalization with <code class="language-plaintext highlighter-rouge">Locale.ROOT</code>.
 <code class="language-plaintext highlighter-rouge">Username</code> preserves case. <code class="language-plaintext highlighter-rouge">Game.isSameGame</code> compares game names, while full equality also compares usernames and metadata.
-The set representation alone does not enforce
-one entry per game name when different usernames are loaded from JSON; do not infer game-command duplicate handling
-from the proposed specification.</p>
+<code class="language-plaintext highlighter-rouge">GameAddCommand</code> rejects an existing game name regardless of username. The set representation alone does not
+enforce this rule when games with different usernames are loaded from JSON.</p>
 
 <div class="alert alert-info">
 <img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note:</strong> The alternative, arguably more object-oriented, design below keeps a unique list of tags in <code class="language-plaintext highlighter-rouge">GameMates</code>, and each <code class="language-plaintext highlighter-rouge">Friend</code> references tags from that list. This lets <code class="language-plaintext highlighter-rouge">GameMates</code> maintain one <code class="language-plaintext highlighter-rouge">Tag</code> object per unique tag instead of each <code class="language-plaintext highlighter-rouge">Friend</code> holding its own <code class="language-plaintext highlighter-rouge">Tag</code> objects.<br>
@@ -354,12 +354,11 @@ the documentation change does not alter the loader.</p>
 single-value name/contact prefixes and collects repeated tags into a set. <code class="language-plaintext highlighter-rouge">UniqueFriendList</code> rejects names equal
 under <code class="language-plaintext highlighter-rouge">Friend.isSameFriend</code>, so different phone/email values or tags do not distinguish duplicate names.</p>
 
-<p><code class="language-plaintext highlighter-rouge">EditCommandParser</code> requires a numeric index or case-insensitive <code class="language-plaintext highlighter-rouge">myself</code>, represented by <code class="language-plaintext highlighter-rouge">Index.myself()</code>.
-An omitted selector is rejected. <code class="language-plaintext highlighter-rouge">EditCommand</code> handles the profile selector before accessing a friend-list index,
-updates <code class="language-plaintext highlighter-rouge">Model.setMyself</code> without resetting the friend filter, and returns feedback that displays the profile.
+<p><code class="language-plaintext highlighter-rouge">EditCommandParser</code> requires a numeric index or case-insensitive <code class="language-plaintext highlighter-rouge">myself</code>; an omitted selector is rejected.
+Target resolution and replacement use the <a href="#myself-profile">Myself profile mechanism</a> described below.
 Add/edit commands reject names shared between a friend and the profile. <code class="language-plaintext highlighter-rouge">EditFriendDescriptor</code> uses
-optional values to distinguish omission from a supplied empty contact field. <code class="language-plaintext highlighter-rouge">EditCommand</code> resolves the index against
-<code class="language-plaintext highlighter-rouge">Model.getFilteredFriendList()</code> and constructs a new friend with the original games. Name/contact values replace
+optional values to distinguish omission from a supplied empty contact field. <code class="language-plaintext highlighter-rouge">EditCommand</code> constructs a new friend
+with the original games. Name/contact values replace
 existing values. Supplied tags are toggled by set membership; duplicates in one command are deduplicated, and a
 single empty <code class="language-plaintext highlighter-rouge">t/</code> clears all tags. Empty and non-empty tag parameters together fail validation.
 After a successful add or friend edit, the model resets the friend-list predicate to show all friends.
@@ -376,6 +375,46 @@ with length limits. The <a href="UserGuide.html#adding-a-friend-add">User Guide<
 No phone, email, game name or username is verified against an external service.
 <code class="language-plaintext highlighter-rouge">GameName</code> and <code class="language-plaintext highlighter-rouge">Username</code> trim with <code class="language-plaintext highlighter-rouge">String.strip()</code>, count UTF-16 code units with <code class="language-plaintext highlighter-rouge">String.length()</code>, require a
 letter/digit code point and reject ISO control code points. This is not a general Unicode printability test.</p>
+
+<h3 id="myself-profile">Myself profile</h3>
+
+<p><code class="language-plaintext highlighter-rouge">GameMates</code> stores the user’s profile as a separate <code class="language-plaintext highlighter-rouge">Friend</code>, initially <code class="language-plaintext highlighter-rouge">Friend.DEFAULT_MYSELF</code>.
+<code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> accept <code class="language-plaintext highlighter-rouge">myself</code> independently of the displayed friend list and profile name.</p>
+
+<p>Their syntax uses <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> for either a positive displayed friend index or the case-insensitive
+profile keyword:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…
+gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME
+gamedel FRIEND_INDEX|myself g/GAME_NAME
+</code></pre></div></div>
+
+<p>The sealed <code class="language-plaintext highlighter-rouge">FriendTarget</code> interface lets these commands update either the profile or a listed friend.
+Its nested <code class="language-plaintext highlighter-rouge">Myself</code> and <code class="language-plaintext highlighter-rouge">ListedFriend</code> records retain the selected <code class="language-plaintext highlighter-rouge">Friend</code> and identify where to apply the update,
+even if the friend-list filter changes.
+The class diagram omits unrelated members and shows records as ordinary classes.</p>
+
+<p><img src="/tp/images/MyselfTargetClassDiagram.png" alt="Classes involved in resolving and updating a friend target"></p>
+
+<ol>
+  <li>The three command parsers use <code class="language-plaintext highlighter-rouge">ParserUtil.parseIndexOrMyself</code>: case-insensitive <code class="language-plaintext highlighter-rouge">Index.MYSELF_KEYWORD</code>
+becomes <code class="language-plaintext highlighter-rouge">Index.myself()</code>; numeric selectors remain displayed friend indices.</li>
+  <li>At execution, <code class="language-plaintext highlighter-rouge">ModelManager.resolveFriend(index)</code> captures the profile or currently displayed friend in a target.</li>
+  <li>After constructing a replacement <code class="language-plaintext highlighter-rouge">Friend</code> and completing validation, the command calls
+<code class="language-plaintext highlighter-rouge">ModelManager.setFriend(target, updatedFriend)</code>. An exhaustive switch routes <code class="language-plaintext highlighter-rouge">Myself</code> to the profile and
+<code class="language-plaintext highlighter-rouge">ListedFriend</code> to its captured friend.</li>
+</ol>
+
+<p>For profile edits, <code class="language-plaintext highlighter-rouge">EditCommand</code> constructs the replacement before <code class="language-plaintext highlighter-rouge">FriendValidator</code> checks for name conflicts
+with all stored friends, including those hidden by the current filter. Profile edits and both game commands
+preserve the friend-list filter.</p>
+
+<p>The sequence shows <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player</code> after parsing. Helper calls and subsequent saving are omitted.</p>
+
+<p><img src="/tp/images/MyselfGameAddSequenceDiagram.png" alt="Successful game addition to the Myself profile"></p>
+
+<p>After success, <code class="language-plaintext highlighter-rouge">LogicManager</code> saves both <code class="language-plaintext highlighter-rouge">friends</code> and <code class="language-plaintext highlighter-rouge">myself</code> through <code class="language-plaintext highlighter-rouge">JsonSerializableGameMates</code>, and
+<code class="language-plaintext highlighter-rouge">MainWindow</code> refreshes the profile via <code class="language-plaintext highlighter-rouge">Logic.getMyself()</code>. Missing <code class="language-plaintext highlighter-rouge">myself</code> in older JSON retains the default profile.</p>
 
 <h3 id="name-and-game-filtering">Name and game filtering</h3>
 
@@ -449,14 +488,12 @@ before publishing a complete v1.3 MVP guide.</p>
     <tr>
       <td>Own-profile editing</td>
       <td>Omit <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> in <code class="language-plaintext highlighter-rouge">edit</code> (pp. 10–13); the later task list instead mentions special <code class="language-plaintext highlighter-rouge">myself</code> handling.</td>
-      <td>
-<a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/69">PR #69</a> has merged: use explicit, case-insensitive <code class="language-plaintext highlighter-rouge">edit myself ...</code>. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ.</td>
+      <td>Use <code>edit FRIEND_INDEX|myself ...</code>. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ.</td>
     </tr>
     <tr>
       <td>Game add/delete</td>
-      <td>
-<code class="language-plaintext highlighter-rouge">gameadd INDEX g/NAME u/USER_NAME [m/KEY:VALUE]...</code> and <code class="language-plaintext highlighter-rouge">gamedel INDEX g/NAME</code> (pp. 17–23).</td>
-      <td>Neither command is routed. <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/70">PR #70</a> is pending. Add success/error, duplicates, filter preservation and persistence tests after integration.</td>
+      <td>Add or delete a friend’s game, with optional metadata on addition (pp. 17–23).</td>
+      <td>Use <code>gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME</code> and <code>gamedel FRIEND_INDEX|myself g/GAME_NAME</code>. Game metadata input remains unavailable. See <a href="#myself-profile">Myself profile</a>.</td>
     </tr>
     <tr>
       <td>Metadata</td>
@@ -498,7 +535,7 @@ before publishing a complete v1.3 MVP guide.</p>
       <td>Game uniqueness</td>
       <td>One username per game name within a friend (pp. 16–19).</td>
       <td>
-<code class="language-plaintext highlighter-rouge">Game.isSameGame</code> supports name identity, but stored sets use full equality. JSON can contain the same game name with different usernames. Verify enforcement when game commands integrate.</td>
+<code class="language-plaintext highlighter-rouge">gameadd</code> rejects duplicate game names through <code class="language-plaintext highlighter-rouge">Game.isSameGame</code>. Stored sets use full equality, so JSON can still contain the same game name with different usernames.</td>
     </tr>
   </tbody>
 </table>
@@ -508,8 +545,8 @@ game-text validation uses ISO-control rejection rather than a complete Unicode p
 recorded limits; no application fix is included in this documentation change.</p>
 
 <p>Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
-not a current use-case step. Game creation/deletion and metadata entry/display cannot yet be demonstrated in this checkout;
-capture those screenshots after integration. Own-profile editing is available through <code class="language-plaintext highlighter-rouge">edit myself</code>.</p>
+not a current use-case step. Game creation/deletion and own-profile editing are available; metadata entry/display
+remains pending.</p>
 
 <h3 id="game-metadata">Game metadata</h3>
 
@@ -1097,8 +1134,8 @@ The current recovery procedure is to copy the JSON file while the application is
 
 <h3 id="non-functional-requirements">Non-Functional Requirements</h3>
 
-<p>The following are targets, not measured guarantees. Targets involving game modification or metadata entry/display
-remain pending integration; startup/performance and large-data capacity need separate measurement.</p>
+<p>The following are targets, not measured guarantees. Metadata entry/display remains pending integration;
+startup/performance and large-data capacity need separate measurement.</p>
 
 <h4 id="environment">Environment</h4>
 
@@ -1340,7 +1377,7 @@ report <code class="language-plaintext highlighter-rouge">Index must be a positi
 invalid-displayed-index error; <code class="language-plaintext highlighter-rouge">edit 1 n/Test</code> and <code class="language-plaintext highlighter-rouge">gamelist 1</code> report an empty displayed list. There is no undo.</li>
 </ol>
 
-<h3 id="saved-profile-game-round-trip-and-pending-commands">Saved profile, game round trip and pending commands</h3>
+<h3 id="saved-profile-and-game-round-trip">Saved profile and game round trip</h3>
 
 <p>Prerequisite: a disposable app folder. Close the app and create <code class="language-plaintext highlighter-rouge">data/gamemates.json</code> with the fixture below.
 This seeds existing data for testing; it is not an own-profile edit command.</p>
@@ -1364,8 +1401,8 @@ Valorant entry. <code class="language-plaintext highlighter-rouge">edit 1 p/9876
 <code class="language-plaintext highlighter-rouge">list g/Unknown</code>, then <code class="language-plaintext highlighter-rouge">edit MYSELF n/Joash Updated p/</code>: expected the renamed profile with no phone number and
 its Minecraft game preserved. The left friend list remains empty. <code class="language-plaintext highlighter-rouge">edit myself n/Fixture Friend</code> rejects the
 duplicate name, and <code class="language-plaintext highlighter-rouge">add n/joash updated</code> rejects a name matching the profile.</li>
-  <li>Try <code class="language-plaintext highlighter-rouge">edit n/Changed</code>, <code class="language-plaintext highlighter-rouge">gameadd 1 g/Test u/player</code>, and <code class="language-plaintext highlighter-rouge">gamedel 1 g/Valorant</code>.
-Expected: missing-index or unknown-command errors. The profile and game remain unchanged.
+  <li>Try <code class="language-plaintext highlighter-rouge">edit n/Changed</code>: expected a missing-index error. Run <code class="language-plaintext highlighter-rouge">gameadd myself g/Test u/player</code>, then
+<code class="language-plaintext highlighter-rouge">gamedel myself g/Test</code>: expected success and the original Minecraft entry preserved after both commands.
 Metadata command entry cannot be tested because no routed command supports it yet. To test storage, close the app,
 add <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code> to the fixture’s Minecraft entry, relaunch and run <code class="language-plaintext highlighter-rouge">list</code>.
 The saved JSON must retain that pair; cards currently show only the game name and username. A missing <code class="language-plaintext highlighter-rouge">metas</code>
