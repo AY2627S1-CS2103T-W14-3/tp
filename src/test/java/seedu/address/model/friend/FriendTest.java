@@ -42,12 +42,20 @@ public class FriendTest {
         assertEquals(friend, reordered);
         assertEquals(friend.hashCode(), reordered.hashCode());
         assertEquals(Objects.hash(friend.getName(), friend.getPhone(), friend.getEmail(),
-                friend.getGames(), friend.getTags(), friend.isArchived()), friend.hashCode());
+                friend.getGames(), friend.getTags(), friend.isArchived(), friend.isPinned()), friend.hashCode());
         assertFalse(friend.equals(ALICE));
         assertTrue(friend.isSameFriend(ALICE));
         Friend changedUsername = new FriendBuilder(ALICE)
                 .withGames(new GameBuilder().withGameName("Valorant").withUsername("other").build(), second).build();
         assertFalse(friend.equals(changedUsername));
+    }
+
+    @Test
+    public void pinnedFriend_hasDistinctEqualityButSameIdentity() {
+        Friend pinnedAlice = new FriendBuilder(ALICE).withPinned(true).build();
+        assertTrue(pinnedAlice.isPinned());
+        assertFalse(pinnedAlice.equals(ALICE));
+        assertTrue(pinnedAlice.isSameFriend(ALICE));
     }
 
     @Test
@@ -135,7 +143,7 @@ public class FriendTest {
                 .withGames(new GameBuilder().withGameName("Valorant").withUsername("alice").build()).build();
         String expected = Friend.class.getCanonicalName() + "{name=" + friend.getName() + ", phone=" + friend.getPhone()
                 + ", email=" + friend.getEmail() + ", games=" + friend.getGames() + ", tags=" + friend.getTags()
-                + ", archived=false}";
+                + ", archived=false, pinned=false}";
         assertEquals(expected, friend.toString());
     }
 }

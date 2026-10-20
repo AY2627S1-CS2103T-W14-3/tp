@@ -46,7 +46,7 @@ public class GameDeleteCommand extends Command {
         Set<Game> games = new HashSet<>(friend.getGames());
         games.remove(toDelete);
         Friend updatedFriend = new Friend(friend.getName(), friend.getPhone(), friend.getEmail(),
-                games, friend.getTags(), friend.isArchived());
+                games, friend.getTags(), friend.isArchived(), friend.isPinned());
         model.setFriend(target, updatedFriend);
         return new CommandResult(String.format(MESSAGE_SUCCESS, gameName, friend.getName()));
     }

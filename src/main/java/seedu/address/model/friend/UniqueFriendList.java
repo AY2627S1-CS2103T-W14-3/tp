@@ -52,6 +52,7 @@ public class UniqueFriendList implements Iterable<Friend> {
             throw new DuplicateFriendException();
         }
         internalList.add(toAdd);
+        movePinnedFriendsToTop();
     }
 
     /**
@@ -72,6 +73,7 @@ public class UniqueFriendList implements Iterable<Friend> {
         }
 
         internalList.set(index, editedFriend);
+        movePinnedFriendsToTop();
     }
 
     /**
@@ -88,6 +90,7 @@ public class UniqueFriendList implements Iterable<Friend> {
     public void setFriends(UniqueFriendList replacement) {
         requireNonNull(replacement);
         internalList.setAll(replacement.internalList);
+        movePinnedFriendsToTop();
     }
 
     /**
@@ -101,6 +104,7 @@ public class UniqueFriendList implements Iterable<Friend> {
         }
 
         internalList.setAll(friends);
+        movePinnedFriendsToTop();
     }
 
     /**
@@ -151,5 +155,15 @@ public class UniqueFriendList implements Iterable<Friend> {
             }
         }
         return true;
+    }
+
+    /**
+     * Keeps pinned friends before unpinned friends while retaining their existing relative order.
+     */
+    private void movePinnedFriendsToTop() {
+        List<Friend> pinnedFriends = internalList.stream().filter(Friend::isPinned).toList();
+        List<Friend> unpinnedFriends = internalList.stream().filter(friend -> !friend.isPinned()).toList();
+        internalList.setAll(pinnedFriends);
+        internalList.addAll(unpinnedFriends);
     }
 }
