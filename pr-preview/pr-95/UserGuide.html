@@ -295,7 +295,7 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 
 <p>Shows all friends in GameMates, optionally filters the friend list by game, and can sort the displayed friends.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">list [g/GAME_NAME] [s/NAME|GAME]</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]</code></p>
 
 <ul>
   <li>
@@ -309,6 +309,9 @@ including when the list is empty.</li>
 <code class="language-plaintext highlighter-rouge">list s/game</code> orders friends by the alphabetically first game in each friend’s game list, ignoring case. Friends
 without games appear after friends with games; name breaks ties.</li>
   <li>
+<code class="language-plaintext highlighter-rouge">o/asc</code> explicitly selects ascending order; this is the default. <code class="language-plaintext highlighter-rouge">o/desc</code> reverses the selected name or game
+order. An order may only be supplied with <code class="language-plaintext highlighter-rouge">s/</code>.</li>
+  <li>
 <code class="language-plaintext highlighter-rouge">list g/GAME_NAME s/NAME|GAME</code> first filters by game, then sorts the matching friends. Prefixes may be supplied in
 either order.</li>
   <li>Omitting <code class="language-plaintext highlighter-rouge">s/</code> preserves the stored insertion order. Running another <code class="language-plaintext highlighter-rouge">list</code> command without <code class="language-plaintext highlighter-rouge">s/</code> clears a sort
@@ -320,8 +323,9 @@ applied by an earlier <code class="language-plaintext highlighter-rouge">list</c
   <li>Filtering applies only to the friend list. It does not filter or modify the separately stored Myself profile.</li>
   <li>Name filtering uses <a href="#locating-friends-by-name-find"><code class="language-plaintext highlighter-rouge">find</code></a>, not <code class="language-plaintext highlighter-rouge">list n/NAME</code>. A new <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list</code> replaces
 the previous friend-list filter; running them consecutively does not intersect their results.</li>
-  <li>Game-name validation uses the same 1–50-character rules as <code class="language-plaintext highlighter-rouge">gamelist</code>. Empty <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">s/</code>, extra positional input,
-an unsupported sort value, and repeated <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">s/</code> are rejected. Supported sort values are <code class="language-plaintext highlighter-rouge">name</code> and <code class="language-plaintext highlighter-rouge">game</code>.
+  <li>Game-name validation uses the same 1–50-character rules as <code class="language-plaintext highlighter-rouge">gamelist</code>. Empty <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">s/</code>, or <code class="language-plaintext highlighter-rouge">o/</code>, extra positional
+input, unsupported sort/order values, an order without a sort, and repeated prefixes are rejected. Supported sort
+values are <code class="language-plaintext highlighter-rouge">name</code> and <code class="language-plaintext highlighter-rouge">game</code>; supported orders are <code class="language-plaintext highlighter-rouge">asc</code> and <code class="language-plaintext highlighter-rouge">desc</code>.
 A valid game filter returns <code class="language-plaintext highlighter-rouge">N friend(s) listed!</code>.</li>
 </ul>
 
@@ -336,6 +340,8 @@ A valid game filter returns <code class="language-plaintext highlighter-rouge">N
 <code class="language-plaintext highlighter-rouge">list g/Stardew Valley</code> shows friends who play <code class="language-plaintext highlighter-rouge">Stardew Valley</code>.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list s/name</code> shows all friends sorted by name.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list s/game o/desc</code> shows all friends in descending game order.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list g/Valorant s/game</code> shows Valorant players sorted by their first game name.</li>
 </ul>
@@ -778,7 +784,7 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
     <tr>
       <td><strong>List</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">list [g/GAME_NAME] [s/NAME|GAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">list g/Valorant s/name</code>
+<code class="language-plaintext highlighter-rouge">list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]</code><br> e.g., <code class="language-plaintext highlighter-rouge">list g/Valorant s/name o/desc</code>
 </td>
     </tr>
     <tr>
