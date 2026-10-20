@@ -389,9 +389,10 @@ gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME
 gamedel FRIEND_INDEX|myself g/GAME_NAME
 </code></pre></div></div>
 
-<p>The existing <strong>Command pattern</strong> encapsulates each request in a command that validates and updates through <code class="language-plaintext highlighter-rouge">Model</code>.
-A sealed <code class="language-plaintext highlighter-rouge">FriendTarget</code> interface represents the selected storage location: its nested <code class="language-plaintext highlighter-rouge">Myself</code> and <code class="language-plaintext highlighter-rouge">ListedFriend</code>
-records capture the original <code class="language-plaintext highlighter-rouge">Friend</code>. The class diagram omits unrelated members and shows records as ordinary classes.</p>
+<p>The sealed <code class="language-plaintext highlighter-rouge">FriendTarget</code> interface lets these commands update either the profile or a listed friend.
+Its nested <code class="language-plaintext highlighter-rouge">Myself</code> and <code class="language-plaintext highlighter-rouge">ListedFriend</code> records retain the selected <code class="language-plaintext highlighter-rouge">Friend</code> and identify where to apply the update,
+even if the friend-list filter changes.
+The class diagram omits unrelated members and shows records as ordinary classes.</p>
 
 <p><img src="/tp/pr-preview/pr-87/images/MyselfTargetClassDiagram.png" alt="Classes involved in resolving and updating a friend target"></p>
 
@@ -399,17 +400,18 @@ records capture the original <code class="language-plaintext highlighter-rouge">
   <li>The three command parsers use <code class="language-plaintext highlighter-rouge">ParserUtil.parseIndexOrMyself</code>: case-insensitive <code class="language-plaintext highlighter-rouge">Index.MYSELF_KEYWORD</code>
 becomes <code class="language-plaintext highlighter-rouge">Index.myself()</code>; numeric selectors remain displayed friend indices.</li>
   <li>At execution, <code class="language-plaintext highlighter-rouge">ModelManager.resolveFriend(index)</code> captures the profile or currently displayed friend in a target.</li>
-  <li>After validation, the command constructs a replacement <code class="language-plaintext highlighter-rouge">Friend</code>. <code class="language-plaintext highlighter-rouge">ModelManager.setFriend(target, updatedFriend)</code>
-uses an exhaustive switch: <code class="language-plaintext highlighter-rouge">Myself</code> updates the profile; <code class="language-plaintext highlighter-rouge">ListedFriend</code> updates its captured friend.</li>
+  <li>After constructing a replacement <code class="language-plaintext highlighter-rouge">Friend</code> and completing validation, the command calls
+<code class="language-plaintext highlighter-rouge">ModelManager.setFriend(target, updatedFriend)</code>. An exhaustive switch routes <code class="language-plaintext highlighter-rouge">Myself</code> to the profile and
+<code class="language-plaintext highlighter-rouge">ListedFriend</code> to its captured friend.</li>
 </ol>
+
+<p>For profile edits, <code class="language-plaintext highlighter-rouge">EditCommand</code> constructs the replacement before <code class="language-plaintext highlighter-rouge">FriendValidator</code> checks for name conflicts
+with all stored friends, including those hidden by the current filter. Profile edits and both game commands
+preserve the friend-list filter.</p>
 
 <p>The sequence shows <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player</code> after parsing. Helper calls and subsequent saving are omitted.</p>
 
 <p><img src="/tp/pr-preview/pr-87/images/MyselfGameAddSequenceDiagram.png" alt="Successful game addition to the Myself profile"></p>
-
-<p>Capturing the target once prevents later filter changes from redirecting an update. Explicit variants also
-distinguish a profile from an imported friend with the same name. Targets last for one command; they do not
-provide concurrency control. Profile edits and both game commands preserve the friend-list filter.</p>
 
 <p>After success, <code class="language-plaintext highlighter-rouge">LogicManager</code> saves both <code class="language-plaintext highlighter-rouge">friends</code> and <code class="language-plaintext highlighter-rouge">myself</code> through <code class="language-plaintext highlighter-rouge">JsonSerializableGameMates</code>, and
 <code class="language-plaintext highlighter-rouge">MainWindow</code> refreshes the profile via <code class="language-plaintext highlighter-rouge">Logic.getMyself()</code>. Missing <code class="language-plaintext highlighter-rouge">myself</code> in older JSON retains the default profile.</p>

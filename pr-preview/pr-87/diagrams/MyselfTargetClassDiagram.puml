@@ -1,8 +1,11 @@
 @startuml
-!pragma layout smetana
+skinparam linetype ortho
+skinparam nodesep 90
+skinparam ranksep 65
 skinparam Shadowing false
 skinparam DefaultFontName Arial
 skinparam ArrowFontStyle plain
+skinparam minClassWidth 170
 skinparam classBackgroundColor #9D0012
 skinparam classFontColor #FFFFFF
 skinparam classStereotypeFontColor #FFFFFF
@@ -29,6 +32,7 @@ ModelManager .up.|> Model
 ModelManager ..> FriendTarget : creates / inspects
 Myself .up.|> FriendTarget
 ListedFriend .up.|> FriendTarget
-Myself --> "1" Friend : captured value
-ListedFriend --> "1" Friend : captured value
+' Keep both multiplicities beside Friend on horizontal associations.
+Myself -right-> "1" Friend : captures
+ListedFriend -left-> "1" Friend : captures
 @enduml
