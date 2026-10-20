@@ -1,0 +1,38 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+participant ":MainWindow" as Window UI_COLOR
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":GameMatesParser" as Parser LOGIC_COLOR
+participant ":GameListCommand" as Command LOGIC_COLOR
+participant ":Model" as Model MODEL_COLOR
+participant ":Storage" as Storage STORAGE_COLOR
+participant ":FriendDetailsPanel" as Panel UI_COLOR
+
+Window -> Logic : execute("gamelist 1 g/valorant")
+activate Logic
+Logic -> Parser : parseCommand(commandText)
+activate Parser
+note right of Parser: GameListCommandParser validates\nthe index and optional game filter.
+Parser --> Logic : command
+deactivate Parser
+Logic -> Command : execute(model)
+activate Command
+Command -> Model : getFilteredFriendList()
+Model --> Command : displayedFriends
+note right of Command: Select the original friend at\ndisplayed index 1. Match GameName\nwithout modifying stored games.
+Command --> Logic : CommandResult(feedback, friend, gameFilter)
+deactivate Command
+Logic -> Model : getGameMates()
+Model --> Logic : gameMates
+Logic -> Storage : saveGameMates(gameMates)
+Storage --> Logic
+Logic --> Window : commandResult
+deactivate Logic
+Window -> Panel : setFriend(friend, false, gameFilter)
+activate Panel
+Panel -> Panel : Render matching cards or an empty label
+note right of Panel: Keep the friend list and\nits predicate unchanged.
+deactivate Panel
+@enduml
