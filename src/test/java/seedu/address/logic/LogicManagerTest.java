@@ -24,6 +24,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.FriendListView;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyGameMates;
@@ -82,6 +83,30 @@ public class LogicManagerTest {
         assertEquals(0, model.getFilteredFriendList().size());
         JsonGameMatesStorage storage = new JsonGameMatesStorage(temporaryFolder.resolve("gameMates.json"));
         assertEquals(model.getGameMates(), storage.readGameMates().get());
+    }
+
+    @Test
+    public void execute_archiveLifecycle_exposesViewAndPersistsStatus() throws Exception {
+        model.addFriend(AMY);
+        Friend profile = logic.getMyself();
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(temporaryFolder.resolve("gameMates.json"));
+        assertEquals(FriendListView.ACTIVE, logic.getFriendListView());
+
+        logic.execute("archive 1");
+        assertEquals(List.of(AMY.withArchived(true)), storage.readGameMates().get().getFriendList());
+        logic.execute("archivelist");
+        assertEquals(FriendListView.ARCHIVED, logic.getFriendListView());
+        assertEquals(List.of(AMY.withArchived(true)), logic.getFilteredFriendList());
+        logic.execute("find " + AMY.getName().fullName);
+        assertEquals(FriendListView.SEARCH, logic.getFriendListView());
+        logic.execute("unarchive 1");
+        assertEquals(FriendListView.SEARCH, logic.getFriendListView());
+        assertEquals(List.of(AMY), logic.getFilteredFriendList());
+        assertEquals(List.of(AMY), storage.readGameMates().get().getFriendList());
+        logic.execute("list");
+        assertEquals(FriendListView.ACTIVE, logic.getFriendListView());
+        assertEquals(profile, logic.getMyself());
+        assertEquals(profile, storage.readGameMates().get().getMyself());
     }
 
     @Test

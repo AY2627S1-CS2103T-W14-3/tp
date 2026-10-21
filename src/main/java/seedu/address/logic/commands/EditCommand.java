@@ -18,6 +18,7 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.CollectionUtil;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.model.FriendListView;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
@@ -86,14 +87,12 @@ public class EditCommand extends Command {
 
         model.setFriend(target, editedFriend);
         if (!target.isMyself()) {
-            switch (model.getFriendListView()) {
-                case ACTIVE -> model.updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
-                case ARCHIVED -> model.updateArchivedFriendList(PREDICATE_SHOW_ALL_FRIENDS);
-                case SEARCH -> {
-                    // Keep the global search predicate; renamed friends may no longer match.
-                }
-                default -> throw new AssertionError("Unknown friend list view");
+            if (model.getFriendListView() == FriendListView.ACTIVE) {
+                model.updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+            } else if (model.getFriendListView() == FriendListView.ARCHIVED) {
+                model.updateArchivedFriendList(PREDICATE_SHOW_ALL_FRIENDS);
             }
+            // In search results, retain the predicate; renamed friends may no longer match.
         }
         return new CommandResult(formatSuccessMessage(friendToEdit, editedFriend));
     }

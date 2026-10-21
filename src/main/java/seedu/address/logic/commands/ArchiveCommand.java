@@ -19,8 +19,6 @@ public class ArchiveCommand extends Command {
             + "Example: " + COMMAND_WORD + " 1";
     public static final String MESSAGE_WRONG_VIEW = "Please switch back to list to archive a friend.";
     public static final String MESSAGE_SUCCESS = "Archived %1$s.";
-    public static final String MESSAGE_WRONG_STATUS = "This friend is already archived. "
-            + "Use list to select an active friend.";
     public static final String MESSAGE_MYSELF = "Your Myself profile cannot be archived or unarchived.";
 
     private final Index targetIndex;
@@ -42,9 +40,6 @@ public class ArchiveCommand extends Command {
             throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
         }
         Friend friend = model.getFilteredFriendList().get(targetIndex.getZeroBased());
-        if (friend.isArchived() == true) {
-            throw new CommandException(MESSAGE_WRONG_STATUS);
-        }
         model.setFriend(friend, friend.withArchived(true));
         return new CommandResult(String.format(MESSAGE_SUCCESS, friend.getName()));
     }
