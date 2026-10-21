@@ -53,7 +53,6 @@ public class MainApp extends Application {
         storage = new StorageManager(gameMatesStorage, userPrefsStorage);
 
         model = initModelManager(storage, userPrefs);
-
         logic = new LogicManager(model, storage);
 
         ui = new UiManager(logic, storage.getGameMatesFilePath());

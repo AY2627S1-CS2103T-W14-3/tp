@@ -86,7 +86,14 @@ public class EditCommand extends Command {
 
         model.setFriend(target, editedFriend);
         if (!target.isMyself()) {
-            model.updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+            switch (model.getFriendListView()) {
+                case ACTIVE -> model.updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+                case ARCHIVED -> model.updateArchivedFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+                case SEARCH -> {
+                    // Keep the global search predicate; renamed friends may no longer match.
+                }
+                default -> throw new AssertionError("Unknown friend list view");
+            }
         }
         return new CommandResult(formatSuccessMessage(friendToEdit, editedFriend));
     }
@@ -115,7 +122,7 @@ public class EditCommand extends Command {
         });
 
         return new Friend(updatedName, updatedPhone, updatedEmail,
-                friendToEdit.getGames(), updatedTags);
+                friendToEdit.getGames(), updatedTags, friendToEdit.isArchived());
     }
 
     /**

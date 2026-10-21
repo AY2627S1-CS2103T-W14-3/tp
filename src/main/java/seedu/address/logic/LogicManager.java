@@ -12,6 +12,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.FriendListView;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
 import seedu.address.storage.Storage;
@@ -67,6 +68,11 @@ public class LogicManager implements Logic {
     @Override
     public ObservableList<Friend> getFilteredFriendList() {
         return model.getFilteredFriendList();
+    }
+
+    @Override
+    public FriendListView getFriendListView() {
+        return model.getFriendListView();
     }
 
     @Override

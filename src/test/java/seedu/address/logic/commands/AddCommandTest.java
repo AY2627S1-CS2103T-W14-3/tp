@@ -18,6 +18,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.model.FriendListView;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyGameMates;
@@ -166,6 +167,21 @@ public class AddCommandTest {
         }
 
         @Override
+        public FriendListView getFriendListView() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void updateSearchFriendList(Predicate<Friend> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void updateArchivedFriendList(Predicate<Friend> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public void updateFilteredFriendList(Predicate<Friend> predicate) {
             throw new AssertionError("This method should not be called.");
         }
@@ -186,6 +202,13 @@ public class AddCommandTest {
         public boolean hasFriend(Friend friend) {
             requireNonNull(friend);
             return this.friend.isSameFriend(friend);
+        }
+
+        @Override
+        public ReadOnlyGameMates getGameMates() {
+            GameMates gameMates = new GameMates();
+            gameMates.addFriend(friend);
+            return gameMates;
         }
     }
 

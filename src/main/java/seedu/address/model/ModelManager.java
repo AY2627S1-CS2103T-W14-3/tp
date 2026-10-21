@@ -23,6 +23,7 @@ public class ModelManager implements Model {
     private final GameMates gameMates;
     private final UserPrefs userPrefs;
     private final FilteredList<Friend> filteredFriends;
+    private FriendListView friendListView = FriendListView.ACTIVE;
 
     /**
      * Initializes a ModelManager with the given gameMates and userPrefs.
@@ -34,7 +35,7 @@ public class ModelManager implements Model {
 
         this.gameMates = new GameMates(gameMates);
         this.userPrefs = new UserPrefs(userPrefs);
-        filteredFriends = new FilteredList<>(this.gameMates.getFriendList());
+        filteredFriends = new FilteredList<>(this.gameMates.getFriendList(), friend -> !friend.isArchived());
     }
 
     public ModelManager() {
@@ -130,7 +131,27 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredFriendList(Predicate<Friend> predicate) {
         requireNonNull(predicate);
+        friendListView = FriendListView.ACTIVE;
+        filteredFriends.setPredicate(friend -> !friend.isArchived() && predicate.test(friend));
+    }
+
+    @Override
+    public void updateArchivedFriendList(Predicate<Friend> predicate) {
+        requireNonNull(predicate);
+        friendListView = FriendListView.ARCHIVED;
+        filteredFriends.setPredicate(friend -> friend.isArchived() && predicate.test(friend));
+    }
+
+    @Override
+    public void updateSearchFriendList(Predicate<Friend> predicate) {
+        requireNonNull(predicate);
+        friendListView = FriendListView.SEARCH;
         filteredFriends.setPredicate(predicate);
+    }
+
+    @Override
+    public FriendListView getFriendListView() {
+        return friendListView;
     }
 
     @Override
@@ -146,7 +167,8 @@ public class ModelManager implements Model {
 
         return gameMates.equals(otherModelManager.gameMates)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredFriends.equals(otherModelManager.filteredFriends);
+                && filteredFriends.equals(otherModelManager.filteredFriends)
+                && friendListView == otherModelManager.friendListView;
     }
 
 }

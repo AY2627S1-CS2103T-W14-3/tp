@@ -12,24 +12,24 @@ import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.GameNameMatchesPredicate;
 
 /**
- * Lists all friends in GameMates to the user.
+ * Lists active friends in GameMates to the user.
  */
 public class ListCommand extends Command {
 
     public static final String COMMAND_WORD = "list";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Lists all friends, or only friends who play "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Lists active friends, or only active friends who play "
             + "the specified game (case-insensitive).\n"
             + "Parameters: [g/GAME_NAME]\n"
             + "Example: " + COMMAND_WORD + " g/Valorant";
 
-    public static final String MESSAGE_SUCCESS = "Listed all friends.";
+    public static final String MESSAGE_SUCCESS = "Listed all active friends.";
 
     private final Predicate<Friend> predicate;
     private final boolean isFilteredByGame;
 
     /**
-     * Creates a command that lists all friends.
+     * Creates a command that lists all active friends.
      */
     public ListCommand() {
         predicate = PREDICATE_SHOW_ALL_FRIENDS;

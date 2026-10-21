@@ -55,7 +55,7 @@ public class GameAddCommand extends Command {
         Set<Game> games = new HashSet<>(friend.getGames());
         games.add(toAdd);
         Friend updatedFriend = new Friend(friend.getName(), friend.getPhone(), friend.getEmail(),
-                games, friend.getTags());
+                games, friend.getTags(), friend.isArchived());
         model.setFriend(target, updatedFriend);
         return new CommandResult(String.format(MESSAGE_SUCCESS,
                 toAdd.getGameName(), friend.getName(), toAdd.getUsername()));

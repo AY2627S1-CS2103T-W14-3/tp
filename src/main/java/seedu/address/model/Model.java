@@ -90,8 +90,17 @@ public interface Model {
     ObservableList<Friend> getFilteredFriendList();
 
     /**
-     * Updates the filter of the filtered friend list to filter by the given {@code predicate}.
+     * Shows active friends matching the given {@code predicate}, leaving the archive view.
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredFriendList(Predicate<Friend> predicate);
+
+    /** Shows archived friends matching the given predicate. */
+    void updateArchivedFriendList(Predicate<Friend> predicate);
+
+    /** Shows matching friends from both active and archived lists as search results. */
+    void updateSearchFriendList(Predicate<Friend> predicate);
+
+    /** Returns the scope of the displayed list, including when it is empty. */
+    FriendListView getFriendListView();
 }

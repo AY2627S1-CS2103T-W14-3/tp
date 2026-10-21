@@ -26,13 +26,20 @@ public class Friend {
     // Data fields
     private final Set<Game> games;
     private final Set<Tag> tags;
+    private final boolean archived;
 
     /**
      * Every field must be present and not null.
      */
     public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags) {
+        this(name, phone, email, games, tags, false);
+    }
+
+    /** Creates a friend with the given archive status and preserved details. */
+    public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags, boolean archived) {
         requireAllNonNull(name, phone, email, games, tags);
         games.forEach(Objects::requireNonNull);
+        this.archived = archived;
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -45,6 +52,15 @@ public class Friend {
      */
     public Friend(Name name, Phone phone, Email email, Set<Tag> tags) {
         this(name, phone, email, Collections.emptySet(), tags);
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    /** Returns a copy with the given archive status, preserving all other fields. */
+    public Friend withArchived(boolean archived) {
+        return new Friend(name, phone, email, games, tags, archived);
     }
 
     public Name getName() {
@@ -107,13 +123,14 @@ public class Friend {
                 && phone.equals(otherFriend.phone)
                 && email.equals(otherFriend.email)
                 && games.equals(otherFriend.games)
-                && tags.equals(otherFriend.tags);
+                && tags.equals(otherFriend.tags)
+                && archived == otherFriend.archived;
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, games, tags);
+        return Objects.hash(name, phone, email, games, tags, archived);
     }
 
     @Override
@@ -124,6 +141,7 @@ public class Friend {
                 .add("email", email)
                 .add("games", games)
                 .add("tags", tags)
+                .add("archived", archived)
                 .toString();
     }
 

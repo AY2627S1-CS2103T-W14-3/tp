@@ -36,6 +36,11 @@ final class FriendValidator {
 
     private static void checkForDuplicateFriend(Model model, Friend candidate) throws CommandException {
         if (model.hasFriend(candidate)) {
+            boolean archivedDuplicate = model.getGameMates().getFriendList().stream()
+                    .anyMatch(friend -> friend.isArchived() && friend.isSameFriend(candidate));
+            if (archivedDuplicate) {
+                throw new CommandException(Messages.MESSAGE_DUPLICATE_ARCHIVED_FRIEND);
+            }
             throw new CommandException(Messages.MESSAGE_DUPLICATE_FRIEND);
         }
     }
