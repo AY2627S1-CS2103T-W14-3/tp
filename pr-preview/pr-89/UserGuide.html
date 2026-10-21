@@ -55,6 +55,8 @@ saved data. See <a href="#your-profile-and-game-entries">Your profile and game e
       <li><a href="#viewing-help-help" id="markdown-toc-viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code></a></li>
       <li><a href="#adding-a-friend-add" id="markdown-toc-adding-a-friend-add">Adding a friend: <code class="language-plaintext highlighter-rouge">add</code></a></li>
       <li><a href="#listing-and-filtering-friends-list" id="markdown-toc-listing-and-filtering-friends-list">Listing and filtering friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
+      <li><a href="#adding-a-game-gameadd" id="markdown-toc-adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code></a></li>
+      <li><a href="#deleting-a-game-gamedel" id="markdown-toc-deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code></a></li>
       <li><a href="#viewing-a-friends-games-gamelist" id="markdown-toc-viewing-a-friends-games-gamelist">Viewing a friend’s games: <code class="language-plaintext highlighter-rouge">gamelist</code></a></li>
       <li><a href="#finding-a-random-squad-squad-planned" id="markdown-toc-finding-a-random-squad-squad-planned">Finding a random squad: <code class="language-plaintext highlighter-rouge">squad</code> (planned)</a></li>
       <li><a href="#editing-a-friend-or-your-own-profile-edit" id="markdown-toc-editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
@@ -155,9 +157,12 @@ For example, if the command specifies <code class="language-plaintext highlighte
 Quotes are not needed around multiword names. Use only the prefixes documented for each command.</li>
     <li>Repeating a single-value <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> parameter in <code class="language-plaintext highlighter-rouge">add</code> or <code class="language-plaintext highlighter-rouge">edit</code> is rejected, even with identical values.
 Tags may be repeated; identical tag values are applied once.</li>
+    <li>Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run <code class="language-plaintext highlighter-rouge">list</code> to see all friends
+again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.</li>
     <li>
-      <p>Friend indices refer to the current left-hand list and range from 1 to 2147483647. Run <code class="language-plaintext highlighter-rouge">list</code> to see all friends
-again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.</p>
+      <p>For <code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> means either a displayed friend index or the
+case-insensitive keyword <code class="language-plaintext highlighter-rouge">myself</code> for your own profile. Do not type <code class="language-plaintext highlighter-rouge">|</code>. The selector must come before prefixes;
+<code class="language-plaintext highlighter-rouge">myself</code> also works when no friends are displayed.</p>
     </li>
     <li>
       <p>Extraneous parameters for commands that take no parameters, such as <code class="language-plaintext highlighter-rouge">help</code>, <code class="language-plaintext highlighter-rouge">exit</code>, and <code class="language-plaintext highlighter-rouge">clear</code>, are ignored.<br>
@@ -196,9 +201,9 @@ change your stored profile.</p>
 and tags. The <code class="language-plaintext highlighter-rouge">myself</code> selector is case-insensitive and works even when the friend list is empty or filtered.
 Omitting the selector, as in <code class="language-plaintext highlighter-rouge">edit n/Joash</code>, is rejected. Profile edits preserve your games and the friend-list filter.</p>
 
-<p>You can view games and usernames already loaded from saved data or the initial sample data using
-<a href="#viewing-a-friends-games-gamelist"><code class="language-plaintext highlighter-rouge">gamelist</code></a>. New friends start with no games.
-<code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> are not recognised commands in this build, and there is no metadata input or display yet.
+<p>New friends start with no games. Use <a href="#adding-a-game-gameadd"><code class="language-plaintext highlighter-rouge">gameadd</code></a> and
+<a href="#deleting-a-game-gamedel"><code class="language-plaintext highlighter-rouge">gamedel</code></a> to manage a friend’s games or your own games, and
+<a href="#viewing-a-friends-games-gamelist"><code class="language-plaintext highlighter-rouge">gamelist</code></a> to view a friend’s entries. Metadata input and display remain unavailable.
 Deleting a friend removes that friend’s complete entry, including their games; it does not remove games from
 other friends. Back up your data before <a href="#editing-the-data-file">editing a saved file</a>.</p>
 
@@ -318,6 +323,45 @@ repeated <code class="language-plaintext highlighter-rouge">g/</code> are reject
 <code class="language-plaintext highlighter-rouge">list g/Stardew Valley</code> shows friends who play <code class="language-plaintext highlighter-rouge">Stardew Valley</code>.</li>
 </ul>
 
+<h3 id="adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code>
+</h3>
+
+<p>Adds a game and in-game username to a friend or your own profile.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME</code></p>
+
+<ul>
+  <li>Both fields are required, non-empty and limited to 50 characters each, with at least one letter or digit.</li>
+  <li>A game name already present on the selected friend or profile is rejected, ignoring case.</li>
+  <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant u/player123</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gameadd myself g/Minecraft u/myUsername</code></li>
+</ul>
+
+<h3 id="deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code>
+</h3>
+
+<p>Removes one game from a friend or your own profile.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">gamedel FRIEND_INDEX|myself g/GAME_NAME</code></p>
+
+<ul>
+  <li>The game name is required and matched case-insensitively. A missing game is rejected.</li>
+  <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">gamedel 1 g/Valorant</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gamedel myself g/Minecraft</code></li>
+</ul>
+
 <h3 id="viewing-a-friends-games-gamelist">Viewing a friend’s games: <code class="language-plaintext highlighter-rouge">gamelist</code>
 </h3>
 
@@ -327,8 +371,8 @@ Each game card shows the game name and in-game username.</p>
 <p>Format: <code class="language-plaintext highlighter-rouge">gamelist &lt;FRIEND_INDEX&gt; [g/GAME_NAME]</code></p>
 
 <ul>
-  <li>Replace <code class="language-plaintext highlighter-rouge">&lt;FRIEND_INDEX&gt;</code> with a positive integer; do not type the angle brackets. The index is required and refers
-to the <strong>currently displayed friend list</strong>, including after <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code>.</li>
+  <li>Replace <code class="language-plaintext highlighter-rouge">&lt;FRIEND_INDEX&gt;</code> with a positive integer from 1 to 2147483647 (inclusive); do not type the angle brackets.
+The index is required and refers to the <strong>currently displayed friend list</strong>, including after <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code>.</li>
   <li>Without <code class="language-plaintext highlighter-rouge">g/</code>, all of the selected friend’s games are shown. This also clears a previous game display filter.</li>
   <li>With <code class="language-plaintext highlighter-rouge">g/</code>, only a game with the complete matching name is shown. Matching is case-insensitive:
 <code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not. Usernames are not searched.</li>
@@ -413,7 +457,7 @@ while the left panel continues showing only Minecraft players.</li>
     </tr>
     <tr>
       <td>Malformed, zero, negative or overflowing index</td>
-      <td><code class="language-plaintext highlighter-rouge">Invalid friend index. Enter a positive integer.</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive).</code></td>
     </tr>
     <tr>
       <td>Positive index outside the displayed list</td>
@@ -455,7 +499,7 @@ game name and is case-insensitive; <code class="language-plaintext highlighter-r
 <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE</code> must be a whole number from 1 to 20, inclusive.</li>
   <li>The requested size includes you: <code class="language-plaintext highlighter-rouge">n/3</code> selects you and two friends; <code class="language-plaintext highlighter-rouge">n/1</code> returns only you.</li>
   <li>You are always included as the first member, labelled <code class="language-plaintext highlighter-rouge">Me</code>, even if your profile does not contain <code class="language-plaintext highlighter-rouge">GAME</code>.</li>
-  <li>The other <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> members are selected from the <strong>currently displayed friend list</strong>.
+  <li>The other <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> members are selected from the <strong>currently displayed friend list</strong>. To include your entire friend list, run <code class="language-plaintext highlighter-rouge">list</code> first.
 Each must play <code class="language-plaintext highlighter-rouge">GAME</code>. A person cannot appear more than once in a squad.</li>
   <li>Selection is random. Repeating the command may return a different squad, but may also return the same one.</li>
 </ul>
@@ -561,11 +605,11 @@ Use that empty prefix on its own; combining it with non-empty tags is rejected.<
 <ul>
   <li>Missing index: <code class="language-plaintext highlighter-rouge">Please provide an index.</code>
 </li>
-  <li>Invalid index: <code class="language-plaintext highlighter-rouge">Index must be a positive integer.</code>
+  <li>Invalid index (including a value above 2147483647): <code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
 </li>
   <li>Empty displayed list: <code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list to show all friends.</code>
 </li>
-  <li>Index outside the displayed list: <code class="language-plaintext highlighter-rouge">No friend exists at index INDEX. Choose an index from 1 to MAX_LIST_INDEX.</code>
+  <li>Index outside the displayed list: <code class="language-plaintext highlighter-rouge">No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.</code>
 </li>
   <li>No fields provided: <code class="language-plaintext highlighter-rouge">No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.</code>
 </li>
@@ -616,7 +660,7 @@ friend’s complete details and games on the right. An empty keyword list is rej
   <li>Deletes the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>.</li>
   <li>The index refers to the index number shown in the displayed friend list.</li>
   <li>The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
-  <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647.</li>
+  <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647 (inclusive).</li>
   <li>A successful deletion displays <code class="language-plaintext highlighter-rouge">Successfully deleted FRIEND_NAME.</code>
 </li>
   <li>Deletion happens immediately, with no confirmation dialog and no undo command. The friend’s games are deleted
@@ -638,7 +682,7 @@ with the friend; other friends and your stored profile are preserved. The curren
   <li>Missing index: <code class="language-plaintext highlighter-rouge">Please provide an index.</code>
 </li>
   <li>Invalid index (such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">-1</code>, or <code class="language-plaintext highlighter-rouge">abc</code>), extra arguments, or a value above 2147483647:
-<code class="language-plaintext highlighter-rouge">Index must be a positive integer.</code>
+<code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
 </li>
   <li>Index outside the displayed list, including an empty list: <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>
 </li>
@@ -769,9 +813,27 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
 </td>
     </tr>
     <tr>
+      <td><strong>Game add</strong></td>
+      <td>
+<code>gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME</code><br> e.g., <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player123</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Game delete</strong></td>
+      <td>
+<code>gamedel FRIEND_INDEX|myself g/GAME_NAME</code><br> e.g., <code class="language-plaintext highlighter-rouge">gamedel myself g/Valorant</code>
+</td>
+    </tr>
+    <tr>
       <td><strong>Game list</strong></td>
       <td>
 <code class="language-plaintext highlighter-rouge">gamelist &lt;FRIEND_INDEX&gt; [g/GAME_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">gamelist 2 g/Valorant</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Squad create</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">squad g/GAME_NAME n/NUMBER_OF_PEOPLE</code><br> e.g., <code class="language-plaintext highlighter-rouge">squad g/Valorant n/5</code>
 </td>
     </tr>
     <tr>
@@ -791,8 +853,7 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
   </tbody>
 </table>
 
-<p>The summary lists available commands only. <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gamedel</code> and metadata entry are pending;
-they are not additional working commands in this build.</p>
+<p>Metadata entry is not supported.</p>
 
   </div>
 
