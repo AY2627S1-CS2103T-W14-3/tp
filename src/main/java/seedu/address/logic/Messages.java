@@ -16,6 +16,8 @@ public class Messages {
     public static final String MESSAGE_INVALID_COMMAND_FORMAT = "Invalid command format!\n%1$s";
     public static final String MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX = "The friend index provided is invalid.";
     public static final String MESSAGE_FRIENDS_LISTED_OVERVIEW = "%1$d friend(s) listed!";
+    public static final String MESSAGE_DUPLICATE_FRIEND = "This friend already exists in GameMates.";
+    public static final String MESSAGE_DUPLICATE_MYSELF = "This name is already used by your Myself profile.";
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
 

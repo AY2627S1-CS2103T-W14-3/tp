@@ -9,7 +9,6 @@ import static seedu.address.model.Model.PREDICATE_SHOW_ALL_FRIENDS;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +21,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendTarget;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
 import seedu.address.model.tag.Tag;
@@ -51,8 +51,6 @@ public class EditCommand extends Command {
     public static final String MESSAGE_NOT_EDITED = "No details were passed to the command. "
             + "Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) "
             + "to edit specific details.";
-    public static final String MESSAGE_DUPLICATE_FRIEND = "This friend already exists in GameMates.";
-    public static final String MESSAGE_DUPLICATE_MYSELF = "This name is already used by your Myself profile.";
 
     public static final String MESSAGE_EMPTY_LIST =
             "No friends are currently displayed. Use list to show all friends.";
@@ -77,62 +75,20 @@ public class EditCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        if (index.isMyself()) {
-            Friend original = model.getGameMates().getMyself();
-            Friend edited = createEditedFriend(original, editFriendDescriptor);
-            if (model.hasFriend(edited)) {
-                throw new CommandException(MESSAGE_DUPLICATE_FRIEND);
-            }
-            model.setMyself(edited);
-            return new CommandResult(formatSuccessMessage(original, edited));
-        }
-        List<Friend> lastShownList = model.getFilteredFriendList();
-
-        if (lastShownList.isEmpty()) {
-            throw new CommandException(MESSAGE_EMPTY_LIST);
-        }
-        if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(String.format(MESSAGE_INDEX_NOT_FOUND,
-                    index.getOneBased(), lastShownList.size()));
-        }
-
-        Friend friendToEdit = lastShownList.get(index.getZeroBased());
+        FriendTarget target = FriendTargetResolver.resolve(model, index, () -> {
+            int displayedCount = model.getFilteredFriendList().size();
+            return displayedCount == 0 ? MESSAGE_EMPTY_LIST
+                    : String.format(MESSAGE_INDEX_NOT_FOUND, index.getOneBased(), displayedCount);
+        });
+        Friend friendToEdit = target.friend();
         Friend editedFriend = createEditedFriend(friendToEdit, editFriendDescriptor);
+        FriendValidator.checkCanEdit(model, target, editedFriend);
 
-        if (model.getGameMates().getMyself().isSameFriend(editedFriend)) {
-            throw new CommandException(MESSAGE_DUPLICATE_MYSELF);
+        model.setFriend(target, editedFriend);
+        if (!target.isMyself()) {
+            model.updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
         }
-        if (!friendToEdit.isSameFriend(editedFriend) && model.hasFriend(editedFriend)) {
-            throw new CommandException(MESSAGE_DUPLICATE_FRIEND);
-        }
-
-        model.setFriend(friendToEdit, editedFriend);
-        model.updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
         return new CommandResult(formatSuccessMessage(friendToEdit, editedFriend));
-    }
-
-    /**
-     * Formats feedback with only the details whose stored values changed.
-     */
-    static String formatSuccessMessage(Friend original, Friend edited) {
-        StringBuilder feedback = new StringBuilder(String.format(MESSAGE_EDIT_FRIEND_SUCCESS, edited.getName()));
-        if (!original.getName().fullName.equals(edited.getName().fullName)) {
-            feedback.append("\n- changed name to ").append(edited.getName());
-        }
-        if (!original.getPhone().equals(edited.getPhone())) {
-            feedback.append(edited.getPhone().isEmpty() ? "\n- removed phone number"
-                    : "\n- changed phone number to " + edited.getPhone());
-        }
-        if (!original.getEmail().equals(edited.getEmail())) {
-            feedback.append(edited.getEmail().isEmpty() ? "\n- removed email"
-                    : "\n- changed email to " + edited.getEmail());
-        }
-        if (!original.getTags().equals(edited.getTags())) {
-            feedback.append(edited.getTags().isEmpty() ? "\n- removed tags" : "\n- changed tags to "
-                    + edited.getTags().stream().map(tag -> tag.tagName).sorted()
-                            .collect(Collectors.joining(", ")));
-        }
-        return feedback.toString();
     }
 
     /**
@@ -160,6 +116,30 @@ public class EditCommand extends Command {
 
         return new Friend(updatedName, updatedPhone, updatedEmail,
                 friendToEdit.getGames(), updatedTags);
+    }
+
+    /**
+     * Formats feedback with only the details whose stored values changed.
+     */
+    static String formatSuccessMessage(Friend original, Friend edited) {
+        StringBuilder feedback = new StringBuilder(String.format(MESSAGE_EDIT_FRIEND_SUCCESS, edited.getName()));
+        if (!original.getName().fullName.equals(edited.getName().fullName)) {
+            feedback.append("\n- changed name to ").append(edited.getName());
+        }
+        if (!original.getPhone().equals(edited.getPhone())) {
+            feedback.append(edited.getPhone().isEmpty() ? "\n- removed phone number"
+                    : "\n- changed phone number to " + edited.getPhone());
+        }
+        if (!original.getEmail().equals(edited.getEmail())) {
+            feedback.append(edited.getEmail().isEmpty() ? "\n- removed email"
+                    : "\n- changed email to " + edited.getEmail());
+        }
+        if (!original.getTags().equals(edited.getTags())) {
+            feedback.append(edited.getTags().isEmpty() ? "\n- removed tags" : "\n- changed tags to "
+                    + edited.getTags().stream().map(tag -> tag.tagName).sorted()
+                            .collect(Collectors.joining(", ")));
+        }
+        return feedback.toString();
     }
 
     @Override

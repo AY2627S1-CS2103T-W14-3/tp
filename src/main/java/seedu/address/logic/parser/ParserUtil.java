@@ -26,12 +26,13 @@ import seedu.address.model.tag.Tag;
 public class ParserUtil {
 
     public static final String MESSAGE_MISSING_INDEX = "Please provide an index.";
-    public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
+    public static final String MESSAGE_INVALID_INDEX =
+            "Index must be a positive integer between 1 and " + Integer.MAX_VALUE + " (inclusive).";
 
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be
      * trimmed.
-     * @throws ParseException if the specified index is invalid (not a non-zero unsigned integer).
+     * @throws ParseException if the specified index is invalid (not an integer from 1 to {@link Integer#MAX_VALUE}).
      */
     public static Index parseIndex(String oneBasedIndex) throws ParseException {
         requireNonNull(oneBasedIndex);
@@ -43,6 +44,18 @@ public class ParserUtil {
             throw new ParseException(MESSAGE_INVALID_INDEX);
         }
         return Index.fromOneBased(Integer.parseInt(trimmedIndex));
+    }
+
+    /**
+     * Parses a positive one-based friend index or the case-insensitive Myself keyword.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the target is neither a valid index nor the Myself keyword.
+     */
+    public static Index parseIndexOrMyself(String target) throws ParseException {
+        requireNonNull(target);
+        String trimmedTarget = target.trim();
+        return trimmedTarget.equalsIgnoreCase(Index.MYSELF_KEYWORD) ? Index.myself() : parseIndex(trimmedTarget);
     }
 
     /**

@@ -10,6 +10,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -67,7 +68,7 @@ public class AddCommandIntegrationTest {
         new GameMatesParser().parseCommand("add n/Melody Tan").execute(model);
         model.updateFilteredFriendList(friend -> false);
         AddCommand duplicate = (AddCommand) new GameMatesParser().parseCommand("add n/melody   tan");
-        assertCommandFailure(duplicate, model, AddCommand.MESSAGE_DUPLICATE_FRIEND);
+        assertCommandFailure(duplicate, model, Messages.MESSAGE_DUPLICATE_FRIEND);
     }
 
     @Test
@@ -82,7 +83,15 @@ public class AddCommandIntegrationTest {
     public void execute_duplicateFriend_throwsCommandException() {
         Friend friendInList = model.getGameMates().getFriendList().get(0);
         assertCommandFailure(new AddCommand(friendInList), model,
-                AddCommand.MESSAGE_DUPLICATE_FRIEND);
+                Messages.MESSAGE_DUPLICATE_FRIEND);
+    }
+
+    @Test
+    public void execute_nameConflictsWithMyself_failure() {
+        model.setMyself(new FriendBuilder().withName("Melody Tan").build());
+        Friend duplicate = new FriendBuilder().withName("melody   tan").build();
+
+        assertCommandFailure(new AddCommand(duplicate), model, Messages.MESSAGE_DUPLICATE_MYSELF);
     }
 
 }
