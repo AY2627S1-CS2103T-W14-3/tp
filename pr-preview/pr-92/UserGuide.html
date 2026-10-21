@@ -156,7 +156,7 @@ For example, if the command specifies <code class="language-plaintext highlighte
 Quotes are not needed around multiword names. Use only the prefixes documented for each command.</li>
     <li>Repeating a single-value <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> parameter in <code class="language-plaintext highlighter-rouge">add</code> or <code class="language-plaintext highlighter-rouge">edit</code> is rejected, even with identical values.
 Tags may be repeated; identical tag values are applied once.</li>
-    <li>Friend indices refer to the current left-hand list and range from 1 to 2147483647. Run <code class="language-plaintext highlighter-rouge">list</code> to see all friends
+    <li>Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run <code class="language-plaintext highlighter-rouge">list</code> to see all friends
 again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.</li>
     <li>
       <p>For <code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> means either a displayed friend index or the
@@ -378,8 +378,8 @@ Each game card shows the game name and in-game username if provided.</p>
 <p>Format: <code class="language-plaintext highlighter-rouge">gamelist &lt;FRIEND_INDEX&gt; [g/GAME_NAME]</code></p>
 
 <ul>
-  <li>Replace <code class="language-plaintext highlighter-rouge">&lt;FRIEND_INDEX&gt;</code> with a positive integer; do not type the angle brackets. The index is required and refers
-to the <strong>currently displayed friend list</strong>, including after <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code>.</li>
+  <li>Replace <code class="language-plaintext highlighter-rouge">&lt;FRIEND_INDEX&gt;</code> with a positive integer from 1 to 2147483647 (inclusive); do not type the angle brackets.
+The index is required and refers to the <strong>currently displayed friend list</strong>, including after <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code>.</li>
   <li>Without <code class="language-plaintext highlighter-rouge">g/</code>, all of the selected friend’s games are shown. This also clears a previous game display filter.</li>
   <li>With <code class="language-plaintext highlighter-rouge">g/</code>, only a game with the complete matching name is shown. Matching is case-insensitive:
 <code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not. Usernames are not searched.</li>
@@ -464,7 +464,7 @@ while the left panel continues showing only Minecraft players.</li>
     </tr>
     <tr>
       <td>Malformed, zero, negative or overflowing index</td>
-      <td><code class="language-plaintext highlighter-rouge">Invalid friend index. Enter a positive integer.</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive).</code></td>
     </tr>
     <tr>
       <td>Positive index outside the displayed list</td>
@@ -540,7 +540,7 @@ Use that empty prefix on its own; combining it with non-empty tags is rejected.<
 <ul>
   <li>Missing index: <code class="language-plaintext highlighter-rouge">Please provide an index.</code>
 </li>
-  <li>Invalid index: <code class="language-plaintext highlighter-rouge">Index must be a positive integer.</code>
+  <li>Invalid index (including a value above 2147483647): <code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
 </li>
   <li>Empty displayed list: <code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list to show all friends.</code>
 </li>
@@ -595,7 +595,7 @@ friend’s complete details and games on the right. An empty keyword list is rej
   <li>Deletes the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>.</li>
   <li>The index refers to the index number shown in the displayed friend list.</li>
   <li>The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
-  <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647.</li>
+  <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647 (inclusive).</li>
   <li>A successful deletion displays <code class="language-plaintext highlighter-rouge">Successfully deleted FRIEND_NAME.</code>
 </li>
   <li>Deletion happens immediately, with no confirmation dialog and no undo command. The friend’s games are deleted
@@ -617,7 +617,7 @@ with the friend; other friends and your stored profile are preserved. The curren
   <li>Missing index: <code class="language-plaintext highlighter-rouge">Please provide an index.</code>
 </li>
   <li>Invalid index (such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">-1</code>, or <code class="language-plaintext highlighter-rouge">abc</code>), extra arguments, or a value above 2147483647:
-<code class="language-plaintext highlighter-rouge">Index must be a positive integer.</code>
+<code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
 </li>
   <li>Index outside the displayed list, including an empty list: <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>
 </li>
