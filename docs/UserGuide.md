@@ -280,7 +280,7 @@ Format: `squad g/GAME n/NUMBER_OF_PEOPLE`
 * `NUMBER_OF_PEOPLE` must be a whole number from 1 to 20, inclusive.
 * The requested size includes you: `n/3` selects you and two friends; `n/1` returns only you.
 * You are always included as the first member, labelled `Me`, even if your profile does not contain `GAME`.
-* The other `NUMBER_OF_PEOPLE - 1` members are selected from the **currently displayed friend list**.
+* The other `NUMBER_OF_PEOPLE - 1` members are selected from the **currently displayed friend list**. To include your entire friend list, run `list` first.
   Each must play `GAME`. A person cannot appear more than once in a squad.
 * Selection is random. Repeating the command may return a different squad, but may also return the same one.
 
@@ -495,6 +495,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Edit** | <code>edit FRIEND_INDEX&#124;myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
 | **Game list** | `gamelist <FRIEND_INDEX> [g/GAME_NAME]`<br> e.g., `gamelist 2 g/Valorant` |
+| **Squad create** | `squad g/GAME_NAME n/NUMBER_OF_PEOPLE`<br> e.g., `squad g/Valorant n/5` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
 | **Help** | `help` |
 | **Exit** | `exit` |
