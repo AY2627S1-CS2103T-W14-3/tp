@@ -358,8 +358,10 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * Searching starts from all active and archived friends, replacing any previous name or game filter.
   `find` does not accept `n/` or `g/` as filter syntax; such text is treated as literal name keywords.
 * Results appear under **Search results**, with an **Archived** badge on archived friends.
-* `archive INDEX` archives an active result; `unarchive INDEX` restores an archived result. The friend stays in
-  the search results with their updated status, and the search filter and displayed order stay in place.
+* `unarchive INDEX` restores an archived result. The friend stays in the search results with their updated status,
+  and the search filter and displayed order stay in place.
+* To archive a friend, run `list` first and use their index in that active list. Running `archive` from search
+  results reports `Please switch back to list to archive a friend.` without changing the results.
 * `list` returns to active friends; `archivelist [KEYWORD...]` switches to archived friends only.
 * Feedback is `N friend(s) listed!`. No matches is a successful empty search view. Exactly one result also opens that
   friend's complete details and games on the right. An empty keyword list is rejected with usage instructions.
@@ -376,9 +378,11 @@ Hides a friend from the active list while keeping their contact details, tags, g
 
 Format: `archive FRIEND_INDEX`
 
-* The index refers to the currently displayed list, including filtered results. It must be a positive integer.
-* In the active view, the friend disappears immediately. In **Search results**, the friend stays visible with an
-  **Archived** badge. The current filter stays in place.
+* Run `list` or `list g/GAME_NAME` first. The index refers to the displayed active list, including game-filtered
+  results. It must be a positive integer.
+* From the archive view or **Search results**, `archive` reports `Please switch back to list to archive a friend.`
+  before checking whether the index exists. This also applies when those views are empty; data and view stay unchanged.
+* The friend disappears from the active view immediately. The current filter stays in place.
 * Feedback is `Archived FRIEND_NAME.`. Archiving an already archived friend is rejected.
 * Your Myself profile cannot be archived. `myself`, missing indices, extra arguments and invalid indices are rejected.
 * Archived friends keep their names reserved. Adding or renaming another friend to the same name is rejected

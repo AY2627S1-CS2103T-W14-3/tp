@@ -6,6 +6,7 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.model.FriendListView;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
 
@@ -13,9 +14,10 @@ import seedu.address.model.friend.Friend;
 public class ArchiveCommand extends Command {
     public static final String COMMAND_WORD = "archive";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Selects an active friend by its displayed index.\n"
+            + ": Archives a friend by its displayed index in the active list. Run list first.\n"
             + "Parameters: FRIEND_INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 1";
+    public static final String MESSAGE_WRONG_VIEW = "Please switch back to list to archive a friend.";
     public static final String MESSAGE_SUCCESS = "Archived %1$s.";
     public static final String MESSAGE_WRONG_STATUS = "This friend is already archived. "
             + "Use list to select an active friend.";
@@ -32,6 +34,9 @@ public class ArchiveCommand extends Command {
         requireNonNull(model);
         if (targetIndex.isMyself()) {
             throw new CommandException(MESSAGE_MYSELF);
+        }
+        if (model.getFriendListView() != FriendListView.ACTIVE) {
+            throw new CommandException(MESSAGE_WRONG_VIEW);
         }
         if (targetIndex.getZeroBased() >= model.getFilteredFriendList().size()) {
             throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);

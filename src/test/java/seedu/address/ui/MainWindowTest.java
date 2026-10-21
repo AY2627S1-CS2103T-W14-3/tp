@@ -139,7 +139,7 @@ class MainWindowTest {
     }
 
     @Test
-    void globalSearch_keepsHeadingAndRowsWhenArchiveStatusChanges() {
+    void globalSearch_preservesResultsOnRejectedArchiveAndSuccessfulUnarchive() {
         FxTestUtil.runAndWait(() -> {
             Friend alice = new FriendBuilder().withName("Alice").build();
             Friend bob = new FriendBuilder().withName("Bob").build().withArchived(true);
@@ -149,8 +149,11 @@ class MainWindowTest {
             executeCommand(window, "find Alice Bob");
             assertEquals("Search results", getLabel(window, "#listHeading").getText());
             assertEquals(2, getFriendList(window).getItems().size());
-            executeCommand(window, "archive 1");
-            assertEquals(alice.withArchived(true), getFriendList(window).getItems().getFirst());
+            InvocationTargetException failure = assertThrows(InvocationTargetException.class, () ->
+                    invokeCommand(window, "archive 1"));
+            assertInstanceOf(CommandException.class, failure.getCause());
+            assertEquals("Please switch back to list to archive a friend.", failure.getCause().getMessage());
+            assertEquals(alice, getFriendList(window).getItems().getFirst());
             assertEquals("Search results", getLabel(window, "#listHeading").getText());
             executeCommand(window, "unarchive 2");
             assertEquals(bob.withArchived(false), getFriendList(window).getItems().get(1));

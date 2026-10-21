@@ -64,12 +64,12 @@ public class ArchiveCommandsTest {
     public void archiveAndUnarchive_useFilteredDisplayedIndices() throws Exception {
         model.addFriend(bob);
         model.addFriend(alice);
-        execute("find Alice");
+        execute("list g/Valorant");
         execute("archive 1");
-        assertEquals(List.of(alice.withArchived(true)), model.getFilteredFriendList());
-        assertEquals(FriendListView.SEARCH, model.getFriendListView());
+        assertTrue(model.getFilteredFriendList().isEmpty());
+        assertEquals(FriendListView.ACTIVE, model.getFriendListView());
         assertEquals(List.of(bob, alice.withArchived(true)), model.getGameMates().getFriendList());
-        execute("find Bob");
+        execute("list");
         execute("archive 1");
         execute("archivelist ALICE missing");
         assertEquals(List.of(alice.withArchived(true)), model.getFilteredFriendList());
@@ -96,25 +96,41 @@ public class ArchiveCommandsTest {
     }
 
     @Test
-    public void mixedSearch_archiveAndUnarchive_keepResultsAndDisplayedIndices() throws Exception {
+    public void mixedSearch_unarchive_keepsResultsAndDisplayedIndices() throws Exception {
         model.addFriend(bob.withArchived(true));
         model.addFriend(alice);
         execute("find Alice Bob");
         assertEquals(List.of(bob.withArchived(true), alice), model.getFilteredFriendList());
-        execute("archive 2");
-        assertEquals(List.of(bob.withArchived(true), alice.withArchived(true)), model.getFilteredFriendList());
-        assertEquals(FriendListView.SEARCH, model.getFriendListView());
-        assertThrows(CommandException.class, ArchiveCommand.MESSAGE_WRONG_STATUS, () -> execute("archive 1"));
+        assertThrows(CommandException.class, ArchiveCommand.MESSAGE_WRONG_VIEW, () -> execute("archive 2"));
         execute("unarchive 1");
-        assertEquals(List.of(bob, alice.withArchived(true)), model.getFilteredFriendList());
+        assertEquals(List.of(bob, alice), model.getFilteredFriendList());
         assertEquals(FriendListView.SEARCH, model.getFriendListView());
         assertThrows(CommandException.class, UnarchiveCommand.MESSAGE_WRONG_STATUS, () -> execute("unarchive 1"));
-        execute("unarchive 2");
-        assertEquals(List.of(bob, alice), model.getFilteredFriendList());
         execute("archivelist");
         assertTrue(model.getFilteredFriendList().isEmpty());
         execute("list");
         assertEquals(List.of(bob, alice), model.getFilteredFriendList());
+    }
+
+    @Test
+    public void archive_wrongView_reportsGuidanceBeforeIndexValidation() throws Exception {
+        model.addFriend(alice);
+        model.addFriend(bob.withArchived(true));
+        for (String viewCommand : List.of("archivelist", "archivelist Nobody", "find Alice Bob", "find Nobody")) {
+            execute(viewCommand);
+            FriendListView view = model.getFriendListView();
+            List<Friend> displayed = List.copyOf(model.getFilteredFriendList());
+            for (String archiveCommand : List.of("archive 1", "archive 99")) {
+                assertThrows(CommandException.class, ArchiveCommand.MESSAGE_WRONG_VIEW, ()
+                        -> execute(archiveCommand));
+                assertEquals(view, model.getFriendListView());
+                assertEquals(displayed, model.getFilteredFriendList());
+                assertEquals(List.of(alice, bob.withArchived(true)), model.getGameMates().getFriendList());
+            }
+        }
+        execute("list");
+        execute("archive 1");
+        assertEquals(List.of(alice.withArchived(true), bob.withArchived(true)), model.getGameMates().getFriendList());
     }
 
     @Test
@@ -185,7 +201,7 @@ public class ArchiveCommandsTest {
         assertEquals(List.of(alice), model.getGameMates().getFriendList());
         execute("archive 1");
         execute("archivelist");
-        assertThrows(CommandException.class, ArchiveCommand.MESSAGE_WRONG_STATUS, () -> execute("archive 1"));
+        assertThrows(CommandException.class, ArchiveCommand.MESSAGE_WRONG_VIEW, () -> execute("archive 1"));
         assertEquals(List.of(alice.withArchived(true)), model.getFilteredFriendList());
         execute("archivelist nobody");
         assertTrue(model.getFilteredFriendList().isEmpty());
