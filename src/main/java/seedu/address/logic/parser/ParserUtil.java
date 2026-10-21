@@ -26,12 +26,13 @@ import seedu.address.model.tag.Tag;
 public class ParserUtil {
 
     public static final String MESSAGE_MISSING_INDEX = "Please provide an index.";
-    public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
+    public static final String MESSAGE_INVALID_INDEX =
+            "Index must be a positive integer between 1 and " + Integer.MAX_VALUE + " (inclusive).";
 
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be
      * trimmed.
-     * @throws ParseException if the specified index is invalid (not a non-zero unsigned integer).
+     * @throws ParseException if the specified index is invalid (not an integer from 1 to {@link Integer#MAX_VALUE}).
      */
     public static Index parseIndex(String oneBasedIndex) throws ParseException {
         requireNonNull(oneBasedIndex);

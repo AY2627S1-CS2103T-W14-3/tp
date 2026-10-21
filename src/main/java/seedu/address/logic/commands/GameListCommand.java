@@ -20,7 +20,8 @@ public class GameListCommand extends Command {
 
     public static final String COMMAND_WORD = "gamelist";
     public static final String MESSAGE_USAGE = "Invalid command format. Usage: gamelist <FRIEND_INDEX> [g/GAME_NAME]";
-    public static final String MESSAGE_INVALID_INDEX = "Invalid friend index. Enter a positive integer.";
+    public static final String MESSAGE_INVALID_INDEX =
+            "Invalid friend index. Enter a positive integer between 1 and " + Integer.MAX_VALUE + " (inclusive).";
     public static final String MESSAGE_INVALID_GAME_NAME = "Invalid game name %1$s. "
             + "Enter 1–50 printable characters containing at least one letter or digit.";
     public static final String MESSAGE_REPEATED_GAME = "Only one game can be filtered per command. "

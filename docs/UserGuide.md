@@ -73,7 +73,7 @@ saved data. See [Your profile and game entries](#your-profile-and-game-entries) 
   Quotes are not needed around multiword names. Use only the prefixes documented for each command.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
   Tags may be repeated; identical tag values are applied once.
-* Friend indices refer to the current left-hand list and range from 1 to 2147483647. Run `list` to see all friends
+* Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all friends
   again before choosing an index. Zero, negative numbers, decimals, a leading `+` and larger integers are rejected.
 * For `edit`, `gameadd` and `gamedel`, `FRIEND_INDEX|myself` means either a displayed friend index or the
   case-insensitive keyword `myself` for your own profile. Do not type `|`. The selector must come before prefixes;
@@ -255,8 +255,8 @@ Each game card shows the game name and in-game username if provided.
 
 Format: `gamelist <FRIEND_INDEX> [g/GAME_NAME]`
 
-* Replace `<FRIEND_INDEX>` with a positive integer; do not type the angle brackets. The index is required and refers
-  to the **currently displayed friend list**, including after `find` or `list g/GAME_NAME`.
+* Replace `<FRIEND_INDEX>` with a positive integer from 1 to 2147483647 (inclusive); do not type the angle brackets.
+  The index is required and refers to the **currently displayed friend list**, including after `find` or `list g/GAME_NAME`.
 * Without `g/`, all of the selected friend's games are shown. This also clears a previous game display filter.
 * With `g/`, only a game with the complete matching name is shown. Matching is case-insensitive:
   `valorant` matches `Valorant`, but `Val` does not. Usernames are not searched.
@@ -296,7 +296,7 @@ Errors:
 | Input problem | Feedback |
 |---------------|----------|
 | Missing index, unknown prefix or extra positional argument | `Invalid command format. Usage: gamelist <FRIEND_INDEX> [g/GAME_NAME]` |
-| Malformed, zero, negative or overflowing index | `Invalid friend index. Enter a positive integer.` |
+| Malformed, zero, negative or overflowing index | `Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive).` |
 | Positive index outside the displayed list | `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.` |
 | Empty displayed list | `No friends are currently displayed. Use list to show all friends.` |
 | Invalid game name, including empty `g/` | `Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.` |
@@ -341,7 +341,7 @@ Examples:
 Errors:
 
 * Missing index: `Please provide an index.`
-* Invalid index: `Index must be a positive integer.`
+* Invalid index (including a value above 2147483647): `Index must be a positive integer between 1 and 2147483647 (inclusive).`
 * Empty displayed list: `No friends are currently displayed. Use list to show all friends.`
 * Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
@@ -379,7 +379,7 @@ Format: `delete FRIEND_INDEX`
 * Deletes the friend at the specified `FRIEND_INDEX`.
 * The index refers to the index number shown in the displayed friend list.
 * The index **must be a positive integer** 1, 2, 3, …​
-* Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647.
+* Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647 (inclusive).
 * A successful deletion displays `Successfully deleted FRIEND_NAME.`
 * Deletion happens immediately, with no confirmation dialog and no undo command. The friend's games are deleted
   with the friend; other friends and your stored profile are preserved. The current friend-list filter stays active.
@@ -393,7 +393,7 @@ Errors:
 
 * Missing index: `Please provide an index.`
 * Invalid index (such as `0`, `-1`, or `abc`), extra arguments, or a value above 2147483647:
-  `Index must be a positive integer.`
+  `Index must be a positive integer between 1 and 2147483647 (inclusive).`
 * Index outside the displayed list, including an empty list: `The friend index provided is invalid.`
 
 ### Clearing the friend list: `clear`
