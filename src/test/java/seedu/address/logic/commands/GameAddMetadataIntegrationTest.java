@@ -53,7 +53,11 @@ public class GameAddMetadataIntegrationTest {
                 .addMeta("Role", "Support").build();
 
         for (String selector : List.of("1", "myself")) {
-            parser.parseCommand("gameadd " + selector + " g/Valorant m/Role:Support").execute(model);
+            CommandResult result = parser.parseCommand("gameadd " + selector + " g/Valorant m/Role:Support")
+                    .execute(model);
+            String name = selector.equals("myself") ? model.getGameMates().getMyself().getName().toString() : "Alex";
+            assertEquals("Added Valorant to " + name + "'s games.\nUsername: Not provided\nMetadata:\n - Role: Support",
+                    result.getFeedbackToUser());
         }
 
         assertEquals(List.of(expected), List.copyOf(model.getFilteredFriendList().getFirst().getGames()));
@@ -137,11 +141,14 @@ public class GameAddMetadataIntegrationTest {
         model.setMyself(original);
         model.updateFilteredFriendList(friend -> friend.getName().equals(original.getName()));
         Game added = new GameBuilder().withGameName("Valorant").withUsername("player")
-                .addMeta("Role", "Support:Mid").addMeta("Level", "20").build();
+                .addMeta("Role", "Support:Mid").addMeta("level", "20").build();
         Friend updated = new FriendBuilder(original).withGames(existing, added).build();
 
-        parser.parseCommand("gameadd " + selector + " g/Valorant u/player m/Role:Support:Mid m/Level:20")
+        CommandResult result = parser.parseCommand("gameadd " + selector
+                + " g/Valorant u/player m/Role:Support:Mid m/level:20")
                 .execute(model);
+        assertEquals("Added Valorant to Alex's games.\nUsername: player\nMetadata:\n - level: 20\n - Role: Support:Mid",
+                result.getFeedbackToUser());
 
         boolean isMyself = selector.equals("myself");
         assertEquals(isMyself ? original : updated, model.getFilteredFriendList().getFirst());

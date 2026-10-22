@@ -5,8 +5,10 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_META;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_USERNAME;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
@@ -61,9 +63,16 @@ public class GameAddCommand extends Command {
         Friend updatedFriend = new Friend(friend.getName(), friend.getPhone(), friend.getEmail(),
                 games, friend.getTags());
         model.setFriend(target, updatedFriend);
-        return new CommandResult(String.format(MESSAGE_SUCCESS,
+        String feedback = String.format(MESSAGE_SUCCESS,
                 toAdd.getGameName(), friend.getName(),
-                toAdd.getUsername().isEmpty() ? "Not provided" : toAdd.getUsername()));
+                toAdd.getUsername().isEmpty() ? "Not provided" : toAdd.getUsername());
+        if (!toAdd.getMetas().isEmpty()) {
+            feedback += toAdd.getMetas().stream()
+                    .sorted(Comparator.comparing(meta -> meta.getKey().value, String.CASE_INSENSITIVE_ORDER))
+                    .map(meta -> " - " + meta.getKey() + ": " + meta.getValue())
+                    .collect(Collectors.joining("\n", "\nMetadata:\n", ""));
+        }
+        return new CommandResult(feedback);
     }
 
     /** Rejects adding a game that the selected friend or profile already has. */

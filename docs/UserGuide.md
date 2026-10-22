@@ -233,6 +233,7 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
 * Metadata appears below the username, sorted by key ignoring case. Long fields wrap; scroll for additional rows.
+* The success message also lists supplied metadata below the username, sorted by key ignoring case.
 
 Examples:
 
