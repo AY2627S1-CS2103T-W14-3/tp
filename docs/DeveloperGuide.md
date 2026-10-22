@@ -309,7 +309,39 @@ prefixes and `list` does not parse `n/`. The `find` parser only requires a
 non-empty keyword list; there is no 255-character keyword validation. No-match queries return successful empty
 results. Filtering and sorting never include or edit the separate profile.
 
-### Viewing games
+### Editing an existing game
+
+`GameEditCommandParser` reuses `ArgumentTokenizer`, `ArgumentMultimap`, `ParserUtil.parseIndexOrMyself`,
+`parseGameName`, `parseUsername` and `parseMetas`. Its immutable `EditGameDescriptor` distinguishes omitted
+metadata (`null`) from a supplied empty replacement set. A single empty `m/` clears metadata; all other
+supplied pairs pass through the shared parser, including normalized duplicate-key checks and first-colon splitting.
+The model identity rules remain unchanged. The merged optional-username model provides `Username.EMPTY`; a supplied empty `u/` maps to that value.
+Omitting `u/` preserves the original username, including an absent username.
+
+The parser opts into `ArgumentTokenizer.tokenizeWithQuotedValues` so a whole field value can be double quoted.
+Recognized prefixes inside that value are literal text: `g/"PUBG n/Game"` selects that complete stored name.
+The tokenizer decodes `\"` and `\\`, rejects malformed quotes/escapes and trailing text, and then passes the
+decoded values through the same field validators and duplicate-prefix checks. Unquoted prefixes retain their
+existing command meaning. The ordinary tokenizer and other commands' syntax remain unchanged.
+
+`GameEditCommand` uses `FriendTargetResolver` and `Model.resolveFriend` for displayed indices or Myself.
+It requires exactly one matching existing game, constructs the complete replacement, then checks collisions
+against the other games before calling `Model.setFriend(target, updated)` once. Ambiguous duplicate names in
+externally edited JSON fail without mutation. `Friend.withGames` copies all current friend fields and defensively
+copies the replacement set, including the original archive and pin statuses. Tests cover pinned order, archived
+targets in archive and global search scopes, and save/reload preservation of both statuses. Its explicit copy
+constructor must also copy any new fields introduced by future integrations.
+
+The command retains the list predicate. A successful friend edit returns the updated friend through
+`CommandResult`, clearing any old game-card filter. A successful profile edit uses the existing profile refresh.
+Failures return no result and preserve the current details. `LogicManager` saves through the existing storage;
+there is no new persistence mechanism or transaction spanning model mutation and a failing disk write.
+Tests exercise command routing, atomic validation, displayed targets, metadata replacement, profile updates,
+case-only spelling, UI refresh and real JSON storage round trips.
+
+The [game edit sequence diagram source](diagrams/GameEditSequenceDiagram.puml) shows validation before mutation.
+
+### Viewing a friend's games
 
 `gamelist FRIEND_INDEX|myself [g/GAME_NAME]` selects a friend or the user profile for the right-hand details panel
 without changing the left-hand friend list. The flow is:
@@ -361,7 +393,7 @@ before publishing a complete v1.3 MVP guide.
 |------|-------------------------|------------------------------------|
 | Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | Use <code>edit FRIEND_INDEX&#124;myself ...</code>. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
 | Game add/delete | Add or delete a friend's game, with optional metadata on addition (pp. 17–23). | Use <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code> and <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code>. See [Myself profile](#myself-profile). |
-| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | Model, parser utilities, JSON persistence, command entry through `gameadd` and game-card rendering are implemented. See [Game metadata](#game-metadata) for the implemented API. |
+| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | Model, parser utilities, JSON persistence, command entry through `gameadd`, replacement/clearing through `gameedit` and game-card rendering are implemented. See [Game metadata](#game-metadata) for the implemented API. |
 | Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
 | Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
 | Phone/email | Phone: 1–40 characters from a broad punctuation set. Email: 1–255 characters containing `@` (pp. 5–6). | Phone: 3–15 ASCII digits, or `+` with 2–15, with constrained grouping and no extensions. Email: at most 254 characters, local part at most 64, ASCII dot-atom and valid domain labels. |
@@ -409,6 +441,8 @@ Missing separators and invalid fields cause `ParseException`.
 
 `parseMetas()` parses a collection of raw values and rejects duplicate normalized keys before returning a set.
 Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
+`GameEditCommandParser` uses these utilities for metadata replacement and handles a single empty `m/` as clearing.
+
 `GameAddCommandParser` tokenizes the optional, repeatable `CliSyntax.PREFIX_META` (`m/`) alongside `g/` and `u/`.
 It passes all raw metadata values to `parseMetas()` and constructs the `Game` with the validated set.
 Omitting `m/` produces an empty set. Duplicate `g/` or `u/` prefixes remain invalid; repeated `m/` prefixes
@@ -576,7 +610,8 @@ The logic layer exposes `getFriendListScope()` to the UI. `MainWindow` updates t
    displayed position with updated status. Neither command resets the predicate or scope.
 1. `LogicManager` saves the updated collection through the existing storage path.
 
-`edit`, `gameadd` and `gamedel` preserve archive status when constructing replacement friends. Friend edits clear
+`edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status when constructing replacement friends.
+`gameedit` retains the current scope and predicate. Friend edits clear
 filters within active/archive scopes, while global searches retain their name predicate. Renaming a search
 result can therefore remove it from the results. `delete` permanently removes the selected friend from either
 status; `clear` removes both statuses while preserving Myself.
@@ -816,7 +851,7 @@ The following are targets, not measured guarantees. Startup/performance and larg
 * **Role**: A job or duty a friend plays as in a particular game, for example a friend can play as a `Sniper` or a `Healer`.
 * **Game name**: The user-provided name used to identify a game within one friend’s game entries. Aliases such as “Val” and “Valorant” are treated as different game names.
 * **In-game username/Handle**: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.
-* **Metadata**: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; entered through `gameadd` using `m/KEY:VALUE` and displayed below the username in game cards.
+* **Metadata**: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; entered through `gameadd` using `m/KEY:VALUE`, replaced or cleared through `gameedit`, and displayed below the username in game cards.
 * **Metadata key**: The label before the first colon in a metadata item. For example, `Role` in `Role:Sentinel`.
 * **Metadata value**: The information after the first colon in a metadata item. For example, `Sentinel` in `Role:Sentinel`.
 * **Friend index**: A positive number representing a friend’s position in the currently displayed friend list.
@@ -988,3 +1023,28 @@ on open PRs labelled `type.Docs`; this task does not publish a preview or change
 Current screenshots must come from the application, not the specification mockups. `Ui.png` shows both panels,
 `findAlexDavidResult.png` shows name filtering, and `gamelistFiltered.png` / `gamelistNoMatch.png` show card filtering.
 Diagram sources live in `docs/diagrams`; regenerate their matching `docs/images/*.png` after changing a source.
+
+### Manual game edit checks
+
+Use a disposable data directory. Add `add n/Tester`, `gameadd 1 g/Valorant u/tester` and
+`gameadd 1 g/Minecraft u/builder`. Edit with `gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Role:Healer`.
+Expect both games and preserved friend fields. Try `gameedit 1 g/Valorant n/Minecraft` and repeated
+normalized metadata keys; expect errors with unchanged data and details. Clear with `gameedit 1 g/Valorant m/`.
+Add `gameadd myself g/Valorant u/own`, run `find Nobody`, then `gameedit myself g/Valorant u/newOwn`;
+expect updated profile despite the empty list. Restart from the same directory and confirm all edits persist.
+
+To check literal prefixes, run `list`, then add both `gameadd 1 g/PUBG u/plain` and
+`gameadd 1 g/PUBG n/Game u/special`.
+Run `gameedit 1 g/"PUBG n/Game" u/updated`: only `PUBG n/Game` should change; the plain `PUBG` entry must
+retain username `plain`. Rename the quoted target using `n/"PUBG m/Edition"` and edit it again using
+`g/"PUBG m/Edition"`. An unclosed quoted selector must report an error without changing either game.
+
+Run `list`, `archive 1`, then `archivelist`. Edit with `gameedit 1 g/Valorant u/archivePlayer`;
+expect the edited friend to remain archived, the heading to stay `Archived friends`, and other fields/games
+to remain unchanged. Run `find Tester` and edit the same game again: expect archived status and the
+`Search results` scope to remain. Restart and use `archivelist` to confirm the saved edit and archive status.
+
+Run `unarchive 1`, `list`, then `pin 1`. Edit with `gameedit 1 g/Valorant m/Role:Tank`;
+expect the friend to keep its pinned badge and list position, and the details card to show `Role: Tank`.
+Archive the pinned friend, run `archivelist` and edit its username again. Restart and use `archivelist`;
+expect the edited game, pinned badge and archived status to persist.

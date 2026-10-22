@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import seedu.address.logic.parser.exceptions.ParseException;
+
 /**
  * Tokenizes arguments string of the form: {@code preamble <prefix>value <prefix>value ...}<br>
  *     e.g. {@code some preamble text t/ 11.00 t/12.00 k/ m/ July}  where prefixes are {@code t/ k/ m/}.<br>
@@ -14,6 +16,75 @@ import java.util.stream.Collectors;
  *    in the above example.<br>
  */
 public class ArgumentTokenizer {
+
+    public static final String MESSAGE_INVALID_QUOTED_VALUE = "Invalid quoted value. Enclose the entire value in "
+            + "double quotes; escape double quotes and backslashes with a backslash.";
+
+    /**
+     * Tokenizes with optional double quotes around complete values. Prefixes inside quotes are literal text.
+     * Only callers opting into this method interpret quotes and backslash escapes; ordinary tokenization is unchanged.
+     *
+     * @throws ParseException if a quoted value is unterminated, has an invalid escape,
+     *     or has text after its closing quote.
+     */
+    public static ArgumentMultimap tokenizeWithQuotedValues(String argsString, Prefix... prefixes)
+            throws ParseException {
+        List<PrefixPosition> positions = findAllPrefixPositions(argsString, prefixes);
+        positions.sort((first, second) -> first.getStartPosition() - second.getStartPosition());
+        ArgumentMultimap arguments = new ArgumentMultimap();
+        int preambleEnd = positions.isEmpty() ? argsString.length() : positions.getFirst().getStartPosition();
+        arguments.put(new Prefix(""), argsString.substring(0, preambleEnd).trim());
+        for (int i = 0; i < positions.size();) {
+            PrefixPosition current = positions.get(i);
+            int valueStart = current.getStartPosition() + current.getPrefix().getPrefix().length();
+            while (valueStart < argsString.length() && argsString.charAt(valueStart) <= ' ') {
+                valueStart++;
+            }
+            int next = i + 1;
+            String value;
+            if (valueStart < argsString.length() && argsString.charAt(valueStart) == '"') {
+                QuotedValue quoted = readQuotedValue(argsString, valueStart);
+                while (next < positions.size() && positions.get(next).getStartPosition() < quoted.endPosition()) {
+                    next++;
+                }
+                int valueEnd = next < positions.size() ? positions.get(next).getStartPosition() : argsString.length();
+                if (!argsString.substring(quoted.endPosition(), valueEnd).trim().isEmpty()) {
+                    throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
+                }
+                value = quoted.value().trim();
+            } else {
+                // Use the original prefix boundary even when the current value contains only whitespace.
+                int valueEnd = next < positions.size() ? positions.get(next).getStartPosition() : argsString.length();
+                int rawStart = current.getStartPosition() + current.getPrefix().getPrefix().length();
+                value = argsString.substring(rawStart, valueEnd).trim();
+            }
+            arguments.put(current.getPrefix(), value);
+            i = next;
+        }
+        return arguments;
+    }
+
+    private static QuotedValue readQuotedValue(String argsString, int start) throws ParseException {
+        StringBuilder value = new StringBuilder();
+        for (int i = start + 1; i < argsString.length(); i++) {
+            char character = argsString.charAt(i);
+            if (character == '"') {
+                return new QuotedValue(value.toString(), i + 1);
+            }
+            if (character == '\\') {
+                i++;
+                if (i == argsString.length() || (argsString.charAt(i) != '"' && argsString.charAt(i) != '\\')) {
+                    throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
+                }
+                character = argsString.charAt(i);
+            }
+            value.append(character);
+        }
+        throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
+    }
+
+    private record QuotedValue(String value, int endPosition) {
+    }
 
     /**
      * Tokenizes an arguments string and returns an {@code ArgumentMultimap} object that maps prefixes to their
