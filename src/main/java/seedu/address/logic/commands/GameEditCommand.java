@@ -78,7 +78,7 @@ public class GameEditCommand extends Command {
         String metadata = replacement.getMetas().isEmpty() ? "None" : replacement.getMetas().stream()
                 .map(Meta::toString).sorted().collect(Collectors.joining(", "));
         String feedback = String.format(MESSAGE_SUCCESS, friend.getName(), replacement.getGameName(),
-                replacement.getUsername(), metadata);
+                replacement.getUsername().isEmpty() ? "Not provided" : replacement.getUsername().value, metadata);
         return target.isMyself() ? new CommandResult(feedback) : new CommandResult(feedback, updated);
     }
 

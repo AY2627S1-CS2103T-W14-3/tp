@@ -93,6 +93,19 @@ public class GameEditCommandTest {
     }
 
     @Test
+    public void execute_clearAndOmitUsername_preservesMetadataAndOtherFields() throws Exception {
+        model.addFriend(friend);
+        CommandResult result = execute("gameedit 1 g/Valorant u/");
+        assertTrue(result.getFeedbackToUser().contains("Username: Not provided"));
+        assertTrue(game(model.getFilteredFriendList().getFirst(), "Valorant").getUsername().isEmpty());
+        execute("gameedit 1 g/Valorant n/New Game");
+        Game renamed = game(model.getFilteredFriendList().getFirst(), "New Game");
+        assertTrue(renamed.getUsername().isEmpty());
+        assertEquals(original.getMetas(), renamed.getMetas());
+        assertTrue(model.getFilteredFriendList().getFirst().getGames().contains(other));
+    }
+
+    @Test
     public void execute_errors_leaveEveryFieldUnchanged() throws Exception {
         model.addFriend(friend);
         for (String input : new String[]{"gameedit 1 g/Valorant n/MINECRAFT", "gameedit 1 g/Val u/newPlayer",
