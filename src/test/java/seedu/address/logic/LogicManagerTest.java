@@ -24,7 +24,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.FriendListView;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyGameMates;
@@ -90,21 +90,21 @@ public class LogicManagerTest {
         model.addFriend(AMY);
         Friend profile = logic.getMyself();
         JsonGameMatesStorage storage = new JsonGameMatesStorage(temporaryFolder.resolve("gameMates.json"));
-        assertEquals(FriendListView.ACTIVE, logic.getFriendListView());
+        assertEquals(FriendListScope.ACTIVE, logic.getFriendListScope());
 
         logic.execute("archive 1");
         assertEquals(List.of(AMY.withArchived(true)), storage.readGameMates().get().getFriendList());
         logic.execute("archivelist");
-        assertEquals(FriendListView.ARCHIVED, logic.getFriendListView());
+        assertEquals(FriendListScope.ARCHIVED, logic.getFriendListScope());
         assertEquals(List.of(AMY.withArchived(true)), logic.getFilteredFriendList());
         logic.execute("find " + AMY.getName().fullName);
-        assertEquals(FriendListView.SEARCH, logic.getFriendListView());
+        assertEquals(FriendListScope.SEARCH, logic.getFriendListScope());
         logic.execute("unarchive 1");
-        assertEquals(FriendListView.SEARCH, logic.getFriendListView());
+        assertEquals(FriendListScope.SEARCH, logic.getFriendListScope());
         assertEquals(List.of(AMY), logic.getFilteredFriendList());
         assertEquals(List.of(AMY), storage.readGameMates().get().getFriendList());
         logic.execute("list");
-        assertEquals(FriendListView.ACTIVE, logic.getFriendListView());
+        assertEquals(FriendListScope.ACTIVE, logic.getFriendListScope());
         assertEquals(profile, logic.getMyself());
         assertEquals(profile, storage.readGameMates().get().getMyself());
     }

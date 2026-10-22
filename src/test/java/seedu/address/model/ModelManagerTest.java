@@ -132,6 +132,22 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void equals_emptyListsWithDifferentScopes_distinguishesUserVisibleState() {
+        ModelManager active = new ModelManager();
+        ModelManager archived = new ModelManager();
+        ModelManager search = new ModelManager();
+        archived.updateArchivedFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+        search.updateSearchFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+        assertEquals(active.getFilteredFriendList(), archived.getFilteredFriendList());
+        assertEquals(active.getFilteredFriendList(), search.getFilteredFriendList());
+        assertFalse(active.equals(archived));
+        assertFalse(archived.equals(search));
+        assertFalse(search.equals(active));
+        active.updateSearchFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+        assertEquals(active, search);
+    }
+
+    @Test
     public void equals() {
         GameMates gameMates = new GameMatesBuilder().withFriend(ALICE).withFriend(BENSON).build();
         GameMates differentGameMates = new GameMates();

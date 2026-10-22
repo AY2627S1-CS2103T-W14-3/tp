@@ -15,7 +15,7 @@ import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.FriendListView;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.friend.Friend;
@@ -52,7 +52,7 @@ public class ArchiveCommandsTest {
         assertEquals("Restored Alice Tan.",
                 parser.parseCommand("unarchive 1").execute(restarted).getFeedbackToUser());
         assertTrue(restarted.getFilteredFriendList().isEmpty());
-        assertEquals(FriendListView.ARCHIVED, restarted.getFriendListView());
+        assertEquals(FriendListScope.ARCHIVED, restarted.getFriendListScope());
         parser.parseCommand("list").execute(restarted);
         assertEquals(List.of(alice), restarted.getFilteredFriendList());
         assertEquals(profile, restarted.getGameMates().getMyself());
@@ -67,7 +67,7 @@ public class ArchiveCommandsTest {
         execute("list g/Valorant");
         execute("archive 1");
         assertTrue(model.getFilteredFriendList().isEmpty());
-        assertEquals(FriendListView.ACTIVE, model.getFriendListView());
+        assertEquals(FriendListScope.ACTIVE, model.getFriendListScope());
         assertEquals(List.of(bob, alice.withArchived(true)), model.getGameMates().getFriendList());
         execute("list");
         execute("archive 1");
@@ -86,7 +86,7 @@ public class ArchiveCommandsTest {
         execute("archivelist");
         execute("find Alice Bob");
         assertEquals(List.of(alice.withArchived(true), bob), model.getFilteredFriendList());
-        assertEquals(FriendListView.SEARCH, model.getFriendListView());
+        assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
         execute("archivelist");
         execute("list g/Valorant");
         assertTrue(model.getFilteredFriendList().isEmpty());
@@ -103,13 +103,13 @@ public class ArchiveCommandsTest {
         assertEquals(List.of(bob.withArchived(true), alice), model.getFilteredFriendList());
         execute("archive 2");
         assertEquals(List.of(bob.withArchived(true), alice.withArchived(true)), model.getFilteredFriendList());
-        assertEquals(FriendListView.SEARCH, model.getFriendListView());
+        assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
         assertThrows(CommandException.class, ArchiveCommand.MESSAGE_WRONG_STATUS, () -> execute("archive 1"));
         assertThrows(CommandException.class, ArchiveCommand.MESSAGE_WRONG_STATUS, () -> execute("archive 2"));
         execute("unarchive 2");
         execute("unarchive 1");
         assertEquals(List.of(bob, alice), model.getFilteredFriendList());
-        assertEquals(FriendListView.SEARCH, model.getFriendListView());
+        assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
         assertThrows(CommandException.class, UnarchiveCommand.MESSAGE_WRONG_STATUS, () -> execute("unarchive 1"));
         execute("archivelist");
         assertTrue(model.getFilteredFriendList().isEmpty());
@@ -123,12 +123,12 @@ public class ArchiveCommandsTest {
         model.addFriend(bob.withArchived(true));
         for (String viewCommand : List.of("archivelist", "archivelist g/Unknown")) {
             execute(viewCommand);
-            FriendListView view = model.getFriendListView();
+            FriendListScope view = model.getFriendListScope();
             List<Friend> displayed = List.copyOf(model.getFilteredFriendList());
             for (String archiveCommand : List.of("archive 1", "archive 99")) {
                 assertThrows(CommandException.class, ArchiveCommand.MESSAGE_WRONG_VIEW, ()
                         -> execute(archiveCommand));
-                assertEquals(view, model.getFriendListView());
+                assertEquals(view, model.getFriendListScope());
                 assertEquals(displayed, model.getFilteredFriendList());
                 assertEquals(List.of(alice, bob.withArchived(true)), model.getGameMates().getFriendList());
             }
@@ -148,7 +148,7 @@ public class ArchiveCommandsTest {
             assertThrows(CommandException.class, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX, ()
                     -> execute("archive 99"));
             assertEquals(displayed, model.getFilteredFriendList());
-            assertEquals(FriendListView.SEARCH, model.getFriendListView());
+            assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
             assertEquals(List.of(alice, bob.withArchived(true)), model.getGameMates().getFriendList());
         }
     }
@@ -161,18 +161,18 @@ public class ArchiveCommandsTest {
         assertEquals(alice.withArchived(true), execute("find ALICE").getFriendToShow().get());
         execute("find Bo");
         assertTrue(model.getFilteredFriendList().isEmpty());
-        assertEquals(FriendListView.SEARCH, model.getFriendListView());
+        assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
         execute("find Bob");
         assertEquals(List.of(bob), model.getFilteredFriendList());
         execute("list g/Valorant");
         execute("find Alice Bob");
         assertEquals(List.of(alice.withArchived(true), bob), model.getFilteredFriendList());
         assertThrows(ParseException.class, () -> execute("find"));
-        assertEquals(FriendListView.SEARCH, model.getFriendListView());
+        assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
         assertEquals(List.of(alice.withArchived(true), bob), model.getFilteredFriendList());
         execute("archivelist g/Minecraft");
         assertTrue(model.getFilteredFriendList().isEmpty());
-        assertEquals(FriendListView.ARCHIVED, model.getFriendListView());
+        assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
     }
 
     @Test
@@ -181,12 +181,12 @@ public class ArchiveCommandsTest {
         model.addFriend(bob);
         execute("find Alice");
         execute("edit 1 p/91234567");
-        assertEquals(FriendListView.SEARCH, model.getFriendListView());
+        assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
         assertTrue(model.getFilteredFriendList().getFirst().isArchived());
         assertEquals(1, model.getFilteredFriendList().size());
         execute("edit 1 n/Carol");
         assertTrue(model.getFilteredFriendList().isEmpty());
-        assertEquals(FriendListView.SEARCH, model.getFriendListView());
+        assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
         execute("find Carol");
         assertTrue(model.getFilteredFriendList().getFirst().isArchived());
     }
@@ -204,12 +204,12 @@ public class ArchiveCommandsTest {
         assertEquals("Listed 1 archived friend(s).",
                 execute("archivelist g/  stardew valley ").getFeedbackToUser());
         assertEquals(List.of(archived), model.getFilteredFriendList());
-        assertEquals(FriendListView.ARCHIVED, model.getFriendListView());
+        assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
         for (String invalid : List.of("archivelist Alice", "archivelist g/", "archivelist g/!!!",
                 "archivelist g/Valorant g/Minecraft")) {
             assertThrows(ParseException.class, () -> execute(invalid));
             assertEquals(List.of(archived), model.getFilteredFriendList());
-            assertEquals(FriendListView.ARCHIVED, model.getFriendListView());
+            assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
         }
         execute("archivelist g/Stardew");
         assertTrue(model.getFilteredFriendList().isEmpty());
@@ -227,7 +227,7 @@ public class ArchiveCommandsTest {
         execute("gamedel 1 g/Minecraft");
         assertEquals(alice.withArchived(true), model.getFilteredFriendList().getFirst());
         execute("edit 1 p/91234567");
-        assertEquals(FriendListView.ARCHIVED, model.getFriendListView());
+        assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
         Friend updated = model.getFilteredFriendList().getFirst();
         assertTrue(updated.isArchived());
         assertEquals("91234567", updated.getPhone().value);
@@ -251,7 +251,7 @@ public class ArchiveCommandsTest {
         assertEquals(List.of(alice.withArchived(true)), model.getFilteredFriendList());
         execute("archivelist g/Unknown");
         assertTrue(model.getFilteredFriendList().isEmpty());
-        assertEquals(FriendListView.ARCHIVED, model.getFriendListView());
+        assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
         assertThrows(CommandException.class, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX, ()
                 -> execute("unarchive 1"));
     }
@@ -277,7 +277,33 @@ public class ArchiveCommandsTest {
         execute("delete 1");
         execute("add n/Alice Tan");
         assertEquals(2, model.getGameMates().getFriendList().size());
-        assertEquals(FriendListView.ACTIVE, model.getFriendListView());
+        assertEquals(FriendListScope.ACTIVE, model.getFriendListScope());
+    }
+
+    @Test
+    public void archiveList_emptyFeedback_distinguishesEmptyArchiveFromGameFilter() throws Exception {
+        model.addFriend(bob);
+        assertEquals(ArchiveListCommand.MESSAGE_EMPTY_ARCHIVE, execute("archivelist").getFeedbackToUser());
+        assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
+        assertEquals(ArchiveListCommand.MESSAGE_NO_MATCH,
+                execute("archivelist g/Valorant").getFeedbackToUser());
+        model.addFriend(alice.withArchived(true));
+        assertEquals(ArchiveListCommand.MESSAGE_NO_MATCH,
+                execute("archivelist g/Minecraft").getFeedbackToUser());
+        assertEquals("Listed 1 archived friend(s).", execute("archivelist g/Valorant").getFeedbackToUser());
+        assertEquals("Listed 1 archived friend(s).", execute("archivelist").getFeedbackToUser());
+        execute("unarchive 1");
+        assertEquals(ArchiveListCommand.MESSAGE_EMPTY_ARCHIVE, execute("archivelist").getFeedbackToUser());
+    }
+
+    @Test
+    public void duplicateActiveName_withUnrelatedArchivedFriend_stillReportsActiveDuplicate() throws Exception {
+        model.addFriend(alice.withArchived(true));
+        model.addFriend(bob);
+        assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_FRIEND, () -> execute("add n/Bob Lim"));
+        assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_ARCHIVED_FRIEND, ()
+                -> execute("add n/Alice Tan"));
+        assertEquals(List.of(alice.withArchived(true), bob), model.getGameMates().getFriendList());
     }
 
     @Test

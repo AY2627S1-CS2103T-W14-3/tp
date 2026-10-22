@@ -102,5 +102,5 @@ public interface Model {
     void updateSearchFriendList(Predicate<Friend> predicate);
 
     /** Returns the scope of the displayed list, including when it is empty. */
-    FriendListView getFriendListView();
+    FriendListScope getFriendListScope();
 }

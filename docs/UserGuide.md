@@ -391,7 +391,7 @@ Format: `archive FRIEND_INDEX`
 
 * The index refers to the currently displayed active list or **Search results**, including game-filtered
   active lists. It must be a positive integer.
-* From the archive-only view, `archive` reports `Please switch back to list to archive a friend.` before checking
+* From the archive-only view, `archive` reports `Run list to switch to the active list before archiving a friend.` before checking
   whether the index exists. This also applies when that view is empty; data and view stay unchanged.
 * The friend disappears from the active view immediately. In **Search results**, the friend stays visible with
   an **Archived** badge. The current filter stays in place.
@@ -417,7 +417,11 @@ Format: `archivelist [g/GAME_NAME]`
   using the same validation rules as `list`.
 * Name keywords and `n/` are not supported here. Use `find KEYWORD [MORE_KEYWORDS]` to search names across both active
   and archived friends.
-* Feedback is `Listed N archived friend(s).`. No matches is a successful empty archive view.
+* Non-empty results report `Listed N archived friend(s).`.
+* With no archived friends, unfiltered `archivelist` reports
+  `No archived friends. Use list, then archive INDEX to archive a friend.`
+* A game filter with no matches reports `No archived friends match this game filter.`.
+  Both empty cases are successful commands and keep the **Archived friends** heading.
 * Indices refer to this displayed archive list. Select a friend or use `gamelist 1` to inspect preserved games.
 * `edit`, `gameadd` and `gamedel` work on displayed archived friends and keep them archived. Editing friend
   details clears the game filter within the archive view. `delete` permanently removes a displayed archived friend.

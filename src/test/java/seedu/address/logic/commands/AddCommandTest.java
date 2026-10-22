@@ -18,7 +18,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.FriendListView;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyGameMates;
@@ -167,7 +167,7 @@ public class AddCommandTest {
         }
 
         @Override
-        public FriendListView getFriendListView() {
+        public FriendListScope getFriendListScope() {
             throw new AssertionError("This method should not be called.");
         }
 

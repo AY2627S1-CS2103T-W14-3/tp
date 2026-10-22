@@ -79,6 +79,23 @@ public class GameMatesParserTest {
     }
 
     @Test
+    public void archiveCommandDiagnostics_distinguishTargetsCommandsAndGameFilters() throws Exception {
+        String archiveFirst = parser.parseCommand("archive 1").toString();
+        String archiveSecond = parser.parseCommand("archive 2").toString();
+        String restoreFirst = parser.parseCommand("unarchive 1").toString();
+        String restoreSecond = parser.parseCommand("unarchive 2").toString();
+        assertNotEquals(archiveFirst, archiveSecond);
+        assertNotEquals(restoreFirst, restoreSecond);
+        assertNotEquals(archiveFirst, restoreFirst);
+        String valorant = parser.parseCommand("archivelist g/Valorant").toString();
+        String minecraft = parser.parseCommand("archivelist g/Minecraft").toString();
+        assertTrue(valorant.contains("Valorant"));
+        assertTrue(minecraft.contains("Minecraft"));
+        assertNotEquals(valorant, minecraft);
+        assertNotEquals(valorant, parser.parseCommand("archivelist").toString());
+    }
+
+    @Test
     public void parseCommand_clear() throws Exception {
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD + " 3") instanceof ClearCommand);

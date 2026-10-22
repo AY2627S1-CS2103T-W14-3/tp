@@ -21,7 +21,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.FriendListView;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -251,8 +251,8 @@ class MainWindowTest {
         }
 
         @Override
-        public FriendListView getFriendListView() {
-            return model.getFriendListView();
+        public FriendListScope getFriendListScope() {
+            return model.getFriendListScope();
         }
 
         @Override

@@ -130,7 +130,7 @@ public class MainWindow extends UiPart<Stage> {
 
         friendListPanel = new FriendListPanel(logic.getFilteredFriendList(),
                 this::showFriendDetails);
-        friendListPanel.setFriendListView(logic.getFriendListView());
+        friendListPanel.setFriendListScope(logic.getFriendListScope());
         friendListPanelPlaceholder.getChildren().add(friendListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
@@ -229,7 +229,7 @@ public class MainWindow extends UiPart<Stage> {
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
         } finally {
-            friendListPanel.setFriendListView(logic.getFriendListView());
+            friendListPanel.setFriendListScope(logic.getFriendListScope());
         }
     }
 }

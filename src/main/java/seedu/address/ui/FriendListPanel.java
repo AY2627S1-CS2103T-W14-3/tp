@@ -8,7 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
-import seedu.address.model.FriendListView;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.friend.Friend;
 
 /**
@@ -39,8 +39,8 @@ public class FriendListPanel extends UiPart<Region> {
     }
 
     /** Updates the heading even when the current list is empty. */
-    public void setFriendListView(FriendListView view) {
-        listHeading.setText(switch (view) {
+    public void setFriendListScope(FriendListScope scope) {
+        listHeading.setText(switch (scope) {
             case ACTIVE -> "Active friends";
             case ARCHIVED -> "Archived friends";
             case SEARCH -> "Search results";

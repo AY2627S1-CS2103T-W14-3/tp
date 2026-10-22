@@ -18,7 +18,7 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.CollectionUtil;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.FriendListView;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Email;
 import seedu.address.model.friend.Friend;
@@ -87,9 +87,9 @@ public class EditCommand extends Command {
 
         model.setFriend(target, editedFriend);
         if (!target.isMyself()) {
-            if (model.getFriendListView() == FriendListView.ACTIVE) {
+            if (model.getFriendListScope() == FriendListScope.ACTIVE) {
                 model.updateFilteredFriendList(PREDICATE_SHOW_ALL_FRIENDS);
-            } else if (model.getFriendListView() == FriendListView.ARCHIVED) {
+            } else if (model.getFriendListScope() == FriendListScope.ARCHIVED) {
                 model.updateArchivedFriendList(PREDICATE_SHOW_ALL_FRIENDS);
             }
             // In search results, retain the predicate; renamed friends may no longer match.

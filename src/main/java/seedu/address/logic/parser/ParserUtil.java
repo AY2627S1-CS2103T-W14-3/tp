@@ -45,7 +45,7 @@ public class ParserUtil {
         }
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_GAME);
         Option<String> gameNameValue = argMultimap.getValue(PREFIX_GAME);
-        if (!argMultimap.getPreamble().isEmpty() || gameNameValue.isEmpty()) {
+        if (gameNameValue.isEmpty() || !argMultimap.getPreamble().isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, usage));
         }
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_GAME);

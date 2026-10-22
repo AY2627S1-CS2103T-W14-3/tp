@@ -23,7 +23,7 @@ public class ModelManager implements Model {
     private final GameMates gameMates;
     private final UserPrefs userPrefs;
     private final FilteredList<Friend> filteredFriends;
-    private FriendListView friendListView = FriendListView.ACTIVE;
+    private FriendListScope friendListScope = FriendListScope.ACTIVE;
 
     /**
      * Initializes a ModelManager with the given gameMates and userPrefs.
@@ -131,27 +131,27 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredFriendList(Predicate<Friend> predicate) {
         requireNonNull(predicate);
-        friendListView = FriendListView.ACTIVE;
+        friendListScope = FriendListScope.ACTIVE;
         filteredFriends.setPredicate(friend -> !friend.isArchived() && predicate.test(friend));
     }
 
     @Override
     public void updateArchivedFriendList(Predicate<Friend> predicate) {
         requireNonNull(predicate);
-        friendListView = FriendListView.ARCHIVED;
+        friendListScope = FriendListScope.ARCHIVED;
         filteredFriends.setPredicate(friend -> friend.isArchived() && predicate.test(friend));
     }
 
     @Override
     public void updateSearchFriendList(Predicate<Friend> predicate) {
         requireNonNull(predicate);
-        friendListView = FriendListView.SEARCH;
+        friendListScope = FriendListScope.SEARCH;
         filteredFriends.setPredicate(predicate);
     }
 
     @Override
-    public FriendListView getFriendListView() {
-        return friendListView;
+    public FriendListScope getFriendListScope() {
+        return friendListScope;
     }
 
     @Override
@@ -168,7 +168,7 @@ public class ModelManager implements Model {
         return gameMates.equals(otherModelManager.gameMates)
                 && userPrefs.equals(otherModelManager.userPrefs)
                 && filteredFriends.equals(otherModelManager.filteredFriends)
-                && friendListView == otherModelManager.friendListView;
+                && friendListScope == otherModelManager.friendListScope;
     }
 
 }

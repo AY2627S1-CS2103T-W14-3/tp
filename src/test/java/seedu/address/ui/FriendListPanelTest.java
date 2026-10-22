@@ -13,7 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import seedu.address.model.FriendListView;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.friend.Friend;
 import seedu.address.testutil.FriendBuilder;
 
@@ -45,11 +45,11 @@ class FriendListPanelTest {
             FriendListPanel panel = new FriendListPanel(FXCollections.observableArrayList(), friend -> {});
             Label heading = (Label) panel.getRoot().lookup("#listHeading");
             assertEquals("Active friends", heading.getText());
-            panel.setFriendListView(FriendListView.ARCHIVED);
+            panel.setFriendListScope(FriendListScope.ARCHIVED);
             assertEquals("Archived friends", heading.getText());
-            panel.setFriendListView(FriendListView.ACTIVE);
+            panel.setFriendListScope(FriendListScope.ACTIVE);
             assertEquals("Active friends", heading.getText());
-            panel.setFriendListView(FriendListView.SEARCH);
+            panel.setFriendListScope(FriendListScope.SEARCH);
             assertEquals("Search results", heading.getText());
         });
     }
