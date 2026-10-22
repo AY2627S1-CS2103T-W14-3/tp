@@ -300,10 +300,10 @@ No-match queries return successful empty results. Filtering never includes or ed
 ### Squad metadata conditions
 
 This extension uses the base squad implementation from PR #104 at
-`7abd13f1a00725c86766d4de0c7c4f06dab8398e`, which is not yet merged into team master.
+`5d1b8d00c32c1e3c98784883f0d7de0cda4e03b1`, which is not yet merged into team master.
 The local feature branch includes that exact prerequisite commit; only the subsequent metadata extension
-commits belong to this contribution. Wait for the prerequisite to merge and merge current master before publication.
-PR #89 owns the base squad User Guide; this branch adds a focused metadata section.
+commits belong to this contribution. Wait for the prerequisite to merge, merge current master and retest
+before marking the draft PR ready to merge. The User Guide from merged PR #89 is extended in place.
 
 `SquadCommandParser` tokenizes repeated `m/` values and calls the existing `ParserUtil.parseMetas`.
 That parser rejects empty/malformed pairs and normalized duplicate keys, even for size one.
@@ -315,10 +315,12 @@ its existing random sampling without replacement and displayed-index sort. Me by
 predicate and counts towards the requested size. An empty condition set preserves base matching and feedback.
 No predicates, friends, games or preferences are updated. Seeded randomness controls sampling in tests.
 
-`CommandResult.preservingDetails` carries an explicit UI instruction for squad success and insufficient-candidate
-feedback. `MainWindow.refreshFriendDetails` returns early for that instruction so existing details and game-card
-filters remain visible. Other result constructors retain their previous behavior. `LogicManager` continues using
-its existing save path even though squad makes no data changes.
+`CommandResult.preservingDetails` carries an explicit UI instruction for squad success.
+`MainWindow.refreshFriendDetails` returns early for that instruction so existing details and game-card filters
+remain visible. Insufficient candidates throw `CommandException` with the base squad error text before sampling;
+the existing exception path also preserves the details. Size one uses the base singular `Found squad of 1 person:`
+heading. Other result constructors retain their previous behavior. `LogicManager` continues using its existing
+save path for success even though squad makes no data changes; a command error does not reach the save call.
 
 The [squad metadata sequence diagram source](diagrams/SquadMetadataSequenceDiagram.puml) shows the filtering order.
 
@@ -931,8 +933,9 @@ Use a disposable data directory with two friends playing Valorant, each with `Ro
 metadata in their Valorant JSON entry. Give a third friend only `Role:Healer` on Valorant and `Region:Asia`
 on Minecraft. Select a friend's filtered game details, then run
 `squad g/Valorant n/3 m/role:Healer m/Region:Asia`. Expect Me first and only the two full matches,
-with original displayed indices and the details unchanged. Repeat with `m/role:healer`; expect insufficient
-candidates. Try `n/1`; expect only Me even without matching profile metadata. Try a repeated normalized key
+with original displayed indices and the details unchanged. Repeat with `m/role:healer`; expect an insufficient
+candidates error with unchanged details. Try `n/1`; expect only Me even without matching profile metadata,
+using the heading `Found squad of 1 person:`. Try a repeated normalized key
 and an empty `m/`; expect errors. Run `find` to hide one eligible friend, then request three people;
-expect insufficient candidates. Run `squad g/Valorant n/2` to confirm the base no-metadata behavior.
+expect an insufficient candidates error. Run `squad g/Valorant n/2` to confirm the base no-metadata behavior.
 After each command, confirm list order, filters and selected details persist and the saved model is unchanged.

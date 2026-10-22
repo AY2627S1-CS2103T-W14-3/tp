@@ -3,6 +3,7 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +12,14 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.ParserUtil;
 import seedu.address.model.GameMates;
 import seedu.address.model.ModelManager;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
+import seedu.address.model.game.Username;
 import seedu.address.model.game.meta.Meta;
 import seedu.address.testutil.FriendBuilder;
 import seedu.address.testutil.GameBuilder;
@@ -47,9 +51,8 @@ public class SquadMetadataCommandTest {
                 result.getFeedbackToUser());
         assertTrue(result.isPreserveDetails());
         assertTrue(result.getFriendToShow().isEmpty());
-        assertEquals("Could not find a squad of 4 people.",
-                command(4, "Role:Healer", "Region:Asia").execute(model).getFeedbackToUser());
-        assertTrue(command(4, "Role:Healer", "Region:Asia").execute(model).isPreserveDetails());
+        assertThrows(CommandException.class, "Could not find a squad of 4 people.", () ->
+                command(4, "Role:Healer", "Region:Asia").execute(model));
         assertEquals(before, model.getGameMates());
         assertEquals(visible, model.getFilteredFriendList());
         model.updateFilteredFriendList(friend -> true);
@@ -58,10 +61,40 @@ public class SquadMetadataCommandTest {
 
     @Test
     public void execute_sizeOne_meNeedsNeitherGameNorMetadata() throws Exception {
-        assertEquals("Found squad of 1 people:\n1. Me", command(1, "Role:Healer").execute(model).getFeedbackToUser());
+        assertEquals("Found squad of 1 person:\n1. Me", command(1, "Role:Healer").execute(model).getFeedbackToUser());
         model.setMyself(player("Own Profile", "Tank", "Europe"));
-        assertEquals("Found squad of 1 people:\n1. Me (username: Amy123)",
+        assertEquals("Found squad of 1 person:\n1. Me (username: Amy123)",
                 command(1, "Role:Healer").execute(model).getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_insufficientAfterFiltering_throwsBeforeSamplingAndPreservesState() throws Exception {
+        model.addFriend(player("Tank", "Tank", "Asia"));
+        model.addFriend(player("Healer", "Healer", "Europe"));
+        GameMates before = new GameMates(model.getGameMates());
+        List<Friend> displayed = new ArrayList<>(model.getFilteredFriendList());
+        Random unused = new Random(0) {
+            @Override
+            public int nextInt(int bound) {
+                throw new AssertionError("Insufficient candidates must fail before sampling");
+            }
+        };
+        SquadCommand filtered = new SquadCommand(game, 2,
+                ParserUtil.parseMetas(List.of("Role:Healer", "Region:Asia")), unused);
+        assertThrows(CommandException.class, "Could not find a squad of 2 people.", () -> filtered.execute(model));
+        assertEquals(before, model.getGameMates());
+        assertEquals(displayed, model.getFilteredFriendList());
+        // Both game players remain eligible without metadata conditions.
+        assertTrue(command(3).execute(model).getFeedbackToUser().startsWith("Found squad of 3 people:"));
+    }
+
+    @Test
+    public void execute_optionalUsernames_omitsEmptyUsernameForMeAndSelectedFriend() throws Exception {
+        Game withoutUsername = new Game(game, Username.EMPTY, ParserUtil.parseMetas(List.of("Role:Healer")));
+        model.addFriend(new FriendBuilder().withName("Healer").withGames(withoutUsername).build());
+        model.setMyself(new FriendBuilder().withName("Own Profile").withGames(withoutUsername).build());
+        assertEquals("Found squad of 2 people:\n1. Me\n2. Healer (index: 1)",
+                command(2, "Role:Healer").execute(model).getFeedbackToUser());
     }
 
     @Test

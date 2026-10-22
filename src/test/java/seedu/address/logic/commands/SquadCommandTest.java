@@ -3,6 +3,7 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -24,20 +26,20 @@ public class SquadCommandTest {
     private final Model model = new ModelManager();
 
     @Test
-    public void execute_sizeOne_alwaysIncludesMe() {
-        assertEquals(CommandResult.preservingDetails("Found squad of 1 people:\n1. Me"),
+    public void execute_sizeOne_alwaysIncludesMe() throws CommandException {
+        assertEquals(CommandResult.preservingDetails("Found squad of 1 person:\n1. Me"),
                 new SquadCommand(VALORANT, 1).execute(model));
         assertEquals(new ModelManager(), model);
         model.setMyself(player("Own Profile", "Minecraft", "builder"));
-        assertEquals("Found squad of 1 people:\n1. Me",
+        assertEquals("Found squad of 1 person:\n1. Me",
                 new SquadCommand(VALORANT, 1).execute(model).getFeedbackToUser());
         model.setMyself(player("Own Profile", "VALORANT", "myUsername"));
-        assertEquals("Found squad of 1 people:\n1. Me (username: myUsername)",
+        assertEquals("Found squad of 1 person:\n1. Me (username: myUsername)",
                 new SquadCommand(VALORANT, 1).execute(model).getFeedbackToUser());
     }
 
     @Test
-    public void execute_filteredFriends_usesDisplayedIndicesAndPreservesState() {
+    public void execute_filteredFriends_usesDisplayedIndicesAndPreservesState() throws CommandException {
         Friend hidden = player("Hidden", "Valorant", "hidden");
         Friend alpha = player("Alpha", "VALORANT", "alpha");
         Friend nonPlayer = player("Other", "Minecraft", "builder");
@@ -56,27 +58,23 @@ public class SquadCommandTest {
                 new SquadCommand(new GameName("valorant"), 3, new Random(0)).execute(model).getFeedbackToUser());
         assertEquals(before, model.getGameMates());
         assertEquals(displayedBefore, model.getFilteredFriendList());
-        assertEquals("Could not find a squad of 4 people.",
-                new SquadCommand(VALORANT, 4).execute(model).getFeedbackToUser());
+        assertCommandFailure(new SquadCommand(VALORANT, 4), model, "Could not find a squad of 4 people.");
         assertEquals(before, model.getGameMates());
         assertEquals(displayedBefore, model.getFilteredFriendList());
     }
 
     @Test
-    public void execute_notEnoughCandidates_returnsFeedback() {
-        assertEquals("Could not find a squad of 2 people.",
-                new SquadCommand(VALORANT, 2).execute(model).getFeedbackToUser());
+    public void execute_notEnoughCandidates_throwsCommandException() {
+        assertCommandFailure(new SquadCommand(VALORANT, 2), model, "Could not find a squad of 2 people.");
         model.addFriend(player("Partial", "Val", "player"));
-        assertEquals("Could not find a squad of 2 people.",
-                new SquadCommand(VALORANT, 2).execute(model).getFeedbackToUser());
+        assertCommandFailure(new SquadCommand(VALORANT, 2), model, "Could not find a squad of 2 people.");
         model.addFriend(player("Exact", "Valorant", "player"));
         model.updateFilteredFriendList(friend -> false);
-        assertEquals("Could not find a squad of 2 people.",
-                new SquadCommand(VALORANT, 2).execute(model).getFeedbackToUser());
+        assertCommandFailure(new SquadCommand(VALORANT, 2), model, "Could not find a squad of 2 people.");
     }
 
     @Test
-    public void execute_maximumSize_includesNineteenDistinctFriendsInOrder() {
+    public void execute_maximumSize_includesNineteenDistinctFriendsInOrder() throws CommandException {
         for (int i = 1; i <= 19; i++) {
             model.addFriend(player("Player " + i, "Valorant", "user" + i));
         }
@@ -91,7 +89,7 @@ public class SquadCommandTest {
     }
 
     @Test
-    public void execute_controlledRandomness_selectsDistinctSubsetThenSorts() {
+    public void execute_controlledRandomness_selectsDistinctSubsetThenSorts() throws CommandException {
         for (int i = 1; i <= 4; i++) {
             model.addFriend(player("Player " + i, "Valorant", "user" + i));
         }

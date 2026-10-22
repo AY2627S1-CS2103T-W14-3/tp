@@ -18,12 +18,12 @@ loop Each displayed friend's game entries
   Predicate --> Command : name matches AND all metadata matches this entry
 end
 alt Fewer than size - 1 candidates
-  Command -> Command : Existing insufficient-candidates feedback
+  Command --> Window : CommandException(MESSAGE_INSUFFICIENT)
 else Enough candidates
   Command -> Command : Sample distinct friends and sort displayed indices
   Command -> Command : Include Me first, regardless of metadata
+  Command --> Window : CommandResult.preservingDetails(feedback)
 end
-Command --> Window : CommandResult.preservingDetails(feedback)
 Window -> Window : Keep existing details and game-card filter
 note over Model: No stored data, list predicate or order changes
 @enduml

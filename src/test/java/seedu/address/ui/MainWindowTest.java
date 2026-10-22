@@ -146,7 +146,7 @@ class MainWindowTest {
             window.fillInnerParts();
             window.getRoot().getScene().getRoot().applyCss();
             executeCommand(window, "gamelist 1 g/Valorant");
-            for (String input : new String[]{"squad g/Valorant n/2 m/Role:Healer", "squad g/Valorant n/2 m/Role:Tank",
+            for (String input : new String[]{"squad g/Valorant n/2 m/Role:Healer",
                 "squad g/Valorant n/1", "squad g/Valorant n/2"}) {
                 executeCommand(window, input);
                 assertEquals("Friend details", getLabel(window, "#title").getText());
@@ -154,6 +154,14 @@ class MainWindowTest {
                 assertEquals(1, getGames(window).getChildren().size());
                 assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
             }
+            InvocationTargetException failure = assertThrows(InvocationTargetException.class, () ->
+                    invokeCommand(window, "squad g/Valorant n/2 m/Role:Tank"));
+            assertInstanceOf(CommandException.class, failure.getCause());
+            assertEquals("Could not find a squad of 2 people.", failure.getCause().getMessage());
+            assertEquals("Friend details", getLabel(window, "#title").getText());
+            assertEquals("Alice", getLabel(window, "#name").getText());
+            assertEquals(1, getGames(window).getChildren().size());
+            assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
             assertThrows(InvocationTargetException.class, () ->
                     invokeCommand(window, "squad g/Valorant n/1 m/"));
             assertEquals("Alice", getLabel(window, "#name").getText());
