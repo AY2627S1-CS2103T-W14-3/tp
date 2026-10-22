@@ -45,6 +45,17 @@ public class UniqueFriendListTest {
     }
 
     @Test
+    public void findFriend_matchesIdentityAndReturnsStoredDetails() {
+        Friend archived = ALICE.withArchived(true);
+        Friend candidate = new FriendBuilder(ALICE).withPhone("91234567").build();
+        assertTrue(uniqueFriendList.findFriend(candidate).isEmpty());
+        uniqueFriendList.add(archived);
+        assertEquals(archived, uniqueFriendList.findFriend(candidate).get());
+        assertTrue(uniqueFriendList.findFriend(candidate).get().isArchived());
+        assertThrows(NullPointerException.class, () -> uniqueFriendList.findFriend(null));
+    }
+
+    @Test
     public void add_nullFriend_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> uniqueFriendList.add(null));
     }
@@ -97,6 +108,37 @@ public class UniqueFriendListTest {
         UniqueFriendList expectedUniqueFriendList = new UniqueFriendList();
         expectedUniqueFriendList.add(BOB);
         assertEquals(expectedUniqueFriendList, uniqueFriendList);
+    }
+
+    @Test
+    public void setFriend_pinnedFriend_movesPinnedFriendToTop() {
+        uniqueFriendList.add(ALICE);
+        uniqueFriendList.add(BOB);
+        Friend pinnedBob = new FriendBuilder(BOB).withPinned(true).build();
+        uniqueFriendList.setFriend(BOB, pinnedBob);
+
+        assertEquals(List.of(pinnedBob, ALICE), uniqueFriendList.asUnmodifiableObservableList());
+    }
+
+    @Test
+    public void setFriends_pinnedFriendAppearsBeforeUnpinnedFriend() {
+        Friend pinnedBob = new FriendBuilder(BOB).withPinned(true).build();
+        uniqueFriendList.setFriends(List.of(ALICE, pinnedBob));
+
+        assertEquals(List.of(pinnedBob, ALICE), uniqueFriendList.asUnmodifiableObservableList());
+    }
+
+    @Test
+    public void setFriends_multiplePinnedFriends_retainsRelativeOrderWithinGroups() {
+        Friend firstUnpinnedFriend = new FriendBuilder().withName("First Unpinned").build();
+        Friend firstPinnedFriend = new FriendBuilder().withName("First Pinned").withPinned(true).build();
+        Friend secondUnpinnedFriend = new FriendBuilder().withName("Second Unpinned").build();
+        Friend secondPinnedFriend = new FriendBuilder().withName("Second Pinned").withPinned(true).build();
+        uniqueFriendList.setFriends(List.of(firstUnpinnedFriend, firstPinnedFriend,
+                secondUnpinnedFriend, secondPinnedFriend));
+
+        assertEquals(List.of(firstPinnedFriend, secondPinnedFriend, firstUnpinnedFriend, secondUnpinnedFriend),
+                uniqueFriendList.asUnmodifiableObservableList());
     }
 
     @Test

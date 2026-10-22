@@ -4,9 +4,11 @@ import java.util.function.Consumer;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.friend.Friend;
 
 /**
@@ -18,6 +20,9 @@ public class FriendListPanel extends UiPart<Region> {
     @FXML
     @SuppressWarnings("unused")
     private ListView<Friend> friendListView;
+
+    @FXML
+    private Label listHeading;
 
     /**
      * Creates a {@code FriendListPanel} that notifies a consumer when its selection changes.
@@ -31,6 +36,15 @@ public class FriendListPanel extends UiPart<Region> {
         friendListView.setCellFactory(_ -> new FriendListViewCell());
         friendListView.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) ->
                 onFriendSelected.accept(newValue));
+    }
+
+    /** Updates the heading even when the current list is empty. */
+    public void setFriendListScope(FriendListScope scope) {
+        listHeading.setText(switch (scope) {
+            case ACTIVE -> "Active friends";
+            case ARCHIVED -> "Archived friends";
+            case SEARCH -> "Search results";
+        });
     }
 
     /**

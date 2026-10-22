@@ -23,6 +23,7 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendSortCriterion;
 import seedu.address.model.friend.GameNameMatchesPredicate;
 import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
@@ -86,10 +87,79 @@ public class ListCommandTest {
     }
 
     @Test
+    public void execute_nameSort_sortsFriendsIgnoringCase() {
+        Friend zoe = new FriendBuilder().withName("Zoe").build();
+        Friend alex = new FriendBuilder().withName("alex").build();
+        Friend ben = new FriendBuilder().withName("Ben").build();
+        GameMates gameMates = gameMatesWith(zoe, alex, ben);
+        model = new ModelManager(gameMates, new UserPrefs());
+
+        assertCommandSuccess(new ListCommand(FriendSortCriterion.NAME), model, ListCommand.MESSAGE_SUCCESS,
+                new ModelManager(gameMates, new UserPrefs()));
+        assertEquals(List.of(alex, ben, zoe), model.getFilteredFriendList());
+    }
+
+    @Test
+    public void execute_descendingNameSort_sortsFriendsInReverseAlphabeticalOrder() {
+        Friend zoe = new FriendBuilder().withName("Zoe").build();
+        Friend alex = new FriendBuilder().withName("alex").build();
+        Friend ben = new FriendBuilder().withName("Ben").build();
+        GameMates gameMates = gameMatesWith(zoe, alex, ben);
+        model = new ModelManager(gameMates, new UserPrefs());
+
+        assertCommandSuccess(new ListCommand(FriendSortCriterion.NAME, true), model, ListCommand.MESSAGE_SUCCESS,
+                new ModelManager(gameMates, new UserPrefs()));
+        assertEquals(List.of(zoe, ben, alex), model.getFilteredFriendList());
+    }
+
+    @Test
+    public void execute_gameSort_sortsByFirstGameThenNameAndPlacesFriendsWithoutGamesLast() {
+        Friend zelda = new FriendBuilder().withName("Zelda").withGames(
+                new Game(new GameName("Zelda"), new Username("zeldaPlayer"))).build();
+        Friend anna = new FriendBuilder().withName("Anna").withGames(
+                new Game(new GameName("Minecraft"), new Username("miner")),
+                new Game(new GameName("Animal Crossing"), new Username("islander"))).build();
+        Friend andy = new FriendBuilder().withName("Andy").withGames(
+                new Game(new GameName("animal crossing"), new Username("anotherIslander"))).build();
+        Friend noGames = new FriendBuilder().withName("No Games").build();
+        GameMates gameMates = gameMatesWith(zelda, anna, noGames, andy);
+        model = new ModelManager(gameMates, new UserPrefs());
+
+        assertCommandSuccess(new ListCommand(FriendSortCriterion.GAME), model, ListCommand.MESSAGE_SUCCESS,
+                new ModelManager(gameMates, new UserPrefs()));
+        assertEquals(List.of(andy, anna, zelda, noGames), model.getFilteredFriendList());
+    }
+
+    @Test
+    public void execute_nameSortOnEmptyList_showsEmptyList() {
+        model = new ModelManager();
+        expectedModel = new ModelManager();
+
+        assertCommandSuccess(new ListCommand(FriendSortCriterion.NAME), model, ListCommand.MESSAGE_SUCCESS,
+                expectedModel);
+        assertTrue(model.getFilteredFriendList().isEmpty());
+    }
+
+    @Test
     public void execute_unfilteredListAfterGameFilter_showsEverything() throws Exception {
         new ListCommand(new GameNameMatchesPredicate(new GameName("Unknown Game"))).execute(model);
 
         assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS, expectedModel);
+    }
+
+    @Test
+    public void execute_unsortedListAfterSort_restoresInsertionOrder() {
+        Friend zoe = new FriendBuilder().withName("Zoe").build();
+        Friend alex = new FriendBuilder().withName("Alex").build();
+        GameMates gameMates = gameMatesWith(zoe, alex);
+        model = new ModelManager(gameMates, new UserPrefs());
+
+        new ListCommand(FriendSortCriterion.NAME).execute(model);
+        assertEquals(List.of(alex, zoe), model.getFilteredFriendList());
+
+        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS,
+                new ModelManager(gameMates, new UserPrefs()));
+        assertEquals(List.of(zoe, alex), model.getFilteredFriendList());
     }
 
     @Test
@@ -103,6 +173,8 @@ public class ListCommandTest {
                 new GameNameMatchesPredicate(new GameName("VALORANT")))));
         assertFalse(command.equals(new ListCommand(minecraft)));
         assertFalse(command.equals(new ListCommand()));
+        assertFalse(command.equals(new ListCommand(FriendSortCriterion.NAME)));
+        assertFalse(command.equals(new ListCommand(FriendSortCriterion.NAME, true)));
         assertFalse(command.equals(null));
         assertFalse(command.equals(1));
     }
@@ -112,7 +184,7 @@ public class ListCommandTest {
         GameNameMatchesPredicate predicate = new GameNameMatchesPredicate(new GameName("Valorant"));
         ListCommand command = new ListCommand(predicate);
         String expected = ListCommand.class.getCanonicalName()
-                + "{predicate=" + predicate + ", isFilteredByGame=true}";
+                + "{predicate=" + predicate + ", isFilteredByGame=true, sortCriterion=null, isDescending=false}";
 
         assertEquals(expected, command.toString());
     }

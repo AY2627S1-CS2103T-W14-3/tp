@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
@@ -35,6 +36,7 @@ public class MainWindow extends UiPart<Stage> {
 
     // Independent Ui parts residing in this Ui container
     private FriendDetailsPanel friendDetailsPanel;
+    private FriendListPanel friendListPanel;
     private ResultDisplay resultDisplay;
     private final HelpWindow helpWindow;
 
@@ -125,10 +127,15 @@ public class MainWindow extends UiPart<Stage> {
      */
     void fillInnerParts() {
         friendDetailsPanel = new FriendDetailsPanel(logic.getMyself(), true);
-        friendDetailsPanelPlaceholder.getChildren().add(friendDetailsPanel.getRoot());
+        ScrollPane detailsScrollPane = new ScrollPane(friendDetailsPanel.getRoot());
+        detailsScrollPane.setFitToWidth(true);
+        detailsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        detailsScrollPane.getStyleClass().add("friend-details-scroll-pane");
+        friendDetailsPanelPlaceholder.getChildren().add(detailsScrollPane);
 
-        FriendListPanel friendListPanel = new FriendListPanel(logic.getFilteredFriendList(),
+        friendListPanel = new FriendListPanel(logic.getFilteredFriendList(),
                 this::showFriendDetails);
+        friendListPanel.setFriendListScope(logic.getFriendListScope());
         friendListPanelPlaceholder.getChildren().add(friendListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
@@ -226,6 +233,8 @@ public class MainWindow extends UiPart<Stage> {
             logger.info("An error occurred while executing command: " + commandText);
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
+        } finally {
+            friendListPanel.setFriendListScope(logic.getFriendListScope());
         }
     }
 }

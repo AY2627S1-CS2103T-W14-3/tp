@@ -7,9 +7,8 @@ GameMates helps gamers keep track of friends, their contact details, the games t
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer; browsing the online help and downloading releases require internet access.
 
-This guide describes the commands available in this checkout. Adding or deleting individual games and game
-metadata input are not available yet. You can view and filter games already present in sample or
-saved data. See [Your profile and game entries](#your-profile-and-game-entries) for the current limits.
+This guide describes the commands available in this checkout, including adding games with optional metadata.
+See [Your profile and game entries](#your-profile-and-game-entries) for the current limits.
 
 * Table of Contents
 {:toc}
@@ -33,9 +32,12 @@ saved data. See [Your profile and game entries](#your-profile-and-game-entries) 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
 
-   * `list` : Lists all contacts.
+   * `list` : Lists active friends.
 
    * `list g/Valorant` : Lists friends who play Valorant.
+
+   * `pin 1` : Keeps the first displayed friend at the top of the list.
+   * `list s/name` : Lists friends in ascending name order.
 
    * `gamelist 1 g/Valorant` : Shows the first displayed friend's Valorant card, if present.
 
@@ -43,7 +45,7 @@ saved data. See [Your profile and game entries](#your-profile-and-game-entries) 
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
-   * `clear` : Deletes all friends and their games immediately, while keeping your profile.
+   * `clear` : Deletes all active and archived friends and their games immediately, while keeping your profile.
 
    * `exit` : Exits the app.
 
@@ -73,7 +75,7 @@ saved data. See [Your profile and game entries](#your-profile-and-game-entries) 
   Quotes are not needed around multiword names. Use only the prefixes documented for each command.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
   Tags may be repeated; identical tag values are applied once.
-* Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all friends
+* Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all active friends
   again before choosing an index. Zero, negative numbers, decimals, a leading `+` and larger integers are rejected.
 * For `edit`, `gameadd` and `gamedel`, `FRIEND_INDEX|myself` means either a displayed friend index or the
   case-insensitive keyword `myself` for your own profile. Do not type `|`. The selector must come before prefixes;
@@ -90,7 +92,7 @@ saved data. See [Your profile and game entries](#your-profile-and-game-entries) 
 
 The main window has two panels: the friend list on the left and a details panel on the right.
 
-* Click a friend in the left panel to view their name, phone number, email address, tags, games, and in-game usernames
+* Click a friend in the left panel to view their name, phone number, email address, tags, games, in-game usernames and metadata
   in the right panel.
 * On startup, the right panel shows your profile. If no profile details have been added, it shows `No details added`.
 * When a `find` command returns exactly one friend, that friend's details are shown automatically.
@@ -101,6 +103,7 @@ The main window has two panels: the friend list on the left and a details panel 
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
   Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.
+* Pinned friends always appear above unpinned friends. The current ordering is retained within each group.
 
 ### Your profile and game entries
 
@@ -114,7 +117,8 @@ Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve
 
 New friends start with no games. Use [`gameadd`](#adding-a-game-gameadd) and
 [`gamedel`](#deleting-a-game-gamedel) to manage a friend's games or your own games, and
-[`gamelist`](#viewing-games-gamelist) to view their entries or your own. Metadata input and display remain unavailable.
+[`gamelist`](#viewing-games-gamelist) to view their entries or your own. Add metadata with optional `m/KEY:VALUE`
+arguments in `gameadd`; each game card shows its metadata below the username.
 Deleting a friend removes that friend's complete entry, including their games; it does not remove games from
 other friends. Back up your data before [editing a saved file](#editing-the-data-file).
 
@@ -189,15 +193,25 @@ and [RFC 5321's SMTP length limits](https://www.rfc-editor.org/rfc/rfc5321#secti
 The 254-character address limit leaves room for the enclosing `<` and `>` in the 256-octet SMTP path limit.
 </div>
 
-### Listing and filtering friends: `list`
+### Listing, filtering and sorting friends: `list`
 
-Shows all friends in GameMates, or filters the friend list by game.
+Shows active friends in GameMates, optionally filters the friend list by game, and can sort the displayed friends.
+Both forms switch to the active view.
 
-Format: `list [g/GAME_NAME]`
+Format: `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`
 
-* `list` shows all friends and clears any previous friend-list filter. Feedback is `Listed all friends.`,
+* `list` shows all active friends and clears any previous friend-list filter. Feedback is `Listed all active friends.`,
   including when the list is empty.
-* `list g/GAME_NAME` shows friends who have a game with that exact name. The match is case-insensitive, so `list g/valorant` matches `Valorant`.
+* `list g/GAME_NAME` shows active friends who have a game with that exact name. The match is case-insensitive, so `list g/valorant` matches `Valorant`.
+* `list s/name` orders the displayed friends alphabetically by name, ignoring case.
+* `list s/game` orders friends by the alphabetically first game in each friend's game list, ignoring case. Friends
+  without games appear after friends with games; name breaks ties.
+* `o/asc` explicitly selects ascending order; this is the default. `o/desc` reverses the selected name or game
+  order. An order may only be supplied with `s/`.
+* `list g/GAME_NAME s/NAME|GAME` first filters by game, then sorts the matching friends. Prefixes may be supplied in
+  either order.
+* Running `find` changes only the friend-list filter and retains a sort applied by an earlier `list` command.
+  Running `list` without `s/` clears that sort and returns to the stored insertion order.
 * Leading and trailing spaces in `GAME_NAME` are ignored, but partial names do not match. For example, `list g/Val` does not match `Valorant`.
 * Only game names are matched; a friend's in-game username is not matched.
 * Multi-word game names are accepted. Only one `g/` prefix may be supplied, and the game name must not be empty.
@@ -205,35 +219,84 @@ Format: `list [g/GAME_NAME]`
 * Filtering applies only to the friend list. It does not filter or modify the separately stored Myself profile.
 * Name filtering uses [`find`](#locating-friends-by-name-find), not `list n/NAME`. A new `find` or `list` replaces
   the previous friend-list filter; running them consecutively does not intersect their results.
-* Game-name validation uses the same 1–50-character rules as `gamelist`. Empty `g/`, extra positional input and
-  repeated `g/` are rejected. A valid filter returns `N friend(s) listed!`.
+* Game-name validation uses the same 1–50-character rules as `gamelist`. Empty `g/`, `s/`, or `o/`, extra positional
+  input, unsupported sort/order values, an order without a sort, and repeated prefixes are rejected. Supported sort
+  values are `name` and `game`; supported orders are `asc` and `desc`.
+  A valid game filter returns `N friend(s) listed!`.
 
 Examples:
 
-* `list` shows all friends.
+* `list` shows all active friends.
 * `list g/Valorant` shows friends who play `Valorant`.
 * `list g/Stardew Valley` shows friends who play `Stardew Valley`.
+* `list s/name` shows all friends sorted by name.
+* `list s/game o/desc` shows all friends in descending game order.
+* `list g/Valorant s/game` shows Valorant players sorted by their first game name.
+
+### Pinning a friend: `pin`
+
+Keeps a friend in the pinned group at the top of the friend list.
+
+Format: `pin FRIEND_INDEX`
+
+* `FRIEND_INDEX` refers to the current displayed list. The command is unavailable for your separately stored Myself
+  profile.
+* At most five friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
+  is rejected without changing the list.
+* Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
+  filtering the list by game.
+* A newly pinned friend is placed after friends already in the pinned group, while remaining above all unpinned
+  friends.
+* Pinned friend cards display a `Pinned` badge, making the boundary between pinned and unpinned friends visible.
+
+Examples:
+
+* `pin 1` pins the first displayed friend.
+* `pin 3` pins the third displayed friend.
+
+### Unpinning a friend: `unpin`
+
+Removes a friend from the pinned group.
+
+Format: `unpin FRIEND_INDEX`
+
+* `FRIEND_INDEX` refers to the current displayed list.
+* Unpinning a friend who is not pinned is rejected without changing the list.
+* The friend is returned to the unpinned group, below all pinned friends.
+
+Examples:
+
+* `unpin 1` unpins the first displayed friend.
 
 ### Adding a game: `gameadd`
 
-Adds a game with an optional in-game username to a friend or your own profile.
+Adds a game with an optional in-game username and metadata (e.g. role or level) to a friend or your own profile.
 
-Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]`
+Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 
-* The game name is required. The username is optional, omit `u/` if you do not know it.
+* The game name is required. The username is optional; omit `u/` if you do not know it.
 * Game names and supplied usernames must contain 1–50 printable characters after trimming,
   including at least one letter or digit.
 * Supplying `u/` without a value, or with only whitespace, is rejected. Omit the prefix instead.
 * Repeated `g/` or `u/` prefixes are rejected, even when the values are identical.
+* Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters;
+  values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.
+* Repeat `m/` for distinct keys. Metadata keys are case-insensitive, so `Role` and `role` are duplicates.
+  Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
+  Omit `m/` entirely for no metadata.
+* A space followed by `g/`, `u/` or `m/` starts a new parameter, even inside quotes; avoid these in field values.
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
+* Metadata appears below the username, sorted by key ignoring case. Long fields wrap; scroll for additional rows.
+* The success message also lists supplied metadata below the username, sorted by key ignoring case.
 
 Examples:
 
 * `gameadd 1 g/Valorant u/player123`
-* `gameadd myself g/Minecraft u/myUsername`
+* `gameadd 1 g/Valorant u/player123 m/Role:Support m/Level:20`
+* `gameadd myself g/Minecraft u/myUsername m/Mode:Creative`
 * `gameadd 1 g/Valorant` adds the game without a username.
-* `gameadd myself g/Stardew Valley` adds a game to your profile without a username.
+* `gameadd myself g/Stardew Valley m/Role:Farmer` adds a game with metadata and no username.
 
 ### Deleting a game: `gamedel`
 
@@ -382,7 +445,9 @@ Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG
 * Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.
 * To remove all of a friend's tags, enter `t/` without a tag after it.
   Use that empty prefix on its own; combining it with non-empty tags is rejected.
-* A successful friend edit shows all friends again, preserving the friend's games and your profile. A successful
+* A successful friend edit shows all friends in the current active or archive view again. In **Search results**,
+  it preserves the search filter; a renamed friend disappears if their new name no longer matches.
+  Editing preserves the friend's archive status, games and your profile. A successful
   `edit myself` shows your updated profile on the right and keeps the current friend-list filter.
 
 Examples:
@@ -406,7 +471,7 @@ Errors:
 
 ### Locating friends by name: `find`
 
-Finds friends whose names contain any of the given keywords.
+Finds active and archived friends whose names contain any of the given keywords, regardless of the current view.
 
 Format: `find KEYWORD [MORE_KEYWORDS]`
 
@@ -415,9 +480,14 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * The search considers only names.
 * Only full words match; for example, `Han` does not match `Hans`.
 * Friends matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
-* Searching starts from all friends, replacing any previous name or game filter. `find` does not accept `n/` or
-  `g/` as filter syntax; such text is treated as literal name keywords.
-* Feedback is `N friend(s) listed!`. No matches is a successful empty list. Exactly one result also opens that
+* Searching starts from all active and archived friends, replacing any previous name or game filter.
+  `find` does not accept `n/` or `g/` as filter syntax; such text is treated as literal name keywords.
+* Results appear under **Search results**, with an **Archived** badge on archived friends.
+* `archive FRIEND_INDEX` archives an active result; `unarchive FRIEND_INDEX` restores an archived result. The friend stays in
+  the search results with their updated status, and the search filter and displayed order stay in place.
+* Archiving an already archived search result reports `This friend is already archived.` without changing data.
+* `list` returns to active friends; `archivelist [g/GAME_NAME]` switches to archived friends only.
+* Feedback is `N friend(s) listed!`. No matches is a successful empty search view. Exactly one result also opens that
   friend's complete details and games on the right. An empty keyword list is rejected with usage instructions.
 
 Examples:
@@ -425,6 +495,76 @@ Examples:
 * `find John` returns `john` and `John Doe`
 * With the initial sample data, `find alex david` returns `Alex Yeoh`, `David Li`.<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
+
+### Archiving a friend: `archive`
+
+Hides a friend from the active list while keeping their contact details, tags, games, usernames and game metadata.
+
+Format: `archive FRIEND_INDEX`
+
+* The index refers to the currently displayed active list or **Search results**, including game-filtered
+  active lists. It must be a positive integer.
+* From the archive-only view, `archive` reports `Run list to switch to the active list before archiving a friend.` before checking
+  whether the index exists. This also applies when that view is empty; data and view stay unchanged.
+* The friend disappears from the active view immediately. In **Search results**, the friend stays visible with
+  an **Archived** badge. The current filter stays in place.
+* Feedback is `Archived FRIEND_NAME.`. Archiving an already archived friend is rejected.
+* Your Myself profile cannot be archived. `myself`, missing indices, extra arguments and invalid indices are rejected.
+* Missing indices report `Please provide an index.`. Invalid indices (such as `-1`, `0` or `abc`) report
+  `Index must be a positive integer between 1 and 2147483647 (inclusive).`.
+* Archived friends keep their names reserved. Adding or renaming another friend to the same name is rejected
+  with a suggestion to use `archivelist` and `unarchive`.
+* `list` and `list g/GAME_NAME` show active friends only. `find` searches both active and archived friends.
+
+Example: `list`, then `archive 1` archives the first displayed active friend.
+
+### Listing and filtering archived friends: `archivelist`
+
+Shows archived friends, optionally filtered by game. It follows the same syntax and game-matching rules as `list`.
+
+Format: `archivelist [g/GAME_NAME]`
+
+* `archivelist` shows all archived friends in the existing list panel, headed **Archived friends**.
+* `archivelist g/GAME_NAME` shows archived friends who have a game with that exact name, ignoring case.
+  Leading and trailing spaces are ignored. Multi-word game names are accepted; partial names and usernames do not match.
+* Each invocation starts from all archived friends and replaces any previous name or game filter.
+* Only one `g/` prefix may be supplied. Empty game names, repeated prefixes and extra positional arguments are rejected,
+  using the same validation rules as `list`.
+* Name keywords and `n/` are not supported here. Use `find KEYWORD [MORE_KEYWORDS]` to search names across both active
+  and archived friends.
+* Non-empty results report `Listed N archived friend(s).`.
+* With no archived friends, unfiltered `archivelist` reports
+  `No archived friends. Use the command "list", then "archive FRIEND_INDEX" to archive a friend.`
+* A game filter with no matches reports `No archived friends match this game filter.`.
+  Both empty cases are successful commands and keep the **Archived friends** heading.
+* Indices refer to this displayed archive list. Select a friend or use `gamelist 1` to inspect preserved games.
+* `edit`, `gameadd` and `gamedel` work on displayed archived friends and keep them archived. Editing friend
+  details clears the game filter within the archive view. `delete` permanently removes a displayed archived friend.
+* `list` returns to the active view, headed **Active friends**. Adding a friend also returns to the active view.
+
+Examples:
+
+* `archivelist` shows all archived friends.
+* `archivelist g/Valorant` shows archived friends who play Valorant.
+* `archivelist g/Stardew Valley` shows archived friends who play Stardew Valley.
+
+### Restoring an archived friend: `unarchive`
+
+Format: `unarchive FRIEND_INDEX`
+
+* Use `archivelist`, `archivelist g/GAME_NAME`, or `find KEYWORD` to display archived friends.
+* The index refers to that displayed list. It must be a positive integer.
+* The friend returns to the active list with all their details intact. They disappear from an archive-only view,
+  but stay visible in **Search results** with the **Archived** badge removed. The current filter stays in place.
+  Run `list` to see active friends.
+* Feedback is `Restored FRIEND_NAME.`. Selecting an active friend is rejected with a suggestion to use `archivelist`.
+* `myself`, missing indices, extra arguments and invalid indices are rejected. Missing indices report
+  `Please provide an index.`; invalid indices report
+  `Index must be a positive integer between 1 and 2147483647 (inclusive).`.
+* Out-of-range indices, including
+  empty lists, report `The friend index provided is invalid.` without changing data or the current view.
+
+Example: `archivelist g/Valorant`, then `unarchive 1` restores the first displayed archived friend who plays Valorant.
 
 ### Deleting a friend: `delete`
 
@@ -454,12 +594,12 @@ Errors:
 
 ### Clearing the friend list: `clear`
 
-Clears all friends from GameMates and preserves your Myself profile.
+Clears all active and archived friends from GameMates and preserves your Myself profile.
 
 Format: `clear`
 
-The command takes effect immediately, with no confirmation or undo. Feedback is `Friend list has been cleared!`.
-All friends and their game entries are removed. Back up your data file first if you may need them again.
+The command takes effect immediately, with no confirmation or undo. Feedback is `All active and archived friends have been cleared!`.
+All active and archived friends and their game entries are removed. Back up your data file first if you may need them again.
 
 ### Exiting the program: `exit`
 
@@ -471,7 +611,7 @@ Format: `exit`
 
 GameMates saves the complete friend list, games and stored profile after every command that parses and executes
 successfully, including viewing commands such as `list` and `gamelist`. You do not need a save command.
-The active friend-list filter, selection and game display filter are not saved; a new launch shows all friends and
+The active friend-list filter, selection and game display filter are not saved; a new launch shows all active friends and
 your profile. Window size and position are stored separately in `preferences.json` when you close the main window
 or use `exit`.
 
@@ -490,14 +630,17 @@ close the destination app, back up its current file, replace it with your copy a
 Copy `preferences.json` only if you also want the saved window settings.
 
 If you edit JSON manually, close the app first and keep a backup. Friend entries contain `name`, optional
-`phone` and `email`, `tags`, and `games`. A game has a required `name` and an optional `username`.
+`phone` and `email`, `tags`, `games`, and `archived` and `pinned` booleans. Missing `archived` defaults to `false`
+(active), while missing `pinned` defaults to `false` (unpinned); both statuses are saved across restarts. A game has a
+required `name` and an optional `username`.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
-Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile. Empty or missing contact fields mean
+Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
+Empty or missing contact fields mean
 `Not provided`. Use the same validation rules as command input. Stored game metadata is supported as an optional
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
 colons and must be unique per game, ignoring case; values may contain colons. Missing `metas` loads as empty.
-Metadata is preserved when saving, but cannot yet be entered through commands or viewed in game cards.
+Metadata can be entered through `gameadd`, is preserved when saving and is displayed in game cards.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If the file is missing, the app starts with sample friends and the default profile. If it cannot load the file
@@ -535,16 +678,19 @@ while copying the file, then launch the destination app from its usual data fold
 | Action | Format, Examples |
 |--------|------------------|
 | **Add** | `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…` <br> e.g., `add n/James Ho t/friend` |
+| **Archive** | `archive FRIEND_INDEX` |
+| **Archive list/filter** | `archivelist [g/GAME_NAME]` |
+| **Unarchive** | `unarchive FRIEND_INDEX` |
 | **Clear** | `clear` |
 | **Delete** | `delete FRIEND_INDEX`<br> e.g., `delete 3` |
 | **Edit** | <code>edit FRIEND_INDEX&#124;myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
-| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME]</code><br> e.g., `gameadd myself g/Valorant u/player123` or `gameadd 1 g/Minecraft` |
+| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code><br> e.g., `gameadd myself g/Valorant u/player123 m/Role:Support` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
 | **Squad create** | `squad g/GAME_NAME n/NUMBER_OF_PEOPLE`<br> e.g., `squad g/Valorant n/5` |
-| **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
+| **List** | `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`<br> e.g., `list g/Valorant s/name o/desc` |
+| **Pin** | `pin FRIEND_INDEX`<br> e.g., `pin 1` |
+| **Unpin** | `unpin FRIEND_INDEX`<br> e.g., `unpin 1` |
 | **Help** | `help` |
 | **Exit** | `exit` |
-
-Metadata entry is not supported.

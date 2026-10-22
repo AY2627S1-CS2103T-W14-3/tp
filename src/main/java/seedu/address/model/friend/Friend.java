@@ -26,11 +26,24 @@ public class Friend {
     // Data fields
     private final Set<Game> games;
     private final Set<Tag> tags;
+    private final boolean archived;
+    private final boolean pinned;
 
     /**
      * Every field must be present and not null.
      */
     public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags) {
+        this(name, phone, email, games, tags, false, false);
+    }
+
+    /** Creates a friend with the given archive status and preserved details. */
+    public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags, boolean archived) {
+        this(name, phone, email, games, tags, archived, false);
+    }
+
+    /** Creates a friend with the given archive and pin statuses. */
+    public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags, boolean archived,
+            boolean pinned) {
         requireAllNonNull(name, phone, email, games, tags);
         games.forEach(Objects::requireNonNull);
         this.name = name;
@@ -38,6 +51,8 @@ public class Friend {
         this.email = email;
         this.games = Collections.unmodifiableSet(games);
         this.tags = Collections.unmodifiableSet(tags);
+        this.archived = archived;
+        this.pinned = pinned;
     }
 
     /**
@@ -45,6 +60,15 @@ public class Friend {
      */
     public Friend(Name name, Phone phone, Email email, Set<Tag> tags) {
         this(name, phone, email, Collections.emptySet(), tags);
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    /** Returns a copy with the given archive status, preserving all other fields. */
+    public Friend withArchived(boolean archived) {
+        return new Friend(name, phone, email, games, tags, archived, pinned);
     }
 
     public Name getName() {
@@ -73,6 +97,16 @@ public class Friend {
      */
     public Set<Tag> getTags() {
         return tags;
+    }
+
+    /** Returns whether this friend is pinned to the top of the friend list. */
+    public boolean isPinned() {
+        return pinned;
+    }
+
+    /** Returns a copy with the given pin status, preserving all other fields. */
+    public Friend withPinned(boolean pinned) {
+        return new Friend(name, phone, email, games, tags, archived, pinned);
     }
 
     /**
@@ -107,13 +141,15 @@ public class Friend {
                 && phone.equals(otherFriend.phone)
                 && email.equals(otherFriend.email)
                 && games.equals(otherFriend.games)
-                && tags.equals(otherFriend.tags);
+                && tags.equals(otherFriend.tags)
+                && archived == otherFriend.archived
+                && pinned == otherFriend.pinned;
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, games, tags);
+        return Objects.hash(name, phone, email, games, tags, archived, pinned);
     }
 
     @Override
@@ -124,6 +160,8 @@ public class Friend {
                 .add("email", email)
                 .add("games", games)
                 .add("tags", tags)
+                .add("archived", archived)
+                .add("pinned", pinned)
                 .toString();
     }
 
