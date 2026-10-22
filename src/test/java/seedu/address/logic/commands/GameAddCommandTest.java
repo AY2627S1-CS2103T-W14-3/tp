@@ -31,6 +31,16 @@ public class GameAddCommandTest {
     private final Index first = Index.fromOneBased(1);
 
     @Test
+    public void execute_omittedUsername_addsGame() {
+        Friend original = model.getFilteredFriendList().get(0);
+        Game withoutUsername = new Game(new GameName("Valorant"), Username.EMPTY);
+        Model expected = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
+        expected.setFriend(original, new FriendBuilder(original).withGames(withoutUsername).build());
+        assertCommandSuccess(new GameAddCommand(first, withoutUsername), model,
+                "Added Valorant to " + original.getName() + "'s games.\nUsername: Not provided", expected);
+    }
+
+    @Test
     public void execute_validFriend_preservesOtherFieldsAndGames() {
         Friend original = model.getFilteredFriendList().get(0);
         Game existing = new Game(new GameName("Minecraft"), new Username("builder"));

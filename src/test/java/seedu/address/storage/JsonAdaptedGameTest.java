@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.game.Game;
+import seedu.address.model.game.Username;
 import seedu.address.model.game.meta.Meta;
 import seedu.address.testutil.GameBuilder;
 
@@ -73,7 +74,18 @@ public class JsonAdaptedGameTest {
     public void toModelType_missingFields_throwsIllegalValueException() throws Exception {
         JsonAdaptedGame missingName = JsonUtil.fromJsonString("{\"username\":\"player\"}", JsonAdaptedGame.class);
         assertThrows(IllegalValueException.class, "Game's GameName field is missing!", missingName::toModelType);
-        JsonAdaptedGame missingUsername = JsonUtil.fromJsonString("{\"name\":\"Valorant\"}", JsonAdaptedGame.class);
-        assertThrows(IllegalValueException.class, "Game's Username field is missing!", missingUsername::toModelType);
+    }
+
+    @Test
+    public void toModelType_optionalUsername_preservesGameAndMetadata() throws Exception {
+        for (String field : List.of("", ",\"username\":null", ",\"username\":\"\"")) {
+            String json = "{\"name\":\"Valorant\"" + field
+                    + ",\"metas\":[{\"key\":\"Role\",\"value\":\"Support\"}]}";
+            Game game = JsonUtil.fromJsonString(json, JsonAdaptedGame.class).toModelType();
+            assertEquals(Username.EMPTY, game.getUsername());
+            assertEquals(1, game.getMetas().size());
+            assertEquals(game, JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonAdaptedGame(game)),
+                    JsonAdaptedGame.class).toModelType());
+        }
     }
 }
