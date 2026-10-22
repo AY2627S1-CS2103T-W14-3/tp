@@ -210,8 +210,8 @@ Format: `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`
   order. An order may only be supplied with `s/`.
 * `list g/GAME_NAME s/NAME|GAME` first filters by game, then sorts the matching friends. Prefixes may be supplied in
   either order.
-* Omitting `s/` preserves the stored insertion order. Running another `list` command without `s/` clears a sort
-  applied by an earlier `list` command.
+* Running `find` changes only the friend-list filter and retains a sort applied by an earlier `list` command.
+  Running `list` without `s/` clears that sort and returns to the stored insertion order.
 * Leading and trailing spaces in `GAME_NAME` are ignored, but partial names do not match. For example, `list g/Val` does not match `Valorant`.
 * Only game names are matched; a friend's in-game username is not matched.
 * Multi-word game names are accepted. Only one `g/` prefix may be supplied, and the game name must not be empty.
