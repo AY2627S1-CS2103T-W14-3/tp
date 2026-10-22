@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.game.GameName;
@@ -25,6 +26,7 @@ public class SquadCommand extends Command {
             + PREFIX_GAME + "GAME "
             + PREFIX_NAME + "NUMBER_OF_PEOPLE";
     public static final String MESSAGE_SUCCESS = "Found squad of %1$d people:";
+    public static final String MESSAGE_SUCCESS_SINGULAR = "Found squad of 1 person:";
     public static final String MESSAGE_INVALID_SIZE = "Invalid squad size. Enter a whole number from 1 to 20.";
     public static final String MESSAGE_INVALID_GAME = "Invalid game name %s. Enter 1–50 printable characters "
             + "containing at least one letter or digit.";
@@ -49,7 +51,7 @@ public class SquadCommand extends Command {
     }
 
     @Override
-    public CommandResult execute(Model model) {
+    public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         List<Friend> displayed = new ArrayList<>(model.getFilteredFriendList());
         List<Integer> eligible = new ArrayList<>();
@@ -59,12 +61,13 @@ public class SquadCommand extends Command {
             }
         }
         if (eligible.size() < size - 1) {
-            return new CommandResult(String.format(MESSAGE_INSUFFICIENT, size));
+            throw new CommandException(String.format(MESSAGE_INSUFFICIENT, size));
         }
         Collections.shuffle(eligible, random);
         List<Integer> selected = new ArrayList<>(eligible.subList(0, size - 1));
         selected.sort(Comparator.naturalOrder());
-        StringBuilder feedback = new StringBuilder(String.format(MESSAGE_SUCCESS, size)).append("\n1. Me");
+        StringBuilder feedback = new StringBuilder(size == 1
+                ? MESSAGE_SUCCESS_SINGULAR : String.format(MESSAGE_SUCCESS, size)).append("\n1. Me");
         String ownUsername = usernameFor(model.getGameMates().getMyself());
         if (!ownUsername.isEmpty()) {
             feedback.append(" (username: ").append(ownUsername).append(")");
