@@ -23,6 +23,7 @@ import seedu.address.logic.commands.GameListCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.PinCommand;
+import seedu.address.logic.commands.SquadCommand;
 import seedu.address.logic.commands.UnarchiveCommand;
 import seedu.address.logic.commands.UnpinCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -72,6 +73,7 @@ public class GameMatesParser {
             case FindCommand.COMMAND_WORD -> new FindCommandParser().parse(arguments);
             case GameListCommand.COMMAND_WORD -> new GameListCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new ListCommandParser().parse(arguments);
+            case SquadCommand.COMMAND_WORD -> new SquadCommandParser().parse(arguments);
             case PinCommand.COMMAND_WORD -> new PinCommandParser().parse(arguments);
             case UnpinCommand.COMMAND_WORD -> new UnpinCommandParser().parse(arguments);
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
