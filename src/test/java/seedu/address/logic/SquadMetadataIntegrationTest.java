@@ -26,7 +26,7 @@ public class SquadMetadataIntegrationTest {
     public Path directory;
 
     @Test
-    public void execute_gameaddMetadataAndSortedPinnedFriends_filterSameGameAndPreserveStorage() throws Exception {
+    public void execute_gameMetadataCommandsAndSortedPinnedFriends_preserveStorage() throws Exception {
         ModelManager model = new ModelManager();
         Path file = directory.resolve("routed-metadata.json");
         JsonGameMatesStorage json = new JsonGameMatesStorage(file);
@@ -36,10 +36,11 @@ public class SquadMetadataIntegrationTest {
         logic.execute("add n/Beta");
         logic.execute("add n/Cross Game");
         logic.execute("gameadd 1 g/Valorant m/Role:Healer m/Region:Asia");
-        logic.execute("gameadd 2 g/Valorant m/role:Healer m/REGION:Asia");
+        logic.execute("gameadd 2 g/Valorant m/role:Tank m/REGION:Asia");
         logic.execute("gameadd 3 g/Valorant m/Role:Healer");
         logic.execute("gameadd 3 g/Minecraft m/Region:Asia");
         logic.execute("pin 2");
+        logic.execute("gameedit 1 g/Valorant m/role:Healer m/REGION:Asia");
         logic.execute("list s/name o/desc");
         GameMates before = new GameMates(model.getGameMates());
         var displayed = new ArrayList<>(model.getFilteredFriendList());

@@ -15,6 +15,27 @@ public class ArgumentTokenizerTest {
     private final Prefix hatQ = new Prefix("^Q");
 
     @Test
+    public void tokenizeWithQuotedValues_preambleAndEmptyValues_followExistingConventions() throws Exception {
+        assertPreambleEmpty(ArgumentTokenizer.tokenizeWithQuotedValues("  ", pSlash));
+        assertPreamblePresent(ArgumentTokenizer.tokenizeWithQuotedValues("  only text  ", pSlash), "only text");
+        ArgumentMultimap result = ArgumentTokenizer.tokenizeWithQuotedValues(
+                " myself p/  -t\"\" p/last", pSlash, dashT);
+        assertPreamblePresent(result, "myself");
+        assertArgumentPresent(result, pSlash, "", "last");
+        assertArgumentPresent(result, dashT, "");
+    }
+
+    @Test
+    public void tokenizeWithQuotedValues_literalPrefixesAndEscapes_doNotLeakIntoOtherArguments() throws Exception {
+        String args = " 1 p/ \" first p/inner -ttext \\\"quoted\\\" \\\\ path \" -tfinal";
+        ArgumentMultimap result = ArgumentTokenizer.tokenizeWithQuotedValues(args, pSlash, dashT);
+        assertArgumentPresent(result, pSlash, "first p/inner -ttext \"quoted\" \\ path");
+        assertArgumentPresent(result, dashT, "final");
+        // The existing method continues treating quotes as ordinary text for other commands.
+        assertArgumentPresent(ArgumentTokenizer.tokenize(" 1 p/\"literal\"", pSlash), pSlash, "\"literal\"");
+    }
+
+    @Test
     public void tokenize_emptyArgsString_noValues() {
         String argsString = "  ";
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(argsString, pSlash);

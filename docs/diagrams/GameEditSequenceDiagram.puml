@@ -1,0 +1,25 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":GameEditCommandParser" as Parser LOGIC_COLOR
+participant ":GameEditCommand" as Command LOGIC_COLOR
+participant ":Model" as Model MODEL_COLOR
+participant ":Storage" as Storage STORAGE_COLOR
+participant ":MainWindow" as Window UI_COLOR
+
+Logic -> Parser : parse(arguments)
+Parser -> Parser : Validate selector, fields and metadata keys
+Parser --> Logic : command
+Logic -> Command : execute(model)
+Command -> Model : resolveFriend(index)
+Model --> Command : target
+Command -> Command : Require one existing game
+Command -> Command : Construct replacement and reject rename collision
+note right of Command: Any validation failure leaves\nall model fields unchanged.
+Command -> Model : setFriend(target, target.friend().withGames(games))
+Command --> Logic : result with updated friend or profile feedback
+Logic -> Storage : saveGameMates(model.getGameMates())
+Logic --> Window : result
+Window -> Window : Refresh updated details through existing result path
+@enduml

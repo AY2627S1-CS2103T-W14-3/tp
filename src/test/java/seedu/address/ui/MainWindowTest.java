@@ -250,6 +250,52 @@ class MainWindowTest {
     }
 
     @Test
+    void gameEdit_updatesFriendAndMyselfDetailsAndPreservesFailureView() {
+        FxTestUtil.runAndWait(() -> {
+            Friend friend = new FriendBuilder().withName("Alice").withGames(
+                    new GameBuilder().withGameName("Valorant").build(), new GameBuilder().build()).build();
+            StubLogic logic = new StubLogic(friend);
+            MainWindow window = new MainWindow(new Stage(), logic, Path.of("test-data.json"));
+            window.fillInnerParts();
+            window.getRoot().getScene().getRoot().applyCss();
+            executeCommand(window, "gamelist 1 g/Valorant");
+            executeCommand(window, "gameedit 1 g/Valorant n/New Game u/newPlayer m/Role:Tank");
+            assertEquals("Alice", getLabel(window, "#name").getText());
+            assertEquals(2, getGames(window).getChildren().size());
+            assertEquals("Friend details", getLabel(window, "#title").getText());
+            assertEquals("New Game", getGames(window).getChildren().get(1)
+                    .lookup(".details-game-name") instanceof Label label ? label.getText() : "");
+            assertThrows(InvocationTargetException.class, () ->
+                    invokeCommand(window, "gameedit 1 g/New Game n/Minecraft"));
+            assertEquals("Alice", getLabel(window, "#name").getText());
+            logic.model.setMyself(new FriendBuilder(friend).withName("Own Profile").build());
+            executeCommand(window, "gameedit myself g/Valorant n/My Game");
+            assertEquals("Your details", getLabel(window, "#title").getText());
+            assertEquals("Own Profile", getLabel(window, "#name").getText());
+        });
+    }
+
+    @Test
+    void gameEdit_archivedFriend_keepsArchiveHeadingAndUpdatedDetails() {
+        FxTestUtil.runAndWait(() -> {
+            Friend archived = new FriendBuilder().withName("Alice").withGames(
+                    new GameBuilder().withGameName("Valorant").build()).build().withArchived(true);
+            MainWindow window = new MainWindow(new Stage(), new StubLogic(archived), Path.of("test-data.json"));
+            window.fillInnerParts();
+            window.getRoot().getScene().getRoot().applyCss();
+            executeCommand(window, "archivelist");
+            executeCommand(window, "gamelist 1 g/Valorant");
+            executeCommand(window, "gameedit 1 g/Valorant n/New Game");
+            assertEquals("Archived friends", getLabel(window, "#listHeading").getText());
+            assertEquals(1, getFriendList(window).getItems().size());
+            assertTrue(getFriendList(window).getItems().getFirst().isArchived());
+            assertEquals("Alice", getLabel(window, "#name").getText());
+            assertEquals("Friend details", getLabel(window, "#title").getText());
+            assertEquals("New Game", getLabel(window, ".details-game-name").getText());
+        });
+    }
+
+    @Test
     void archiveCommands_updateHeadingAndClearRemovedFriendsDetails() {
         FxTestUtil.runAndWait(() -> {
             Friend alice = new FriendBuilder().withName("Alice").build();

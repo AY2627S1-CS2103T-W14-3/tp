@@ -7,9 +7,10 @@ GameMates helps gamers keep track of friends, their contact details, the games t
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer; browsing the online help and downloading releases require internet access.
 
-This guide describes the commands available in this checkout, including adding games with optional metadata
-and filtering `squad` candidates by that metadata.
-See [Your profile and game entries](#your-profile-and-game-entries) for the current limits.
+This guide describes the commands available in this checkout. Use `gameadd`, `gamedel`, and `gameedit` to manage game
+entries; `gameedit` can also replace or clear metadata. Metadata appears on game cards below the username.
+See [Your profile and game entries](#your-profile-and-game-entries) for adding games to your profile.
+Optional metadata conditions on `squad` filter candidates by their entries for the requested game.
 
 * Table of Contents
 {:toc}
@@ -78,7 +79,7 @@ See [Your profile and game entries](#your-profile-and-game-entries) for the curr
   Tags may be repeated; identical tag values are applied once.
 * Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all active friends
   again before choosing an index. Zero, negative numbers, decimals, a leading `+` and larger integers are rejected.
-* For `edit`, `gameadd` and `gamedel`, `FRIEND_INDEX|myself` means either a displayed friend index or the
+* For `edit`, `gameadd`, `gameedit` and `gamedel`, `FRIEND_INDEX|myself` means either a displayed friend index or the
   case-insensitive keyword `myself` for your own profile. Do not type `|`. The selector must come before prefixes;
   `myself` also works when no friends are displayed.
 
@@ -100,7 +101,7 @@ The main window has two panels: the friend list on the left and a details panel 
 * Use `gamelist FRIEND_INDEX|myself [g/GAME_NAME]` to select a friend or your own profile and optionally
   show only one game.
   Clicking another friend shows all of that friend's games.
-* Successful commands other than `gamelist`, `squad` or a single-result `find` return the right panel to your profile. Squad preserves the current details and game-card filter.
+* Successful commands other than `gamelist`, `squad`, a friend-targeted `gameedit` or a single-result `find` return the right panel to your profile. Squad preserves the current details and game-card filter.
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
   Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.
@@ -374,6 +375,37 @@ Errors:
 For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
 showing `No details added`.
 
+### Editing a game: `gameedit`
+
+Edits one existing game for a displayed friend or your separately stored profile.
+
+Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...</code>
+
+* Use the index from the **currently displayed** friend list, or case-insensitive `myself`. The profile can be edited even when the displayed list is empty.
+* `g/` selects a complete existing game name, ignoring case. Partial names do not match. Supply at least one of `n/`, `u/` or `m/`. Repeatable `m/` pairs can appear in any order with the other prefixes; `g/`, `n/` and `u/` may each appear only once.
+* Wrap the **whole value** in double quotes if it contains a space followed by `g/`, `n/`, `u/` or `m/`:
+  `g/"PUBG n/Game"` selects the literal name `PUBG n/Game`. Without quotes, these prefixes introduce command options.
+  This also works for new names (`n/"PUBG m/Edition"`), usernames and metadata. Within quoted values, use `\"` for
+  a literal double quote and `\\` for a backslash. Unclosed quotes, invalid escapes and extra text after a closing
+  quote are rejected before any change. Quoting is specific to `gameedit`; other commands retain their existing syntax.
+* `n/` renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.
+* Omitted fields retain their values. Other games, contact details, tags, archive status and pin status are preserved.
+  The current friend-list scope and filter are retained, including archived lists and search results;
+  a renamed game can make its friend disappear from a game-filtered list.
+* Usernames use the current 1–50 character validation and must contain a letter or digit. A supplied empty `u/` clears the username; omitting `u/` preserves it.
+* Supplying metadata **replaces the entire metadata set**. Omitting `m/` preserves it. A single empty `m/` clears all metadata. Do not mix an empty `m/` with pairs.
+* Pairs split at the first colon: `m/Region:Asia:SG` means key `Region`, value `Asia:SG`. Keys and values are trimmed independently. Keys use 1–50 characters and cannot contain colons; values use 1–200 characters. Both require a letter or digit and reject control characters, using the existing game metadata validation.
+* Keys are unique ignoring case: `m/Role:Healer m/role:Healer` is rejected even though the values agree. Values preserve case.
+* Every edit is validated before any data changes. On success, the right panel shows the updated friend (all games) or your updated profile. Feedback includes the resulting game name, username and metadata. Metadata is saved and displayed on game cards below the username.
+
+Examples:
+
+* `gameedit 1 g/Valorant u/newPlayer` changes only the username.
+* After `gameadd 1 g/PUBG n/Game u/player`, use `gameedit 1 g/"PUBG n/Game" u/newPlayer` to edit that exact entry, even if the friend also plays `PUBG`.
+* `gameedit myself g/Valorant n/VALORANT m/Role:Healer m/Region:Asia:SG` changes spelling and replaces metadata.
+* `gameedit 1 g/Valorant m/` clears metadata while preserving the game name and username.
+
+Errors include an invalid displayed index, missing selector, missing game, invalid field, repeated singleton prefix, repeated metadata key, and a rename collision. A game name that matches multiple entries in an externally edited save file is rejected as ambiguous. Failed commands preserve the stored data and previous details view.
 ### Finding a random squad: `squad`
 
 Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
@@ -571,7 +603,7 @@ Format: `archivelist [g/GAME_NAME]`
 * A game filter with no matches reports `No archived friends match this game filter.`.
   Both empty cases are successful commands and keep the **Archived friends** heading.
 * Indices refer to this displayed archive list. Select a friend or use `gamelist 1` to inspect preserved games.
-* `edit`, `gameadd` and `gamedel` work on displayed archived friends and keep them archived. Editing friend
+* `edit`, `gameadd`, `gameedit` and `gamedel` work on displayed archived friends and keep them archived. Editing friend
   details clears the game filter within the archive view. `delete` permanently removes a displayed archived friend.
 * `list` returns to the active view, headed **Active friends**. Adding a friend also returns to the active view.
 
@@ -673,7 +705,8 @@ Empty or missing contact fields mean
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
 colons and must be unique per game, ignoring case; values may contain colons. Missing `metas` loads as empty.
-Metadata can be entered through `gameadd`, is preserved when saving and is displayed in game cards.
+Metadata can be entered with `gameadd` or replaced or cleared with `gameedit`; it is preserved when saving and
+displayed on game cards.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If the file is missing, the app starts with sample friends and the default profile. If it cannot load the file
@@ -718,6 +751,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Delete** | `delete FRIEND_INDEX`<br> e.g., `delete 3` |
 | **Edit** | <code>edit FRIEND_INDEX&#124;myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
+| **Game edit** | <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...</code><br> e.g., `gameedit myself g/Valorant m/Role:Healer` |
 | **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code><br> e.g., `gameadd myself g/Valorant u/player123 m/Role:Support` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
