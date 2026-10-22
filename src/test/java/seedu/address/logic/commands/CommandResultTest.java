@@ -42,6 +42,17 @@ public class CommandResultTest {
     }
 
     @Test
+    public void preservingDetails_hasExplicitValueSemantics() {
+        CommandResult result = CommandResult.preservingDetails("feedback");
+        assertTrue(result.isPreserveDetails());
+        assertTrue(result.getFriendToShow().isEmpty());
+        assertTrue(result.getGameFilter().isEmpty());
+        assertEquals(result, CommandResult.preservingDetails("feedback"));
+        assertEquals(result.hashCode(), CommandResult.preservingDetails("feedback").hashCode());
+        assertNotEquals(result, new CommandResult("feedback"));
+    }
+
+    @Test
     public void hashcode() {
         CommandResult commandResult = new CommandResult("feedback");
 
@@ -95,7 +106,7 @@ public class CommandResultTest {
         String expected = CommandResult.class.getCanonicalName() + "{feedbackToUser="
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
                 + ", exit=" + commandResult.isExit() + ", friendToShow=" + commandResult.getFriendToShow()
-                + ", gameFilter=" + commandResult.getGameFilter() + ", showMyself=false}";
+                + ", gameFilter=" + commandResult.getGameFilter() + ", showMyself=false, preserveDetails=false}";
         assertEquals(expected, commandResult.toString());
     }
 
@@ -103,7 +114,7 @@ public class CommandResultTest {
     public void toStringMethod_withGameFilter() {
         CommandResult result = new CommandResult("feedback", TypicalFriends.ALICE, new GameName("Valorant"));
         assertEquals(CommandResult.class.getCanonicalName() + "{feedbackToUser=feedback, showHelp=false, exit=false"
-                + ", friendToShow=" + result.getFriendToShow() + ", gameFilter=Optional[Valorant], showMyself=false}",
-                result.toString());
+                + ", friendToShow=" + result.getFriendToShow()
+                + ", gameFilter=Optional[Valorant], showMyself=false, preserveDetails=false}", result.toString());
     }
 }

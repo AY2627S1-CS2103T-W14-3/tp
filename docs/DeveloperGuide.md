@@ -309,6 +309,31 @@ prefixes and `list` does not parse `n/`. The `find` parser only requires a
 non-empty keyword list; there is no 255-character keyword validation. No-match queries return successful empty
 results. Filtering and sorting never include or edit the separate profile.
 
+### Squad metadata conditions
+
+This extension builds on the existing squad command, adding optional conditions to select eligible
+friends by metadata on the requested game. The User Guide documents the combined syntax and feedback.
+
+`SquadCommandParser` tokenizes repeated `m/` values and calls the existing `ParserUtil.parseMetas`.
+That parser rejects empty/malformed pairs and normalized duplicate keys, even for size one.
+`GameMatchesMetadataPredicate` tests `GameName.equals` and `game.getMetas().containsAll(conditions)`
+on one entry. `Meta` equality gives case-insensitive keys and case-sensitive values; no identity semantics change.
+
+`SquadCommand` snapshots displayed friends, filters their game entries, checks availability, then reuses
+its existing random sampling without replacement and displayed-index sort. Me bypasses the metadata
+predicate and counts towards the requested size. An empty condition set preserves base matching and feedback.
+No predicates, friends, games or preferences are updated. The displayed scope and sort comparator are
+retained, including pinned, archived and global search results. Seeded randomness controls sampling in tests.
+
+`CommandResult.preservingDetails` carries an explicit UI instruction for squad success.
+`MainWindow.refreshFriendDetails` returns early for that instruction so existing details and game-card filters
+remain visible. Insufficient candidates throw `CommandException` with the base squad error text before sampling;
+the existing exception path also preserves the details. Size one uses the base singular `Found squad of 1 person:`
+heading. Other result constructors retain their previous behavior. `LogicManager` continues using its existing
+save path for success even though squad makes no data changes; a command error does not reach the save call.
+
+The [squad metadata sequence diagram source](diagrams/SquadMetadataSequenceDiagram.puml) shows the filtering order.
+
 ### Editing an existing game
 
 `GameEditCommandParser` reuses `ArgumentTokenizer`, `ArgumentMultimap`, `ParserUtil.parseIndexOrMyself`,
@@ -1023,6 +1048,23 @@ on open PRs labelled `type.Docs`; this task does not publish a preview or change
 Current screenshots must come from the application, not the specification mockups. `Ui.png` shows both panels,
 `findAlexDavidResult.png` shows name filtering, and `gamelistFiltered.png` / `gamelistNoMatch.png` show card filtering.
 Diagram sources live in `docs/diagrams`; regenerate their matching `docs/images/*.png` after changing a source.
+
+### Manual squad metadata checks
+
+Use a disposable data directory with two friends playing Valorant. Add each game with
+`gameadd FRIEND_INDEX g/Valorant m/Role:Healer m/Region:Asia`.
+Give a third friend only `Role:Healer` on Valorant and `Region:Asia`
+on Minecraft. Select a friend's filtered game details, then run
+`squad g/Valorant n/3 m/role:Healer m/Region:Asia`. Expect Me first and only the two full matches,
+with original displayed indices and the details unchanged. Repeat with `m/role:healer`; expect an insufficient
+candidates error with unchanged details. Try `n/1`; expect only Me even without matching profile metadata,
+using the heading `Found squad of 1 person:`. Try a repeated normalized key
+and an empty `m/`; expect errors. Run `find` to hide one eligible friend, then request three people;
+expect an insufficient candidates error. Run `squad g/Valorant n/2` to confirm the base no-metadata behavior.
+After each command, confirm list order, filters and selected details persist and the saved model is unchanged.
+Repeat after `list s/name o/desc`, then after pinning one matching friend and running `list`.
+Expect the result to use the indices and order visible in each view. Archive a matching friend and run
+`archivelist`; squad selection uses that archive view and leaves its heading and stored statuses unchanged.
 
 ### Manual game edit checks
 

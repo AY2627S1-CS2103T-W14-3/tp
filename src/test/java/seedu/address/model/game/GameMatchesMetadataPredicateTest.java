@@ -1,0 +1,39 @@
+package seedu.address.model.game;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+
+import seedu.address.logic.parser.ParserUtil;
+import seedu.address.model.game.meta.Meta;
+import seedu.address.testutil.GameBuilder;
+
+public class GameMatchesMetadataPredicateTest {
+    @Test
+    public void test_allPairsOnSameGame_keysIgnoreCaseAndValuesPreserveCase() throws Exception {
+        Game game = new GameBuilder().withGameName("Valorant")
+                .addMeta("Role", "Healer").addMeta("Region", "Asia:SG").build();
+        assertTrue(predicate("valorant", "role:Healer", "REGION:Asia:SG").test(game));
+        assertFalse(predicate("Val", "Role:Healer").test(game));
+        assertFalse(predicate("Valorant", "Role:healer").test(game));
+        assertFalse(predicate("Valorant", "Role:Healer", "Level:30").test(game));
+        assertFalse(predicate("Valorant", "Role:Healer", "Region:Europe").test(game));
+        assertTrue(predicate("Valorant").test(new GameBuilder().withGameName("VALORANT").build()));
+    }
+
+    @Test
+    public void constructor_copiesConditions() throws Exception {
+        Set<Meta> source = new HashSet<>(ParserUtil.parseMetas(Set.of("Role:Healer")));
+        GameMatchesMetadataPredicate predicate = new GameMatchesMetadataPredicate(new GameName("Valorant"), source);
+        source.clear();
+        assertFalse(predicate.test(new GameBuilder().withGameName("Valorant").build()));
+    }
+
+    private GameMatchesMetadataPredicate predicate(String game, String... pairs) throws Exception {
+        return new GameMatchesMetadataPredicate(new GameName(game), ParserUtil.parseMetas(Set.of(pairs)));
+    }
+}

@@ -10,6 +10,7 @@ Your data stays on your computer; browsing the online help and downloading relea
 This guide describes the commands available in this checkout. Use `gameadd`, `gamedel`, and `gameedit` to manage game
 entries; `gameedit` can also replace or clear metadata. Metadata appears on game cards below the username.
 See [Your profile and game entries](#your-profile-and-game-entries) for adding games to your profile.
+Optional metadata conditions on `squad` filter candidates by their entries for the requested game.
 
 * Table of Contents
 {:toc}
@@ -100,7 +101,7 @@ The main window has two panels: the friend list on the left and a details panel 
 * Use `gamelist FRIEND_INDEX|myself [g/GAME_NAME]` to select a friend or your own profile and optionally
   show only one game.
   Clicking another friend shows all of that friend's games.
-* Successful commands other than `gamelist`, a friend-targeted `gameedit` or a single-result `find` return the right panel to your profile.
+* Successful commands other than `gamelist`, `squad`, a friend-targeted `gameedit` or a single-result `find` return the right panel to your profile. Squad preserves the current details and game-card filter.
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
   Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.
@@ -410,7 +411,7 @@ Errors include an invalid displayed index, missing selector, missing game, inval
 Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
 Lists each member's name, in-game username when available, and displayed friend index where applicable.
 
-Format: `squad g/GAME n/NUMBER_OF_PEOPLE`
+Format: `squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`
 
 * Both `g/` and `n/` are required and may appear in either order.
 * `GAME` uses the same game-name rules as `gamelist`: 1–50 printable characters after trimming,
@@ -419,14 +420,41 @@ Format: `squad g/GAME n/NUMBER_OF_PEOPLE`
 * `NUMBER_OF_PEOPLE` must be a whole number from 1 to 20, inclusive.
 * The requested size includes you: `n/3` selects you and two friends; `n/1` returns only you.
 * You are always included as the first member, labelled `Me`, even if your profile does not contain `GAME`.
-* The other `NUMBER_OF_PEOPLE - 1` members are selected from the **currently displayed friend list**. To include your entire friend list, run `list` first.
+* The other `NUMBER_OF_PEOPLE - 1` members are selected from the **currently displayed friend list**. To select from all active friends, run `list` first.
   Each must play `GAME`. A person cannot appear more than once in a squad.
+  Archived friends are eligible when displayed through `archivelist` or `find`.
 * Selection is random. Repeating the command may return a different squad, but may also return the same one.
+* Success preserves the current details and game-card filter. Errors also keep the existing details visible.
+  Stored data and the friend list's filter and order remain unchanged.
+
+#### Filtering squad candidates by metadata
+
+* Add one or more `m/KEY:VALUE` conditions to filter eligible friends before checking availability and sampling.
+  Without `m/`, eligibility, success feedback and errors follow the base squad behavior.
+* All conditions must match (**AND**) on the **same game entry** matched by `g/`. Missing keys fail;
+  metadata on another game cannot satisfy a condition. Extra stored metadata is allowed.
+* Keys match ignoring case. Values match exactly and are **case-sensitive**: `m/role:Healer` matches
+  `Role:Healer`, while `m/role:healer` does not. There are no numeric comparisons, role quotas or OR expressions.
+* Pairs split at the first colon: `m/Region:Asia:SG` matches the value `Asia:SG`. Keys and values are trimmed.
+  Keys use 1–50 characters without colons; values use 1–200 characters. Each requires a letter or digit and
+  rejects control characters, following existing metadata validation.
+* Empty/malformed metadata and repeated keys ignoring case are rejected, even for identical repeated pairs.
+  These checks apply to `n/1` too. `g/` and `n/` must each appear exactly once; prefixes may be supplied in any order.
+* Me is exempt from the metadata conditions and remains first, counting towards the size. `n/1` returns only
+  Me with the heading `Found squad of 1 person:`. Selected friends retain their original displayed indices
+  and appear in displayed-list order. If fewer than `n - 1` displayed friends meet all conditions, the command
+  reports the error `Could not find a squad of N people.`
+
+Add metadata to a game using `gameadd FRIEND_INDEX|myself g/GAME [u/USERNAME] [m/KEY:VALUE]...`.
+Each game card displays the stored pairs below its username.
 
 Examples:
 
 * `squad g/Valorant n/3`
 * `squad g/Stardew Valley n/4`
+* `squad g/Valorant n/3 m/Role:Healer m/Region:Asia` selects Me and two displayed friends matching both pairs.
+* `squad g/Valorant n/2 m/Level:30` matches the text `30`; it does not mean level 30 or above.
+* `squad g/Valorant n/1 m/Role:Healer` returns only Me, regardless of the profile's metadata.
 
 Assuming Benedict and Melody are at indices 1 and 2 in the currently displayed friend list.
 Example success feedback for `squad g/Valorant n/3`:
@@ -439,7 +467,8 @@ Found squad of 3 people:
 ```
 
 If your profile has no entry for the requested game, the first row is simply `1. Me`.
-If fewer than `NUMBER_OF_PEOPLE - 1` displayed friends play the requested game, feedback is:
+If fewer than `NUMBER_OF_PEOPLE - 1` displayed friends play the requested game and meet all supplied metadata
+conditions, the command reports an error:
 
 ```text
 Could not find a squad of <n> people.
@@ -451,9 +480,13 @@ Possible errors:
 
 | Input problem | Feedback |
 |---------------|----------|
-| Missing `g/` or `n/`, or a missing parameter value | `Invalid command format. Usage: squad g/GAME n/NUMBER_OF_PEOPLE` |
+| Missing `g/` or `n/`, or a missing parameter value | Usage starts with `Invalid command format. Usage: squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...` |
 | Invalid squad size, such as `0`, `21`, `-1`, `2.5` or `abc` | `Invalid squad size. Enter a whole number from 1 to 20.` |
 | Invalid game name | `Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.` |
+| Empty or malformed metadata | `Metadata must be in the format Key:Value.` |
+| Repeated metadata keys, ignoring case | `Metadata keys must be unique within a game entry.` |
+
+Empty keys/values and invalid lengths report the existing metadata field constraints.
 
 ### Editing a friend or your own profile: `edit`
 
@@ -722,7 +755,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code><br> e.g., `gameadd myself g/Valorant u/player123 m/Role:Support` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
-| **Squad create** | `squad g/GAME_NAME n/NUMBER_OF_PEOPLE`<br> e.g., `squad g/Valorant n/5` |
+| **Squad create** | `squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`<br> e.g., `squad g/Valorant n/3 m/Role:Healer` |
 | **List** | `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`<br> e.g., `list g/Valorant s/name o/desc` |
 | **Pin** | `pin FRIEND_INDEX`<br> e.g., `pin 1` |
 | **Unpin** | `unpin FRIEND_INDEX`<br> e.g., `unpin 1` |
