@@ -315,8 +315,8 @@ order. An order may only be supplied with <code class="language-plaintext highli
   <li>
 <code class="language-plaintext highlighter-rouge">list g/GAME_NAME s/NAME|GAME</code> first filters by game, then sorts the matching friends. Prefixes may be supplied in
 either order.</li>
-  <li>Omitting <code class="language-plaintext highlighter-rouge">s/</code> preserves the stored insertion order. Running another <code class="language-plaintext highlighter-rouge">list</code> command without <code class="language-plaintext highlighter-rouge">s/</code> clears a sort
-applied by an earlier <code class="language-plaintext highlighter-rouge">list</code> command.</li>
+  <li>Running <code class="language-plaintext highlighter-rouge">find</code> changes only the friend-list filter and retains a sort applied by an earlier <code class="language-plaintext highlighter-rouge">list</code> command.
+Running <code class="language-plaintext highlighter-rouge">list</code> without <code class="language-plaintext highlighter-rouge">s/</code> clears that sort and returns to the stored insertion order.</li>
   <li>Leading and trailing spaces in <code class="language-plaintext highlighter-rouge">GAME_NAME</code> are ignored, but partial names do not match. For example, <code class="language-plaintext highlighter-rouge">list g/Val</code> does not match <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
   <li>Only game names are matched; a friend’s in-game username is not matched.</li>
   <li>Multi-word game names are accepted. Only one <code class="language-plaintext highlighter-rouge">g/</code> prefix may be supplied, and the game name must not be empty.</li>
