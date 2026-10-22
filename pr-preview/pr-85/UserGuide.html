@@ -338,8 +338,9 @@ including at least one letter or digit.</li>
   <li>Repeated <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">u/</code> prefixes are rejected, even when the values are identical.</li>
   <li>Each <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters;
 values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.</li>
-  <li>Repeat <code class="language-plaintext highlighter-rouge">m/</code> for distinct keys, ignoring case. Malformed pairs, empty fields or duplicate keys reject the whole
-command, even if values match. Omit <code class="language-plaintext highlighter-rouge">m/</code> entirely for no metadata.</li>
+  <li>Repeat <code class="language-plaintext highlighter-rouge">m/</code> for distinct keys. Metadata keys are case-insensitive, so <code class="language-plaintext highlighter-rouge">Role</code> and <code class="language-plaintext highlighter-rouge">role</code> are duplicates.
+Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
+Omit <code class="language-plaintext highlighter-rouge">m/</code> entirely for no metadata.</li>
   <li>A space followed by <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code> starts a new parameter, even inside quotes; avoid these in field values.</li>
   <li>A game name already present on the selected friend or profile is rejected, ignoring case.</li>
   <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
@@ -799,8 +800,6 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
     </tr>
   </tbody>
 </table>
-
-<p>Metadata entry is not supported.</p>
 
   </div>
 

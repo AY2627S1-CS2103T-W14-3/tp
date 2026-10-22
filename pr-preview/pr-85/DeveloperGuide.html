@@ -464,10 +464,9 @@ Parse and execution failures do not refresh the panel, preserving the previous g
 
 <p>The command does not update the model’s friend-list predicate, friends, games, preferences or Myself profile.
 The profile fallback still shows all profile games; explicit profile selection supports game filtering.
-<code class="language-plaintext highlighter-rouge">GameDetailsCard</code> currently renders the available
-<code class="language-plaintext highlighter-rouge">Game.getGameName()</code> and <code class="language-plaintext highlighter-rouge">Game.getUsername()</code> fields. Metadata storage has merged, but cards do not yet render
-<code class="language-plaintext highlighter-rouge">Game.getMetas()</code>. Extend the card using <code class="language-plaintext highlighter-rouge">Meta.getKey()</code> and <code class="language-plaintext highlighter-rouge">Meta.getValue()</code> and add rendering/preservation tests;
-the command’s original-friend payload already retains metadata without copying or removing it.</p>
+<code class="language-plaintext highlighter-rouge">GameDetailsCard</code> renders <code class="language-plaintext highlighter-rouge">Game.getGameName()</code>, <code class="language-plaintext highlighter-rouge">Game.getUsername()</code> and <code class="language-plaintext highlighter-rouge">Game.getMetas()</code>.
+Metadata pairs appear below the username as wrapping <code class="language-plaintext highlighter-rouge">Key: Value</code> labels, sorted by key ignoring case.
+The command’s original-friend payload retains metadata without copying or removing it.</p>
 
 <p>Parser and command tests cover errors, exact matching, empty results, displayed-list indexing and unchanged model
 data. JavaFX panel and window tests exercise filtered payloads, empty states, clearing by commands and selection,
@@ -1218,7 +1217,7 @@ occur after successful commands; window preferences save on shutdown. Metadata p
   <li>
 <strong>In-game username/Handle</strong>: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.</li>
   <li>
-<strong>Metadata</strong>: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; command entry and card rendering are not yet supported.</li>
+<strong>Metadata</strong>: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; entered through <code class="language-plaintext highlighter-rouge">gameadd</code> using <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> and displayed below the username in game cards.</li>
   <li>
 <strong>Metadata key</strong>: The label before the first colon in a metadata item. For example, <code class="language-plaintext highlighter-rouge">Role</code> in <code class="language-plaintext highlighter-rouge">Role:Sentinel</code>.</li>
   <li>
@@ -1422,10 +1421,11 @@ Valorant entry. <code class="language-plaintext highlighter-rouge">edit 1 p/9876
 <code class="language-plaintext highlighter-rouge">list g/Unknown</code>, then <code class="language-plaintext highlighter-rouge">edit MYSELF n/Joash Updated p/</code>: expected the renamed profile with no phone number and
 its Minecraft game preserved. The left friend list remains empty. <code class="language-plaintext highlighter-rouge">edit myself n/Fixture Friend</code> rejects the
 duplicate name, and <code class="language-plaintext highlighter-rouge">add n/joash updated</code> rejects a name matching the profile.</li>
-  <li>Try <code class="language-plaintext highlighter-rouge">edit n/Changed</code>: expected a missing-index error. Run <code class="language-plaintext highlighter-rouge">gameadd myself g/Test u/player</code>, then
-<code class="language-plaintext highlighter-rouge">gamedel myself g/Test</code>: expected success and the original Minecraft entry preserved after both commands.
-Metadata command entry cannot be tested because no routed command supports it yet. To test storage, close the app,
-add <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code> to the fixture’s Minecraft entry, relaunch and run <code class="language-plaintext highlighter-rouge">list</code>.
+  <li>Try <code class="language-plaintext highlighter-rouge">edit n/Changed</code>: expected a missing-index error. Run <code class="language-plaintext highlighter-rouge">gameadd myself g/Test u/player m/Role:Support:Mid</code>, then
+<code class="language-plaintext highlighter-rouge">gamelist myself g/Test</code>: expected <code class="language-plaintext highlighter-rouge">Role: Support:Mid</code> in the addition feedback and below the username in the game card.
+Run <code class="language-plaintext highlighter-rouge">gamedel myself g/Test</code>: expected success and the original Minecraft entry preserved.
+To also test loading metadata from JSON, close the app, add
+<code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code> to the fixture’s Minecraft entry, relaunch and run <code class="language-plaintext highlighter-rouge">list</code>.
 The saved JSON must retain that pair; cards show the game name and <code class="language-plaintext highlighter-rouge">Username: Not provided</code> when the username is omitted.
 A missing <code class="language-plaintext highlighter-rouge">metas</code> field loads as empty; a repeated key (including case variants) rejects the load and uses the documented fallback.</li>
   <li>Run <code class="language-plaintext highlighter-rouge">gameadd myself g/Test</code> without <code class="language-plaintext highlighter-rouge">u/</code>: expect success with <code class="language-plaintext highlighter-rouge">Username: Not provided</code> in feedback and the game card.
