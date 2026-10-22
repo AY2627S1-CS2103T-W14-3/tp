@@ -145,7 +145,7 @@ public class MainWindow extends UiPart<Stage> {
 
     private void refreshFriendDetails(CommandResult commandResult) {
         if (commandResult.getFriendToShow().isPresent()) {
-            friendDetailsPanel.setFriend(commandResult.getFriendToShow().get(), false,
+            friendDetailsPanel.setFriend(commandResult.getFriendToShow().get(), commandResult.isShowMyself(),
                     commandResult.getGameFilter().orElse(null));
         } else {
             showFriendDetails(null);

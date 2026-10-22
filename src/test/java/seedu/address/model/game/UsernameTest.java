@@ -11,6 +11,15 @@ import org.junit.jupiter.api.Test;
 public class UsernameTest {
 
     @Test
+    public void emptyUsername_representsOmittedValue() {
+        assertTrue(Username.EMPTY.isEmpty());
+        assertEquals("", Username.EMPTY.value);
+        assertEquals("", Username.EMPTY.toString());
+        assertFalse(new Username("player").isEmpty());
+        assertNotEquals(Username.EMPTY, new Username("player"));
+    }
+
+    @Test
     public void constructor_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Username(null));
     }

@@ -82,8 +82,7 @@ public class JsonAdaptedFriendTest {
     @Test
     public void toModelType_invalidGames_throwsIllegalValueException() {
         for (JsonAdaptedGame game : List.of(new JsonAdaptedGame(" ", "player"),
-                new JsonAdaptedGame("Valorant", " "), new JsonAdaptedGame(null, "player"),
-                new JsonAdaptedGame("Valorant", null))) {
+                new JsonAdaptedGame("Valorant", " "), new JsonAdaptedGame(null, "player"))) {
             JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
                     List.of(game), VALID_TAGS);
             assertThrows(IllegalValueException.class, friend::toModelType);

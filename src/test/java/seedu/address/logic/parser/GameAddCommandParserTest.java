@@ -40,11 +40,16 @@ public class GameAddCommandParserTest {
 
     @Test
     public void parse_missingParameters_failure() {
-        for (String input : new String[]{"", " 1", " 1 g/Valorant", " 1 u/player", " g/Valorant u/player",
-            "myself g/Valorant", "myself u/player"}) {
+        for (String input : new String[]{"", " 1", " 1 u/player", " g/Valorant u/player", "myself u/player"}) {
             assertParseFailure(parser, input,
                     String.format(Messages.MESSAGE_INVALID_COMMAND_FORMAT, GameAddCommand.MESSAGE_USAGE));
         }
+    }
+
+    @Test
+    public void parse_omittedUsername_returnsGameWithEmptyUsername() {
+        assertParseSuccess(parser, " 1 g/Valorant",
+                new GameAddCommand(Index.fromOneBased(1), new Game(new GameName("Valorant"), Username.EMPTY)));
     }
 
     @Test

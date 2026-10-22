@@ -35,12 +35,12 @@ class JsonAdaptedUsername {
     /**
      * Converts the stored value to the model, validating its constraints.
      *
-     * @throws IllegalValueException if the stored value is missing or invalid.
+     * Missing or empty values represent an omitted username.
+     * @throws IllegalValueException if a non-empty stored value is invalid.
      */
     public Username toModelType() throws IllegalValueException {
-        if (value == null) {
-            throw new IllegalValueException(String.format(JsonAdaptedGame.MISSING_FIELD_MESSAGE_FORMAT,
-                    Username.class.getSimpleName()));
+        if (value == null || value.isEmpty()) {
+            return Username.EMPTY;
         }
         if (!Username.isValidUsername(value)) {
             throw new IllegalValueException(Username.MESSAGE_CONSTRAINTS);
