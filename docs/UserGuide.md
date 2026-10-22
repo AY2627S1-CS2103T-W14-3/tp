@@ -310,6 +310,56 @@ Errors:
 For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
 showing `No details added`.
 
+### Finding a random squad: `squad` (planned)
+
+Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
+Lists each member's name, in-game username when available, and displayed friend index where applicable.
+
+Format: `squad g/GAME n/NUMBER_OF_PEOPLE`
+
+* Both `g/` and `n/` are required and may appear in either order.
+* `GAME` uses the same game-name rules as `gamelist`: 1–50 printable characters after trimming,
+  including at least one letter or digit. Multiword names are accepted. Matching uses the complete
+  game name and is case-insensitive; `valorant` matches `Valorant`, but `Val` does not.
+* `NUMBER_OF_PEOPLE` must be a whole number from 1 to 20, inclusive.
+* The requested size includes you: `n/3` selects you and two friends; `n/1` returns only you.
+* You are always included as the first member, labelled `Me`, even if your profile does not contain `GAME`.
+* The other `NUMBER_OF_PEOPLE - 1` members are selected from the **currently displayed friend list**. To include your entire friend list, run `list` first.
+  Each must play `GAME`. A person cannot appear more than once in a squad.
+* Selection is random. Repeating the command may return a different squad, but may also return the same one.
+
+Examples:
+
+* `squad g/Valorant n/3`
+* `squad g/Stardew Valley n/4`
+
+Assuming Benedict and Melody are at indices 1 and 2 in the currently displayed friend list.
+Example success feedback for `squad g/Valorant n/3`:
+
+```text
+Found squad of 3 people:
+1. Me (username: aaravm123)
+2. Benedict (username: benthecat, index: 1)
+3. Melody (username: melodyps, index: 2)
+```
+
+If your profile has no entry for the requested game, the first row is simply `1. Me`.
+If fewer than `NUMBER_OF_PEOPLE - 1` displayed friends play the requested game, feedback is:
+
+```text
+Could not find a squad of <n> people.
+```
+
+`<n>` is replaced with the requested squad size, for example `Could not find a squad of 3 people.`
+
+Proposed errors:
+
+| Input problem | Feedback |
+|---------------|----------|
+| Missing `g/` or `n/`, or a missing parameter value | `Invalid command format. Usage: squad g/GAME n/NUMBER_OF_PEOPLE` |
+| Invalid squad size, such as `0`, `21`, `-1`, `2.5` or `abc` | `Invalid squad size. Enter a whole number from 1 to 20.` |
+| Invalid game name | `Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.` |
+
 ### Editing a friend or your own profile: `edit`
 
 Edits an existing friend or your separately stored Myself profile in GameMates.
@@ -492,6 +542,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME]</code><br> e.g., `gameadd myself g/Valorant u/player123` or `gameadd 1 g/Minecraft` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
+| **Squad create** | `squad g/GAME_NAME n/NUMBER_OF_PEOPLE`<br> e.g., `squad g/Valorant n/5` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
 | **Help** | `help` |
 | **Exit** | `exit` |
