@@ -58,6 +58,7 @@ saved data. See <a href="#your-profile-and-game-entries">Your profile and game e
       <li><a href="#adding-a-game-gameadd" id="markdown-toc-adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code></a></li>
       <li><a href="#deleting-a-game-gamedel" id="markdown-toc-deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code></a></li>
       <li><a href="#viewing-games-gamelist" id="markdown-toc-viewing-games-gamelist">Viewing games: <code class="language-plaintext highlighter-rouge">gamelist</code></a></li>
+      <li><a href="#finding-a-random-squad-squad-planned" id="markdown-toc-finding-a-random-squad-squad-planned">Finding a random squad: <code class="language-plaintext highlighter-rouge">squad</code> (planned)</a></li>
       <li><a href="#editing-a-friend-or-your-own-profile-edit" id="markdown-toc-editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
       <li><a href="#locating-friends-by-name-find" id="markdown-toc-locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
       <li><a href="#deleting-a-friend-delete" id="markdown-toc-deleting-a-friend-delete">Deleting a friend: <code class="language-plaintext highlighter-rouge">delete</code></a></li>
@@ -498,6 +499,78 @@ while the left panel continues showing only Minecraft players.</li>
 <p>For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
 showing <code class="language-plaintext highlighter-rouge">No details added</code>.</p>
 
+<h3 id="finding-a-random-squad-squad-planned">Finding a random squad: <code class="language-plaintext highlighter-rouge">squad</code> (planned)</h3>
+
+<p>Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
+Lists each member’s name, in-game username when available, and displayed friend index where applicable.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">squad g/GAME n/NUMBER_OF_PEOPLE</code></p>
+
+<ul>
+  <li>Both <code class="language-plaintext highlighter-rouge">g/</code> and <code class="language-plaintext highlighter-rouge">n/</code> are required and may appear in either order.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">GAME</code> uses the same game-name rules as <code class="language-plaintext highlighter-rouge">gamelist</code>: 1–50 printable characters after trimming,
+including at least one letter or digit. Multiword names are accepted. Matching uses the complete
+game name and is case-insensitive; <code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE</code> must be a whole number from 1 to 20, inclusive.</li>
+  <li>The requested size includes you: <code class="language-plaintext highlighter-rouge">n/3</code> selects you and two friends; <code class="language-plaintext highlighter-rouge">n/1</code> returns only you.</li>
+  <li>You are always included as the first member, labelled <code class="language-plaintext highlighter-rouge">Me</code>, even if your profile does not contain <code class="language-plaintext highlighter-rouge">GAME</code>.</li>
+  <li>The other <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> members are selected from the <strong>currently displayed friend list</strong>. To include your entire friend list, run <code class="language-plaintext highlighter-rouge">list</code> first.
+Each must play <code class="language-plaintext highlighter-rouge">GAME</code>. A person cannot appear more than once in a squad.</li>
+  <li>Selection is random. Repeating the command may return a different squad, but may also return the same one.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">squad g/Valorant n/3</code></li>
+  <li><code class="language-plaintext highlighter-rouge">squad g/Stardew Valley n/4</code></li>
+</ul>
+
+<p>Assuming Benedict and Melody are at indices 1 and 2 in the currently displayed friend list.
+Example success feedback for <code class="language-plaintext highlighter-rouge">squad g/Valorant n/3</code>:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Found squad of 3 people:
+1. Me (username: aaravm123)
+2. Benedict (username: benthecat, index: 1)
+3. Melody (username: melodyps, index: 2)
+</code></pre></div></div>
+
+<p>If your profile has no entry for the requested game, the first row is simply <code class="language-plaintext highlighter-rouge">1. Me</code>.
+If fewer than <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> displayed friends play the requested game, feedback is:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Could not find a squad of &lt;n&gt; people.
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">&lt;n&gt;</code> is replaced with the requested squad size, for example <code class="language-plaintext highlighter-rouge">Could not find a squad of 3 people.</code></p>
+
+<p>Proposed errors:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Input problem</th>
+      <th>Feedback</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Missing <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">n/</code>, or a missing parameter value</td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid command format. Usage: squad g/GAME n/NUMBER_OF_PEOPLE</code></td>
+    </tr>
+    <tr>
+      <td>Invalid squad size, such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">21</code>, <code class="language-plaintext highlighter-rouge">-1</code>, <code class="language-plaintext highlighter-rouge">2.5</code> or <code class="language-plaintext highlighter-rouge">abc</code>
+</td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid squad size. Enter a whole number from 1 to 20.</code></td>
+    </tr>
+    <tr>
+      <td>Invalid game name</td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.</code></td>
+    </tr>
+  </tbody>
+</table>
+
 <h3 id="editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code>
 </h3>
 
@@ -773,6 +846,12 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
       <td><strong>Game list</strong></td>
       <td>
 <code>gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">gamelist myself g/Valorant</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Squad create</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">squad g/GAME_NAME n/NUMBER_OF_PEOPLE</code><br> e.g., <code class="language-plaintext highlighter-rouge">squad g/Valorant n/5</code>
 </td>
     </tr>
     <tr>
