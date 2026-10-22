@@ -25,6 +25,47 @@ public class GameEditCommandParserTest {
     private final GameEditCommandParser parser = new GameEditCommandParser();
 
     @Test
+    public void parse_quotedSelector_supportsEveryPrefixAndLiteralQuotes() {
+        for (String name : new String[]{"PUBG g/Game", "PUBG n/Game", "PUBG u/Game", "PUBG m/Game",
+            "\"Quoted Game\"", "Game \\ Path"}) {
+            String quoted = name.replace("\\", "\\\\").replace("\"", "\\\"");
+            assertParseSuccess(parser, " 1 g/\"" + quoted + "\" u/player",
+                    new GameEditCommand(Index.fromOneBased(1), new GameName(name),
+                            new EditGameDescriptor(null, new Username("player"), null)));
+        }
+    }
+
+    @Test
+    public void parse_quotedValues_keepPrefixesLiteralAndDecodeEscapes() throws Exception {
+        GameEditCommand expected = new GameEditCommand(Index.myself(), new GameName("PUBG n/Game"),
+                new EditGameDescriptor(new GameName("New g/Game n/Name u/User m/Meta"),
+                        new Username("player n/name"), ParserUtil.parseMetas(Set.of("Role:uses m/value"))));
+        assertParseSuccess(parser, " myself g/\"PUBG n/Game\" n/\"New g/Game n/Name u/User m/Meta\""
+                + " u/\"player n/name\" m/\"Role:uses m/value\"", expected);
+        assertParseSuccess(parser, " 2 g/Valorant n/\"The \\\"Game\\\" \\\\ Edition\"",
+                command(new GameName("The \"Game\" \\ Edition"), null, null));
+        assertParseSuccess(parser, " 2 g/Valorant n/Players' Game",
+                command(new GameName("Players' Game"), null, null));
+    }
+
+    @Test
+    public void parse_quotedValues_stillValidateFieldsAndDuplicatePrefixes() {
+        assertParseFailure(parser, " 2 g/\"Valorant\"", GameEditCommand.MESSAGE_NOT_EDITED);
+        assertParseFailure(parser, " 2 g/Valorant n/\"\"", GameName.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " 2 g/\"Valorant\" g/\"Other\" u/player",
+                Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_GAME_NAME));
+        assertParseFailure(parser, " 2 g/Valorant m/\"Role:Tank\" m/\"role:Tank\"", Meta.MESSAGE_DUPLICATE_KEY);
+    }
+
+    @Test
+    public void parse_malformedQuotedValues_failure() {
+        for (String input : new String[]{" 2 g/\"PUBG n/Game u/player", " 2 g/\"PUBG\"extra u/player",
+            " 2 g/Valorant n/\"Game\\q\"", " 2 g/Valorant u/\"player\\", " 2 g/\"PUBG\" extra u/player"}) {
+            assertParseFailure(parser, input, ArgumentTokenizer.MESSAGE_INVALID_QUOTED_VALUE);
+        }
+    }
+
+    @Test
     public void parse_validFieldsAndRouting_success() throws Exception {
         GameEditCommand expected = new GameEditCommand(Index.myself(), new GameName("Stardew Valley"),
                 new EditGameDescriptor(new GameName("New Game"), new Username("player"),

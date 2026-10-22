@@ -23,7 +23,7 @@ public class GameEditCommandParser implements Parser<GameEditCommand> {
     @Override
     public GameEditCommand parse(String args) throws ParseException {
         requireNonNull(args);
-        ArgumentMultimap arguments = ArgumentTokenizer.tokenize(args,
+        ArgumentMultimap arguments = ArgumentTokenizer.tokenizeWithQuotedValues(args,
                 PREFIX_GAME_NAME, PREFIX_NAME, PREFIX_USERNAME, PREFIX_META);
         if (arguments.getPreamble().isEmpty() || !arguments.arePrefixesPresent(PREFIX_GAME_NAME)) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, GameEditCommand.MESSAGE_USAGE));

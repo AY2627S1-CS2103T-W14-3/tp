@@ -306,6 +306,12 @@ supplied pairs pass through the shared parser, including normalized duplicate-ke
 The model identity rules remain unchanged. The merged optional-username model provides `Username.EMPTY`; a supplied empty `u/` maps to that value.
 Omitting `u/` preserves the original username, including an absent username.
 
+The parser opts into `ArgumentTokenizer.tokenizeWithQuotedValues` so a whole field value can be double quoted.
+Recognized prefixes inside that value are literal text: `g/"PUBG n/Game"` selects that complete stored name.
+The tokenizer decodes `\"` and `\\`, rejects malformed quotes/escapes and trailing text, and then passes the
+decoded values through the same field validators and duplicate-prefix checks. Unquoted prefixes retain their
+existing command meaning. The ordinary tokenizer and other commands' syntax remain unchanged.
+
 `GameEditCommand` uses `FriendTargetResolver` and `Model.resolveFriend` for displayed indices or Myself.
 It requires exactly one matching existing game, constructs the complete replacement, then checks collisions
 against the other games before calling `Model.setFriend(target, updated)` once. Ambiguous duplicate names in
@@ -932,3 +938,8 @@ Expect both games and preserved friend fields. Try `gameedit 1 g/Valorant n/Mine
 normalized metadata keys; expect errors with unchanged data and details. Clear with `gameedit 1 g/Valorant m/`.
 Add `gameadd myself g/Valorant u/own`, run `find Nobody`, then `gameedit myself g/Valorant u/newOwn`;
 expect updated profile despite the empty list. Restart from the same directory and confirm all edits persist.
+
+To check literal prefixes, add both `gameadd 1 g/PUBG u/plain` and `gameadd 1 g/PUBG n/Game u/special`.
+Run `gameedit 1 g/"PUBG n/Game" u/updated`: only `PUBG n/Game` should change; the plain `PUBG` entry must
+retain username `plain`. Rename the quoted target using `n/"PUBG m/Edition"` and edit it again using
+`g/"PUBG m/Edition"`. An unclosed quoted selector must report an error without changing either game.

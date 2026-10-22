@@ -27,6 +27,33 @@ public class GameEditIntegrationTest {
     public Path directory;
 
     @Test
+    public void execute_prefixLikeGameNames_editOnlyQuotedTargetAndPersist() throws Exception {
+        Path file = directory.resolve("quoted-games.json");
+        JsonGameMatesStorage json = new JsonGameMatesStorage(file);
+        ModelManager model = new ModelManager();
+        model.addFriend(new FriendBuilder().withName("Player").withGames().build());
+        LogicManager logic = new LogicManager(model,
+                new StorageManager(json, new JsonUserPrefsStorage(directory.resolve("preferences.json"))));
+        logic.execute("gameadd 1 g/PUBG u/plain");
+        logic.execute("gameadd 1 g/PUBG n/Game u/special");
+        Game plain = model.getFilteredFriendList().getFirst().getGames().stream()
+                .filter(game -> game.getGameName().value.equals("PUBG")).findFirst().orElseThrow();
+        logic.execute("gameedit 1 g/\"PUBG n/Game\" u/updated");
+        assertTrue(model.getFilteredFriendList().getFirst().getGames().contains(plain));
+        assertTrue(model.getFilteredFriendList().getFirst().getGames().stream().anyMatch(game ->
+                game.getGameName().value.equals("PUBG n/Game") && game.getUsername().value.equals("updated")));
+        logic.execute("gameedit 1 g/\"PUBG n/Game\" n/\"PUBG m/Edition\"");
+        model.setMyself(new FriendBuilder(model.getFilteredFriendList().getFirst()).withName("Own Profile").build());
+        model.updateFilteredFriendList(friend -> false);
+        logic.execute("gameedit myself g/\"PUBG m/Edition\" m/\"Note:uses n/text\"");
+        assertEquals(model.getGameMates(), json.readGameMates().get());
+        String saved = Files.readString(file);
+        assertThrows(ParseException.class, () -> logic.execute("gameedit myself g/\"PUBG m/Edition u/oops"));
+        assertEquals(saved, Files.readString(file));
+        assertEquals(model.getGameMates(), json.readGameMates().get());
+    }
+
+    @Test
     public void execute_friendAndMyself_roundTripAndFailuresDoNotSave() throws Exception {
         Path file = directory.resolve("gamemates.json");
         JsonGameMatesStorage json = new JsonGameMatesStorage(file);

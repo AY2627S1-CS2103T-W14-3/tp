@@ -317,6 +317,11 @@ Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME
 
 * Use the index from the **currently displayed** friend list, or case-insensitive `myself`. The profile can be edited even when the displayed list is empty.
 * `g/` selects a complete existing game name, ignoring case. Partial names do not match. Supply at least one of `n/`, `u/` or `m/`. Repeatable `m/` pairs can appear in any order with the other prefixes; `g/`, `n/` and `u/` may each appear only once.
+* Wrap the **whole value** in double quotes if it contains a space followed by `g/`, `n/`, `u/` or `m/`:
+  `g/"PUBG n/Game"` selects the literal name `PUBG n/Game`. Without quotes, these prefixes introduce command options.
+  This also works for new names (`n/"PUBG m/Edition"`), usernames and metadata. Within quoted values, use `\"` for
+  a literal double quote and `\\` for a backslash. Unclosed quotes, invalid escapes and extra text after a closing
+  quote are rejected before any change. Quoting is specific to `gameedit`; other commands retain their existing syntax.
 * `n/` renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.
 * Omitted fields retain their values. Other games, contact details and tags are preserved. The current friend-list filter is retained; a renamed game can make its friend disappear from a game-filtered list.
 * Usernames use the current 1–50 character validation and must contain a letter or digit. A supplied empty `u/` clears the username; omitting `u/` preserves it.
@@ -328,6 +333,7 @@ Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME
 Examples:
 
 * `gameedit 1 g/Valorant u/newPlayer` changes only the username.
+* After `gameadd 1 g/PUBG n/Game u/player`, use `gameedit 1 g/"PUBG n/Game" u/newPlayer` to edit that exact entry, even if the friend also plays `PUBG`.
 * `gameedit myself g/Valorant n/VALORANT m/Role:Healer m/Region:Asia:SG` changes spelling and replaces metadata.
 * `gameedit 1 g/Valorant m/` clears metadata while preserving the game name and username.
 
