@@ -66,6 +66,7 @@
 <a href="#game-metadata" id="markdown-toc-game-metadata">Game metadata</a>        <ul>
           <li><a href="#validation-and-equality" id="markdown-toc-validation-and-equality">Validation and equality</a></li>
           <li><a href="#parsing" id="markdown-toc-parsing">Parsing</a></li>
+          <li><a href="#display" id="markdown-toc-display">Display</a></li>
           <li><a href="#persistence-and-testing" id="markdown-toc-persistence-and-testing">Persistence and testing</a></li>
         </ul>
       </li>
@@ -397,7 +398,7 @@ require a letter/digit code point and reject ISO control code points. This is no
 profile keyword:</p>
 
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…
-gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]
+gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…
 gamedel FRIEND_INDEX|myself g/GAME_NAME
 </code></pre></div></div>
 
@@ -472,10 +473,9 @@ Parse and execution failures do not refresh the panel, preserving the previous g
 
 <p>The command does not update the model’s friend-list predicate, friends, games, preferences or Myself profile.
 The profile fallback still shows all profile games; explicit profile selection supports game filtering.
-<code class="language-plaintext highlighter-rouge">GameDetailsCard</code> currently renders the available
-<code class="language-plaintext highlighter-rouge">Game.getGameName()</code> and <code class="language-plaintext highlighter-rouge">Game.getUsername()</code> fields. Metadata storage has merged, but cards do not yet render
-<code class="language-plaintext highlighter-rouge">Game.getMetas()</code>. Extend the card using <code class="language-plaintext highlighter-rouge">Meta.getKey()</code> and <code class="language-plaintext highlighter-rouge">Meta.getValue()</code> and add rendering/preservation tests;
-the command’s original-friend payload already retains metadata without copying or removing it.</p>
+<code class="language-plaintext highlighter-rouge">GameDetailsCard</code> renders <code class="language-plaintext highlighter-rouge">Game.getGameName()</code>, <code class="language-plaintext highlighter-rouge">Game.getUsername()</code> and <code class="language-plaintext highlighter-rouge">Game.getMetas()</code>.
+Metadata pairs appear below the username as wrapping <code class="language-plaintext highlighter-rouge">Key: Value</code> labels, sorted by key ignoring case.
+The command’s original-friend payload retains metadata without copying or removing it.</p>
 
 <p>Parser and command tests cover errors, exact matching, empty results, displayed-list indexing and unchanged model
 data. JavaFX panel and window tests exercise filtered payloads, empty states, clearing by commands and selection,
@@ -509,13 +509,12 @@ before publishing a complete v1.3 MVP guide.</p>
     <tr>
       <td>Game add/delete</td>
       <td>Add or delete a friend’s game, with optional metadata on addition (pp. 17–23).</td>
-      <td>Use <code>gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]</code> and <code>gamedel FRIEND_INDEX|myself g/GAME_NAME</code>. Game metadata input remains unavailable. See <a href="#myself-profile">Myself profile</a>.</td>
+      <td>Use <code>gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code> and <code>gamedel FRIEND_INDEX|myself g/GAME_NAME</code>. See <a href="#myself-profile">Myself profile</a>.</td>
     </tr>
     <tr>
       <td>Metadata</td>
       <td>Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20).</td>
-      <td>
-<a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64">PR #64</a> has merged the model, parser utilities and JSON persistence. Command entry and game-card rendering remain unavailable. See <a href="#game-metadata">Game metadata</a> for the implemented API.</td>
+      <td>Model, parser utilities, JSON persistence, command entry through <code class="language-plaintext highlighter-rouge">gameadd</code> and game-card rendering are implemented. See <a href="#game-metadata">Game metadata</a> for the implemented API.</td>
     </tr>
     <tr>
       <td>Tags</td>
@@ -561,8 +560,7 @@ game-text validation uses ISO-control rejection rather than a complete Unicode p
 recorded limits; no application fix is included in this documentation change.</p>
 
 <p>Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
-not a current use-case step. Game creation/deletion and own-profile editing are available; metadata entry/display
-remains pending.</p>
+not a current use-case step. Game creation/deletion, metadata entry/display and own-profile editing are available.</p>
 
 <h3 id="game-metadata">Game metadata</h3>
 
@@ -617,7 +615,16 @@ Missing separators and invalid fields cause <code class="language-plaintext high
 
 <p><code class="language-plaintext highlighter-rouge">parseMetas()</code> parses a collection of raw values and rejects duplicate normalized keys before returning a set.
 Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
-These are parser utilities; command-specific metadata flag handling is not yet implemented.</p>
+<code class="language-plaintext highlighter-rouge">GameAddCommandParser</code> tokenizes the optional, repeatable <code class="language-plaintext highlighter-rouge">CliSyntax.PREFIX_META</code> (<code class="language-plaintext highlighter-rouge">m/</code>) alongside <code class="language-plaintext highlighter-rouge">g/</code> and <code class="language-plaintext highlighter-rouge">u/</code>.
+It passes all raw metadata values to <code class="language-plaintext highlighter-rouge">parseMetas()</code> and constructs the <code class="language-plaintext highlighter-rouge">Game</code> with the validated set.
+Omitting <code class="language-plaintext highlighter-rouge">m/</code> produces an empty set. Duplicate <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">u/</code> prefixes remain invalid; repeated <code class="language-plaintext highlighter-rouge">m/</code> prefixes
+are allowed only for distinct keys. Validation finishes before the command updates either a friend or the profile.</p>
+
+<h4 id="display">Display</h4>
+
+<p><code class="language-plaintext highlighter-rouge">GameDetailsCard</code> displays each metadata pair as a wrapping <code class="language-plaintext highlighter-rouge">Key: Value</code> label below the username.
+Pairs are sorted by key ignoring case, preserving the stored spelling and values. The metadata container
+is hidden and unmanaged when empty. Both friend and profile details use these cards, including filtered game views.</p>
 
 <h4 id="persistence-and-testing">Persistence and testing</h4>
 
@@ -635,6 +642,8 @@ Null array entries, invalid fields and duplicate keys cause <code class="languag
 
 <p>Tests cover trimmed length boundaries, Unicode, control characters, colons, case normalization,
 duplicate keys, immutability, JSON round-trips and metadata preservation during contact edits.
+Command tests also cover optional and interleaved metadata flags, malformed input, and addition with metadata
+to displayed friends and <code class="language-plaintext highlighter-rouge">myself</code>, including filter preservation, duplicate-game rejection and JSON round-trips.
 <code class="language-plaintext highlighter-rouge">GameBuilder.addMeta("Role", "Support")</code> appends a pair; <code class="language-plaintext highlighter-rouge">withMetas(...)</code> replaces the collection.
 Duplicate keys added through the builder are rejected by <code class="language-plaintext highlighter-rouge">build()</code>.</p>
 
@@ -1244,8 +1253,7 @@ feedback, identity conflicts, editing archived friends and save/reload restorati
 
 <h3 id="non-functional-requirements">Non-Functional Requirements</h3>
 
-<p>The following are targets, not measured guarantees. Metadata entry/display remains pending integration;
-startup/performance and large-data capacity need separate measurement.</p>
+<p>The following are targets, not measured guarantees. Startup/performance and large-data capacity need separate measurement.</p>
 
 <h4 id="environment">Environment</h4>
 
@@ -1312,7 +1320,7 @@ occur after successful commands; window preferences save on shutdown. Metadata p
   <li>
 <strong>In-game username/Handle</strong>: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.</li>
   <li>
-<strong>Metadata</strong>: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; command entry and card rendering are not yet supported.</li>
+<strong>Metadata</strong>: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; entered through <code class="language-plaintext highlighter-rouge">gameadd</code> using <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> and displayed below the username in game cards.</li>
   <li>
 <strong>Metadata key</strong>: The label before the first colon in a metadata item. For example, <code class="language-plaintext highlighter-rouge">Role</code> in <code class="language-plaintext highlighter-rouge">Role:Sentinel</code>.</li>
   <li>
@@ -1516,10 +1524,11 @@ Valorant entry. <code class="language-plaintext highlighter-rouge">edit 1 p/9876
 <code class="language-plaintext highlighter-rouge">list g/Unknown</code>, then <code class="language-plaintext highlighter-rouge">edit MYSELF n/Joash Updated p/</code>: expected the renamed profile with no phone number and
 its Minecraft game preserved. The left friend list remains empty. <code class="language-plaintext highlighter-rouge">edit myself n/Fixture Friend</code> rejects the
 duplicate name, and <code class="language-plaintext highlighter-rouge">add n/joash updated</code> rejects a name matching the profile.</li>
-  <li>Try <code class="language-plaintext highlighter-rouge">edit n/Changed</code>: expected a missing-index error. Run <code class="language-plaintext highlighter-rouge">gameadd myself g/Test u/player</code>, then
-<code class="language-plaintext highlighter-rouge">gamedel myself g/Test</code>: expected success and the original Minecraft entry preserved after both commands.
-Metadata command entry cannot be tested because no routed command supports it yet. To test storage, close the app,
-add <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code> to the fixture’s Minecraft entry, relaunch and run <code class="language-plaintext highlighter-rouge">list</code>.
+  <li>Try <code class="language-plaintext highlighter-rouge">edit n/Changed</code>: expected a missing-index error. Run <code class="language-plaintext highlighter-rouge">gameadd myself g/Test u/player m/Role:Support:Mid</code>, then
+<code class="language-plaintext highlighter-rouge">gamelist myself g/Test</code>: expected <code class="language-plaintext highlighter-rouge">Role: Support:Mid</code> in the addition feedback and below the username in the game card.
+Run <code class="language-plaintext highlighter-rouge">gamedel myself g/Test</code>: expected success and the original Minecraft entry preserved.
+To also test loading metadata from JSON, close the app, add
+<code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code> to the fixture’s Minecraft entry, relaunch and run <code class="language-plaintext highlighter-rouge">list</code>.
 The saved JSON must retain that pair; cards show the game name and <code class="language-plaintext highlighter-rouge">Username: Not provided</code> when the username is omitted.
 A missing <code class="language-plaintext highlighter-rouge">metas</code> field loads as empty; a repeated key (including case variants) rejects the load and uses the documented fallback.</li>
   <li>Run <code class="language-plaintext highlighter-rouge">gameadd myself g/Test</code> without <code class="language-plaintext highlighter-rouge">u/</code>: expect success with <code class="language-plaintext highlighter-rouge">Username: Not provided</code> in feedback and the game card.

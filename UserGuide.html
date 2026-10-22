@@ -42,9 +42,8 @@
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer; browsing the online help and downloading releases require internet access.</p>
 
-<p>This guide describes the commands available in this checkout. Adding or deleting individual games and game
-metadata input are not available yet. You can view and filter games already present in sample or
-saved data. See <a href="#your-profile-and-game-entries">Your profile and game entries</a> for the current limits.</p>
+<p>This guide describes the commands available in this checkout, including adding games with optional metadata.
+See <a href="#your-profile-and-game-entries">Your profile and game entries</a> for the current limits.</p>
 
 <ul id="markdown-toc">
   <li><a href="#quick-start" id="markdown-toc-quick-start">Quick start</a></li>
@@ -181,7 +180,7 @@ commands across line breaks: spaces can be lost during copying.</li>
 <p>The main window has two panels: the friend list on the left and a details panel on the right.</p>
 
 <ul>
-  <li>Click a friend in the left panel to view their name, phone number, email address, tags, games, and in-game usernames
+  <li>Click a friend in the left panel to view their name, phone number, email address, tags, games, in-game usernames and metadata
 in the right panel.</li>
   <li>On startup, the right panel shows your profile. If no profile details have been added, it shows <code class="language-plaintext highlighter-rouge">No details added</code>.</li>
   <li>When a <code class="language-plaintext highlighter-rouge">find</code> command returns exactly one friend, that friend’s details are shown automatically.</li>
@@ -207,7 +206,8 @@ Omitting the selector, as in <code class="language-plaintext highlighter-rouge">
 
 <p>New friends start with no games. Use <a href="#adding-a-game-gameadd"><code class="language-plaintext highlighter-rouge">gameadd</code></a> and
 <a href="#deleting-a-game-gamedel"><code class="language-plaintext highlighter-rouge">gamedel</code></a> to manage a friend’s games or your own games, and
-<a href="#viewing-games-gamelist"><code class="language-plaintext highlighter-rouge">gamelist</code></a> to view their entries or your own. Metadata input and display remain unavailable.
+<a href="#viewing-games-gamelist"><code class="language-plaintext highlighter-rouge">gamelist</code></a> to view their entries or your own. Add metadata with optional <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code>
+arguments in <code class="language-plaintext highlighter-rouge">gameadd</code>; each game card shows its metadata below the username.
 Deleting a friend removes that friend’s complete entry, including their games; it does not remove games from
 other friends. Back up your data before <a href="#editing-the-data-file">editing a saved file</a>.</p>
 
@@ -330,29 +330,38 @@ repeated <code class="language-plaintext highlighter-rouge">g/</code> are reject
 <h3 id="adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code>
 </h3>
 
-<p>Adds a game with an optional in-game username to a friend or your own profile.</p>
+<p>Adds a game with an optional in-game username and metadata (e.g. role or level) to a friend or your own profile.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code></p>
 
 <ul>
-  <li>The game name is required. The username is optional, omit <code class="language-plaintext highlighter-rouge">u/</code> if you do not know it.</li>
+  <li>The game name is required. The username is optional; omit <code class="language-plaintext highlighter-rouge">u/</code> if you do not know it.</li>
   <li>Game names and supplied usernames must contain 1–50 printable characters after trimming,
 including at least one letter or digit.</li>
   <li>Supplying <code class="language-plaintext highlighter-rouge">u/</code> without a value, or with only whitespace, is rejected. Omit the prefix instead.</li>
   <li>Repeated <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">u/</code> prefixes are rejected, even when the values are identical.</li>
+  <li>Each <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters;
+values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.</li>
+  <li>Repeat <code class="language-plaintext highlighter-rouge">m/</code> for distinct keys. Metadata keys are case-insensitive, so <code class="language-plaintext highlighter-rouge">Role</code> and <code class="language-plaintext highlighter-rouge">role</code> are duplicates.
+Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
+Omit <code class="language-plaintext highlighter-rouge">m/</code> entirely for no metadata.</li>
+  <li>A space followed by <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code> starts a new parameter, even inside quotes; avoid these in field values.</li>
   <li>A game name already present on the selected friend or profile is rejected, ignoring case.</li>
   <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
+  <li>Metadata appears below the username, sorted by key ignoring case. Long fields wrap; scroll for additional rows.</li>
+  <li>The success message also lists supplied metadata below the username, sorted by key ignoring case.</li>
 </ul>
 
 <p>Examples:</p>
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant u/player123</code></li>
-  <li><code class="language-plaintext highlighter-rouge">gameadd myself g/Minecraft u/myUsername</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant u/player123 m/Role:Support m/Level:20</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gameadd myself g/Minecraft u/myUsername m/Mode:Creative</code></li>
   <li>
 <code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant</code> adds the game without a username.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">gameadd myself g/Stardew Valley</code> adds a game to your profile without a username.</li>
+<code class="language-plaintext highlighter-rouge">gameadd myself g/Stardew Valley m/Role:Farmer</code> adds a game with metadata and no username.</li>
 </ul>
 
 <h3 id="deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code>
@@ -857,7 +866,7 @@ Empty or missing contact fields mean
 <code class="language-plaintext highlighter-rouge">metas</code> array, for example <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code>. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
 colons and must be unique per game, ignoring case; values may contain colons. Missing <code class="language-plaintext highlighter-rouge">metas</code> loads as empty.
-Metadata is preserved when saving, but cannot yet be entered through commands or viewed in game cards.</p>
+Metadata can be entered through <code class="language-plaintext highlighter-rouge">gameadd</code>, is preserved when saving and is displayed in game cards.</p>
 
 <div class="alert alert-warning">
 <img class="emoji" title=":exclamation:" alt=":exclamation:" src="https://github.githubassets.com/images/icons/emoji/unicode/2757.png" height="20" width="20"> <strong>Caution:</strong>
@@ -950,7 +959,7 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
     <tr>
       <td><strong>Game add</strong></td>
       <td>
-<code>gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player123</code> or <code class="language-plaintext highlighter-rouge">gameadd 1 g/Minecraft</code>
+<code>gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code><br> e.g., <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player123 m/Role:Support</code>
 </td>
     </tr>
     <tr>
@@ -987,8 +996,6 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
     </tr>
   </tbody>
 </table>
-
-<p>Metadata entry is not supported.</p>
 
   </div>
 
