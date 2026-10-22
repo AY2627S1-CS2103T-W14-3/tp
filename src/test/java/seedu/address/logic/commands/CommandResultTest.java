@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -90,12 +91,22 @@ public class CommandResultTest {
     }
 
     @Test
+    public void showMyself_distinguishesProfileFromIdenticalFriend() {
+        GameName filter = new GameName("Valorant");
+        CommandResult result = new CommandResult("feedback", TypicalFriends.ALICE, filter, true);
+        assertTrue(result.isShowMyself());
+        assertNotEquals(result, new CommandResult("feedback", TypicalFriends.ALICE, filter));
+        assertFalse(new CommandResult("feedback", TypicalFriends.ALICE).isShowMyself());
+        assertThrows(NullPointerException.class, () -> new CommandResult("feedback", null, null, true));
+    }
+
+    @Test
     public void toStringMethod() {
         CommandResult commandResult = new CommandResult("feedback");
         String expected = CommandResult.class.getCanonicalName() + "{feedbackToUser="
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
                 + ", exit=" + commandResult.isExit() + ", friendToShow=" + commandResult.getFriendToShow()
-                + ", gameFilter=" + commandResult.getGameFilter() + ", preserveDetails=false}";
+                + ", gameFilter=" + commandResult.getGameFilter() + ", showMyself=false, preserveDetails=false}";
         assertEquals(expected, commandResult.toString());
     }
 
@@ -104,6 +115,6 @@ public class CommandResultTest {
         CommandResult result = new CommandResult("feedback", TypicalFriends.ALICE, new GameName("Valorant"));
         assertEquals(CommandResult.class.getCanonicalName() + "{feedbackToUser=feedback, showHelp=false, exit=false"
                 + ", friendToShow=" + result.getFriendToShow()
-                + ", gameFilter=Optional[Valorant], preserveDetails=false}", result.toString());
+                + ", gameFilter=Optional[Valorant], showMyself=false, preserveDetails=false}", result.toString());
     }
 }
