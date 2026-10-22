@@ -7,9 +7,9 @@ GameMates helps gamers keep track of friends, their contact details, the games t
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer; browsing the online help and downloading releases require internet access.
 
-This guide describes the commands available in this checkout. Use gameadd, gamedel, and gameedit to manage game
-entries; gameedit can also replace or clear metadata. Game cards do not yet display metadata. See Your profile and 
-game entries (#your-profile-and-game-entries) for adding games to your profile.
+This guide describes the commands available in this checkout. Use `gameadd`, `gamedel`, and `gameedit` to manage game
+entries; `gameedit` can also replace or clear metadata. Metadata appears on game cards below the username.
+See [Your profile and game entries](#your-profile-and-game-entries) for adding games to your profile.
 
 * Table of Contents
 {:toc}
@@ -372,14 +372,14 @@ Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME
   a literal double quote and `\\` for a backslash. Unclosed quotes, invalid escapes and extra text after a closing
   quote are rejected before any change. Quoting is specific to `gameedit`; other commands retain their existing syntax.
 * `n/` renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.
-* Omitted fields retain their values. Other games, contact details, tags and archive status are preserved.
+* Omitted fields retain their values. Other games, contact details, tags, archive status and pin status are preserved.
   The current friend-list scope and filter are retained, including archived lists and search results;
   a renamed game can make its friend disappear from a game-filtered list.
 * Usernames use the current 1–50 character validation and must contain a letter or digit. A supplied empty `u/` clears the username; omitting `u/` preserves it.
 * Supplying metadata **replaces the entire metadata set**. Omitting `m/` preserves it. A single empty `m/` clears all metadata. Do not mix an empty `m/` with pairs.
 * Pairs split at the first colon: `m/Region:Asia:SG` means key `Region`, value `Asia:SG`. Keys and values are trimmed independently. Keys use 1–50 characters and cannot contain colons; values use 1–200 characters. Both require a letter or digit and reject control characters, using the existing game metadata validation.
 * Keys are unique ignoring case: `m/Role:Healer m/role:Healer` is rejected even though the values agree. Values preserve case.
-* Every edit is validated before any data changes. On success, the right panel shows the updated friend (all games) or your updated profile. Feedback includes the resulting game name, username and metadata. Metadata is saved, but game cards do not yet render it; use the feedback or the saved JSON to inspect it.
+* Every edit is validated before any data changes. On success, the right panel shows the updated friend (all games) or your updated profile. Feedback includes the resulting game name, username and metadata. Metadata is saved and displayed on game cards below the username.
 
 Examples:
 
@@ -656,7 +656,7 @@ Empty or missing contact fields mean
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
 colons and must be unique per game, ignoring case; values may contain colons. Missing `metas` loads as empty.
-Metadata can be entered with gameadd or replaced or cleared with gameedit; it is preserved when saving and
+Metadata can be entered with `gameadd` or replaced or cleared with `gameedit`; it is preserved when saving and
 displayed on game cards.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**

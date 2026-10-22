@@ -71,6 +71,7 @@ public class Friend {
         tags = original.tags;
         games = Set.copyOf(replacementGames);
         archived = original.archived;
+        pinned = original.pinned;
     }
 
     public boolean isArchived() {

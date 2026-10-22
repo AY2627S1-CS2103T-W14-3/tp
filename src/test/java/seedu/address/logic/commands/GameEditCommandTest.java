@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,31 @@ public class GameEditCommandTest {
     private final Friend friend = new FriendBuilder().withName("Player").withPhone("12345678")
             .withEmail("player@example.com").withTags("team").withGames(original, other).build();
     private final ModelManager model = new ModelManager();
+
+    @Test
+    public void execute_pinnedFriend_preservesPinOrderAndOtherFields() throws Exception {
+        CountingModel counted = new CountingModel();
+        Friend unpinned = new FriendBuilder().withName("Unpinned").build();
+        Friend firstPinned = new FriendBuilder().withName("First Pinned").withPinned(true).build();
+        Friend target = friend.withPinned(true);
+        counted.addFriend(unpinned);
+        counted.addFriend(firstPinned);
+        counted.addFriend(target);
+        CommandResult result = new GameMatesParser().parseCommand(
+                "gameedit 2 g/Valorant n/New Game u/newPlayer m/Role:Tank").execute(counted);
+        Friend updated = counted.getFilteredFriendList().get(1);
+        Game replacement = new GameBuilder().withGameName("New Game").withUsername("newPlayer")
+                .addMeta("Role", "Tank").build();
+        assertEquals(new FriendBuilder(target).withGames(replacement, other).build(), updated);
+        assertEquals(List.of(firstPinned, updated, unpinned), counted.getFilteredFriendList());
+        assertEquals(FriendListScope.ACTIVE, counted.getFriendListScope());
+        assertEquals(1, counted.updates);
+        assertSame(updated, result.getFriendToShow().orElseThrow());
+        assertThrows(CommandException.class, () -> new GameMatesParser().parseCommand(
+                "gameedit 2 g/New Game n/Minecraft").execute(counted));
+        assertEquals(List.of(firstPinned, updated, unpinned), counted.getFilteredFriendList());
+        assertEquals(1, counted.updates);
+    }
 
     @Test
     public void execute_archivedFriend_preservesArchiveStatusScopeAndOtherFields() throws Exception {

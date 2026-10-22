@@ -55,13 +55,13 @@ public class GameEditIntegrationTest {
     }
 
     @Test
-    public void execute_archivedFriendAndMyself_roundTripAndFailuresDoNotSave() throws Exception {
+    public void execute_pinnedArchivedFriendAndMyself_roundTripAndFailuresDoNotSave() throws Exception {
         Path file = directory.resolve("gamemates.json");
         JsonGameMatesStorage json = new JsonGameMatesStorage(file);
         ModelManager model = new ModelManager();
         Friend friend = new FriendBuilder().withName("Player").withGames(
                 new GameBuilder().withGameName("Valorant").addMeta("Role", "Healer").build(),
-                new GameBuilder().build()).build().withArchived(true);
+                new GameBuilder().build()).withArchived(true).withPinned(true).build();
         model.addFriend(friend);
         model.setMyself(new FriendBuilder(friend).withName("Own Profile").build());
         LogicManager logic = new LogicManager(model,
@@ -72,6 +72,7 @@ public class GameEditIntegrationTest {
         var restored = json.readGameMates().get();
         assertEquals(model.getGameMates(), restored);
         assertTrue(restored.getFriendList().getFirst().isArchived());
+        assertTrue(restored.getFriendList().getFirst().isPinned());
         assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
         Game edited = restored.getFriendList().getFirst().getGames().stream()
                 .filter(game -> game.getGameName().value.equals("VALORANT")).findFirst().orElseThrow();
