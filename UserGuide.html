@@ -53,7 +53,7 @@ See <a href="#your-profile-and-game-entries">Your profile and game entries</a> f
       <li><a href="#your-profile-and-game-entries" id="markdown-toc-your-profile-and-game-entries">Your profile and game entries</a></li>
       <li><a href="#viewing-help-help" id="markdown-toc-viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code></a></li>
       <li><a href="#adding-a-friend-add" id="markdown-toc-adding-a-friend-add">Adding a friend: <code class="language-plaintext highlighter-rouge">add</code></a></li>
-      <li><a href="#listing-and-filtering-friends-list" id="markdown-toc-listing-and-filtering-friends-list">Listing and filtering friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
+      <li><a href="#listing-filtering-and-sorting-friends-list" id="markdown-toc-listing-filtering-and-sorting-friends-list">Listing, filtering and sorting friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
       <li><a href="#pinning-a-friend-pin" id="markdown-toc-pinning-a-friend-pin">Pinning a friend: <code class="language-plaintext highlighter-rouge">pin</code></a></li>
       <li><a href="#unpinning-a-friend-unpin" id="markdown-toc-unpinning-a-friend-unpin">Unpinning a friend: <code class="language-plaintext highlighter-rouge">unpin</code></a></li>
       <li><a href="#adding-a-game-gameadd" id="markdown-toc-adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code></a></li>
@@ -111,7 +111,9 @@ Some example commands you can try:</p>
         <p><code class="language-plaintext highlighter-rouge">list g/Valorant</code> : Lists friends who play Valorant.</p>
       </li>
       <li>
-        <p><code class="language-plaintext highlighter-rouge">pin 1</code> : Keeps the first displayed friend at the top of the list.</p>
+<code class="language-plaintext highlighter-rouge">pin 1</code> : Keeps the first displayed friend at the top of the list.</li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">list s/name</code> : Lists friends in ascending name order.</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">gamelist 1 g/Valorant</code> : Shows the first displayed friend’s Valorant card, if present.</p>
@@ -126,8 +128,7 @@ Some example commands you can try:</p>
         <p><code class="language-plaintext highlighter-rouge">clear</code> : Deletes all active and archived friends and their games immediately, while keeping your profile.</p>
       </li>
       <li>
-        <p><code class="language-plaintext highlighter-rouge">exit</code> : Exits the app.</p>
-      </li>
+<code class="language-plaintext highlighter-rouge">exit</code> : Exits the app.</li>
     </ul>
   </li>
   <li>
@@ -298,12 +299,13 @@ and <a href="https://www.rfc-editor.org/rfc/rfc5321#section-4.5.3.1">RFC 5321’
 The 254-character address limit leaves room for the enclosing <code class="language-plaintext highlighter-rouge">&lt;</code> and <code class="language-plaintext highlighter-rouge">&gt;</code> in the 256-octet SMTP path limit.
 </div>
 
-<h3 id="listing-and-filtering-friends-list">Listing and filtering friends: <code class="language-plaintext highlighter-rouge">list</code>
+<h3 id="listing-filtering-and-sorting-friends-list">Listing, filtering and sorting friends: <code class="language-plaintext highlighter-rouge">list</code>
 </h3>
 
-<p>Shows active friends in GameMates, optionally filtered by game. Both forms switch to the active view.</p>
+<p>Shows active friends in GameMates, optionally filters the friend list by game, and can sort the displayed friends.
+Both forms switch to the active view.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">list [g/GAME_NAME]</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]</code></p>
 
 <ul>
   <li>
@@ -311,6 +313,19 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 including when the list is empty.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> shows active friends who have a game with that exact name. The match is case-insensitive, so <code class="language-plaintext highlighter-rouge">list g/valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list s/name</code> orders the displayed friends alphabetically by name, ignoring case.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list s/game</code> orders friends by the alphabetically first game in each friend’s game list, ignoring case. Friends
+without games appear after friends with games; name breaks ties.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">o/asc</code> explicitly selects ascending order; this is the default. <code class="language-plaintext highlighter-rouge">o/desc</code> reverses the selected name or game
+order. An order may only be supplied with <code class="language-plaintext highlighter-rouge">s/</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list g/GAME_NAME s/NAME|GAME</code> first filters by game, then sorts the matching friends. Prefixes may be supplied in
+either order.</li>
+  <li>Running <code class="language-plaintext highlighter-rouge">find</code> changes only the friend-list filter and retains a sort applied by an earlier <code class="language-plaintext highlighter-rouge">list</code> command.
+Running <code class="language-plaintext highlighter-rouge">list</code> without <code class="language-plaintext highlighter-rouge">s/</code> clears that sort and returns to the stored insertion order.</li>
   <li>Leading and trailing spaces in <code class="language-plaintext highlighter-rouge">GAME_NAME</code> are ignored, but partial names do not match. For example, <code class="language-plaintext highlighter-rouge">list g/Val</code> does not match <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
   <li>Only game names are matched; a friend’s in-game username is not matched.</li>
   <li>Multi-word game names are accepted. Only one <code class="language-plaintext highlighter-rouge">g/</code> prefix may be supplied, and the game name must not be empty.</li>
@@ -318,8 +333,10 @@ including when the list is empty.</li>
   <li>Filtering applies only to the friend list. It does not filter or modify the separately stored Myself profile.</li>
   <li>Name filtering uses <a href="#locating-friends-by-name-find"><code class="language-plaintext highlighter-rouge">find</code></a>, not <code class="language-plaintext highlighter-rouge">list n/NAME</code>. A new <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list</code> replaces
 the previous friend-list filter; running them consecutively does not intersect their results.</li>
-  <li>Game-name validation uses the same 1–50-character rules as <code class="language-plaintext highlighter-rouge">gamelist</code>. Empty <code class="language-plaintext highlighter-rouge">g/</code>, extra positional input and
-repeated <code class="language-plaintext highlighter-rouge">g/</code> are rejected. A valid filter returns <code class="language-plaintext highlighter-rouge">N friend(s) listed!</code>.</li>
+  <li>Game-name validation uses the same 1–50-character rules as <code class="language-plaintext highlighter-rouge">gamelist</code>. Empty <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">s/</code>, or <code class="language-plaintext highlighter-rouge">o/</code>, extra positional
+input, unsupported sort/order values, an order without a sort, and repeated prefixes are rejected. Supported sort
+values are <code class="language-plaintext highlighter-rouge">name</code> and <code class="language-plaintext highlighter-rouge">game</code>; supported orders are <code class="language-plaintext highlighter-rouge">asc</code> and <code class="language-plaintext highlighter-rouge">desc</code>.
+A valid game filter returns <code class="language-plaintext highlighter-rouge">N friend(s) listed!</code>.</li>
 </ul>
 
 <p>Examples:</p>
@@ -331,6 +348,12 @@ repeated <code class="language-plaintext highlighter-rouge">g/</code> are reject
 <code class="language-plaintext highlighter-rouge">list g/Valorant</code> shows friends who play <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list g/Stardew Valley</code> shows friends who play <code class="language-plaintext highlighter-rouge">Stardew Valley</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list s/name</code> shows all friends sorted by name.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list s/game o/desc</code> shows all friends in descending game order.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list g/Valorant s/game</code> shows Valorant players sorted by their first game name.</li>
 </ul>
 
 <h3 id="pinning-a-friend-pin">Pinning a friend: <code class="language-plaintext highlighter-rouge">pin</code>
@@ -1040,7 +1063,7 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
     <tr>
       <td><strong>List</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">list [g/GAME_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">list g/Valorant</code>
+<code class="language-plaintext highlighter-rouge">list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]</code><br> e.g., <code class="language-plaintext highlighter-rouge">list g/Valorant s/name o/desc</code>
 </td>
     </tr>
     <tr>

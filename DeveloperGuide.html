@@ -440,9 +440,13 @@ preserve the friend-list filter.</p>
 <p><code class="language-plaintext highlighter-rouge">FindCommand</code> installs <code class="language-plaintext highlighter-rouge">NameContainsKeywordsPredicate</code>: any full name word matching any supplied keyword, ignoring
 case, is sufficient. <code class="language-plaintext highlighter-rouge">ListCommand</code> either installs <code class="language-plaintext highlighter-rouge">PREDICATE_SHOW_ALL_FRIENDS</code> or <code class="language-plaintext highlighter-rouge">GameNameMatchesPredicate</code>, which
 tests whether any of a friend’s games has the exact <code class="language-plaintext highlighter-rouge">GameName</code>. Both operate over all stored friends and replace
-the previous predicate; they do not intersect filters. <code class="language-plaintext highlighter-rouge">find</code> does not parse prefixes and <code class="language-plaintext highlighter-rouge">list</code> does not parse <code class="language-plaintext highlighter-rouge">n/</code>.
-The <code class="language-plaintext highlighter-rouge">find</code> parser only requires a non-empty keyword list; there is no 255-character keyword validation.
-No-match queries return successful empty results. Filtering never includes or edits the separate profile.</p>
+the previous predicate; they do not intersect filters. <code class="language-plaintext highlighter-rouge">list s/name</code> and <code class="language-plaintext highlighter-rouge">list s/game</code> set a <code class="language-plaintext highlighter-rouge">SortedList</code> comparator
+in <code class="language-plaintext highlighter-rouge">ModelManager</code> after filtering; <code class="language-plaintext highlighter-rouge">o/desc</code> reverses that comparator, while the default and <code class="language-plaintext highlighter-rouge">o/asc</code> are ascending.
+The default <code class="language-plaintext highlighter-rouge">list</code> clears the comparator and retains stored insertion order. Game sorting uses each friend’s
+alphabetically first game name, with friends without games last and names as the tie-breaker. <code class="language-plaintext highlighter-rouge">find</code> does not parse
+prefixes and <code class="language-plaintext highlighter-rouge">list</code> does not parse <code class="language-plaintext highlighter-rouge">n/</code>. The <code class="language-plaintext highlighter-rouge">find</code> parser only requires a
+non-empty keyword list; there is no 255-character keyword validation. No-match queries return successful empty
+results. Filtering and sorting never include or edit the separate profile.</p>
 
 <h3 id="viewing-games">Viewing games</h3>
 
