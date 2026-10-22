@@ -6,6 +6,7 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
+import io.vavr.control.Option;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
@@ -23,6 +24,7 @@ public class ModelManager implements Model {
     private final GameMates gameMates;
     private final UserPrefs userPrefs;
     private final FilteredList<Friend> filteredFriends;
+    private FriendListScope friendListScope = FriendListScope.ACTIVE;
 
     /**
      * Initializes a ModelManager with the given gameMates and userPrefs.
@@ -34,7 +36,7 @@ public class ModelManager implements Model {
 
         this.gameMates = new GameMates(gameMates);
         this.userPrefs = new UserPrefs(userPrefs);
-        filteredFriends = new FilteredList<>(this.gameMates.getFriendList());
+        filteredFriends = new FilteredList<>(this.gameMates.getFriendList(), friend -> !friend.isArchived());
     }
 
     public ModelManager() {
@@ -90,6 +92,11 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public Option<Friend> findFriend(Friend friend) {
+        return gameMates.findFriend(friend);
+    }
+
+    @Override
     public void deleteFriend(Friend target) {
         gameMates.removeFriend(target);
     }
@@ -130,7 +137,27 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredFriendList(Predicate<Friend> predicate) {
         requireNonNull(predicate);
+        friendListScope = FriendListScope.ACTIVE;
+        filteredFriends.setPredicate(friend -> !friend.isArchived() && predicate.test(friend));
+    }
+
+    @Override
+    public void updateArchivedFriendList(Predicate<Friend> predicate) {
+        requireNonNull(predicate);
+        friendListScope = FriendListScope.ARCHIVED;
+        filteredFriends.setPredicate(friend -> friend.isArchived() && predicate.test(friend));
+    }
+
+    @Override
+    public void updateSearchFriendList(Predicate<Friend> predicate) {
+        requireNonNull(predicate);
+        friendListScope = FriendListScope.SEARCH;
         filteredFriends.setPredicate(predicate);
+    }
+
+    @Override
+    public FriendListScope getFriendListScope() {
+        return friendListScope;
     }
 
     @Override
@@ -146,7 +173,8 @@ public class ModelManager implements Model {
 
         return gameMates.equals(otherModelManager.gameMates)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredFriends.equals(otherModelManager.filteredFriends);
+                && filteredFriends.equals(otherModelManager.filteredFriends)
+                && friendListScope == otherModelManager.friendListScope;
     }
 
 }

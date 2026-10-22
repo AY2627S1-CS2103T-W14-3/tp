@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
@@ -12,7 +13,10 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.AddCommand;
+import seedu.address.logic.commands.ArchiveCommand;
+import seedu.address.logic.commands.ArchiveListCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
@@ -22,6 +26,7 @@ import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.GameListCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.UnarchiveCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.GameNameMatchesPredicate;
@@ -40,6 +45,54 @@ public class GameMatesParserTest {
         Friend friend = new FriendBuilder().build();
         AddCommand command = (AddCommand) parser.parseCommand(FriendUtil.getAddCommand(friend));
         assertEquals(new AddCommand(friend), command);
+    }
+
+    @Test
+    public void parseCommand_archiveAndUnarchive_preserveIndexAndCommandType() throws Exception {
+        ArchiveCommand archive = new ArchiveCommand(Index.fromOneBased(2));
+        UnarchiveCommand unarchive = new UnarchiveCommand(Index.fromOneBased(2));
+        assertEquals(archive, parser.parseCommand("archive   2 "));
+        assertEquals(unarchive, parser.parseCommand("unarchive   2 "));
+        assertNotEquals(archive, parser.parseCommand("archive 1"));
+        assertNotEquals(unarchive, parser.parseCommand("unarchive 1"));
+        assertNotEquals(archive, unarchive);
+        assertNotEquals(unarchive, archive);
+        assertNotEquals(archive, null);
+        assertNotEquals(unarchive, null);
+        assertEquals(archive, archive);
+        assertEquals(unarchive, unarchive);
+    }
+
+    @Test
+    public void parseCommand_archiveList_preservesOptionalGameFilter() throws Exception {
+        ArchiveListCommand all = new ArchiveListCommand();
+        ArchiveListCommand filtered = new ArchiveListCommand(
+                new GameNameMatchesPredicate(new GameName("Stardew Valley")));
+        assertEquals(all, parser.parseCommand("archivelist"));
+        assertEquals(all, parser.parseCommand("archivelist   "));
+        assertEquals(filtered, parser.parseCommand("archivelist   g/  Stardew Valley "));
+        assertNotEquals(all, filtered);
+        assertNotEquals(filtered, parser.parseCommand("archivelist g/Valorant"));
+        assertNotEquals(filtered, parser.parseCommand("find Alice Bob"));
+        assertNotEquals(filtered, null);
+        assertEquals(filtered, filtered);
+    }
+
+    @Test
+    public void archiveCommandDiagnostics_distinguishTargetsCommandsAndGameFilters() throws Exception {
+        String archiveFirst = parser.parseCommand("archive 1").toString();
+        String archiveSecond = parser.parseCommand("archive 2").toString();
+        String restoreFirst = parser.parseCommand("unarchive 1").toString();
+        String restoreSecond = parser.parseCommand("unarchive 2").toString();
+        assertNotEquals(archiveFirst, archiveSecond);
+        assertNotEquals(restoreFirst, restoreSecond);
+        assertNotEquals(archiveFirst, restoreFirst);
+        String valorant = parser.parseCommand("archivelist g/Valorant").toString();
+        String minecraft = parser.parseCommand("archivelist g/Minecraft").toString();
+        assertTrue(valorant.contains("Valorant"));
+        assertTrue(minecraft.contains("Minecraft"));
+        assertNotEquals(valorant, minecraft);
+        assertNotEquals(valorant, parser.parseCommand("archivelist").toString());
     }
 
     @Test

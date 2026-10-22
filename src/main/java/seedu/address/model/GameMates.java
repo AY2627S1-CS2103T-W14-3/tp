@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Objects;
 
+import io.vavr.control.Option;
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.friend.Friend;
@@ -68,6 +69,11 @@ public class GameMates implements ReadOnlyGameMates {
     public boolean hasFriend(Friend friend) {
         requireNonNull(friend);
         return friends.contains(friend);
+    }
+
+    /** Returns the stored active or archived friend with the same identity, or none if absent. */
+    public Option<Friend> findFriend(Friend friend) {
+        return friends.findFriend(friend);
     }
 
     /**

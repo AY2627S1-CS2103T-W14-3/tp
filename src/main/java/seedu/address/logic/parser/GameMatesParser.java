@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.AddCommand;
+import seedu.address.logic.commands.ArchiveCommand;
+import seedu.address.logic.commands.ArchiveListCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteCommand;
@@ -21,6 +23,7 @@ import seedu.address.logic.commands.GameEditCommand;
 import seedu.address.logic.commands.GameListCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.UnarchiveCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
@@ -56,6 +59,9 @@ public class GameMatesParser {
         logger.fine("Command word: " + commandWord + "; Arguments: " + arguments);
 
         return switch (commandWord) {
+            case ArchiveCommand.COMMAND_WORD -> new ArchiveCommandParser().parse(arguments);
+            case ArchiveListCommand.COMMAND_WORD -> new ArchiveListCommandParser().parse(arguments);
+            case UnarchiveCommand.COMMAND_WORD -> new UnarchiveCommandParser().parse(arguments);
             case GameAddCommand.COMMAND_WORD -> new GameAddCommandParser().parse(arguments);
             case GameDeleteCommand.COMMAND_WORD -> new GameDeleteCommandParser().parse(arguments);
             case GameEditCommand.COMMAND_WORD -> new GameEditCommandParser().parse(arguments);

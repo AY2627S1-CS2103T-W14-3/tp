@@ -3,6 +3,7 @@ package seedu.address.ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,6 +22,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -162,6 +164,77 @@ class MainWindowTest {
         });
     }
 
+    @Test
+    void gameEdit_archivedFriend_keepsArchiveHeadingAndUpdatedDetails() {
+        FxTestUtil.runAndWait(() -> {
+            Friend archived = new FriendBuilder().withName("Alice").withGames(
+                    new GameBuilder().withGameName("Valorant").build()).build().withArchived(true);
+            MainWindow window = new MainWindow(new Stage(), new StubLogic(archived), Path.of("test-data.json"));
+            window.fillInnerParts();
+            window.getRoot().getScene().getRoot().applyCss();
+            executeCommand(window, "archivelist");
+            executeCommand(window, "gamelist 1 g/Valorant");
+            executeCommand(window, "gameedit 1 g/Valorant n/New Game");
+            assertEquals("Archived friends", getLabel(window, "#listHeading").getText());
+            assertEquals(1, getFriendList(window).getItems().size());
+            assertTrue(getFriendList(window).getItems().getFirst().isArchived());
+            assertEquals("Alice", getLabel(window, "#name").getText());
+            assertEquals("Friend details", getLabel(window, "#title").getText());
+            assertEquals("New Game", getLabel(window, ".details-game-name").getText());
+        });
+    }
+
+    @Test
+    void archiveCommands_updateHeadingAndClearRemovedFriendsDetails() {
+        FxTestUtil.runAndWait(() -> {
+            Friend alice = new FriendBuilder().withName("Alice").build();
+            MainWindow window = new MainWindow(new Stage(), new StubLogic(alice), Path.of("test-data.json"));
+            window.fillInnerParts();
+            window.getRoot().getScene().getRoot().applyCss();
+            getFriendList(window).getSelectionModel().selectFirst();
+            executeCommand(window, "archive 1");
+            assertEquals("Your details", getLabel(window, "#title").getText());
+            assertEquals("Active friends", getLabel(window, "#listHeading").getText());
+            executeCommand(window, "archivelist");
+            assertEquals("Archived friends", getLabel(window, "#listHeading").getText());
+            assertEquals(1, getFriendList(window).getItems().size());
+            getFriendList(window).getSelectionModel().selectFirst();
+            executeCommand(window, "unarchive 1");
+            assertEquals("Your details", getLabel(window, "#title").getText());
+            assertEquals("Archived friends", getLabel(window, "#listHeading").getText());
+            assertEquals(0, getFriendList(window).getItems().size());
+            executeCommand(window, "list");
+            assertEquals("Active friends", getLabel(window, "#listHeading").getText());
+            assertEquals(1, getFriendList(window).getItems().size());
+        });
+    }
+
+    @Test
+    void globalSearch_preservesResultsWhenArchivingAndRestoring() {
+        FxTestUtil.runAndWait(() -> {
+            Friend alice = new FriendBuilder().withName("Alice").build();
+            Friend bob = new FriendBuilder().withName("Bob").build().withArchived(true);
+            MainWindow window = new MainWindow(new Stage(), new StubLogic(alice, bob), Path.of("test-data.json"));
+            window.fillInnerParts();
+            window.getRoot().getScene().getRoot().applyCss();
+            executeCommand(window, "find Alice Bob");
+            assertEquals("Search results", getLabel(window, "#listHeading").getText());
+            assertEquals(2, getFriendList(window).getItems().size());
+            executeCommand(window, "archive 1");
+            assertEquals(alice.withArchived(true), getFriendList(window).getItems().getFirst());
+            assertEquals(2, getFriendList(window).getItems().size());
+            assertEquals("Search results", getLabel(window, "#listHeading").getText());
+            executeCommand(window, "unarchive 2");
+            assertEquals(bob.withArchived(false), getFriendList(window).getItems().get(1));
+            assertEquals("Search results", getLabel(window, "#listHeading").getText());
+            executeCommand(window, "find Nobody");
+            assertEquals(0, getFriendList(window).getItems().size());
+            assertEquals("Search results", getLabel(window, "#listHeading").getText());
+            executeCommand(window, "archivelist");
+            assertEquals("Archived friends", getLabel(window, "#listHeading").getText());
+        });
+    }
+
     private void executeCommand(MainWindow mainWindow) {
         executeCommand(mainWindow, "list");
     }
@@ -222,6 +295,11 @@ class MainWindowTest {
         @Override
         public ObservableList<Friend> getFilteredFriendList() {
             return model.getFilteredFriendList();
+        }
+
+        @Override
+        public FriendListScope getFriendListScope() {
+            return model.getFriendListScope();
         }
 
         @Override

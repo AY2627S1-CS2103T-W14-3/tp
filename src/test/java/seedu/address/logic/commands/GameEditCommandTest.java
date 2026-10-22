@@ -17,6 +17,7 @@ import seedu.address.logic.Messages;
 import seedu.address.logic.commands.GameEditCommand.EditGameDescriptor;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.GameMatesParser;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.GameMates;
 import seedu.address.model.ModelManager;
 import seedu.address.model.friend.Friend;
@@ -35,6 +36,36 @@ public class GameEditCommandTest {
     private final Friend friend = new FriendBuilder().withName("Player").withPhone("12345678")
             .withEmail("player@example.com").withTags("team").withGames(original, other).build();
     private final ModelManager model = new ModelManager();
+
+    @Test
+    public void execute_archivedFriend_preservesArchiveStatusScopeAndOtherFields() throws Exception {
+        Friend hidden = new FriendBuilder().withName("Hidden").build();
+        model.addFriend(hidden);
+        model.addFriend(friend.withArchived(true));
+        for (FriendListScope scope : new FriendListScope[]{FriendListScope.ARCHIVED, FriendListScope.SEARCH}) {
+            if (scope == FriendListScope.ARCHIVED) {
+                model.updateArchivedFriendList(target -> target.getName().equals(friend.getName()));
+            } else {
+                model.updateSearchFriendList(target -> target.getName().equals(friend.getName()));
+            }
+            CommandResult result = execute("gameedit 1 g/Valorant u/newPlayer");
+            Friend updated = model.getFilteredFriendList().getFirst();
+            assertTrue(updated.isArchived());
+            assertEquals(scope, model.getFriendListScope());
+            assertEquals(1, model.getFilteredFriendList().size());
+            assertSame(hidden, model.getGameMates().getFriendList().getFirst());
+            assertSame(updated, result.getFriendToShow().orElseThrow());
+            assertEquals(friend.getName(), updated.getName());
+            assertEquals(friend.getPhone(), updated.getPhone());
+            assertEquals(friend.getEmail(), updated.getEmail());
+            assertEquals(friend.getTags(), updated.getTags());
+            assertEquals(original.getMetas(), game(updated, "Valorant").getMetas());
+            assertTrue(updated.getGames().contains(other));
+            assertThrows(CommandException.class, () -> execute("gameedit 1 g/Valorant n/Minecraft"));
+            assertSame(updated, model.getFilteredFriendList().getFirst());
+            assertEquals(scope, model.getFriendListScope());
+        }
+    }
 
     @Test
     public void execute_displayedIndex_preservesFieldsFilterAndOtherGamesWithOneUpdate() throws Exception {

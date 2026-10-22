@@ -6,12 +6,12 @@ import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 
 /**
- * Clears the friend list while preserving the user profile.
+ * Clears active and archived friends while preserving the user profile.
  */
 public class ClearCommand extends Command {
 
     public static final String COMMAND_WORD = "clear";
-    public static final String MESSAGE_SUCCESS = "Friend list has been cleared!";
+    public static final String MESSAGE_SUCCESS = "All active and archived friends have been cleared!";
 
 
     @Override

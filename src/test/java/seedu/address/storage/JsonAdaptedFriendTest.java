@@ -50,6 +50,20 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
+    public void toModelType_archivedFriend_roundTrips() throws Exception {
+        Friend original = new FriendBuilder(BENSON).withGames(
+                new GameBuilder().addMeta("Role", "Support").build()).build().withArchived(true);
+        String json = JsonUtil.toJsonString(new JsonAdaptedFriend(original));
+        assertEquals(original, JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType());
+    }
+
+    @Test
+    public void toModelType_missingArchiveStatus_defaultsToActive() throws Exception {
+        String json = "{\"name\":\"Alice Tan\"}";
+        assertFalse(JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType().isArchived());
+    }
+
+    @Test
     public void toModelType_games_roundTrips() throws Exception {
         Friend original = new FriendBuilder(BENSON).withGames(
                 new GameBuilder().withGameName("Valorant").withUsername("benson").build(),

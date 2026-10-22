@@ -13,11 +13,13 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
+import io.vavr.control.Option;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyGameMates;
@@ -146,6 +148,11 @@ public class AddCommandTest {
         }
 
         @Override
+        public Option<Friend> findFriend(Friend friend) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public void deleteFriend(Friend target) {
             throw new AssertionError("This method should not be called.");
         }
@@ -162,6 +169,21 @@ public class AddCommandTest {
 
         @Override
         public ObservableList<Friend> getFilteredFriendList() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public FriendListScope getFriendListScope() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void updateSearchFriendList(Predicate<Friend> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void updateArchivedFriendList(Predicate<Friend> predicate) {
             throw new AssertionError("This method should not be called.");
         }
 
@@ -183,9 +205,16 @@ public class AddCommandTest {
         }
 
         @Override
-        public boolean hasFriend(Friend friend) {
+        public Option<Friend> findFriend(Friend friend) {
             requireNonNull(friend);
-            return this.friend.isSameFriend(friend);
+            return Option.of(this.friend).filter(friend::isSameFriend);
+        }
+
+        @Override
+        public ReadOnlyGameMates getGameMates() {
+            GameMates gameMates = new GameMates();
+            gameMates.addFriend(friend);
+            return gameMates;
         }
     }
 
@@ -196,9 +225,9 @@ public class AddCommandTest {
         final ArrayList<Friend> friendsAdded = new ArrayList<>();
 
         @Override
-        public boolean hasFriend(Friend friend) {
+        public Option<Friend> findFriend(Friend friend) {
             requireNonNull(friend);
-            return friendsAdded.stream().anyMatch(friend::isSameFriend);
+            return Option.ofOptional(friendsAdded.stream().filter(friend::isSameFriend).findFirst());
         }
 
         @Override

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.ModelManager;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.game.Game;
@@ -54,21 +55,24 @@ public class GameEditIntegrationTest {
     }
 
     @Test
-    public void execute_friendAndMyself_roundTripAndFailuresDoNotSave() throws Exception {
+    public void execute_archivedFriendAndMyself_roundTripAndFailuresDoNotSave() throws Exception {
         Path file = directory.resolve("gamemates.json");
         JsonGameMatesStorage json = new JsonGameMatesStorage(file);
         ModelManager model = new ModelManager();
         Friend friend = new FriendBuilder().withName("Player").withGames(
                 new GameBuilder().withGameName("Valorant").addMeta("Role", "Healer").build(),
-                new GameBuilder().build()).build();
+                new GameBuilder().build()).build().withArchived(true);
         model.addFriend(friend);
         model.setMyself(new FriendBuilder(friend).withName("Own Profile").build());
         LogicManager logic = new LogicManager(model,
                 new StorageManager(json, new JsonUserPrefsStorage(directory.resolve("preferences.json"))));
+        logic.execute("archivelist");
         logic.execute("gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Region:Asia:SG");
         logic.execute("gameedit myself g/Valorant n/My Game m/ u/");
         var restored = json.readGameMates().get();
         assertEquals(model.getGameMates(), restored);
+        assertTrue(restored.getFriendList().getFirst().isArchived());
+        assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
         Game edited = restored.getFriendList().getFirst().getGames().stream()
                 .filter(game -> game.getGameName().value.equals("VALORANT")).findFirst().orElseThrow();
         assertEquals("newPlayer", edited.getUsername().value);
