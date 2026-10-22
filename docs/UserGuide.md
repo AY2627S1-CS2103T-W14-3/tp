@@ -310,7 +310,7 @@ Errors:
 For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
 showing `No details added`.
 
-### Finding a random squad: `squad` (planned)
+### Finding a random squad: `squad`
 
 Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
 Lists each member's name, in-game username when available, and displayed friend index where applicable.
@@ -352,7 +352,7 @@ Could not find a squad of <n> people.
 
 `<n>` is replaced with the requested squad size, for example `Could not find a squad of 3 people.`
 
-Proposed errors:
+Possible errors:
 
 | Input problem | Feedback |
 |---------------|----------|
