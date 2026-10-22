@@ -129,6 +129,19 @@ public class UniqueFriendListTest {
     }
 
     @Test
+    public void setFriends_multiplePinnedFriends_retainsRelativeOrderWithinGroups() {
+        Friend firstUnpinnedFriend = new FriendBuilder().withName("First Unpinned").build();
+        Friend firstPinnedFriend = new FriendBuilder().withName("First Pinned").withPinned(true).build();
+        Friend secondUnpinnedFriend = new FriendBuilder().withName("Second Unpinned").build();
+        Friend secondPinnedFriend = new FriendBuilder().withName("Second Pinned").withPinned(true).build();
+        uniqueFriendList.setFriends(List.of(firstUnpinnedFriend, firstPinnedFriend,
+                secondUnpinnedFriend, secondPinnedFriend));
+
+        assertEquals(List.of(firstPinnedFriend, secondPinnedFriend, firstUnpinnedFriend, secondUnpinnedFriend),
+                uniqueFriendList.asUnmodifiableObservableList());
+    }
+
+    @Test
     public void setFriend_editedFriendHasNonUniqueIdentity_throwsDuplicateFriendException() {
         uniqueFriendList.add(ALICE);
         uniqueFriendList.add(BOB);

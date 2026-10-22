@@ -3,6 +3,7 @@ package seedu.address.model.friend;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,6 +25,8 @@ import seedu.address.model.friend.exceptions.FriendNotFoundException;
  * @see Friend#isSameFriend(Friend)
  */
 public class UniqueFriendList implements Iterable<Friend> {
+
+    private static final Comparator<Friend> PINNED_FRIENDS_FIRST = Comparator.comparing(Friend::isPinned).reversed();
 
     private final ObservableList<Friend> internalList = FXCollections.observableArrayList();
     private final ObservableList<Friend> internalUnmodifiableList =
@@ -161,9 +164,6 @@ public class UniqueFriendList implements Iterable<Friend> {
      * Keeps pinned friends before unpinned friends while retaining their existing relative order.
      */
     private void movePinnedFriendsToTop() {
-        List<Friend> pinnedFriends = internalList.stream().filter(Friend::isPinned).toList();
-        List<Friend> unpinnedFriends = internalList.stream().filter(friend -> !friend.isPinned()).toList();
-        internalList.setAll(pinnedFriends);
-        internalList.addAll(unpinnedFriends);
+        FXCollections.sort(internalList, PINNED_FRIENDS_FIRST);
     }
 }
