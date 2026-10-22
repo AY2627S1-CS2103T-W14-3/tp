@@ -54,6 +54,8 @@ See <a href="#your-profile-and-game-entries">Your profile and game entries</a> f
       <li><a href="#viewing-help-help" id="markdown-toc-viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code></a></li>
       <li><a href="#adding-a-friend-add" id="markdown-toc-adding-a-friend-add">Adding a friend: <code class="language-plaintext highlighter-rouge">add</code></a></li>
       <li><a href="#listing-filtering-and-sorting-friends-list" id="markdown-toc-listing-filtering-and-sorting-friends-list">Listing, filtering and sorting friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
+      <li><a href="#pinning-a-friend-pin" id="markdown-toc-pinning-a-friend-pin">Pinning a friend: <code class="language-plaintext highlighter-rouge">pin</code></a></li>
+      <li><a href="#unpinning-a-friend-unpin" id="markdown-toc-unpinning-a-friend-unpin">Unpinning a friend: <code class="language-plaintext highlighter-rouge">unpin</code></a></li>
       <li><a href="#adding-a-game-gameadd" id="markdown-toc-adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code></a></li>
       <li><a href="#deleting-a-game-gamedel" id="markdown-toc-deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code></a></li>
       <li><a href="#viewing-games-gamelist" id="markdown-toc-viewing-games-gamelist">Viewing games: <code class="language-plaintext highlighter-rouge">gamelist</code></a></li>
@@ -110,6 +112,9 @@ Some example commands you can try:</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">list s/name</code> : Lists friends in ascending name order.</p>
+      </li>
+      <li>
+        <p><code class="language-plaintext highlighter-rouge">pin 1</code> : Keeps the first displayed friend at the top of the list.</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">gamelist 1 g/Valorant</code> : Shows the first displayed friend’s Valorant card, if present.</p>
@@ -195,6 +200,7 @@ Clicking a friend selects their details again. Invalid commands keep the existin
   <li>
 <code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> each replace the previous friend-list filter. They do not combine filters.
 Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.</li>
+  <li>Pinned friends always appear above unpinned friends. The current ordering is retained within each group.</li>
 </ul>
 
 <h3 id="your-profile-and-game-entries">Your profile and game entries</h3>
@@ -350,6 +356,56 @@ A valid game filter returns <code class="language-plaintext highlighter-rouge">N
 <code class="language-plaintext highlighter-rouge">list s/game o/desc</code> shows all friends in descending game order.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list g/Valorant s/game</code> shows Valorant players sorted by their first game name.</li>
+</ul>
+
+<h3 id="pinning-a-friend-pin">Pinning a friend: <code class="language-plaintext highlighter-rouge">pin</code>
+</h3>
+
+<p>Keeps a friend in the pinned group at the top of the friend list.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">pin FRIEND_INDEX</code></p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> refers to the current displayed list. The command is unavailable for your separately stored Myself
+profile.</li>
+  <li>At most five friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
+is rejected without changing the list.</li>
+  <li>Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
+filtering the list by game.</li>
+  <li>A newly pinned friend is placed after friends already in the pinned group, while remaining above all unpinned
+friends.</li>
+  <li>Pinned friend cards display a <code class="language-plaintext highlighter-rouge">Pinned</code> badge, making the boundary between pinned and unpinned friends visible.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">pin 1</code> pins the first displayed friend.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">pin 3</code> pins the third displayed friend.</li>
+</ul>
+
+<h3 id="unpinning-a-friend-unpin">Unpinning a friend: <code class="language-plaintext highlighter-rouge">unpin</code>
+</h3>
+
+<p>Removes a friend from the pinned group.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">unpin FRIEND_INDEX</code></p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> refers to the current displayed list.</li>
+  <li>Unpinning a friend who is not pinned is rejected without changing the list.</li>
+  <li>The friend is returned to the unpinned group, below all pinned friends.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">unpin 1</code> unpins the first displayed friend.</li>
 </ul>
 
 <h3 id="adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code>
@@ -882,8 +938,9 @@ close the destination app, back up its current file, replace it with your copy a
 Copy <code class="language-plaintext highlighter-rouge">preferences.json</code> only if you also want the saved window settings.</p>
 
 <p>If you edit JSON manually, close the app first and keep a backup. Friend entries contain <code class="language-plaintext highlighter-rouge">name</code>, optional
-<code class="language-plaintext highlighter-rouge">phone</code> and <code class="language-plaintext highlighter-rouge">email</code>, <code class="language-plaintext highlighter-rouge">tags</code>, <code class="language-plaintext highlighter-rouge">games</code>, and an <code class="language-plaintext highlighter-rouge">archived</code> boolean. Missing <code class="language-plaintext highlighter-rouge">archived</code> defaults to <code class="language-plaintext highlighter-rouge">false</code>
-(active); archive status is saved across restarts. A game has a required <code class="language-plaintext highlighter-rouge">name</code> and an optional <code class="language-plaintext highlighter-rouge">username</code>.
+<code class="language-plaintext highlighter-rouge">phone</code> and <code class="language-plaintext highlighter-rouge">email</code>, <code class="language-plaintext highlighter-rouge">tags</code>, <code class="language-plaintext highlighter-rouge">games</code>, and <code class="language-plaintext highlighter-rouge">archived</code> and <code class="language-plaintext highlighter-rouge">pinned</code> booleans. Missing <code class="language-plaintext highlighter-rouge">archived</code> defaults to <code class="language-plaintext highlighter-rouge">false</code>
+(active), while missing <code class="language-plaintext highlighter-rouge">pinned</code> defaults to <code class="language-plaintext highlighter-rouge">false</code> (unpinned); both statuses are saved across restarts. A game has a
+required <code class="language-plaintext highlighter-rouge">name</code> and an optional <code class="language-plaintext highlighter-rouge">username</code>.
 An empty or missing <code class="language-plaintext highlighter-rouge">username</code> means no username has been provided; the game entry is still retained.
 Existing files that omit <code class="language-plaintext highlighter-rouge">games</code> load with no games; files that omit <code class="language-plaintext highlighter-rouge">myself</code> use the default empty profile.
 Empty or missing contact fields mean
@@ -1008,7 +1065,19 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
     <tr>
       <td><strong>List</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]</code><br> e.g., <code class="language-plaintext highlighter-rouge">list g/Valorant s/name o/desc</code>
+<code>list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]</code><br> e.g., <code class="language-plaintext highlighter-rouge">list g/Valorant s/name o/desc</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Pin</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">pin FRIEND_INDEX</code><br> e.g., <code class="language-plaintext highlighter-rouge">pin 1</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Unpin</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">unpin FRIEND_INDEX</code><br> e.g., <code class="language-plaintext highlighter-rouge">unpin 1</code>
 </td>
     </tr>
     <tr>

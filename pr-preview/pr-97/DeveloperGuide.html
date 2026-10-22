@@ -294,7 +294,10 @@ rather than a second collection of copied friends.</li>
 </ul>
 
 <p><code class="language-plaintext highlighter-rouge">Friend</code> contains <code class="language-plaintext highlighter-rouge">Name</code>, optional contact values, a set of <code class="language-plaintext highlighter-rouge">Tag</code> objects, a set of <code class="language-plaintext highlighter-rouge">Game</code> objects and an immutable
-<code class="language-plaintext highlighter-rouge">archived</code> status. See <a href="#friend-archiving">Friend archiving</a> for scope, identity and persistence rules.
+<code class="language-plaintext highlighter-rouge">archived</code> status and an immutable <code class="language-plaintext highlighter-rouge">pinned</code> state. See <a href="#friend-archiving">Friend archiving</a> for scope, identity and
+persistence rules. <code class="language-plaintext highlighter-rouge">UniqueFriendList</code> stably partitions friends after additions and
+replacements so pinned friends are always before unpinned friends, while preserving the existing relative order
+within each group. The filtered friend list is backed by this ordering, so the invariant also holds for filters.
 <code class="language-plaintext highlighter-rouge">Game</code> contains <code class="language-plaintext highlighter-rouge">GameName</code>, <code class="language-plaintext highlighter-rouge">Username</code> and an immutable metadata set. Name equality ignores case and collapses repeated ASCII spaces;
 <code class="language-plaintext highlighter-rouge">GameName.equals</code> compares complete names using lower-case normalization with <code class="language-plaintext highlighter-rouge">Locale.ROOT</code>.
 <code class="language-plaintext highlighter-rouge">Username</code> preserves case and uses <code class="language-plaintext highlighter-rouge">Username.EMPTY</code> for omission, with <code class="language-plaintext highlighter-rouge">isEmpty()</code> to check it.
@@ -332,7 +335,10 @@ JSON contact fields that are null or empty map to the corresponding empty contac
 nonempty contact values are rejected without trimming. Missing <code class="language-plaintext highlighter-rouge">games</code> or <code class="language-plaintext highlighter-rouge">tags</code> load as empty sets, and missing
 <code class="language-plaintext highlighter-rouge">myself</code> retains <code class="language-plaintext highlighter-rouge">Friend.DEFAULT_MYSELF</code>. Stored games require a valid <code class="language-plaintext highlighter-rouge">name</code>. Missing, null or empty usernames
 are mapped to <code class="language-plaintext highlighter-rouge">Username.EMPTY</code> and invalid non-empty values, including whitespace-only strings, are rejected.
-Duplicate friend names reject the whole data load, including a previously parsed profile; startup uses a new empty <code class="language-plaintext highlighter-rouge">GameMates</code>.</p>
+Duplicate friend names reject the whole data load, including a previously parsed profile; startup uses a new empty
+<code class="language-plaintext highlighter-rouge">GameMates</code>.
+<code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> persists a friend’s <code class="language-plaintext highlighter-rouge">pinned</code> boolean. The field is optional when loading: missing or <code class="language-plaintext highlighter-rouge">null</code>
+values in save files created before pinning was introduced default to <code class="language-plaintext highlighter-rouge">false</code>.</p>
 
 <p><code class="language-plaintext highlighter-rouge">MainApp</code> resolves <code class="language-plaintext highlighter-rouge">data/gamemates.json</code> and <code class="language-plaintext highlighter-rouge">preferences.json</code> relative to the process working directory, not the
 JAR’s location. <code class="language-plaintext highlighter-rouge">MainApp.initPrefs</code> writes initialized preferences at startup and <code class="language-plaintext highlighter-rouge">stop</code> writes them again at shutdown;
