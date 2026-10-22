@@ -124,6 +124,10 @@
     -fx-text-fill: white;
 }
 
+.friend-details-scroll-pane, .friend-details-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
 .details-title {
     -fx-font-family: "Segoe UI Light";
     -fx-font-size: 24px;
@@ -162,7 +166,7 @@
     -fx-font-size: 15px;
 }
 
-.details-game-username {
+.details-game-username, .details-game-metadata {
     -fx-font-family: "Segoe UI";
     -fx-font-size: 13px;
     -fx-text-fill: #c7c7c7 !important;
@@ -182,6 +186,15 @@
     -fx-font-family: "Segoe UI";
     -fx-font-size: 13px;
     -fx-text-fill: #010504;
+}
+
+.pinned-label {
+    -fx-background-color: #3e7b91;
+    -fx-background-radius: 8;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 11px;
+    -fx-padding: 2 6 2 6;
+    -fx-text-fill: white;
 }
 
 .stack-pane {

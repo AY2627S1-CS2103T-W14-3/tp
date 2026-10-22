@@ -54,13 +54,15 @@ class JsonSerializableGameMates {
         if (myself != null) {
             gameMates.setMyself(myself.toModelType());
         }
+        List<Friend> modelFriends = new ArrayList<>();
         for (JsonAdaptedFriend jsonAdaptedFriend : friends) {
             Friend friend = jsonAdaptedFriend.toModelType();
-            if (gameMates.hasFriend(friend)) {
+            if (modelFriends.stream().anyMatch(friend::isSameFriend)) {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_FRIEND);
             }
-            gameMates.addFriend(friend);
+            modelFriends.add(friend);
         }
+        gameMates.setFriends(modelFriends);
         return gameMates;
     }
 

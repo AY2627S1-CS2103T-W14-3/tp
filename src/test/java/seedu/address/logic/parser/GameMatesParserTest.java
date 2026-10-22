@@ -26,7 +26,9 @@ import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.GameListCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.PinCommand;
 import seedu.address.logic.commands.UnarchiveCommand;
+import seedu.address.logic.commands.UnpinCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.GameNameMatchesPredicate;
@@ -168,6 +170,12 @@ public class GameMatesParserTest {
         assertEquals(new ListCommand(), parser.parseCommand(ListCommand.COMMAND_WORD));
         assertEquals(new ListCommand(new GameNameMatchesPredicate(new GameName("Valorant"))),
                 parser.parseCommand(ListCommand.COMMAND_WORD + " g/Valorant"));
+    }
+
+    @Test
+    public void parseCommand_pinAndUnpin() throws Exception {
+        assertEquals(new PinCommand(INDEX_FIRST_FRIEND), parser.parseCommand("pin 1"));
+        assertEquals(new UnpinCommand(INDEX_FIRST_FRIEND), parser.parseCommand("unpin 1"));
     }
 
     @Test
