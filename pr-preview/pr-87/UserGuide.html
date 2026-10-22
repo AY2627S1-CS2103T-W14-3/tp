@@ -326,12 +326,16 @@ repeated <code class="language-plaintext highlighter-rouge">g/</code> are reject
 <h3 id="adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code>
 </h3>
 
-<p>Adds a game and in-game username to a friend or your own profile.</p>
+<p>Adds a game with an optional in-game username to a friend or your own profile.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]</code></p>
 
 <ul>
-  <li>Both fields are required, non-empty and limited to 50 characters each, with at least one letter or digit.</li>
+  <li>The game name is required. The username is optional, omit <code class="language-plaintext highlighter-rouge">u/</code> if you do not know it.</li>
+  <li>Game names and supplied usernames must contain 1–50 printable characters after trimming,
+including at least one letter or digit.</li>
+  <li>Supplying <code class="language-plaintext highlighter-rouge">u/</code> without a value, or with only whitespace, is rejected. Omit the prefix instead.</li>
+  <li>Repeated <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">u/</code> prefixes are rejected, even when the values are identical.</li>
   <li>A game name already present on the selected friend or profile is rejected, ignoring case.</li>
   <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
 </ul>
@@ -341,6 +345,10 @@ repeated <code class="language-plaintext highlighter-rouge">g/</code> are reject
 <ul>
   <li><code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant u/player123</code></li>
   <li><code class="language-plaintext highlighter-rouge">gameadd myself g/Minecraft u/myUsername</code></li>
+  <li>
+<code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant</code> adds the game without a username.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">gameadd myself g/Stardew Valley</code> adds a game to your profile without a username.</li>
 </ul>
 
 <h3 id="deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code>
@@ -367,7 +375,7 @@ repeated <code class="language-plaintext highlighter-rouge">g/</code> are reject
 
 <p>Shows a friend’s or your own details and game cards in the right panel, keeping the friend list and its current
 filter on the left.
-Each game card shows the game name and in-game username.</p>
+Each game card shows the game name and in-game username if provided.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code></p>
 
@@ -664,8 +672,9 @@ close the destination app, back up its current file, replace it with your copy a
 Copy <code class="language-plaintext highlighter-rouge">preferences.json</code> only if you also want the saved window settings.</p>
 
 <p>If you edit JSON manually, close the app first and keep a backup. Friend entries contain <code class="language-plaintext highlighter-rouge">name</code>, optional
-<code class="language-plaintext highlighter-rouge">phone</code> and <code class="language-plaintext highlighter-rouge">email</code>, <code class="language-plaintext highlighter-rouge">tags</code>, and <code class="language-plaintext highlighter-rouge">games</code>. A game has a <code class="language-plaintext highlighter-rouge">name</code> and <code class="language-plaintext highlighter-rouge">username</code>. Existing files that omit <code class="language-plaintext highlighter-rouge">games</code>
-load with no games; files that omit <code class="language-plaintext highlighter-rouge">myself</code> use the default empty profile. Empty or missing contact fields mean
+<code class="language-plaintext highlighter-rouge">phone</code> and <code class="language-plaintext highlighter-rouge">email</code>, <code class="language-plaintext highlighter-rouge">tags</code>, and <code class="language-plaintext highlighter-rouge">games</code>. A game has a required <code class="language-plaintext highlighter-rouge">name</code> and an optional <code class="language-plaintext highlighter-rouge">username</code>.
+An empty or missing <code class="language-plaintext highlighter-rouge">username</code> means no username has been provided; the game entry is still retained.
+Existing files that omit <code class="language-plaintext highlighter-rouge">games</code> load with no games; files that omit <code class="language-plaintext highlighter-rouge">myself</code> use the default empty profile. Empty or missing contact fields mean
 <code class="language-plaintext highlighter-rouge">Not provided</code>. Use the same validation rules as command input. Stored game metadata is supported as an optional
 <code class="language-plaintext highlighter-rouge">metas</code> array, for example <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code>. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
@@ -751,7 +760,7 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
     <tr>
       <td><strong>Game add</strong></td>
       <td>
-<code>gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME</code><br> e.g., <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player123</code>
+<code>gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player123</code> or <code class="language-plaintext highlighter-rouge">gameadd 1 g/Minecraft</code>
 </td>
     </tr>
     <tr>
