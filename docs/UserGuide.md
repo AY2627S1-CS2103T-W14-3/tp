@@ -361,7 +361,7 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * `archive INDEX` archives an active result; `unarchive INDEX` restores an archived result. The friend stays in
   the search results with their updated status, and the search filter and displayed order stay in place.
 * Archiving an already archived search result reports `This friend is already archived.` without changing data.
-* `list` returns to active friends; `archivelist [KEYWORD...]` switches to archived friends only.
+* `list` returns to active friends; `archivelist [g/GAME_NAME]` switches to archived friends only.
 * Feedback is `N friend(s) listed!`. No matches is a successful empty search view. Exactly one result also opens that
   friend's complete details and games on the right. An empty keyword list is rejected with usage instructions.
 
@@ -391,27 +391,37 @@ Format: `archive FRIEND_INDEX`
 
 Example: `list`, then `archive 1` archives the first displayed active friend.
 
-### Listing and searching archived friends: `archivelist`
+### Listing and filtering archived friends: `archivelist`
 
-Format: `archivelist [KEYWORD [MORE_KEYWORDS]...]`
+Shows archived friends, optionally filtered by game. It follows the same syntax and game-matching rules as `list`.
+
+Format: `archivelist [g/GAME_NAME]`
 
 * `archivelist` shows all archived friends in the existing list panel, headed **Archived friends**.
-* `archivelist alice` searches archived names using the same rules as `find`: case-insensitive whole words,
-  matching any keyword. Every search starts from all archived friends and replaces the previous filter.
-* Keywords are plain text; prefixes such as `n/` and `g/` have no special meaning here.
+* `archivelist g/GAME_NAME` shows archived friends who have a game with that exact name, ignoring case.
+  Leading and trailing spaces are ignored. Multi-word game names are accepted; partial names and usernames do not match.
+* Each invocation starts from all archived friends and replaces any previous name or game filter.
+* Only one `g/` prefix may be supplied. Empty game names, repeated prefixes and extra positional arguments are rejected,
+  using the same validation rules as `list`.
+* Name keywords and `n/` are not supported here. Use `find KEYWORD [MORE_KEYWORDS]` to search names across both active
+  and archived friends.
 * Feedback is `Listed N archived friend(s).`. No matches is a successful empty archive view.
 * Indices refer to this displayed archive list. Select a friend or use `gamelist 1` to inspect preserved games.
 * `edit`, `gameadd` and `gamedel` work on displayed archived friends and keep them archived. Editing friend
-  details clears the name filter within the current view. `delete` permanently removes a displayed archived friend.
+  details clears the game filter within the archive view. `delete` permanently removes a displayed archived friend.
 * `list` returns to the active view, headed **Active friends**. Adding a friend also returns to the active view.
 
-Example: `archivelist alice bob` shows archived friends with either whole word in their names.
+Examples:
+
+* `archivelist` shows all archived friends.
+* `archivelist g/Valorant` shows archived friends who play Valorant.
+* `archivelist g/Stardew Valley` shows archived friends who play Stardew Valley.
 
 ### Restoring an archived friend: `unarchive`
 
 Format: `unarchive FRIEND_INDEX`
 
-* Use `archivelist`, `archivelist KEYWORD`, or `find KEYWORD` to display archived friends.
+* Use `archivelist`, `archivelist g/GAME_NAME`, or `find KEYWORD` to display archived friends.
 * The index refers to that displayed list. It must be a positive integer.
 * The friend returns to the active list with all their details intact. They disappear from an archive-only view,
   but stay visible in **Search results** with the **Archived** badge removed. The current filter stays in place.
@@ -420,7 +430,7 @@ Format: `unarchive FRIEND_INDEX`
 * `myself`, missing indices, extra arguments and invalid indices are rejected. Out-of-range indices, including
   empty lists, report `The friend index provided is invalid.` without changing data or the current view.
 
-Example: `archivelist alice`, then `unarchive 1` restores the first matching archived friend.
+Example: `archivelist g/Valorant`, then `unarchive 1` restores the first displayed archived friend who plays Valorant.
 
 ### Deleting a friend: `delete`
 
@@ -532,7 +542,7 @@ while copying the file, then launch the destination app from its usual data fold
 |--------|------------------|
 | **Add** | `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…` <br> e.g., `add n/James Ho t/friend` |
 | **Archive** | `archive FRIEND_INDEX` |
-| **Archive list/search** | `archivelist [KEYWORD [MORE_KEYWORDS]...]` |
+| **Archive list/filter** | `archivelist [g/GAME_NAME]` |
 | **Unarchive** | `unarchive FRIEND_INDEX` |
 | **Clear** | `clear` |
 | **Delete** | `delete FRIEND_INDEX`<br> e.g., `delete 3` |

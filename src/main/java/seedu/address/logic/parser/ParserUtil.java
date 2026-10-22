@@ -1,12 +1,15 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import io.vavr.control.Option;
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -28,6 +31,29 @@ public class ParserUtil {
     public static final String MESSAGE_MISSING_INDEX = "Please provide an index.";
     public static final String MESSAGE_INVALID_INDEX =
             "Index must be a positive integer between 1 and " + Integer.MAX_VALUE + " (inclusive).";
+
+    /**
+     * Parses the optional game filter shared by active and archived list commands.
+     *
+     * @throws ParseException if the arguments are not empty or a single valid g/GAME_NAME filter.
+     */
+    public static Option<GameName> parseOptionalGameFilter(String args, String usage) throws ParseException {
+        requireNonNull(args);
+        requireNonNull(usage);
+        if (args.trim().isEmpty()) {
+            return Option.none();
+        }
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_GAME);
+        Option<String> gameNameValue = argMultimap.getValue(PREFIX_GAME);
+        if (!argMultimap.getPreamble().isEmpty() || gameNameValue.isEmpty()) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, usage));
+        }
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_GAME);
+        if (gameNameValue.get().isBlank()) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, usage));
+        }
+        return Option.of(parseGameName(gameNameValue.get()));
+    }
 
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be

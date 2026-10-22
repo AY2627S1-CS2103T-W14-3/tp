@@ -8,15 +8,15 @@ import java.util.function.Predicate;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
-import seedu.address.model.friend.NameContainsKeywordsPredicate;
+import seedu.address.model.friend.GameNameMatchesPredicate;
 
-/** Shows archived friends, optionally matching any name keyword. */
+/** Shows archived friends, optionally filtered by game. */
 public class ArchiveListCommand extends Command {
     public static final String COMMAND_WORD = "archivelist";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Lists archived friends, optionally matching any name keyword (case-insensitive).\n"
-            + "Parameters: [KEYWORD [MORE_KEYWORDS]...]\n"
-            + "Example: " + COMMAND_WORD + " alice";
+            + ": Lists archived friends, optionally filtered by game (case-insensitive).\n"
+            + "Parameters: [g/GAME_NAME]\n"
+            + "Example: " + COMMAND_WORD + " g/Valorant";
     public static final String MESSAGE_SUCCESS = "Listed %1$d archived friend(s).";
 
     private final Predicate<Friend> predicate;
@@ -25,7 +25,7 @@ public class ArchiveListCommand extends Command {
         predicate = PREDICATE_SHOW_ALL_FRIENDS;
     }
 
-    public ArchiveListCommand(NameContainsKeywordsPredicate predicate) {
+    public ArchiveListCommand(GameNameMatchesPredicate predicate) {
         this.predicate = requireNonNull(predicate);
     }
 

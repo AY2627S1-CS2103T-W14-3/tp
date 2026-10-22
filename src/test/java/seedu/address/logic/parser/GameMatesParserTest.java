@@ -64,15 +64,15 @@ public class GameMatesParserTest {
     }
 
     @Test
-    public void parseCommand_archiveList_preservesOptionalKeywords() throws Exception {
+    public void parseCommand_archiveList_preservesOptionalGameFilter() throws Exception {
         ArchiveListCommand all = new ArchiveListCommand();
         ArchiveListCommand filtered = new ArchiveListCommand(
-                new NameContainsKeywordsPredicate(List.of("Alice", "Bob")));
+                new GameNameMatchesPredicate(new GameName("Stardew Valley")));
         assertEquals(all, parser.parseCommand("archivelist"));
         assertEquals(all, parser.parseCommand("archivelist   "));
-        assertEquals(filtered, parser.parseCommand("archivelist   Alice   Bob "));
+        assertEquals(filtered, parser.parseCommand("archivelist   g/  Stardew Valley "));
         assertNotEquals(all, filtered);
-        assertNotEquals(filtered, parser.parseCommand("archivelist Alice"));
+        assertNotEquals(filtered, parser.parseCommand("archivelist g/Valorant"));
         assertNotEquals(filtered, parser.parseCommand("find Alice Bob"));
         assertNotEquals(filtered, null);
         assertEquals(filtered, filtered);
