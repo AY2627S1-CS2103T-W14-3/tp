@@ -35,12 +35,12 @@ public class ListCommandParser implements Parser<ListCommand> {
         Option<String> orderValue = argMultimap.getValue(PREFIX_ORDER);
         if (!argMultimap.getPreamble().isEmpty()
                 || (gameNameValue.isEmpty() && sortValue.isEmpty() && orderValue.isEmpty())) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE));
+            throw invalidFormat();
         }
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_GAME, PREFIX_SORT, PREFIX_ORDER);
         if (gameNameValue.isDefined() && gameNameValue.get().isBlank()) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE));
+            throw invalidFormat();
         }
 
         FriendSortCriterion sortCriterion = null;
@@ -51,7 +51,7 @@ public class ListCommandParser implements Parser<ListCommand> {
         boolean isDescending = false;
         if (orderValue.isDefined()) {
             if (sortCriterion == null) {
-                throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE));
+                throw invalidFormat();
             }
             isDescending = parseDescending(orderValue.get());
         }
@@ -68,7 +68,7 @@ public class ListCommandParser implements Parser<ListCommand> {
         try {
             return FriendSortCriterion.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException exception) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE));
+            throw invalidFormat();
         }
     }
 
@@ -76,8 +76,11 @@ public class ListCommandParser implements Parser<ListCommand> {
         return switch (value.toUpperCase(Locale.ROOT)) {
             case "ASC" -> false;
             case "DESC" -> true;
-            default -> throw new ParseException(
-                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE));
+            default -> throw invalidFormat();
         };
+    }
+
+    private ParseException invalidFormat() {
+        return new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE));
     }
 }
