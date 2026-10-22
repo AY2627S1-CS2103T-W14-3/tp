@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
+import static seedu.address.logic.commands.EditCommand.MESSAGE_EMPTY_LIST;
+import static seedu.address.logic.commands.EditCommand.MESSAGE_INDEX_NOT_FOUND;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_FRIEND;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_FRIEND;
@@ -12,7 +14,6 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_FRIEND;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.Messages;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -52,14 +53,15 @@ public class UnpinCommandTest {
     public void execute_emptyList_throwsCommandException() {
         Model emptyModel = new ModelManager(new GameMates(), new UserPrefs());
         assertCommandFailure(new UnpinCommand(INDEX_FIRST_FRIEND), emptyModel,
-                Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+                MESSAGE_EMPTY_LIST);
     }
 
     @Test
     public void execute_invalidIndex_throwsCommandException() {
         Model model = new ModelManager(TypicalFriends.getTypicalGameMates(), new UserPrefs());
-        assertCommandFailure(new UnpinCommand(Index.fromOneBased(model.getFilteredFriendList().size() + 1)), model,
-                Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        Index invalidIndex = Index.fromOneBased(model.getFilteredFriendList().size() + 1);
+        assertCommandFailure(new UnpinCommand(invalidIndex), model, String.format(MESSAGE_INDEX_NOT_FOUND,
+                invalidIndex.getOneBased(), model.getFilteredFriendList().size()));
     }
 
     @Test

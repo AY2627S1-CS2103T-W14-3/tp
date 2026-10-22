@@ -1,10 +1,11 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.commands.EditCommand.MESSAGE_EMPTY_LIST;
+import static seedu.address.logic.commands.EditCommand.MESSAGE_INDEX_NOT_FOUND;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
@@ -30,11 +31,12 @@ public class UnpinCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        if (targetIndex.getZeroBased() >= model.getFilteredFriendList().size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        int displayedFriendCount = model.getFilteredFriendList().size();
+        if (displayedFriendCount == 0) {
+            throw new CommandException(MESSAGE_EMPTY_LIST);
         }
-
-        Friend friendToUnpin = model.getFilteredFriendList().get(targetIndex.getZeroBased());
+        Friend friendToUnpin = FriendTargetResolver.resolve(model, targetIndex, () -> String.format(
+                MESSAGE_INDEX_NOT_FOUND, targetIndex.getOneBased(), displayedFriendCount)).friend();
         if (!friendToUnpin.isPinned()) {
             throw new CommandException(String.format(MESSAGE_NOT_PINNED, friendToUnpin.getName()));
         }
