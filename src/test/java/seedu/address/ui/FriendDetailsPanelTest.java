@@ -111,13 +111,18 @@ class FriendDetailsPanelTest {
     }
 
     @Test
-    void setFriend_myself_showsAllProfileGames() {
+    void setFriend_myself_filtersAndClearsProfileGames() {
         FxTestUtil.runAndWait(() -> {
             Friend profile = new FriendBuilder().withGames(
                     new GameBuilder().withGameName("Valorant").build(), new GameBuilder().build()).build();
             FriendDetailsPanel panel = new FriendDetailsPanel(profile, true);
             panel.setFriend(profile, true, new GameName("Valorant"));
             assertEquals("Your details", getLabel(panel, "#title").getText());
+            assertEquals(1, getGamesContainer(panel).getChildren().size());
+            assertEquals("Valorant", getGameCardLabel(getFirstGameCard(panel), ".details-game-name").getText());
+            panel.setFriend(profile, true, new GameName("Unknown"));
+            assertEquals("No matching game: Unknown", getFirstLabelText(getGamesContainer(panel)));
+            panel.setFriend(profile, true);
             assertEquals(2, getGamesContainer(panel).getChildren().size());
         });
     }

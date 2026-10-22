@@ -97,7 +97,8 @@ public class GameMatesParserTest {
             }
             for (String command : List.of("gamelist " + index, "gamelist " + index + " g/Valorant")) {
                 assertThrows(ParseException.class,
-                        "Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive).", ()
+                        "Invalid friend index. Enter a positive integer between 1 and 2147483647 "
+                                + "(inclusive), or myself.", ()
                             -> parser.parseCommand(command));
             }
         }
