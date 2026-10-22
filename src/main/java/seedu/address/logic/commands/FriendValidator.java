@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import io.vavr.control.Option;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -35,13 +36,10 @@ final class FriendValidator {
     }
 
     private static void checkForDuplicateFriend(Model model, Friend candidate) throws CommandException {
-        if (model.hasFriend(candidate)) {
-            boolean archivedDuplicate = model.getGameMates().getFriendList().stream()
-                    .anyMatch(friend -> friend.isArchived() && friend.isSameFriend(candidate));
-            if (archivedDuplicate) {
-                throw new CommandException(Messages.MESSAGE_DUPLICATE_ARCHIVED_FRIEND);
-            }
-            throw new CommandException(Messages.MESSAGE_DUPLICATE_FRIEND);
+        Option<Friend> existing = model.findFriend(candidate);
+        if (existing.isDefined()) {
+            throw new CommandException(existing.get().isArchived()
+                    ? Messages.MESSAGE_DUPLICATE_ARCHIVED_FRIEND : Messages.MESSAGE_DUPLICATE_FRIEND);
         }
     }
 

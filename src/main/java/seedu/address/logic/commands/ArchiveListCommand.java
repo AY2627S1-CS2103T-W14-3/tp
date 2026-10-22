@@ -20,7 +20,7 @@ public class ArchiveListCommand extends Command {
     public static final String MESSAGE_SUCCESS = "Listed %1$d archived friend(s).";
 
     public static final String MESSAGE_EMPTY_ARCHIVE =
-            "No archived friends. Use list, then archive INDEX to archive a friend.";
+            "No archived friends. Use the command \"list\", then \"archive FRIEND_INDEX\" to archive a friend.";
     public static final String MESSAGE_NO_MATCH = "No archived friends match this game filter.";
 
     private final Predicate<Friend> predicate;

@@ -6,6 +6,7 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
+import io.vavr.control.Option;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
@@ -88,6 +89,11 @@ public class ModelManager implements Model {
     public boolean hasFriend(Friend friend) {
         requireNonNull(friend);
         return gameMates.hasFriend(friend);
+    }
+
+    @Override
+    public Option<Friend> findFriend(Friend friend) {
+        return gameMates.findFriend(friend);
     }
 
     @Override

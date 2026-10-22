@@ -39,12 +39,12 @@ public class Friend {
     public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags, boolean archived) {
         requireAllNonNull(name, phone, email, games, tags);
         games.forEach(Objects::requireNonNull);
-        this.archived = archived;
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.games = Collections.unmodifiableSet(games);
         this.tags = Collections.unmodifiableSet(tags);
+        this.archived = archived;
     }
 
     /**

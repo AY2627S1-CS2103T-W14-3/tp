@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
+import io.vavr.control.Option;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
@@ -147,6 +148,11 @@ public class AddCommandTest {
         }
 
         @Override
+        public Option<Friend> findFriend(Friend friend) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public void deleteFriend(Friend target) {
             throw new AssertionError("This method should not be called.");
         }
@@ -199,9 +205,9 @@ public class AddCommandTest {
         }
 
         @Override
-        public boolean hasFriend(Friend friend) {
+        public Option<Friend> findFriend(Friend friend) {
             requireNonNull(friend);
-            return this.friend.isSameFriend(friend);
+            return Option.of(this.friend).filter(friend::isSameFriend);
         }
 
         @Override
@@ -219,9 +225,9 @@ public class AddCommandTest {
         final ArrayList<Friend> friendsAdded = new ArrayList<>();
 
         @Override
-        public boolean hasFriend(Friend friend) {
+        public Option<Friend> findFriend(Friend friend) {
             requireNonNull(friend);
-            return friendsAdded.stream().anyMatch(friend::isSameFriend);
+            return Option.ofOptional(friendsAdded.stream().filter(friend::isSameFriend).findFirst());
         }
 
         @Override

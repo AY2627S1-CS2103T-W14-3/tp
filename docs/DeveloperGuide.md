@@ -520,7 +520,8 @@ and `hashCode()` include archive status, while `isSameFriend()` continues to com
 
 Names must be unique across active and archived friends combined, and must differ from the separately stored
 Myself profile. An archived name stays reserved. `FriendValidator` rejects a conflicting add or rename and
-suggests `archivelist` and `unarchive` when the existing friend is archived. Editing the existing friend while
+suggests `archivelist` and `unarchive` when the existing friend is archived. It uses `Model.findFriend()` to obtain
+that stored friend in one identity lookup across both statuses, independent of the current display filter. Editing the existing friend while
 retaining their own name is allowed. Myself cannot be archived or restored.
 
 #### Display scope and filtering
@@ -535,7 +536,8 @@ retaining their own name is allowed. Myself cannot be archived or restored.
 
 `ListCommandParser` and `ArchiveListCommandParser` share `ParserUtil.parseOptionalGameFilter()` and
 `GameNameMatchesPredicate`. Game matching is exact and case-insensitive, with the same validation rules for both
-commands. Name matching remains a global `find` operation. Every viewing command replaces the previous predicate.
+commands. Name matching remains a global `find` operation. Each `list`, `archivelist` or `find` command replaces
+the previous predicate. `gamelist` preserves the friend-list filter.
 Unfiltered empty archives give guidance on archiving; filtered empty results report that no archived friends
 match the game filter.
 

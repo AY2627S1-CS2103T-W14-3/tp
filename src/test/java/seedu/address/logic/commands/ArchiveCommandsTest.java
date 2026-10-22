@@ -14,6 +14,7 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.GameMatesParser;
+import seedu.address.logic.parser.ParserUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.FriendListScope;
 import seedu.address.model.ModelManager;
@@ -261,6 +262,19 @@ public class ArchiveCommandsTest {
         for (String word : List.of("archive", "unarchive")) {
             for (String args : List.of("", "0", "-1", "myself", "abc", "2147483648", "1 2", "1 n/Alice")) {
                 assertThrows(ParseException.class, () -> parser.parseCommand(word + " " + args));
+            }
+        }
+    }
+
+    @Test
+    public void archiveParsers_reportSpecificMissingAndInvalidIndexErrors() {
+        for (String word : List.of("archive", "unarchive")) {
+            assertThrows(ParseException.class, ParserUtil.MESSAGE_MISSING_INDEX, () -> parser.parseCommand(word));
+            assertThrows(ParseException.class, ParserUtil.MESSAGE_MISSING_INDEX, ()
+                    -> parser.parseCommand(word + "   "));
+            for (String value : List.of("-1", "0", "abc", "2147483648", "myself", "1 2")) {
+                assertThrows(ParseException.class, ParserUtil.MESSAGE_INVALID_INDEX, ()
+                        -> parser.parseCommand(word + " " + value));
             }
         }
     }

@@ -73,6 +73,21 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void findFriend_ignoresDisplayFiltersAndPreservesScope() {
+        Friend archived = ALICE.withArchived(true);
+        Friend candidate = new FriendBuilder(ALICE).withPhone("91234567").build();
+        assertTrue(modelManager.findFriend(candidate).isEmpty());
+        modelManager.addFriend(archived);
+        modelManager.addFriend(BENSON);
+        modelManager.updateSearchFriendList(friend -> false);
+        assertEquals(archived, modelManager.findFriend(candidate).get());
+        assertEquals(BENSON, modelManager.findFriend(BENSON).get());
+        assertTrue(modelManager.getFilteredFriendList().isEmpty());
+        assertEquals(FriendListScope.SEARCH, modelManager.getFriendListScope());
+        assertThrows(NullPointerException.class, () -> modelManager.findFriend(null));
+    }
+
+    @Test
     public void resolveFriend_numericIndex_usesDisplayedList() {
         assertThrows(IndexOutOfBoundsException.class, () -> modelManager.resolveFriend(Index.fromOneBased(1)));
         modelManager.addFriend(ALICE);

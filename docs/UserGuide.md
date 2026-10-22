@@ -370,7 +370,7 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * Searching starts from all active and archived friends, replacing any previous name or game filter.
   `find` does not accept `n/` or `g/` as filter syntax; such text is treated as literal name keywords.
 * Results appear under **Search results**, with an **Archived** badge on archived friends.
-* `archive INDEX` archives an active result; `unarchive INDEX` restores an archived result. The friend stays in
+* `archive FRIEND_INDEX` archives an active result; `unarchive FRIEND_INDEX` restores an archived result. The friend stays in
   the search results with their updated status, and the search filter and displayed order stay in place.
 * Archiving an already archived search result reports `This friend is already archived.` without changing data.
 * `list` returns to active friends; `archivelist [g/GAME_NAME]` switches to archived friends only.
@@ -397,6 +397,8 @@ Format: `archive FRIEND_INDEX`
   an **Archived** badge. The current filter stays in place.
 * Feedback is `Archived FRIEND_NAME.`. Archiving an already archived friend is rejected.
 * Your Myself profile cannot be archived. `myself`, missing indices, extra arguments and invalid indices are rejected.
+* Missing indices report `Please provide an index.`. Invalid indices (such as `-1`, `0` or `abc`) report
+  `Index must be a positive integer between 1 and 2147483647 (inclusive).`.
 * Archived friends keep their names reserved. Adding or renaming another friend to the same name is rejected
   with a suggestion to use `archivelist` and `unarchive`.
 * `list` and `list g/GAME_NAME` show active friends only. `find` searches both active and archived friends.
@@ -419,7 +421,7 @@ Format: `archivelist [g/GAME_NAME]`
   and archived friends.
 * Non-empty results report `Listed N archived friend(s).`.
 * With no archived friends, unfiltered `archivelist` reports
-  `No archived friends. Use list, then archive INDEX to archive a friend.`
+  `No archived friends. Use the command "list", then "archive FRIEND_INDEX" to archive a friend.`
 * A game filter with no matches reports `No archived friends match this game filter.`.
   Both empty cases are successful commands and keep the **Archived friends** heading.
 * Indices refer to this displayed archive list. Select a friend or use `gamelist 1` to inspect preserved games.
@@ -443,7 +445,10 @@ Format: `unarchive FRIEND_INDEX`
   but stay visible in **Search results** with the **Archived** badge removed. The current filter stays in place.
   Run `list` to see active friends.
 * Feedback is `Restored FRIEND_NAME.`. Selecting an active friend is rejected with a suggestion to use `archivelist`.
-* `myself`, missing indices, extra arguments and invalid indices are rejected. Out-of-range indices, including
+* `myself`, missing indices, extra arguments and invalid indices are rejected. Missing indices report
+  `Please provide an index.`; invalid indices report
+  `Index must be a positive integer between 1 and 2147483647 (inclusive).`.
+* Out-of-range indices, including
   empty lists, report `The friend index provided is invalid.` without changing data or the current view.
 
 Example: `archivelist g/Valorant`, then `unarchive 1` restores the first displayed archived friend who plays Valorant.

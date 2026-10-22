@@ -2,6 +2,7 @@ package seedu.address.model;
 
 import java.util.function.Predicate;
 
+import io.vavr.control.Option;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
@@ -55,6 +56,9 @@ public interface Model {
      * Returns true if a friend with the same identity as {@code friend} exists in GameMates.
      */
     boolean hasFriend(Friend friend);
+
+    /** Returns the stored active or archived friend with the same identity, regardless of display filters. */
+    Option<Friend> findFriend(Friend friend);
 
     /**
      * Deletes the given friend.
