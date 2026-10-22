@@ -60,7 +60,8 @@
       <li><a href="#friend-creation-editing-and-deletion" id="markdown-toc-friend-creation-editing-and-deletion">Friend creation, editing and deletion</a></li>
       <li><a href="#myself-profile" id="markdown-toc-myself-profile">Myself profile</a></li>
       <li><a href="#name-and-game-filtering" id="markdown-toc-name-and-game-filtering">Name and game filtering</a></li>
-      <li><a href="#viewing-games" id="markdown-toc-viewing-games">Viewing games</a></li>
+      <li><a href="#editing-an-existing-game" id="markdown-toc-editing-an-existing-game">Editing an existing game</a></li>
+      <li><a href="#viewing-a-friends-games" id="markdown-toc-viewing-a-friends-games">Viewing a friend’s games</a></li>
       <li><a href="#mvp-integration-and-specification-departures" id="markdown-toc-mvp-integration-and-specification-departures">MVP integration and specification departures</a></li>
       <li>
 <a href="#game-metadata" id="markdown-toc-game-metadata">Game metadata</a>        <ul>
@@ -116,6 +117,7 @@
       <li><a href="#saved-profile-and-game-round-trip" id="markdown-toc-saved-profile-and-game-round-trip">Saved profile and game round trip</a></li>
       <li><a href="#missing-invalid-and-unwritable-files" id="markdown-toc-missing-invalid-and-unwritable-files">Missing, invalid and unwritable files</a></li>
       <li><a href="#documentation-preview" id="markdown-toc-documentation-preview">Documentation preview</a></li>
+      <li><a href="#manual-game-edit-checks" id="markdown-toc-manual-game-edit-checks">Manual game edit checks</a></li>
     </ul>
   </li>
 </ul>
@@ -448,7 +450,39 @@ prefixes and <code class="language-plaintext highlighter-rouge">list</code> does
 non-empty keyword list; there is no 255-character keyword validation. No-match queries return successful empty
 results. Filtering and sorting never include or edit the separate profile.</p>
 
-<h3 id="viewing-games">Viewing games</h3>
+<h3 id="editing-an-existing-game">Editing an existing game</h3>
+
+<p><code class="language-plaintext highlighter-rouge">GameEditCommandParser</code> reuses <code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code>, <code class="language-plaintext highlighter-rouge">ArgumentMultimap</code>, <code class="language-plaintext highlighter-rouge">ParserUtil.parseIndexOrMyself</code>,
+<code class="language-plaintext highlighter-rouge">parseGameName</code>, <code class="language-plaintext highlighter-rouge">parseUsername</code> and <code class="language-plaintext highlighter-rouge">parseMetas</code>. Its immutable <code class="language-plaintext highlighter-rouge">EditGameDescriptor</code> distinguishes omitted
+metadata (<code class="language-plaintext highlighter-rouge">null</code>) from a supplied empty replacement set. A single empty <code class="language-plaintext highlighter-rouge">m/</code> clears metadata; all other
+supplied pairs pass through the shared parser, including normalized duplicate-key checks and first-colon splitting.
+The model identity rules remain unchanged. The merged optional-username model provides <code class="language-plaintext highlighter-rouge">Username.EMPTY</code>; a supplied empty <code class="language-plaintext highlighter-rouge">u/</code> maps to that value.
+Omitting <code class="language-plaintext highlighter-rouge">u/</code> preserves the original username, including an absent username.</p>
+
+<p>The parser opts into <code class="language-plaintext highlighter-rouge">ArgumentTokenizer.tokenizeWithQuotedValues</code> so a whole field value can be double quoted.
+Recognized prefixes inside that value are literal text: <code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> selects that complete stored name.
+The tokenizer decodes <code class="language-plaintext highlighter-rouge">\"</code> and <code class="language-plaintext highlighter-rouge">\\</code>, rejects malformed quotes/escapes and trailing text, and then passes the
+decoded values through the same field validators and duplicate-prefix checks. Unquoted prefixes retain their
+existing command meaning. The ordinary tokenizer and other commands’ syntax remain unchanged.</p>
+
+<p><code class="language-plaintext highlighter-rouge">GameEditCommand</code> uses <code class="language-plaintext highlighter-rouge">FriendTargetResolver</code> and <code class="language-plaintext highlighter-rouge">Model.resolveFriend</code> for displayed indices or Myself.
+It requires exactly one matching existing game, constructs the complete replacement, then checks collisions
+against the other games before calling <code class="language-plaintext highlighter-rouge">Model.setFriend(target, updated)</code> once. Ambiguous duplicate names in
+externally edited JSON fail without mutation. <code class="language-plaintext highlighter-rouge">Friend.withGames</code> copies all current friend fields and defensively
+copies the replacement set, including the original archive and pin statuses. Tests cover pinned order, archived
+targets in archive and global search scopes, and save/reload preservation of both statuses. Its explicit copy
+constructor must also copy any new fields introduced by future integrations.</p>
+
+<p>The command retains the list predicate. A successful friend edit returns the updated friend through
+<code class="language-plaintext highlighter-rouge">CommandResult</code>, clearing any old game-card filter. A successful profile edit uses the existing profile refresh.
+Failures return no result and preserve the current details. <code class="language-plaintext highlighter-rouge">LogicManager</code> saves through the existing storage;
+there is no new persistence mechanism or transaction spanning model mutation and a failing disk write.
+Tests exercise command routing, atomic validation, displayed targets, metadata replacement, profile updates,
+case-only spelling, UI refresh and real JSON storage round trips.</p>
+
+<p>The <a href="/tp/diagrams/GameEditSequenceDiagram.puml">game edit sequence diagram source</a> shows validation before mutation.</p>
+
+<h3 id="viewing-a-friends-games">Viewing a friend’s games</h3>
 
 <p><code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code> selects a friend or the user profile for the right-hand details panel
 without changing the left-hand friend list. The flow is:</p>
@@ -524,7 +558,7 @@ before publishing a complete v1.3 MVP guide.</p>
     <tr>
       <td>Metadata</td>
       <td>Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20).</td>
-      <td>Model, parser utilities, JSON persistence, command entry through <code class="language-plaintext highlighter-rouge">gameadd</code> and game-card rendering are implemented. See <a href="#game-metadata">Game metadata</a> for the implemented API.</td>
+      <td>Model, parser utilities, JSON persistence, command entry through <code class="language-plaintext highlighter-rouge">gameadd</code>, replacement/clearing through <code class="language-plaintext highlighter-rouge">gameedit</code> and game-card rendering are implemented. See <a href="#game-metadata">Game metadata</a> for the implemented API.</td>
     </tr>
     <tr>
       <td>Tags</td>
@@ -625,7 +659,9 @@ Missing separators and invalid fields cause <code class="language-plaintext high
 
 <p><code class="language-plaintext highlighter-rouge">parseMetas()</code> parses a collection of raw values and rejects duplicate normalized keys before returning a set.
 Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
-<code class="language-plaintext highlighter-rouge">GameAddCommandParser</code> tokenizes the optional, repeatable <code class="language-plaintext highlighter-rouge">CliSyntax.PREFIX_META</code> (<code class="language-plaintext highlighter-rouge">m/</code>) alongside <code class="language-plaintext highlighter-rouge">g/</code> and <code class="language-plaintext highlighter-rouge">u/</code>.
+<code class="language-plaintext highlighter-rouge">GameEditCommandParser</code> uses these utilities for metadata replacement and handles a single empty <code class="language-plaintext highlighter-rouge">m/</code> as clearing.</p>
+
+<p><code class="language-plaintext highlighter-rouge">GameAddCommandParser</code> tokenizes the optional, repeatable <code class="language-plaintext highlighter-rouge">CliSyntax.PREFIX_META</code> (<code class="language-plaintext highlighter-rouge">m/</code>) alongside <code class="language-plaintext highlighter-rouge">g/</code> and <code class="language-plaintext highlighter-rouge">u/</code>.
 It passes all raw metadata values to <code class="language-plaintext highlighter-rouge">parseMetas()</code> and constructs the <code class="language-plaintext highlighter-rouge">Game</code> with the validated set.
 Omitting <code class="language-plaintext highlighter-rouge">m/</code> produces an empty set. Duplicate <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">u/</code> prefixes remain invalid; repeated <code class="language-plaintext highlighter-rouge">m/</code> prefixes
 are allowed only for distinct keys. Validation finishes before the command updates either a friend or the profile.</p>
@@ -835,7 +871,8 @@ displayed position with updated status. Neither command resets the predicate or 
 <code class="language-plaintext highlighter-rouge">LogicManager</code> saves the updated collection through the existing storage path.</li>
 </ol>
 
-<p><code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> preserve archive status when constructing replacement friends. Friend edits clear
+<p><code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> preserve archive status when constructing replacement friends.
+<code class="language-plaintext highlighter-rouge">gameedit</code> retains the current scope and predicate. Friend edits clear
 filters within active/archive scopes, while global searches retain their name predicate. Renaming a search
 result can therefore remove it from the results. <code class="language-plaintext highlighter-rouge">delete</code> permanently removes the selected friend from either
 status; <code class="language-plaintext highlighter-rouge">clear</code> removes both statuses while preserving Myself.</p>
@@ -1330,7 +1367,7 @@ occur after successful commands; window preferences save on shutdown. Metadata p
   <li>
 <strong>In-game username/Handle</strong>: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.</li>
   <li>
-<strong>Metadata</strong>: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; entered through <code class="language-plaintext highlighter-rouge">gameadd</code> using <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> and displayed below the username in game cards.</li>
+<strong>Metadata</strong>: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; entered through <code class="language-plaintext highlighter-rouge">gameadd</code> using <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code>, replaced or cleared through <code class="language-plaintext highlighter-rouge">gameedit</code>, and displayed below the username in game cards.</li>
   <li>
 <strong>Metadata key</strong>: The label before the first colon in a metadata item. For example, <code class="language-plaintext highlighter-rouge">Role</code> in <code class="language-plaintext highlighter-rouge">Role:Sentinel</code>.</li>
   <li>
@@ -1620,6 +1657,31 @@ on open PRs labelled <code class="language-plaintext highlighter-rouge">type.Doc
 <p>Current screenshots must come from the application, not the specification mockups. <code class="language-plaintext highlighter-rouge">Ui.png</code> shows both panels,
 <code class="language-plaintext highlighter-rouge">findAlexDavidResult.png</code> shows name filtering, and <code class="language-plaintext highlighter-rouge">gamelistFiltered.png</code> / <code class="language-plaintext highlighter-rouge">gamelistNoMatch.png</code> show card filtering.
 Diagram sources live in <code class="language-plaintext highlighter-rouge">docs/diagrams</code>; regenerate their matching <code class="language-plaintext highlighter-rouge">docs/images/*.png</code> after changing a source.</p>
+
+<h3 id="manual-game-edit-checks">Manual game edit checks</h3>
+
+<p>Use a disposable data directory. Add <code class="language-plaintext highlighter-rouge">add n/Tester</code>, <code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant u/tester</code> and
+<code class="language-plaintext highlighter-rouge">gameadd 1 g/Minecraft u/builder</code>. Edit with <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Role:Healer</code>.
+Expect both games and preserved friend fields. Try <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant n/Minecraft</code> and repeated
+normalized metadata keys; expect errors with unchanged data and details. Clear with <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant m/</code>.
+Add <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/own</code>, run <code class="language-plaintext highlighter-rouge">find Nobody</code>, then <code class="language-plaintext highlighter-rouge">gameedit myself g/Valorant u/newOwn</code>;
+expect updated profile despite the empty list. Restart from the same directory and confirm all edits persist.</p>
+
+<p>To check literal prefixes, run <code class="language-plaintext highlighter-rouge">list</code>, then add both <code class="language-plaintext highlighter-rouge">gameadd 1 g/PUBG u/plain</code> and
+<code class="language-plaintext highlighter-rouge">gameadd 1 g/PUBG n/Game u/special</code>.
+Run <code class="language-plaintext highlighter-rouge">gameedit 1 g/"PUBG n/Game" u/updated</code>: only <code class="language-plaintext highlighter-rouge">PUBG n/Game</code> should change; the plain <code class="language-plaintext highlighter-rouge">PUBG</code> entry must
+retain username <code class="language-plaintext highlighter-rouge">plain</code>. Rename the quoted target using <code class="language-plaintext highlighter-rouge">n/"PUBG m/Edition"</code> and edit it again using
+<code class="language-plaintext highlighter-rouge">g/"PUBG m/Edition"</code>. An unclosed quoted selector must report an error without changing either game.</p>
+
+<p>Run <code class="language-plaintext highlighter-rouge">list</code>, <code class="language-plaintext highlighter-rouge">archive 1</code>, then <code class="language-plaintext highlighter-rouge">archivelist</code>. Edit with <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant u/archivePlayer</code>;
+expect the edited friend to remain archived, the heading to stay <code class="language-plaintext highlighter-rouge">Archived friends</code>, and other fields/games
+to remain unchanged. Run <code class="language-plaintext highlighter-rouge">find Tester</code> and edit the same game again: expect archived status and the
+<code class="language-plaintext highlighter-rouge">Search results</code> scope to remain. Restart and use <code class="language-plaintext highlighter-rouge">archivelist</code> to confirm the saved edit and archive status.</p>
+
+<p>Run <code class="language-plaintext highlighter-rouge">unarchive 1</code>, <code class="language-plaintext highlighter-rouge">list</code>, then <code class="language-plaintext highlighter-rouge">pin 1</code>. Edit with <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant m/Role:Tank</code>;
+expect the friend to keep its pinned badge and list position, and the details card to show <code class="language-plaintext highlighter-rouge">Role: Tank</code>.
+Archive the pinned friend, run <code class="language-plaintext highlighter-rouge">archivelist</code> and edit its username again. Restart and use <code class="language-plaintext highlighter-rouge">archivelist</code>;
+expect the edited game, pinned badge and archived status to persist.</p>
 
   </div>
 

@@ -42,8 +42,9 @@
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer; browsing the online help and downloading releases require internet access.</p>
 
-<p>This guide describes the commands available in this checkout, including adding games with optional metadata.
-See <a href="#your-profile-and-game-entries">Your profile and game entries</a> for the current limits.</p>
+<p>This guide describes the commands available in this checkout. Use <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gamedel</code>, and <code class="language-plaintext highlighter-rouge">gameedit</code> to manage game
+entries; <code class="language-plaintext highlighter-rouge">gameedit</code> can also replace or clear metadata. Metadata appears on game cards below the username.
+See <a href="#your-profile-and-game-entries">Your profile and game entries</a> for adding games to your profile.</p>
 
 <ul id="markdown-toc">
   <li><a href="#quick-start" id="markdown-toc-quick-start">Quick start</a></li>
@@ -59,6 +60,7 @@ See <a href="#your-profile-and-game-entries">Your profile and game entries</a> f
       <li><a href="#adding-a-game-gameadd" id="markdown-toc-adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code></a></li>
       <li><a href="#deleting-a-game-gamedel" id="markdown-toc-deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code></a></li>
       <li><a href="#viewing-games-gamelist" id="markdown-toc-viewing-games-gamelist">Viewing games: <code class="language-plaintext highlighter-rouge">gamelist</code></a></li>
+      <li><a href="#editing-a-game-gameedit" id="markdown-toc-editing-a-game-gameedit">Editing a game: <code class="language-plaintext highlighter-rouge">gameedit</code></a></li>
       <li><a href="#finding-a-random-squad-squad" id="markdown-toc-finding-a-random-squad-squad">Finding a random squad: <code class="language-plaintext highlighter-rouge">squad</code></a></li>
       <li><a href="#editing-a-friend-or-your-own-profile-edit" id="markdown-toc-editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
       <li><a href="#locating-friends-by-name-find" id="markdown-toc-locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
@@ -168,7 +170,7 @@ Tags may be repeated; identical tag values are applied once.</li>
     <li>Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run <code class="language-plaintext highlighter-rouge">list</code> to see all active friends
 again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.</li>
     <li>
-      <p>For <code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> means either a displayed friend index or the
+      <p>For <code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> means either a displayed friend index or the
 case-insensitive keyword <code class="language-plaintext highlighter-rouge">myself</code> for your own profile. Do not type <code class="language-plaintext highlighter-rouge">|</code>. The selector must come before prefixes;
 <code class="language-plaintext highlighter-rouge">myself</code> also works when no friends are displayed.</p>
     </li>
@@ -193,7 +195,7 @@ in the right panel.</li>
   <li>Use <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code> to select a friend or your own profile and optionally
 show only one game.
 Clicking another friend shows all of that friend’s games.</li>
-  <li>Successful commands other than <code class="language-plaintext highlighter-rouge">gamelist</code> or a single-result <code class="language-plaintext highlighter-rouge">find</code> return the right panel to your profile.
+  <li>Successful commands other than <code class="language-plaintext highlighter-rouge">gamelist</code>, a friend-targeted <code class="language-plaintext highlighter-rouge">gameedit</code> or a single-result <code class="language-plaintext highlighter-rouge">find</code> return the right panel to your profile.
 Clicking a friend selects their details again. Invalid commands keep the existing details display.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> each replace the previous friend-list filter. They do not combine filters.
@@ -590,6 +592,47 @@ while the left panel continues showing only Minecraft players.</li>
 <p>For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
 showing <code class="language-plaintext highlighter-rouge">No details added</code>.</p>
 
+<h3 id="editing-a-game-gameedit">Editing a game: <code class="language-plaintext highlighter-rouge">gameedit</code>
+</h3>
+
+<p>Edits one existing game for a displayed friend or your separately stored profile.</p>
+
+<p>Format: <code>gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...</code></p>
+
+<ul>
+  <li>Use the index from the <strong>currently displayed</strong> friend list, or case-insensitive <code class="language-plaintext highlighter-rouge">myself</code>. The profile can be edited even when the displayed list is empty.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">g/</code> selects a complete existing game name, ignoring case. Partial names do not match. Supply at least one of <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code>. Repeatable <code class="language-plaintext highlighter-rouge">m/</code> pairs can appear in any order with the other prefixes; <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">n/</code> and <code class="language-plaintext highlighter-rouge">u/</code> may each appear only once.</li>
+  <li>Wrap the <strong>whole value</strong> in double quotes if it contains a space followed by <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code>:
+<code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> selects the literal name <code class="language-plaintext highlighter-rouge">PUBG n/Game</code>. Without quotes, these prefixes introduce command options.
+This also works for new names (<code class="language-plaintext highlighter-rouge">n/"PUBG m/Edition"</code>), usernames and metadata. Within quoted values, use <code class="language-plaintext highlighter-rouge">\"</code> for
+a literal double quote and <code class="language-plaintext highlighter-rouge">\\</code> for a backslash. Unclosed quotes, invalid escapes and extra text after a closing
+quote are rejected before any change. Quoting is specific to <code class="language-plaintext highlighter-rouge">gameedit</code>; other commands retain their existing syntax.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">n/</code> renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.</li>
+  <li>Omitted fields retain their values. Other games, contact details, tags, archive status and pin status are preserved.
+The current friend-list scope and filter are retained, including archived lists and search results;
+a renamed game can make its friend disappear from a game-filtered list.</li>
+  <li>Usernames use the current 1–50 character validation and must contain a letter or digit. A supplied empty <code class="language-plaintext highlighter-rouge">u/</code> clears the username; omitting <code class="language-plaintext highlighter-rouge">u/</code> preserves it.</li>
+  <li>Supplying metadata <strong>replaces the entire metadata set</strong>. Omitting <code class="language-plaintext highlighter-rouge">m/</code> preserves it. A single empty <code class="language-plaintext highlighter-rouge">m/</code> clears all metadata. Do not mix an empty <code class="language-plaintext highlighter-rouge">m/</code> with pairs.</li>
+  <li>Pairs split at the first colon: <code class="language-plaintext highlighter-rouge">m/Region:Asia:SG</code> means key <code class="language-plaintext highlighter-rouge">Region</code>, value <code class="language-plaintext highlighter-rouge">Asia:SG</code>. Keys and values are trimmed independently. Keys use 1–50 characters and cannot contain colons; values use 1–200 characters. Both require a letter or digit and reject control characters, using the existing game metadata validation.</li>
+  <li>Keys are unique ignoring case: <code class="language-plaintext highlighter-rouge">m/Role:Healer m/role:Healer</code> is rejected even though the values agree. Values preserve case.</li>
+  <li>Every edit is validated before any data changes. On success, the right panel shows the updated friend (all games) or your updated profile. Feedback includes the resulting game name, username and metadata. Metadata is saved and displayed on game cards below the username.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant u/newPlayer</code> changes only the username.</li>
+  <li>After <code class="language-plaintext highlighter-rouge">gameadd 1 g/PUBG n/Game u/player</code>, use <code class="language-plaintext highlighter-rouge">gameedit 1 g/"PUBG n/Game" u/newPlayer</code> to edit that exact entry, even if the friend also plays <code class="language-plaintext highlighter-rouge">PUBG</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">gameedit myself g/Valorant n/VALORANT m/Role:Healer m/Region:Asia:SG</code> changes spelling and replaces metadata.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant m/</code> clears metadata while preserving the game name and username.</li>
+</ul>
+
+<p>Errors include an invalid displayed index, missing selector, missing game, invalid field, repeated singleton prefix, repeated metadata key, and a rename collision. A game name that matches multiple entries in an externally edited save file is rejected as ambiguous. Failed commands preserve the stored data and previous details view.</p>
 <h3 id="finding-a-random-squad-squad">Finding a random squad: <code class="language-plaintext highlighter-rouge">squad</code>
 </h3>
 
@@ -819,7 +862,7 @@ and archived friends.</li>
 Both empty cases are successful commands and keep the <strong>Archived friends</strong> heading.</li>
   <li>Indices refer to this displayed archive list. Select a friend or use <code class="language-plaintext highlighter-rouge">gamelist 1</code> to inspect preserved games.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> work on displayed archived friends and keep them archived. Editing friend
+<code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> work on displayed archived friends and keep them archived. Editing friend
 details clears the game filter within the archive view. <code class="language-plaintext highlighter-rouge">delete</code> permanently removes a displayed archived friend.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list</code> returns to the active view, headed <strong>Active friends</strong>. Adding a friend also returns to the active view.</li>
@@ -947,7 +990,8 @@ Empty or missing contact fields mean
 <code class="language-plaintext highlighter-rouge">metas</code> array, for example <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code>. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
 colons and must be unique per game, ignoring case; values may contain colons. Missing <code class="language-plaintext highlighter-rouge">metas</code> loads as empty.
-Metadata can be entered through <code class="language-plaintext highlighter-rouge">gameadd</code>, is preserved when saving and is displayed in game cards.</p>
+Metadata can be entered with <code class="language-plaintext highlighter-rouge">gameadd</code> or replaced or cleared with <code class="language-plaintext highlighter-rouge">gameedit</code>; it is preserved when saving and
+displayed on game cards.</p>
 
 <div class="alert alert-warning">
 <img class="emoji" title=":exclamation:" alt=":exclamation:" src="https://github.githubassets.com/images/icons/emoji/unicode/2757.png" height="20" width="20"> <strong>Caution:</strong>
@@ -1035,6 +1079,12 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
       <td><strong>Find</strong></td>
       <td>
 <code class="language-plaintext highlighter-rouge">find KEYWORD [MORE_KEYWORDS]</code><br> e.g., <code class="language-plaintext highlighter-rouge">find James Jake</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Game edit</strong></td>
+      <td>
+<code>gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...</code><br> e.g., <code class="language-plaintext highlighter-rouge">gameedit myself g/Valorant m/Role:Healer</code>
 </td>
     </tr>
     <tr>
