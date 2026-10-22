@@ -10,11 +10,25 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
+import seedu.address.model.game.Username;
 import seedu.address.testutil.FriendBuilder;
 import seedu.address.testutil.GameBuilder;
 
 class FriendDetailsPanelTest {
+
+    @Test
+    void setFriend_gameWithoutUsername_showsNotProvided() {
+        FxTestUtil.runAndWait(() -> {
+            Friend friend = new FriendBuilder().withGames(
+                    new Game(new GameName("Valorant"), Username.EMPTY)).build();
+            FriendDetailsPanel panel = new FriendDetailsPanel(friend, false);
+            assertEquals("Valorant", getGameCardLabel(getFirstGameCard(panel), ".details-game-name").getText());
+            assertEquals("Username: Not provided",
+                    getGameCardLabel(getFirstGameCard(panel), ".details-game-username").getText());
+        });
+    }
 
     @Test
     void setFriend_defaultProfile_showsEmptyState() {
@@ -97,13 +111,18 @@ class FriendDetailsPanelTest {
     }
 
     @Test
-    void setFriend_myself_showsAllProfileGames() {
+    void setFriend_myself_filtersAndClearsProfileGames() {
         FxTestUtil.runAndWait(() -> {
             Friend profile = new FriendBuilder().withGames(
                     new GameBuilder().withGameName("Valorant").build(), new GameBuilder().build()).build();
             FriendDetailsPanel panel = new FriendDetailsPanel(profile, true);
             panel.setFriend(profile, true, new GameName("Valorant"));
             assertEquals("Your details", getLabel(panel, "#title").getText());
+            assertEquals(1, getGamesContainer(panel).getChildren().size());
+            assertEquals("Valorant", getGameCardLabel(getFirstGameCard(panel), ".details-game-name").getText());
+            panel.setFriend(profile, true, new GameName("Unknown"));
+            assertEquals("No matching game: Unknown", getFirstLabelText(getGamesContainer(panel)));
+            panel.setFriend(profile, true);
             assertEquals(2, getGamesContainer(panel).getChildren().size());
         });
     }

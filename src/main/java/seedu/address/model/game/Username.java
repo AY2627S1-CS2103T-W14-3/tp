@@ -7,7 +7,7 @@ import seedu.address.commons.util.StringUtil;
 
 /**
  * Represents a player's username for a game in GameMates.
- * Guarantees: immutable; is valid as declared in {@link #isValidUsername(String)}
+ * Guarantees: immutable; is empty or valid as declared in {@link #isValidUsername(String)}
  */
 public class Username {
 
@@ -16,6 +16,9 @@ public class Username {
                     + "and include at least one letter or digit.";
 
     public static final int MAX_USERNAME_LENGTH = 50;
+
+    /** The empty value representing an omitted username. */
+    public static final Username EMPTY = new Username();
 
     public final String value;
 
@@ -28,6 +31,16 @@ public class Username {
         requireNonNull(username);
         checkArgument(isValidUsername(username), MESSAGE_CONSTRAINTS);
         value = username.strip();
+    }
+
+    /** Constructs an empty username without accepting blank user input as valid. */
+    private Username() {
+        value = "";
+    }
+
+    /** Returns whether the username has been omitted. */
+    public boolean isEmpty() {
+        return value.isEmpty();
     }
 
     /**

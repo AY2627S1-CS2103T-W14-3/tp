@@ -22,11 +22,17 @@ public class JsonAdaptedUsernameTest {
     }
 
     @Test
-    public void toModelType_invalidOrMissingValue_throwsIllegalValueException() {
+    public void toModelType_invalidValue_throwsIllegalValueException() {
         assertThrows(IllegalValueException.class, Username.MESSAGE_CONSTRAINTS,
                 new JsonAdaptedUsername(" ")::toModelType);
-        String message = String.format(JsonAdaptedGame.MISSING_FIELD_MESSAGE_FORMAT, "Username");
-        assertThrows(IllegalValueException.class, message,
-                new JsonAdaptedUsername((String) null)::toModelType);
+    }
+
+    @Test
+    public void toModelType_emptyOrMissingValue_returnsEmptyUsername() throws Exception {
+        assertEquals(Username.EMPTY, new JsonAdaptedUsername((String) null).toModelType());
+        assertEquals(Username.EMPTY, new JsonAdaptedUsername("").toModelType());
+        String json = JsonUtil.toJsonString(new JsonAdaptedUsername(Username.EMPTY));
+        assertEquals("\"\"", json);
+        assertEquals(Username.EMPTY, JsonUtil.fromJsonString(json, JsonAdaptedUsername.class).toModelType());
     }
 }

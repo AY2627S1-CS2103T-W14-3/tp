@@ -94,7 +94,8 @@ The main window has two panels: the friend list on the left and a details panel 
   in the right panel.
 * On startup, the right panel shows your profile. If no profile details have been added, it shows `No details added`.
 * When a `find` command returns exactly one friend, that friend's details are shown automatically.
-* Use `gamelist FRIEND_INDEX [g/GAME_NAME]` to select a friend and optionally show only one of their games.
+* Use `gamelist FRIEND_INDEX|myself [g/GAME_NAME]` to select a friend or your own profile and optionally
+  show only one game.
   Clicking another friend shows all of that friend's games.
 * Successful commands other than `gamelist` or a single-result `find` return the right panel to your profile.
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
@@ -113,7 +114,7 @@ Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve
 
 New friends start with no games. Use [`gameadd`](#adding-a-game-gameadd) and
 [`gamedel`](#deleting-a-game-gamedel) to manage a friend's games or your own games, and
-[`gamelist`](#viewing-a-friends-games-gamelist) to view a friend's entries. Metadata input and display remain unavailable.
+[`gamelist`](#viewing-games-gamelist) to view their entries or your own. Metadata input and display remain unavailable.
 Deleting a friend removes that friend's complete entry, including their games; it does not remove games from
 other friends. Back up your data before [editing a saved file](#editing-the-data-file).
 
@@ -215,11 +216,15 @@ Examples:
 
 ### Adding a game: `gameadd`
 
-Adds a game and in-game username to a friend or your own profile.
+Adds a game with an optional in-game username to a friend or your own profile.
 
-Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME`
+Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]`
 
-* Both fields are required, non-empty and limited to 50 characters each, with at least one letter or digit.
+* The game name is required. The username is optional, omit `u/` if you do not know it.
+* Game names and supplied usernames must contain 1–50 printable characters after trimming,
+  including at least one letter or digit.
+* Supplying `u/` without a value, or with only whitespace, is rejected. Omit the prefix instead.
+* Repeated `g/` or `u/` prefixes are rejected, even when the values are identical.
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
 
@@ -227,6 +232,8 @@ Examples:
 
 * `gameadd 1 g/Valorant u/player123`
 * `gameadd myself g/Minecraft u/myUsername`
+* `gameadd 1 g/Valorant` adds the game without a username.
+* `gameadd myself g/Stardew Valley` adds a game to your profile without a username.
 
 ### Deleting a game: `gamedel`
 
@@ -242,28 +249,32 @@ Examples:
 * `gamedel 1 g/Valorant`
 * `gamedel myself g/Minecraft`
 
-### Viewing a friend's games: `gamelist`
+### Viewing games: `gamelist`
 
-Shows a friend's details and game cards in the right panel, keeping the friend list and its current filter on the left.
-Each game card shows the game name and in-game username.
+Shows a friend's or your own details and game cards in the right panel, keeping the friend list and its current
+filter on the left.
+Each game card shows the game name and in-game username if provided.
 
-Format: `gamelist <FRIEND_INDEX> [g/GAME_NAME]`
+Format: `gamelist FRIEND_INDEX|myself [g/GAME_NAME]`
 
-* Replace `<FRIEND_INDEX>` with a positive integer from 1 to 2147483647 (inclusive); do not type the angle brackets.
-  The index is required and refers to the **currently displayed friend list**, including after `find` or `list g/GAME_NAME`.
-* Without `g/`, all of the selected friend's games are shown. This also clears a previous game display filter.
+* Use a positive `FRIEND_INDEX` from 1 to 2147483647 (inclusive) to select from the **currently displayed friend list**,
+  including after `find` or `list g/GAME_NAME`, or use `myself` to select your own profile. The selector is required.
+* `myself` is case-insensitive and works even when the friend list is empty or filtered. The panel shows `Your details`.
+* Without `g/`, all of the selected person's games are shown. This also clears a previous game display filter.
 * With `g/`, only a game with the complete matching name is shown. Matching is case-insensitive:
   `valorant` matches `Valorant`, but `Val` does not. Usernames are not searched.
 * Leading and trailing whitespace in the game name is removed. Game names may contain 1–50 printable characters
   and must include at least one letter or digit. Multiword names are accepted.
-* Put the index before the optional filter. Only one `g/` is allowed, even if repeated values are identical.
+* Put the selector before the optional filter. Only one `g/` is allowed, even if repeated values are identical.
   Unknown prefixes and extra words before `g/` are rejected. All words after `g/` form the game name;
   whitespace-separated tokens such as `x/` are treated as parameter prefixes, not part of the name.
-* An absent game is a successful empty result, including when the friend has no games. Stored friend details,
+* An absent game is a successful empty result, including when the selected person has no games. Stored friend details,
   game entries and your Myself profile are unchanged. Invalid commands leave the previous details display unchanged.
 
 Examples:
 
+* `gamelist myself` shows all of your games.
+* `gamelist myself g/Valorant` shows only your Valorant entry.
 * `gamelist 1` shows all games of the first displayed friend.
 * `gamelist 2 g/Valorant` shows only the second displayed friend's Valorant entry.
 * `gamelist 2 g/minecraft` matches the stored name `Minecraft`.
@@ -289,14 +300,65 @@ Errors:
 
 | Input problem | Feedback |
 |---------------|----------|
-| Missing index, unknown prefix or extra positional argument | `Invalid command format. Usage: gamelist <FRIEND_INDEX> [g/GAME_NAME]` |
-| Malformed, zero, negative or overflowing index | `Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive).` |
+| Missing selector, unknown prefix or extra positional argument | <code>Invalid command format. Usage: gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code> |
+| Malformed, zero, negative or overflowing index | `Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive), or myself.` |
 | Positive index outside the displayed list | `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.` |
-| Empty displayed list | `No friends are currently displayed. Use list to show all friends.` |
+| Numeric index with an empty displayed list | `No friends are currently displayed. Use list to show all friends.` |
 | Invalid game name, including empty `g/` | `Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.` |
 | Repeated `g/` | `Only one game can be filtered per command. Run gamelist separately for each game.` |
 
-`gamelist myself` is not supported; the existing profile view remains available when no friend is selected.
+For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
+showing `No details added`.
+
+### Finding a random squad: `squad` (planned)
+
+Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
+Lists each member's name, in-game username when available, and displayed friend index where applicable.
+
+Format: `squad g/GAME n/NUMBER_OF_PEOPLE`
+
+* Both `g/` and `n/` are required and may appear in either order.
+* `GAME` uses the same game-name rules as `gamelist`: 1–50 printable characters after trimming,
+  including at least one letter or digit. Multiword names are accepted. Matching uses the complete
+  game name and is case-insensitive; `valorant` matches `Valorant`, but `Val` does not.
+* `NUMBER_OF_PEOPLE` must be a whole number from 1 to 20, inclusive.
+* The requested size includes you: `n/3` selects you and two friends; `n/1` returns only you.
+* You are always included as the first member, labelled `Me`, even if your profile does not contain `GAME`.
+* The other `NUMBER_OF_PEOPLE - 1` members are selected from the **currently displayed friend list**. To include your entire friend list, run `list` first.
+  Each must play `GAME`. A person cannot appear more than once in a squad.
+* Selection is random. Repeating the command may return a different squad, but may also return the same one.
+
+Examples:
+
+* `squad g/Valorant n/3`
+* `squad g/Stardew Valley n/4`
+
+Assuming Benedict and Melody are at indices 1 and 2 in the currently displayed friend list.
+Example success feedback for `squad g/Valorant n/3`:
+
+```text
+Found squad of 3 people:
+1. Me (username: aaravm123)
+2. Benedict (username: benthecat, index: 1)
+3. Melody (username: melodyps, index: 2)
+```
+
+If your profile has no entry for the requested game, the first row is simply `1. Me`.
+If fewer than `NUMBER_OF_PEOPLE - 1` displayed friends play the requested game, feedback is:
+
+```text
+Could not find a squad of <n> people.
+```
+
+`<n>` is replaced with the requested squad size, for example `Could not find a squad of 3 people.`
+
+Proposed errors:
+
+| Input problem | Feedback |
+|---------------|----------|
+| Missing `g/` or `n/`, or a missing parameter value | `Invalid command format. Usage: squad g/GAME n/NUMBER_OF_PEOPLE` |
+| Invalid squad size, such as `0`, `21`, `-1`, `2.5` or `abc` | `Invalid squad size. Enter a whole number from 1 to 20.` |
+| Invalid game name | `Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.` |
 
 ### Editing a friend or your own profile: `edit`
 
@@ -428,8 +490,9 @@ close the destination app, back up its current file, replace it with your copy a
 Copy `preferences.json` only if you also want the saved window settings.
 
 If you edit JSON manually, close the app first and keep a backup. Friend entries contain `name`, optional
-`phone` and `email`, `tags`, and `games`. A game has a `name` and `username`. Existing files that omit `games`
-load with no games; files that omit `myself` use the default empty profile. Empty or missing contact fields mean
+`phone` and `email`, `tags`, and `games`. A game has a required `name` and an optional `username`.
+An empty or missing `username` means no username has been provided; the game entry is still retained.
+Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile. Empty or missing contact fields mean
 `Not provided`. Use the same validation rules as command input. Stored game metadata is supported as an optional
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
@@ -476,9 +539,10 @@ while copying the file, then launch the destination app from its usual data fold
 | **Delete** | `delete FRIEND_INDEX`<br> e.g., `delete 3` |
 | **Edit** | <code>edit FRIEND_INDEX&#124;myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
-| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME u/USER_NAME</code><br> e.g., `gameadd myself g/Valorant u/player123` |
+| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME]</code><br> e.g., `gameadd myself g/Valorant u/player123` or `gameadd 1 g/Minecraft` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
-| **Game list** | `gamelist <FRIEND_INDEX> [g/GAME_NAME]`<br> e.g., `gamelist 2 g/Valorant` |
+| **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
+| **Squad create** | `squad g/GAME_NAME n/NUMBER_OF_PEOPLE`<br> e.g., `squad g/Valorant n/5` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
 | **Help** | `help` |
 | **Exit** | `exit` |
