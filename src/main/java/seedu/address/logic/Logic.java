@@ -5,6 +5,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.friend.Friend;
 
 /**
@@ -25,6 +26,9 @@ public interface Logic {
 
     /** Returns an unmodifiable view of the filtered list of friends */
     ObservableList<Friend> getFilteredFriendList();
+
+    /** Returns the scope of the displayed friend list. */
+    FriendListScope getFriendListScope();
 
     /**
      * Returns the user prefs' GUI settings.

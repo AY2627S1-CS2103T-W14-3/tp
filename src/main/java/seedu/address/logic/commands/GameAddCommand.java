@@ -74,7 +74,7 @@ public class GameAddCommand extends Command {
         Set<Game> games = new HashSet<>(friend.getGames());
         games.add(toAdd);
         return new Friend(friend.getName(), friend.getPhone(), friend.getEmail(),
-                games, friend.getTags());
+                games, friend.getTags(), friend.isArchived());
     }
 
     /** Formats success feedback with the username and any metadata sorted by key ignoring case. */

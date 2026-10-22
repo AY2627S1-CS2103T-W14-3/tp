@@ -31,6 +31,8 @@ public class FriendCard extends UiPart<Region> {
     @FXML
     private Label name;
     @FXML
+    private Label archivedBadge;
+    @FXML
     private Label id;
     @FXML
     private Label phone;
@@ -53,6 +55,8 @@ public class FriendCard extends UiPart<Region> {
         this.friend = friend;
         id.setText(displayedIndex + ". ");
         name.setText(friend.getName().fullName);
+        archivedBadge.setVisible(friend.isArchived());
+        archivedBadge.setManaged(friend.isArchived());
         phone.setText("Phone: " + (friend.getPhone().isEmpty() ? "Not provided" : friend.getPhone().value));
         email.setText("Email: " + (friend.getEmail().isEmpty() ? "Not provided" : friend.getEmail().value));
         friend.getTags().stream()

@@ -406,3 +406,11 @@
     -fx-background-radius: 2;
     -fx-font-size: 11;
 }
+
+.archived-badge {
+    -fx-text-fill: #ffdf9e;
+    -fx-background-color: #554328;
+    -fx-background-radius: 4;
+    -fx-padding: 2 6;
+    -fx-font-size: 11px;
+}

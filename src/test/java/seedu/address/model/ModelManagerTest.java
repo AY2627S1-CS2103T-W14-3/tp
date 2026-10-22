@@ -73,6 +73,21 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void findFriend_ignoresDisplayFiltersAndPreservesScope() {
+        Friend archived = ALICE.withArchived(true);
+        Friend candidate = new FriendBuilder(ALICE).withPhone("91234567").build();
+        assertTrue(modelManager.findFriend(candidate).isEmpty());
+        modelManager.addFriend(archived);
+        modelManager.addFriend(BENSON);
+        modelManager.updateSearchFriendList(friend -> false);
+        assertEquals(archived, modelManager.findFriend(candidate).get());
+        assertEquals(BENSON, modelManager.findFriend(BENSON).get());
+        assertTrue(modelManager.getFilteredFriendList().isEmpty());
+        assertEquals(FriendListScope.SEARCH, modelManager.getFriendListScope());
+        assertThrows(NullPointerException.class, () -> modelManager.findFriend(null));
+    }
+
+    @Test
     public void resolveFriend_numericIndex_usesDisplayedList() {
         assertThrows(IndexOutOfBoundsException.class, () -> modelManager.resolveFriend(Index.fromOneBased(1)));
         modelManager.addFriend(ALICE);
@@ -129,6 +144,22 @@ public class ModelManagerTest {
     @Test
     public void getFilteredFriendList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredFriendList().remove(0));
+    }
+
+    @Test
+    public void equals_emptyListsWithDifferentScopes_distinguishesUserVisibleState() {
+        ModelManager active = new ModelManager();
+        ModelManager archived = new ModelManager();
+        ModelManager search = new ModelManager();
+        archived.updateArchivedFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+        search.updateSearchFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+        assertEquals(active.getFilteredFriendList(), archived.getFilteredFriendList());
+        assertEquals(active.getFilteredFriendList(), search.getFilteredFriendList());
+        assertFalse(active.equals(archived));
+        assertFalse(archived.equals(search));
+        assertFalse(search.equals(active));
+        active.updateSearchFriendList(PREDICATE_SHOW_ALL_FRIENDS);
+        assertEquals(active, search);
     }
 
     @Test

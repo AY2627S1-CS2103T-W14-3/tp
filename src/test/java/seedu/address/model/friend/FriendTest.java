@@ -42,7 +42,7 @@ public class FriendTest {
         assertEquals(friend, reordered);
         assertEquals(friend.hashCode(), reordered.hashCode());
         assertEquals(Objects.hash(friend.getName(), friend.getPhone(), friend.getEmail(),
-                friend.getGames(), friend.getTags()), friend.hashCode());
+                friend.getGames(), friend.getTags(), friend.isArchived()), friend.hashCode());
         assertFalse(friend.equals(ALICE));
         assertTrue(friend.isSameFriend(ALICE));
         Friend changedUsername = new FriendBuilder(ALICE)
@@ -81,6 +81,17 @@ public class FriendTest {
         String nameWithTrailingSpaces = VALID_NAME_BOB + " ";
         editedBob = new FriendBuilder(BOB).withName(nameWithTrailingSpaces).build();
         assertTrue(BOB.isSameFriend(editedBob));
+    }
+
+    @Test
+    public void archiveStatus_changesValueEqualityButPreservesIdentityAndDetails() {
+        Friend archived = ALICE.withArchived(true);
+        assertTrue(archived.isArchived());
+        assertFalse(ALICE.equals(archived));
+        assertTrue(ALICE.isSameFriend(archived));
+        assertEquals(ALICE, archived.withArchived(false));
+        assertEquals(archived, archived.withArchived(true));
+        assertEquals(archived.hashCode(), ALICE.withArchived(true).hashCode());
     }
 
     @Test
@@ -123,7 +134,8 @@ public class FriendTest {
         Friend friend = new FriendBuilder(ALICE)
                 .withGames(new GameBuilder().withGameName("Valorant").withUsername("alice").build()).build();
         String expected = Friend.class.getCanonicalName() + "{name=" + friend.getName() + ", phone=" + friend.getPhone()
-                + ", email=" + friend.getEmail() + ", games=" + friend.getGames() + ", tags=" + friend.getTags() + "}";
+                + ", email=" + friend.getEmail() + ", games=" + friend.getGames() + ", tags=" + friend.getTags()
+                + ", archived=false}";
         assertEquals(expected, friend.toString());
     }
 }
