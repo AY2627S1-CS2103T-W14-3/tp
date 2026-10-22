@@ -28,6 +28,9 @@ public class CommandResult {
     /** An optional filter applied only to the selected friend's game cards. */
     private final GameName gameFilter;
 
+    /** Whether the current details, including any game filter, should remain visible. */
+    private final boolean preserveDetails;
+
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
@@ -52,6 +55,11 @@ public class CommandResult {
 
     private CommandResult(String feedbackToUser, boolean showHelp, boolean exit,
             Friend friendToShow, GameName gameFilter) {
+        this(feedbackToUser, showHelp, exit, friendToShow, gameFilter, false);
+    }
+
+    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit,
+            Friend friendToShow, GameName gameFilter, boolean preserveDetails) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
@@ -60,6 +68,7 @@ public class CommandResult {
             requireNonNull(friendToShow);
         }
         this.gameFilter = gameFilter;
+        this.preserveDetails = preserveDetails;
     }
 
     /**
@@ -68,6 +77,15 @@ public class CommandResult {
      */
     public CommandResult(String feedbackToUser) {
         this(feedbackToUser, false, false);
+    }
+
+    /** Constructs feedback that leaves the current details view intact. */
+    public static CommandResult preservingDetails(String feedbackToUser) {
+        return new CommandResult(feedbackToUser, false, false, null, null, true);
+    }
+
+    public boolean isPreserveDetails() {
+        return preserveDetails;
     }
 
     public String getFeedbackToUser() {
@@ -108,13 +126,14 @@ public class CommandResult {
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
                 && exit == otherCommandResult.exit
+                && preserveDetails == otherCommandResult.preserveDetails
                 && Objects.equals(friendToShow, otherCommandResult.friendToShow)
                 && Objects.equals(gameFilter, otherCommandResult.gameFilter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit, friendToShow, gameFilter);
+        return Objects.hash(feedbackToUser, showHelp, exit, friendToShow, gameFilter, preserveDetails);
     }
 
     @Override
@@ -125,6 +144,7 @@ public class CommandResult {
                 .add("exit", exit)
                 .add("friendToShow", getFriendToShow())
                 .add("gameFilter", getGameFilter())
+                .add("preserveDetails", preserveDetails)
                 .toString();
     }
 

@@ -1,0 +1,29 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+participant ":SquadCommandParser" as Parser LOGIC_COLOR
+participant ":ParserUtil" as Util LOGIC_COLOR
+participant ":SquadCommand" as Command LOGIC_COLOR
+participant ":Model" as Model MODEL_COLOR
+participant ":GameMatchesMetadataPredicate" as Predicate MODEL_COLOR
+participant ":MainWindow" as Window UI_COLOR
+
+Parser -> Util : parseMetas(all m/ values)
+Util --> Parser : validated unique conditions
+Parser -> Command : new(gameName, conditions, size)
+Command -> Model : getFilteredFriendList()
+Model --> Command : displayed friends
+loop Each displayed friend's game entries
+  Command -> Predicate : test(game)
+  Predicate --> Command : name matches AND all metadata matches this entry
+end
+alt Fewer than size - 1 candidates
+  Command -> Command : Existing insufficient-candidates feedback
+else Enough candidates
+  Command -> Command : Sample distinct friends and sort displayed indices
+  Command -> Command : Include Me first, regardless of metadata
+end
+Command --> Window : CommandResult.preservingDetails(feedback)
+Window -> Window : Keep existing details and game-card filter
+note over Model: No stored data, list predicate or order changes
+@enduml

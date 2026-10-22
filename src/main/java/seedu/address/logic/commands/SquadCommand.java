@@ -3,6 +3,7 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_META;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 
 import java.util.ArrayList;
@@ -10,11 +11,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.game.GameMatchesMetadataPredicate;
 import seedu.address.model.game.GameName;
+import seedu.address.model.game.meta.Meta;
 
 /** Selects a random squad from displayed friends, always including the user. */
 public class SquadCommand extends Command {
@@ -23,7 +27,9 @@ public class SquadCommand extends Command {
 
     public static final String MESSAGE_USAGE = "Invalid command format. Usage: " + COMMAND_WORD + " "
             + PREFIX_GAME + "GAME "
-            + PREFIX_NAME + "NUMBER_OF_PEOPLE";
+            + PREFIX_NAME + "NUMBER_OF_PEOPLE [" + PREFIX_META + "KEY:VALUE]...\n"
+            + "All metadata conditions must match the requested game; keys ignore case, values preserve case."
+            + " Repeated keys and empty metadata are rejected. Me is always included and counts towards the size.";
     public static final String MESSAGE_SUCCESS = "Found squad of %1$d people:";
     public static final String MESSAGE_INVALID_SIZE = "Invalid squad size. Enter a whole number from 1 to 20.";
     public static final String MESSAGE_INVALID_GAME = "Invalid game name %s. Enter 1–50 printable characters "
@@ -34,18 +40,30 @@ public class SquadCommand extends Command {
     private final GameName gameName;
     private final int size;
     private final Random random;
+    private final Set<Meta> conditions;
 
     /** Creates a command using a new random source. */
     public SquadCommand(GameName gameName, int size) {
-        this(gameName, size, new Random());
+        this(gameName, Set.of(), size);
+    }
+
+    /** Creates a squad whose friend candidates must satisfy every metadata condition. */
+    public SquadCommand(GameName gameName, Set<Meta> conditions, int size) {
+        this(gameName, size, conditions, new Random());
     }
 
     /** Allows tests to supply a deterministic random source. */
     SquadCommand(GameName gameName, int size, Random random) {
+        this(gameName, size, Set.of(), random);
+    }
+
+    /** Allows metadata filtering tests to supply a deterministic random source. */
+    SquadCommand(GameName gameName, int size, Set<Meta> conditions, Random random) {
         this.gameName = requireNonNull(gameName);
         checkArgument(size >= 1 && size <= MAX_SIZE, MESSAGE_INVALID_SIZE);
         this.size = size;
         this.random = requireNonNull(random);
+        this.conditions = Set.copyOf(conditions);
     }
 
     @Override
@@ -53,13 +71,14 @@ public class SquadCommand extends Command {
         requireNonNull(model);
         List<Friend> displayed = new ArrayList<>(model.getFilteredFriendList());
         List<Integer> eligible = new ArrayList<>();
+        GameMatchesMetadataPredicate matches = new GameMatchesMetadataPredicate(gameName, conditions);
         for (int i = 0; i < displayed.size(); i++) {
-            if (displayed.get(i).getGames().stream().anyMatch(game -> game.getGameName().equals(gameName))) {
+            if (displayed.get(i).getGames().stream().anyMatch(matches)) {
                 eligible.add(i);
             }
         }
         if (eligible.size() < size - 1) {
-            return new CommandResult(String.format(MESSAGE_INSUFFICIENT, size));
+            return CommandResult.preservingDetails(String.format(MESSAGE_INSUFFICIENT, size));
         }
         Collections.shuffle(eligible, random);
         List<Integer> selected = new ArrayList<>(eligible.subList(0, size - 1));
@@ -79,7 +98,7 @@ public class SquadCommand extends Command {
             }
             feedback.append("index: ").append(index + 1).append(")");
         }
-        return new CommandResult(feedback.toString());
+        return CommandResult.preservingDetails(feedback.toString());
     }
 
     private String usernameFor(Friend friend) {
@@ -99,7 +118,8 @@ public class SquadCommand extends Command {
         }
 
         return gameName.equals(otherSquadCommand.gameName)
-                && size == otherSquadCommand.size;
+                && size == otherSquadCommand.size
+                && conditions.equals(otherSquadCommand.conditions);
     }
 
     @Override
@@ -107,6 +127,7 @@ public class SquadCommand extends Command {
         return new ToStringBuilder(this)
                 .add("gameName", gameName)
                 .add("size", size)
+                .add("conditions", conditions)
                 .toString();
     }
 }

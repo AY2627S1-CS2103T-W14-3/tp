@@ -7,9 +7,9 @@ GameMates helps gamers keep track of friends, their contact details, the games t
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer; browsing the online help and downloading releases require internet access.
 
-This guide describes the commands available in this checkout. Adding or deleting individual games and game
-metadata input are not available yet. You can view and filter games already present in sample or
-saved data. See [Your profile and game entries](#your-profile-and-game-entries) for the current limits.
+This guide describes the commands available in this checkout, including metadata conditions for `squad`.
+Games can be added or deleted with `gameadd` and `gamedel`; metadata can be loaded from saved data.
+Direct metadata input through `gameadd` remains a separate feature.
 
 * Table of Contents
 {:toc}
@@ -96,7 +96,7 @@ The main window has two panels: the friend list on the left and a details panel 
 * When a `find` command returns exactly one friend, that friend's details are shown automatically.
 * Use `gamelist FRIEND_INDEX [g/GAME_NAME]` to select a friend and optionally show only one of their games.
   Clicking another friend shows all of that friend's games.
-* Successful commands other than `gamelist` or a single-result `find` return the right panel to your profile.
+* Successful commands other than `gamelist`, `squad` or a single-result `find` return the right panel to your profile. Squad preserves the current details and game-card filter.
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
   Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.
@@ -298,6 +298,31 @@ Errors:
 
 `gamelist myself` is not supported; the existing profile view remains available when no friend is selected.
 
+### Filtering a squad by game metadata: `squad`
+
+Selects a random squad from the currently displayed friends who play the requested game and meet all supplied metadata conditions.
+
+Format: `squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`
+
+* Without `m/`, the existing squad behavior and success/insufficient-candidates feedback are preserved. Run `list` first to include everyone.
+* Game names match completely, ignoring case. `n/` is the total squad size from 1 to 20, including you. You always appear first as `Me`, even without the requested game or metadata. `n/1` returns only you after validating the arguments.
+* Every `m/` condition must match (**AND**) on the **same game entry** selected by `g/`. A missing key fails. Metadata on another game cannot satisfy a condition. Extra stored keys are allowed.
+* Keys match ignoring case, following existing metadata identity. Values match exactly and are **case-sensitive**: `m/role:Healer` matches `Role:Healer`, while `m/role:healer` does not.
+* Pairs split at the first colon, so `m/Region:Asia:SG` matches value `Asia:SG`. Keys/values are trimmed independently. Existing metadata validation applies: keys use 1–50 characters without a colon, values use 1–200 characters, and each requires a letter or digit and rejects control characters.
+* Empty or malformed metadata and repeated keys after normalization are rejected, including identical repeated pairs and `n/1` commands. `g/` and `n/` each occur exactly once. Argument prefixes may be supplied in any order.
+* Filtering occurs before checking availability and sampling. If fewer than `n - 1` displayed friends qualify, feedback remains `Could not find a squad of N people.` Otherwise, distinct friends are sampled randomly and printed in displayed-list order using their original displayed indices.
+* The command preserves all stored data, the displayed list/filter/order, and the current details and game-card filter. There are no numeric comparisons, role quotas or OR expressions.
+
+Examples:
+
+* `squad g/Valorant n/3 m/Role:Healer m/Region:Asia` selects you and two displayed Valorant players who each have both matching pairs.
+* `squad g/Valorant n/2 m/Level:30` matches the exact text `30`; it does not mean level 30 or above.
+* `squad g/Valorant n/1 m/Role:Healer` returns only you, regardless of your metadata.
+
+Success feedback starts with `Found squad of N people:` followed by `1. Me`, optionally with your game username, then selected friends with usernames and their displayed indices. For example, a selected friend at displayed index 3 appears as `2. Tester (username: tester, index: 3)`.
+
+Malformed pairs report `Metadata must be in the format Key:Value.` Repeated keys report `Metadata keys must be unique within a game entry.` Empty keys/values and invalid lengths report their existing metadata constraints. Metadata can be present in the saved JSON; direct `gameadd` metadata input is a separate feature.
+
 ### Editing a friend or your own profile: `edit`
 
 Edits an existing friend or your separately stored Myself profile in GameMates.
@@ -479,6 +504,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME u/USER_NAME</code><br> e.g., `gameadd myself g/Valorant u/player123` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | `gamelist <FRIEND_INDEX> [g/GAME_NAME]`<br> e.g., `gamelist 2 g/Valorant` |
+| **Squad metadata** | `squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`<br> e.g., `squad g/Valorant n/3 m/Role:Healer` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
 | **Help** | `help` |
 | **Exit** | `exit` |
