@@ -57,7 +57,7 @@ saved data. See <a href="#your-profile-and-game-entries">Your profile and game e
       <li><a href="#listing-and-filtering-friends-list" id="markdown-toc-listing-and-filtering-friends-list">Listing and filtering friends: <code class="language-plaintext highlighter-rouge">list</code></a></li>
       <li><a href="#adding-a-game-gameadd" id="markdown-toc-adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code></a></li>
       <li><a href="#deleting-a-game-gamedel" id="markdown-toc-deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code></a></li>
-      <li><a href="#viewing-a-friends-games-gamelist" id="markdown-toc-viewing-a-friends-games-gamelist">Viewing a friend’s games: <code class="language-plaintext highlighter-rouge">gamelist</code></a></li>
+      <li><a href="#viewing-games-gamelist" id="markdown-toc-viewing-games-gamelist">Viewing games: <code class="language-plaintext highlighter-rouge">gamelist</code></a></li>
       <li><a href="#editing-a-friend-or-your-own-profile-edit" id="markdown-toc-editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
       <li><a href="#locating-friends-by-name-find" id="markdown-toc-locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
       <li><a href="#deleting-a-friend-delete" id="markdown-toc-deleting-a-friend-delete">Deleting a friend: <code class="language-plaintext highlighter-rouge">delete</code></a></li>
@@ -181,7 +181,8 @@ commands across line breaks: spaces can be lost during copying.</li>
 in the right panel.</li>
   <li>On startup, the right panel shows your profile. If no profile details have been added, it shows <code class="language-plaintext highlighter-rouge">No details added</code>.</li>
   <li>When a <code class="language-plaintext highlighter-rouge">find</code> command returns exactly one friend, that friend’s details are shown automatically.</li>
-  <li>Use <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX [g/GAME_NAME]</code> to select a friend and optionally show only one of their games.
+  <li>Use <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code> to select a friend or your own profile and optionally
+show only one game.
 Clicking another friend shows all of that friend’s games.</li>
   <li>Successful commands other than <code class="language-plaintext highlighter-rouge">gamelist</code> or a single-result <code class="language-plaintext highlighter-rouge">find</code> return the right panel to your profile.
 Clicking a friend selects their details again. Invalid commands keep the existing details display.</li>
@@ -202,7 +203,7 @@ Omitting the selector, as in <code class="language-plaintext highlighter-rouge">
 
 <p>New friends start with no games. Use <a href="#adding-a-game-gameadd"><code class="language-plaintext highlighter-rouge">gameadd</code></a> and
 <a href="#deleting-a-game-gamedel"><code class="language-plaintext highlighter-rouge">gamedel</code></a> to manage a friend’s games or your own games, and
-<a href="#viewing-a-friends-games-gamelist"><code class="language-plaintext highlighter-rouge">gamelist</code></a> to view a friend’s entries. Metadata input and display remain unavailable.
+<a href="#viewing-games-gamelist"><code class="language-plaintext highlighter-rouge">gamelist</code></a> to view their entries or your own. Metadata input and display remain unavailable.
 Deleting a friend removes that friend’s complete entry, including their games; it does not remove games from
 other friends. Back up your data before <a href="#editing-the-data-file">editing a saved file</a>.</p>
 
@@ -369,32 +370,39 @@ including at least one letter or digit.</li>
   <li><code class="language-plaintext highlighter-rouge">gamedel myself g/Minecraft</code></li>
 </ul>
 
-<h3 id="viewing-a-friends-games-gamelist">Viewing a friend’s games: <code class="language-plaintext highlighter-rouge">gamelist</code>
+<h3 id="viewing-games-gamelist">Viewing games: <code class="language-plaintext highlighter-rouge">gamelist</code>
 </h3>
 
-<p>Shows a friend’s details and game cards in the right panel, keeping the friend list and its current filter on the left.
+<p>Shows a friend’s or your own details and game cards in the right panel, keeping the friend list and its current
+filter on the left.
 Each game card shows the game name and in-game username if provided.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">gamelist &lt;FRIEND_INDEX&gt; [g/GAME_NAME]</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code></p>
 
 <ul>
-  <li>Replace <code class="language-plaintext highlighter-rouge">&lt;FRIEND_INDEX&gt;</code> with a positive integer from 1 to 2147483647 (inclusive); do not type the angle brackets.
-The index is required and refers to the <strong>currently displayed friend list</strong>, including after <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code>.</li>
-  <li>Without <code class="language-plaintext highlighter-rouge">g/</code>, all of the selected friend’s games are shown. This also clears a previous game display filter.</li>
+  <li>Use a positive <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> from 1 to 2147483647 (inclusive) to select from the <strong>currently displayed friend list</strong>,
+including after <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code>, or use <code class="language-plaintext highlighter-rouge">myself</code> to select your own profile. The selector is required.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">myself</code> is case-insensitive and works even when the friend list is empty or filtered. The panel shows <code class="language-plaintext highlighter-rouge">Your details</code>.</li>
+  <li>Without <code class="language-plaintext highlighter-rouge">g/</code>, all of the selected person’s games are shown. This also clears a previous game display filter.</li>
   <li>With <code class="language-plaintext highlighter-rouge">g/</code>, only a game with the complete matching name is shown. Matching is case-insensitive:
 <code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not. Usernames are not searched.</li>
   <li>Leading and trailing whitespace in the game name is removed. Game names may contain 1–50 printable characters
 and must include at least one letter or digit. Multiword names are accepted.</li>
-  <li>Put the index before the optional filter. Only one <code class="language-plaintext highlighter-rouge">g/</code> is allowed, even if repeated values are identical.
+  <li>Put the selector before the optional filter. Only one <code class="language-plaintext highlighter-rouge">g/</code> is allowed, even if repeated values are identical.
 Unknown prefixes and extra words before <code class="language-plaintext highlighter-rouge">g/</code> are rejected. All words after <code class="language-plaintext highlighter-rouge">g/</code> form the game name;
 whitespace-separated tokens such as <code class="language-plaintext highlighter-rouge">x/</code> are treated as parameter prefixes, not part of the name.</li>
-  <li>An absent game is a successful empty result, including when the friend has no games. Stored friend details,
+  <li>An absent game is a successful empty result, including when the selected person has no games. Stored friend details,
 game entries and your Myself profile are unchanged. Invalid commands leave the previous details display unchanged.</li>
 </ul>
 
 <p>Examples:</p>
 
 <ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">gamelist myself</code> shows all of your games.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">gamelist myself g/Valorant</code> shows only your Valorant entry.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">gamelist 1</code> shows all games of the first displayed friend.</li>
   <li>
@@ -459,19 +467,19 @@ while the left panel continues showing only Minecraft players.</li>
   </thead>
   <tbody>
     <tr>
-      <td>Missing index, unknown prefix or extra positional argument</td>
-      <td><code class="language-plaintext highlighter-rouge">Invalid command format. Usage: gamelist &lt;FRIEND_INDEX&gt; [g/GAME_NAME]</code></td>
+      <td>Missing selector, unknown prefix or extra positional argument</td>
+      <td><code>Invalid command format. Usage: gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code></td>
     </tr>
     <tr>
       <td>Malformed, zero, negative or overflowing index</td>
-      <td><code class="language-plaintext highlighter-rouge">Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive).</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive), or myself.</code></td>
     </tr>
     <tr>
       <td>Positive index outside the displayed list</td>
       <td><code class="language-plaintext highlighter-rouge">No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.</code></td>
     </tr>
     <tr>
-      <td>Empty displayed list</td>
+      <td>Numeric index with an empty displayed list</td>
       <td><code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list to show all friends.</code></td>
     </tr>
     <tr>
@@ -487,7 +495,8 @@ while the left panel continues showing only Minecraft players.</li>
   </tbody>
 </table>
 
-<p><code class="language-plaintext highlighter-rouge">gamelist myself</code> is not supported; the existing profile view remains available when no friend is selected.</p>
+<p>For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
+showing <code class="language-plaintext highlighter-rouge">No details added</code>.</p>
 
 <h3 id="editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code>
 </h3>
@@ -763,7 +772,7 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
     <tr>
       <td><strong>Game list</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">gamelist &lt;FRIEND_INDEX&gt; [g/GAME_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">gamelist 2 g/Valorant</code>
+<code>gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">gamelist myself g/Valorant</code>
 </td>
     </tr>
     <tr>
