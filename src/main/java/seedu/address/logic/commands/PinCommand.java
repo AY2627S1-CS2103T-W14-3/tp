@@ -51,8 +51,7 @@ public class PinCommand extends Command {
     }
 
     static Friend copyWithPinnedState(Friend friend, boolean pinned) {
-        return new Friend(friend.getName(), friend.getPhone(), friend.getEmail(), friend.getGames(), friend.getTags(),
-                pinned);
+        return friend.withPinned(pinned);
     }
 
     @Override

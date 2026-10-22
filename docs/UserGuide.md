@@ -102,8 +102,7 @@ The main window has two panels: the friend list on the left and a details panel 
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
   Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.
-* Pinned friends always appear above unpinned friends. The current ordering is retained within each group; if a list
-  ordering option is used, it applies separately within the pinned and unpinned groups.
+* Pinned friends always appear above unpinned friends. The current ordering is retained within each group.
 
 ### Your profile and game entries
 
@@ -615,8 +614,9 @@ close the destination app, back up its current file, replace it with your copy a
 Copy `preferences.json` only if you also want the saved window settings.
 
 If you edit JSON manually, close the app first and keep a backup. Friend entries contain `name`, optional
-`phone` and `email`, `tags`, `games`, and an `archived` boolean. Missing `archived` defaults to `false`
-(active); archive status is saved across restarts. A game has a required `name` and an optional `username`.
+`phone` and `email`, `tags`, `games`, and `archived` and `pinned` booleans. Missing `archived` defaults to `false`
+(active), while missing `pinned` defaults to `false` (unpinned); both statuses are saved across restarts. A game has a
+required `name` and an optional `username`.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
 Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
 Empty or missing contact fields mean

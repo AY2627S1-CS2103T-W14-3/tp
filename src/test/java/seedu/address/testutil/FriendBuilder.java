@@ -25,6 +25,7 @@ public class FriendBuilder {
     private Email email;
     private Set<Game> games;
     private Set<Tag> tags;
+    private boolean archived;
     private boolean pinned;
 
     /**
@@ -36,6 +37,7 @@ public class FriendBuilder {
         email = new Email(DEFAULT_EMAIL);
         games = new HashSet<>();
         tags = new HashSet<>();
+        archived = false;
         pinned = false;
     }
 
@@ -48,6 +50,7 @@ public class FriendBuilder {
         email = friendToCopy.getEmail();
         games = new HashSet<>(friendToCopy.getGames());
         tags = new HashSet<>(friendToCopy.getTags());
+        archived = friendToCopy.isArchived();
         pinned = friendToCopy.isPinned();
     }
 
@@ -97,8 +100,14 @@ public class FriendBuilder {
         return this;
     }
 
+    /** Sets whether the friend being built is archived. */
+    public FriendBuilder withArchived(boolean archived) {
+        this.archived = archived;
+        return this;
+    }
+
     public Friend build() {
-        return new Friend(name, phone, email, games, tags, pinned);
+        return new Friend(name, phone, email, games, tags, archived, pinned);
     }
 
 }
