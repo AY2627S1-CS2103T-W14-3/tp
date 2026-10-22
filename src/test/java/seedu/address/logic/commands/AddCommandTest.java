@@ -25,6 +25,7 @@ import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyGameMates;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendSortCriterion;
 import seedu.address.model.friend.FriendTarget;
 import seedu.address.testutil.FriendBuilder;
 
@@ -189,6 +190,16 @@ public class AddCommandTest {
 
         @Override
         public void updateFilteredFriendList(Predicate<Friend> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void sortFilteredFriendList(FriendSortCriterion sortCriterion, boolean isDescending) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void clearFriendListSort() {
             throw new AssertionError("This method should not be called.");
         }
     }
