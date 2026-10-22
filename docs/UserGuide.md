@@ -36,6 +36,8 @@ See [Your profile and game entries](#your-profile-and-game-entries) for the curr
 
    * `list g/Valorant` : Lists friends who play Valorant.
 
+   * `pin 1` : Keeps the first displayed friend at the top of the list.
+
    * `gamelist 1 g/Valorant` : Shows the first displayed friend's Valorant card, if present.
 
    * `add n/John Doe p/98765432 e/johnd@example.com` : Adds a contact named `John Doe` to GameMates.
@@ -100,6 +102,7 @@ The main window has two panels: the friend list on the left and a details panel 
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
   Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.
+* Pinned friends always appear above unpinned friends. The current ordering is retained within each group.
 
 ### Your profile and game entries
 
@@ -213,6 +216,41 @@ Examples:
 * `list` shows all active friends.
 * `list g/Valorant` shows friends who play `Valorant`.
 * `list g/Stardew Valley` shows friends who play `Stardew Valley`.
+
+### Pinning a friend: `pin`
+
+Keeps a friend in the pinned group at the top of the friend list.
+
+Format: `pin FRIEND_INDEX`
+
+* `FRIEND_INDEX` refers to the current displayed list. The command is unavailable for your separately stored Myself
+  profile.
+* At most five friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
+  is rejected without changing the list.
+* Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
+  filtering the list by game.
+* A newly pinned friend is placed after friends already in the pinned group, while remaining above all unpinned
+  friends.
+* Pinned friend cards display a `Pinned` badge, making the boundary between pinned and unpinned friends visible.
+
+Examples:
+
+* `pin 1` pins the first displayed friend.
+* `pin 3` pins the third displayed friend.
+
+### Unpinning a friend: `unpin`
+
+Removes a friend from the pinned group.
+
+Format: `unpin FRIEND_INDEX`
+
+* `FRIEND_INDEX` refers to the current displayed list.
+* Unpinning a friend who is not pinned is rejected without changing the list.
+* The friend is returned to the unpinned group, below all pinned friends.
+
+Examples:
+
+* `unpin 1` unpins the first displayed friend.
 
 ### Adding a game: `gameadd`
 
@@ -576,8 +614,9 @@ close the destination app, back up its current file, replace it with your copy a
 Copy `preferences.json` only if you also want the saved window settings.
 
 If you edit JSON manually, close the app first and keep a backup. Friend entries contain `name`, optional
-`phone` and `email`, `tags`, `games`, and an `archived` boolean. Missing `archived` defaults to `false`
-(active); archive status is saved across restarts. A game has a required `name` and an optional `username`.
+`phone` and `email`, `tags`, `games`, and `archived` and `pinned` booleans. Missing `archived` defaults to `false`
+(active), while missing `pinned` defaults to `false` (unpinned); both statuses are saved across restarts. A game has a
+required `name` and an optional `username`.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
 Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
 Empty or missing contact fields mean
@@ -635,5 +674,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
 | **Squad create** | `squad g/GAME_NAME n/NUMBER_OF_PEOPLE`<br> e.g., `squad g/Valorant n/5` |
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
+| **Pin** | `pin FRIEND_INDEX`<br> e.g., `pin 1` |
+| **Unpin** | `unpin FRIEND_INDEX`<br> e.g., `unpin 1` |
 | **Help** | `help` |
 | **Exit** | `exit` |

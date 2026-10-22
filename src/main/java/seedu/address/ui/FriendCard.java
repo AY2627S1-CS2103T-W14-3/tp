@@ -39,6 +39,8 @@ public class FriendCard extends UiPart<Region> {
     @FXML
     private Label email;
     @FXML
+    private Label pinned;
+    @FXML
     private FlowPane tags;
 
     /** Creates an unnumbered card for the user profile. */
@@ -57,6 +59,8 @@ public class FriendCard extends UiPart<Region> {
         name.setText(friend.getName().fullName);
         archivedBadge.setVisible(friend.isArchived());
         archivedBadge.setManaged(friend.isArchived());
+        pinned.setVisible(friend.isPinned());
+        pinned.setManaged(friend.isPinned());
         phone.setText("Phone: " + (friend.getPhone().isEmpty() ? "Not provided" : friend.getPhone().value));
         email.setText("Email: " + (friend.getEmail().isEmpty() ? "Not provided" : friend.getEmail().value));
         friend.getTags().stream()
