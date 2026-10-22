@@ -57,8 +57,12 @@ See <a href="#your-profile-and-game-entries">Your profile and game entries</a> f
       <li><a href="#adding-a-game-gameadd" id="markdown-toc-adding-a-game-gameadd">Adding a game: <code class="language-plaintext highlighter-rouge">gameadd</code></a></li>
       <li><a href="#deleting-a-game-gamedel" id="markdown-toc-deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code></a></li>
       <li><a href="#viewing-games-gamelist" id="markdown-toc-viewing-games-gamelist">Viewing games: <code class="language-plaintext highlighter-rouge">gamelist</code></a></li>
+      <li><a href="#finding-a-random-squad-squad-planned" id="markdown-toc-finding-a-random-squad-squad-planned">Finding a random squad: <code class="language-plaintext highlighter-rouge">squad</code> (planned)</a></li>
       <li><a href="#editing-a-friend-or-your-own-profile-edit" id="markdown-toc-editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
       <li><a href="#locating-friends-by-name-find" id="markdown-toc-locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
+      <li><a href="#archiving-a-friend-archive" id="markdown-toc-archiving-a-friend-archive">Archiving a friend: <code class="language-plaintext highlighter-rouge">archive</code></a></li>
+      <li><a href="#listing-and-filtering-archived-friends-archivelist" id="markdown-toc-listing-and-filtering-archived-friends-archivelist">Listing and filtering archived friends: <code class="language-plaintext highlighter-rouge">archivelist</code></a></li>
+      <li><a href="#restoring-an-archived-friend-unarchive" id="markdown-toc-restoring-an-archived-friend-unarchive">Restoring an archived friend: <code class="language-plaintext highlighter-rouge">unarchive</code></a></li>
       <li><a href="#deleting-a-friend-delete" id="markdown-toc-deleting-a-friend-delete">Deleting a friend: <code class="language-plaintext highlighter-rouge">delete</code></a></li>
       <li><a href="#clearing-the-friend-list-clear" id="markdown-toc-clearing-the-friend-list-clear">Clearing the friend list: <code class="language-plaintext highlighter-rouge">clear</code></a></li>
       <li><a href="#exiting-the-program-exit" id="markdown-toc-exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code></a></li>
@@ -99,7 +103,7 @@ Some example commands you can try:</p>
 
     <ul>
       <li>
-        <p><code class="language-plaintext highlighter-rouge">list</code> : Lists all contacts.</p>
+        <p><code class="language-plaintext highlighter-rouge">list</code> : Lists active friends.</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">list g/Valorant</code> : Lists friends who play Valorant.</p>
@@ -114,7 +118,7 @@ Some example commands you can try:</p>
         <p><code class="language-plaintext highlighter-rouge">delete 3</code> : Deletes the 3rd contact shown in the current list.</p>
       </li>
       <li>
-        <p><code class="language-plaintext highlighter-rouge">clear</code> : Deletes all friends and their games immediately, while keeping your profile.</p>
+        <p><code class="language-plaintext highlighter-rouge">clear</code> : Deletes all active and archived friends and their games immediately, while keeping your profile.</p>
       </li>
       <li>
         <p><code class="language-plaintext highlighter-rouge">exit</code> : Exits the app.</p>
@@ -155,7 +159,7 @@ For example, if the command specifies <code class="language-plaintext highlighte
 Quotes are not needed around multiword names. Use only the prefixes documented for each command.</li>
     <li>Repeating a single-value <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> parameter in <code class="language-plaintext highlighter-rouge">add</code> or <code class="language-plaintext highlighter-rouge">edit</code> is rejected, even with identical values.
 Tags may be repeated; identical tag values are applied once.</li>
-    <li>Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run <code class="language-plaintext highlighter-rouge">list</code> to see all friends
+    <li>Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run <code class="language-plaintext highlighter-rouge">list</code> to see all active friends
 again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.</li>
     <li>
       <p>For <code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> means either a displayed friend index or the
@@ -291,16 +295,16 @@ The 254-character address limit leaves room for the enclosing <code class="langu
 <h3 id="listing-and-filtering-friends-list">Listing and filtering friends: <code class="language-plaintext highlighter-rouge">list</code>
 </h3>
 
-<p>Shows all friends in GameMates, or filters the friend list by game.</p>
+<p>Shows active friends in GameMates, optionally filtered by game. Both forms switch to the active view.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">list [g/GAME_NAME]</code></p>
 
 <ul>
   <li>
-<code class="language-plaintext highlighter-rouge">list</code> shows all friends and clears any previous friend-list filter. Feedback is <code class="language-plaintext highlighter-rouge">Listed all friends.</code>,
+<code class="language-plaintext highlighter-rouge">list</code> shows all active friends and clears any previous friend-list filter. Feedback is <code class="language-plaintext highlighter-rouge">Listed all active friends.</code>,
 including when the list is empty.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> shows friends who have a game with that exact name. The match is case-insensitive, so <code class="language-plaintext highlighter-rouge">list g/valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
+<code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> shows active friends who have a game with that exact name. The match is case-insensitive, so <code class="language-plaintext highlighter-rouge">list g/valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
   <li>Leading and trailing spaces in <code class="language-plaintext highlighter-rouge">GAME_NAME</code> are ignored, but partial names do not match. For example, <code class="language-plaintext highlighter-rouge">list g/Val</code> does not match <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
   <li>Only game names are matched; a friend’s in-game username is not matched.</li>
   <li>Multi-word game names are accepted. Only one <code class="language-plaintext highlighter-rouge">g/</code> prefix may be supplied, and the game name must not be empty.</li>
@@ -316,7 +320,7 @@ repeated <code class="language-plaintext highlighter-rouge">g/</code> are reject
 
 <ul>
   <li>
-<code class="language-plaintext highlighter-rouge">list</code> shows all friends.</li>
+<code class="language-plaintext highlighter-rouge">list</code> shows all active friends.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list g/Valorant</code> shows friends who play <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
   <li>
@@ -507,6 +511,78 @@ while the left panel continues showing only Minecraft players.</li>
 <p>For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
 showing <code class="language-plaintext highlighter-rouge">No details added</code>.</p>
 
+<h3 id="finding-a-random-squad-squad-planned">Finding a random squad: <code class="language-plaintext highlighter-rouge">squad</code> (planned)</h3>
+
+<p>Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
+Lists each member’s name, in-game username when available, and displayed friend index where applicable.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">squad g/GAME n/NUMBER_OF_PEOPLE</code></p>
+
+<ul>
+  <li>Both <code class="language-plaintext highlighter-rouge">g/</code> and <code class="language-plaintext highlighter-rouge">n/</code> are required and may appear in either order.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">GAME</code> uses the same game-name rules as <code class="language-plaintext highlighter-rouge">gamelist</code>: 1–50 printable characters after trimming,
+including at least one letter or digit. Multiword names are accepted. Matching uses the complete
+game name and is case-insensitive; <code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE</code> must be a whole number from 1 to 20, inclusive.</li>
+  <li>The requested size includes you: <code class="language-plaintext highlighter-rouge">n/3</code> selects you and two friends; <code class="language-plaintext highlighter-rouge">n/1</code> returns only you.</li>
+  <li>You are always included as the first member, labelled <code class="language-plaintext highlighter-rouge">Me</code>, even if your profile does not contain <code class="language-plaintext highlighter-rouge">GAME</code>.</li>
+  <li>The other <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> members are selected from the <strong>currently displayed friend list</strong>. To include your entire friend list, run <code class="language-plaintext highlighter-rouge">list</code> first.
+Each must play <code class="language-plaintext highlighter-rouge">GAME</code>. A person cannot appear more than once in a squad.</li>
+  <li>Selection is random. Repeating the command may return a different squad, but may also return the same one.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">squad g/Valorant n/3</code></li>
+  <li><code class="language-plaintext highlighter-rouge">squad g/Stardew Valley n/4</code></li>
+</ul>
+
+<p>Assuming Benedict and Melody are at indices 1 and 2 in the currently displayed friend list.
+Example success feedback for <code class="language-plaintext highlighter-rouge">squad g/Valorant n/3</code>:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Found squad of 3 people:
+1. Me (username: aaravm123)
+2. Benedict (username: benthecat, index: 1)
+3. Melody (username: melodyps, index: 2)
+</code></pre></div></div>
+
+<p>If your profile has no entry for the requested game, the first row is simply <code class="language-plaintext highlighter-rouge">1. Me</code>.
+If fewer than <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> displayed friends play the requested game, feedback is:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Could not find a squad of &lt;n&gt; people.
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">&lt;n&gt;</code> is replaced with the requested squad size, for example <code class="language-plaintext highlighter-rouge">Could not find a squad of 3 people.</code></p>
+
+<p>Proposed errors:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Input problem</th>
+      <th>Feedback</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Missing <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">n/</code>, or a missing parameter value</td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid command format. Usage: squad g/GAME n/NUMBER_OF_PEOPLE</code></td>
+    </tr>
+    <tr>
+      <td>Invalid squad size, such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">21</code>, <code class="language-plaintext highlighter-rouge">-1</code>, <code class="language-plaintext highlighter-rouge">2.5</code> or <code class="language-plaintext highlighter-rouge">abc</code>
+</td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid squad size. Enter a whole number from 1 to 20.</code></td>
+    </tr>
+    <tr>
+      <td>Invalid game name</td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.</code></td>
+    </tr>
+  </tbody>
+</table>
+
 <h3 id="editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code>
 </h3>
 
@@ -532,7 +608,9 @@ as <code class="language-plaintext highlighter-rouge">removed phone number</code
   <li>Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.</li>
   <li>To remove all of a friend’s tags, enter <code class="language-plaintext highlighter-rouge">t/</code> without a tag after it.
 Use that empty prefix on its own; combining it with non-empty tags is rejected.</li>
-  <li>A successful friend edit shows all friends again, preserving the friend’s games and your profile. A successful
+  <li>A successful friend edit shows all friends in the current active or archive view again. In <strong>Search results</strong>,
+it preserves the search filter; a renamed friend disappears if their new name no longer matches.
+Editing preserves the friend’s archive status, games and your profile. A successful
 <code class="language-plaintext highlighter-rouge">edit myself</code> shows your updated profile on the right and keeps the current friend-list filter.</li>
 </ul>
 
@@ -575,7 +653,7 @@ Use that empty prefix on its own; combining it with non-empty tags is rejected.<
 <h3 id="locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code>
 </h3>
 
-<p>Finds friends whose names contain any of the given keywords.</p>
+<p>Finds active and archived friends whose names contain any of the given keywords, regardless of the current view.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">find KEYWORD [MORE_KEYWORDS]</code></p>
 
@@ -585,9 +663,16 @@ Use that empty prefix on its own; combining it with non-empty tags is rejected.<
   <li>The search considers only names.</li>
   <li>Only full words match; for example, <code class="language-plaintext highlighter-rouge">Han</code> does not match <code class="language-plaintext highlighter-rouge">Hans</code>.</li>
   <li>Friends matching at least one keyword are returned (an <code class="language-plaintext highlighter-rouge">OR</code> search); for example, <code class="language-plaintext highlighter-rouge">Hans Bo</code> returns <code class="language-plaintext highlighter-rouge">Hans Gruber</code> and <code class="language-plaintext highlighter-rouge">Bo Yang</code>.</li>
-  <li>Searching starts from all friends, replacing any previous name or game filter. <code class="language-plaintext highlighter-rouge">find</code> does not accept <code class="language-plaintext highlighter-rouge">n/</code> or
-<code class="language-plaintext highlighter-rouge">g/</code> as filter syntax; such text is treated as literal name keywords.</li>
-  <li>Feedback is <code class="language-plaintext highlighter-rouge">N friend(s) listed!</code>. No matches is a successful empty list. Exactly one result also opens that
+  <li>Searching starts from all active and archived friends, replacing any previous name or game filter.
+<code class="language-plaintext highlighter-rouge">find</code> does not accept <code class="language-plaintext highlighter-rouge">n/</code> or <code class="language-plaintext highlighter-rouge">g/</code> as filter syntax; such text is treated as literal name keywords.</li>
+  <li>Results appear under <strong>Search results</strong>, with an <strong>Archived</strong> badge on archived friends.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">archive FRIEND_INDEX</code> archives an active result; <code class="language-plaintext highlighter-rouge">unarchive FRIEND_INDEX</code> restores an archived result. The friend stays in
+the search results with their updated status, and the search filter and displayed order stay in place.</li>
+  <li>Archiving an already archived search result reports <code class="language-plaintext highlighter-rouge">This friend is already archived.</code> without changing data.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list</code> returns to active friends; <code class="language-plaintext highlighter-rouge">archivelist [g/GAME_NAME]</code> switches to archived friends only.</li>
+  <li>Feedback is <code class="language-plaintext highlighter-rouge">N friend(s) listed!</code>. No matches is a successful empty search view. Exactly one result also opens that
 friend’s complete details and games on the right. An empty keyword list is rejected with usage instructions.</li>
 </ul>
 
@@ -601,6 +686,97 @@ friend’s complete details and games on the right. An empty keyword list is rej
 <img src="/tp/pr-preview/pr-85/images/findAlexDavidResult.png" alt="result for 'find alex david'">
 </li>
 </ul>
+
+<h3 id="archiving-a-friend-archive">Archiving a friend: <code class="language-plaintext highlighter-rouge">archive</code>
+</h3>
+
+<p>Hides a friend from the active list while keeping their contact details, tags, games, usernames and game metadata.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">archive FRIEND_INDEX</code></p>
+
+<ul>
+  <li>The index refers to the currently displayed active list or <strong>Search results</strong>, including game-filtered
+active lists. It must be a positive integer.</li>
+  <li>From the archive-only view, <code class="language-plaintext highlighter-rouge">archive</code> reports <code class="language-plaintext highlighter-rouge">Run list to switch to the active list before archiving a friend.</code> before checking
+whether the index exists. This also applies when that view is empty; data and view stay unchanged.</li>
+  <li>The friend disappears from the active view immediately. In <strong>Search results</strong>, the friend stays visible with
+an <strong>Archived</strong> badge. The current filter stays in place.</li>
+  <li>Feedback is <code class="language-plaintext highlighter-rouge">Archived FRIEND_NAME.</code>. Archiving an already archived friend is rejected.</li>
+  <li>Your Myself profile cannot be archived. <code class="language-plaintext highlighter-rouge">myself</code>, missing indices, extra arguments and invalid indices are rejected.</li>
+  <li>Missing indices report <code class="language-plaintext highlighter-rouge">Please provide an index.</code>. Invalid indices (such as <code class="language-plaintext highlighter-rouge">-1</code>, <code class="language-plaintext highlighter-rouge">0</code> or <code class="language-plaintext highlighter-rouge">abc</code>) report
+<code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>.</li>
+  <li>Archived friends keep their names reserved. Adding or renaming another friend to the same name is rejected
+with a suggestion to use <code class="language-plaintext highlighter-rouge">archivelist</code> and <code class="language-plaintext highlighter-rouge">unarchive</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list</code> and <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> show active friends only. <code class="language-plaintext highlighter-rouge">find</code> searches both active and archived friends.</li>
+</ul>
+
+<p>Example: <code class="language-plaintext highlighter-rouge">list</code>, then <code class="language-plaintext highlighter-rouge">archive 1</code> archives the first displayed active friend.</p>
+
+<h3 id="listing-and-filtering-archived-friends-archivelist">Listing and filtering archived friends: <code class="language-plaintext highlighter-rouge">archivelist</code>
+</h3>
+
+<p>Shows archived friends, optionally filtered by game. It follows the same syntax and game-matching rules as <code class="language-plaintext highlighter-rouge">list</code>.</p>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">archivelist [g/GAME_NAME]</code></p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">archivelist</code> shows all archived friends in the existing list panel, headed <strong>Archived friends</strong>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">archivelist g/GAME_NAME</code> shows archived friends who have a game with that exact name, ignoring case.
+Leading and trailing spaces are ignored. Multi-word game names are accepted; partial names and usernames do not match.</li>
+  <li>Each invocation starts from all archived friends and replaces any previous name or game filter.</li>
+  <li>Only one <code class="language-plaintext highlighter-rouge">g/</code> prefix may be supplied. Empty game names, repeated prefixes and extra positional arguments are rejected,
+using the same validation rules as <code class="language-plaintext highlighter-rouge">list</code>.</li>
+  <li>Name keywords and <code class="language-plaintext highlighter-rouge">n/</code> are not supported here. Use <code class="language-plaintext highlighter-rouge">find KEYWORD [MORE_KEYWORDS]</code> to search names across both active
+and archived friends.</li>
+  <li>Non-empty results report <code class="language-plaintext highlighter-rouge">Listed N archived friend(s).</code>.</li>
+  <li>With no archived friends, unfiltered <code class="language-plaintext highlighter-rouge">archivelist</code> reports
+<code class="language-plaintext highlighter-rouge">No archived friends. Use the command "list", then "archive FRIEND_INDEX" to archive a friend.</code>
+</li>
+  <li>A game filter with no matches reports <code class="language-plaintext highlighter-rouge">No archived friends match this game filter.</code>.
+Both empty cases are successful commands and keep the <strong>Archived friends</strong> heading.</li>
+  <li>Indices refer to this displayed archive list. Select a friend or use <code class="language-plaintext highlighter-rouge">gamelist 1</code> to inspect preserved games.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> work on displayed archived friends and keep them archived. Editing friend
+details clears the game filter within the archive view. <code class="language-plaintext highlighter-rouge">delete</code> permanently removes a displayed archived friend.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">list</code> returns to the active view, headed <strong>Active friends</strong>. Adding a friend also returns to the active view.</li>
+</ul>
+
+<p>Examples:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">archivelist</code> shows all archived friends.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">archivelist g/Valorant</code> shows archived friends who play Valorant.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">archivelist g/Stardew Valley</code> shows archived friends who play Stardew Valley.</li>
+</ul>
+
+<h3 id="restoring-an-archived-friend-unarchive">Restoring an archived friend: <code class="language-plaintext highlighter-rouge">unarchive</code>
+</h3>
+
+<p>Format: <code class="language-plaintext highlighter-rouge">unarchive FRIEND_INDEX</code></p>
+
+<ul>
+  <li>Use <code class="language-plaintext highlighter-rouge">archivelist</code>, <code class="language-plaintext highlighter-rouge">archivelist g/GAME_NAME</code>, or <code class="language-plaintext highlighter-rouge">find KEYWORD</code> to display archived friends.</li>
+  <li>The index refers to that displayed list. It must be a positive integer.</li>
+  <li>The friend returns to the active list with all their details intact. They disappear from an archive-only view,
+but stay visible in <strong>Search results</strong> with the <strong>Archived</strong> badge removed. The current filter stays in place.
+Run <code class="language-plaintext highlighter-rouge">list</code> to see active friends.</li>
+  <li>Feedback is <code class="language-plaintext highlighter-rouge">Restored FRIEND_NAME.</code>. Selecting an active friend is rejected with a suggestion to use <code class="language-plaintext highlighter-rouge">archivelist</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">myself</code>, missing indices, extra arguments and invalid indices are rejected. Missing indices report
+<code class="language-plaintext highlighter-rouge">Please provide an index.</code>; invalid indices report
+<code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>.</li>
+  <li>Out-of-range indices, including
+empty lists, report <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code> without changing data or the current view.</li>
+</ul>
+
+<p>Example: <code class="language-plaintext highlighter-rouge">archivelist g/Valorant</code>, then <code class="language-plaintext highlighter-rouge">unarchive 1</code> restores the first displayed archived friend who plays Valorant.</p>
 
 <h3 id="deleting-a-friend-delete">Deleting a friend: <code class="language-plaintext highlighter-rouge">delete</code>
 </h3>
@@ -644,12 +820,12 @@ with the friend; other friends and your stored profile are preserved. The curren
 <h3 id="clearing-the-friend-list-clear">Clearing the friend list: <code class="language-plaintext highlighter-rouge">clear</code>
 </h3>
 
-<p>Clears all friends from GameMates and preserves your Myself profile.</p>
+<p>Clears all active and archived friends from GameMates and preserves your Myself profile.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">clear</code></p>
 
-<p>The command takes effect immediately, with no confirmation or undo. Feedback is <code class="language-plaintext highlighter-rouge">Friend list has been cleared!</code>.
-All friends and their game entries are removed. Back up your data file first if you may need them again.</p>
+<p>The command takes effect immediately, with no confirmation or undo. Feedback is <code class="language-plaintext highlighter-rouge">All active and archived friends have been cleared!</code>.
+All active and archived friends and their game entries are removed. Back up your data file first if you may need them again.</p>
 
 <h3 id="exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code>
 </h3>
@@ -662,7 +838,7 @@ All friends and their game entries are removed. Back up your data file first if 
 
 <p>GameMates saves the complete friend list, games and stored profile after every command that parses and executes
 successfully, including viewing commands such as <code class="language-plaintext highlighter-rouge">list</code> and <code class="language-plaintext highlighter-rouge">gamelist</code>. You do not need a save command.
-The active friend-list filter, selection and game display filter are not saved; a new launch shows all friends and
+The active friend-list filter, selection and game display filter are not saved; a new launch shows all active friends and
 your profile. Window size and position are stored separately in <code class="language-plaintext highlighter-rouge">preferences.json</code> when you close the main window
 or use <code class="language-plaintext highlighter-rouge">exit</code>.</p>
 
@@ -681,9 +857,11 @@ close the destination app, back up its current file, replace it with your copy a
 Copy <code class="language-plaintext highlighter-rouge">preferences.json</code> only if you also want the saved window settings.</p>
 
 <p>If you edit JSON manually, close the app first and keep a backup. Friend entries contain <code class="language-plaintext highlighter-rouge">name</code>, optional
-<code class="language-plaintext highlighter-rouge">phone</code> and <code class="language-plaintext highlighter-rouge">email</code>, <code class="language-plaintext highlighter-rouge">tags</code>, and <code class="language-plaintext highlighter-rouge">games</code>. A game has a required <code class="language-plaintext highlighter-rouge">name</code> and an optional <code class="language-plaintext highlighter-rouge">username</code>.
+<code class="language-plaintext highlighter-rouge">phone</code> and <code class="language-plaintext highlighter-rouge">email</code>, <code class="language-plaintext highlighter-rouge">tags</code>, <code class="language-plaintext highlighter-rouge">games</code>, and an <code class="language-plaintext highlighter-rouge">archived</code> boolean. Missing <code class="language-plaintext highlighter-rouge">archived</code> defaults to <code class="language-plaintext highlighter-rouge">false</code>
+(active); archive status is saved across restarts. A game has a required <code class="language-plaintext highlighter-rouge">name</code> and an optional <code class="language-plaintext highlighter-rouge">username</code>.
 An empty or missing <code class="language-plaintext highlighter-rouge">username</code> means no username has been provided; the game entry is still retained.
-Existing files that omit <code class="language-plaintext highlighter-rouge">games</code> load with no games; files that omit <code class="language-plaintext highlighter-rouge">myself</code> use the default empty profile. Empty or missing contact fields mean
+Existing files that omit <code class="language-plaintext highlighter-rouge">games</code> load with no games; files that omit <code class="language-plaintext highlighter-rouge">myself</code> use the default empty profile.
+Empty or missing contact fields mean
 <code class="language-plaintext highlighter-rouge">Not provided</code>. Use the same validation rules as command input. Stored game metadata is supported as an optional
 <code class="language-plaintext highlighter-rouge">metas</code> array, for example <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code>. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
@@ -745,6 +923,18 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
 </td>
     </tr>
     <tr>
+      <td><strong>Archive</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">archive FRIEND_INDEX</code></td>
+    </tr>
+    <tr>
+      <td><strong>Archive list/filter</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">archivelist [g/GAME_NAME]</code></td>
+    </tr>
+    <tr>
+      <td><strong>Unarchive</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">unarchive FRIEND_INDEX</code></td>
+    </tr>
+    <tr>
       <td><strong>Clear</strong></td>
       <td><code class="language-plaintext highlighter-rouge">clear</code></td>
     </tr>
@@ -782,6 +972,12 @@ case. Close the app and restore a valid <code class="language-plaintext highligh
       <td><strong>Game list</strong></td>
       <td>
 <code>gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code><br> e.g., <code class="language-plaintext highlighter-rouge">gamelist myself g/Valorant</code>
+</td>
+    </tr>
+    <tr>
+      <td><strong>Squad create</strong></td>
+      <td>
+<code class="language-plaintext highlighter-rouge">squad g/GAME_NAME n/NUMBER_OF_PEOPLE</code><br> e.g., <code class="language-plaintext highlighter-rouge">squad g/Valorant n/5</code>
 </td>
     </tr>
     <tr>
