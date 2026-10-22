@@ -34,7 +34,8 @@ public class GameEditCommandParser implements Parser<GameEditCommand> {
         GameName name = arguments.getValue(PREFIX_NAME).isDefined()
                 ? ParserUtil.parseGameName(arguments.getValue(PREFIX_NAME).get()) : null;
         Username username = arguments.getValue(PREFIX_USERNAME).isDefined()
-                ? ParserUtil.parseUsername(arguments.getValue(PREFIX_USERNAME).get()) : null;
+                ? arguments.getValue(PREFIX_USERNAME).get().isEmpty() ? Username.EMPTY
+                        : ParserUtil.parseUsername(arguments.getValue(PREFIX_USERNAME).get()) : null;
         List<String> pairs = arguments.getAllValues(PREFIX_META);
         Set<Meta> metas = pairs.isEmpty() ? null : pairs.size() == 1 && pairs.getFirst().isEmpty()
                 ? Set.of() : ParserUtil.parseMetas(pairs);

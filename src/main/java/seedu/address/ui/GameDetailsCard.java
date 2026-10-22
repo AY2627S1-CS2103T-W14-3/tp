@@ -27,6 +27,7 @@ public class GameDetailsCard extends UiPart<Region> {
         super(FXML);
         requireNonNull(game);
         gameName.setText(game.getGameName().value);
-        username.setText("Username: " + game.getUsername().value);
+        username.setText("Username: "
+                + (game.getUsername().isEmpty() ? "Not provided" : game.getUsername().value));
     }
 }

@@ -39,7 +39,7 @@ public class GameEditIntegrationTest {
         LogicManager logic = new LogicManager(model,
                 new StorageManager(json, new JsonUserPrefsStorage(directory.resolve("preferences.json"))));
         logic.execute("gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Region:Asia:SG");
-        logic.execute("gameedit myself g/Valorant n/My Game m/");
+        logic.execute("gameedit myself g/Valorant n/My Game m/ u/");
         var restored = json.readGameMates().get();
         assertEquals(model.getGameMates(), restored);
         Game edited = restored.getFriendList().getFirst().getGames().stream()
@@ -47,7 +47,8 @@ public class GameEditIntegrationTest {
         assertEquals("newPlayer", edited.getUsername().value);
         assertEquals("Region:Asia:SG", edited.getMetas().iterator().next().toString());
         assertTrue(restored.getMyself().getGames().stream()
-                .anyMatch(game -> game.getGameName().value.equals("My Game") && game.getMetas().isEmpty()));
+                .anyMatch(game -> game.getGameName().value.equals("My Game") && game.getMetas().isEmpty()
+                        && game.getUsername().isEmpty()));
         String saved = Files.readString(file);
         assertThrows(ParseException.class, () -> logic.execute("gameedit 1 g/Valorant m/Role:Tank m/role:Tank"));
         assertThrows(CommandException.class, () -> logic.execute("gameedit 1 g/Valorant n/Minecraft"));

@@ -138,6 +138,7 @@ setters retain defensive copies.
 
 Parsing continues to report the first invalid value through `ParseException`. Vavr's checked-function
 adapters propagate the original exception, so invalid input is never treated as an omitted argument.
+`GameAddCommandParser` similarly defaults omitted `u/` to `Username.EMPTY`; a supplied blank `u/` is rejected.
 
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java)
@@ -151,14 +152,15 @@ The `Model` component,
   The profile is not in the friend list. Add/edit commands separately prevent names shared between a friend and the profile.
 * exposes an observable `FilteredList<Friend>` backed by the stored friends. The filter is a predicate over the
   full list, rather than a second collection of copied friends.
-* stores each friend's games as `Game` objects, including their game name, username and optional metadata.
+* stores each friend's games as `Game` objects, including their game name, username if provided and optional metadata.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
 `Friend` contains `Name`, optional contact values, a set of `Tag` objects and a set of `Game` objects.
 `Game` contains `GameName`, `Username` and an immutable metadata set. Name equality ignores case and collapses repeated ASCII spaces;
 `GameName.equals` compares complete names using lower-case normalization with `Locale.ROOT`.
-`Username` preserves case. `Game.isSameGame` compares game names, while full equality also compares usernames and metadata.
+`Username` preserves case and uses `Username.EMPTY` for omission, with `isEmpty()` to check it.
+`Game.isSameGame` compares game names, while full equality also compares usernames and metadata.
 `GameAddCommand` rejects an existing game name regardless of username. The set representation alone does not
 enforce this rule when games with different usernames are loaded from JSON.
 
@@ -188,8 +190,9 @@ Startup uses sample data for a missing GameMates file
 and an empty GameMates for a loading error. Missing or unreadable preferences use default preferences.
 JSON contact fields that are null or empty map to the corresponding empty contact value; invalid
 nonempty contact values are rejected without trimming. Missing `games` or `tags` load as empty sets, and missing
-`myself` retains `Friend.DEFAULT_MYSELF`. Stored games require valid `name` and `username` values. Duplicate friend
-names reject the whole data load, including a previously parsed profile; startup uses a new empty `GameMates`.
+`myself` retains `Friend.DEFAULT_MYSELF`. Stored games require a valid `name`. Missing, null or empty usernames 
+are mapped to `Username.EMPTY` and invalid non-empty values, including whitespace-only strings, are rejected.
+Duplicate friend names reject the whole data load, including a previously parsed profile; startup uses a new empty `GameMates`.
 
 `MainApp` resolves `data/gamemates.json` and `preferences.json` relative to the process working directory, not the
 JAR's location. `MainApp.initPrefs` writes initialized preferences at startup and `stop` writes them again at shutdown;
@@ -243,8 +246,8 @@ The implemented contact rules differ from the submitted draft: names are 1–100
 characters/spaces, phones validate digit counts and grouping, and emails validate ASCII dot-atom/domain syntax
 with length limits. The [User Guide](UserGuide.html#adding-a-friend-add) specifies the accepted input for users.
 No phone, email, game name or username is verified against an external service.
-`GameName` and `Username` trim with `String.strip()`, count UTF-16 code units with `String.length()`, require a
-letter/digit code point and reject ISO control code points. This is not a general Unicode printability test.
+Supplied `GameName` and `Username` values trim with `String.strip()`, count UTF-16 code units with `String.length()`,
+require a letter/digit code point and reject ISO control code points. This is not a general Unicode printability test.
 
 ### Myself profile
 
@@ -256,7 +259,7 @@ profile keyword:
 
 ```text
 edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…
-gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME
+gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]
 gamedel FRIEND_INDEX|myself g/GAME_NAME
 ```
 
@@ -300,8 +303,8 @@ No-match queries return successful empty results. Filtering never includes or ed
 `parseGameName`, `parseUsername` and `parseMetas`. Its immutable `EditGameDescriptor` distinguishes omitted
 metadata (`null`) from a supplied empty replacement set. A single empty `m/` clears metadata; all other
 supplied pairs pass through the shared parser, including normalized duplicate-key checks and first-colon splitting.
-The model identity rules remain unchanged. On this master, `Username` has no empty value; `u/` clearing is
-rejected. Revisit that parser branch when optional usernames in PR #92 merge, without duplicating that feature here.
+The model identity rules remain unchanged. The merged optional-username model provides `Username.EMPTY`; a supplied empty `u/` maps to that value.
+Omitting `u/` preserves the original username, including an absent username.
 
 `GameEditCommand` uses `FriendTargetResolver` and `Model.resolveFriend` for displayed indices or Myself.
 It requires exactly one matching existing game, constructs the complete replacement, then checks collisions
@@ -367,7 +370,7 @@ before publishing a complete v1.3 MVP guide.
 | Area | Submitted specification | Current implementation / follow-up |
 |------|-------------------------|------------------------------------|
 | Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | Use <code>edit FRIEND_INDEX&#124;myself ...</code>. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
-| Game add/delete | Add or delete a friend's game, with optional metadata on addition (pp. 17–23). | Use <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME u/USER_NAME</code> and <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code>. Metadata can be edited with `gameedit`; adding metadata directly with `gameadd` remains pending. See [Myself profile](#myself-profile). |
+| Game add/delete | Add or delete a friend's game, with optional metadata on addition (pp. 17–23). | Use <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME]</code> and <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code>. Metadata can be edited with `gameedit`; adding metadata directly with `gameadd` remains pending. See [Myself profile](#myself-profile). |
 | Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | [PR #64](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64) has merged the model, parser utilities and JSON persistence. Metadata entry/replacement is available through `gameedit`; game-card rendering remains unavailable. See [Game metadata](#game-metadata) for the implemented API. |
 | Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
 | Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
@@ -375,7 +378,7 @@ before publishing a complete v1.3 MVP guide.
 | Friend filtering | Combined `list [n/KEYWORDS] [g/GAME]`, with named empty-result feedback (pp. 14–15). | Separate `find KEYWORD...` and `list [g/GAME]`; a new command replaces the previous filter. Feedback is `Listed all friends.` or `N friend(s) listed!`, including zero. |
 | GUI | Feature-spec mockups replace the friend panel with a game's list (pp. 15, 25); later v1.3 notes call for a split panel. | The adopted split layout matches those later notes: friends stay on the left and details/game cards appear on the right. `gamelist` filters cards only. Retire the earlier mockups. |
 | Errors | Command-specific index and validation wording. | Messages differ across commands; use the verified wording in the User Guide instead of copying spec errors. |
-| Game uniqueness | One username per game name within a friend (pp. 16–19). | `gameadd` rejects duplicate game names through `Game.isSameGame`. Stored sets use full equality, so JSON can still contain the same game name with different usernames. |
+| Game uniqueness | One or no username per game name within a friend (pp. 16–19). | `gameadd` rejects duplicate game names through `Game.isSameGame`. Stored sets use full equality, so JSON can still contain the same game name with different usernames. |
 
 Additional integration issues found during the audit: root-level JSON `null` bypasses the loading fallback, and
 game-text validation uses ISO-control rejection rather than a complete Unicode printability check. These are
@@ -869,12 +872,14 @@ This seeds existing data for testing; it is not an own-profile edit command.
    `gamedel myself g/Test`: expected success and the original Minecraft entry preserved after both commands.
    Metadata command entry cannot be tested because no routed command supports it yet. To test storage, close the app,
    add `"metas": [{"key": "Role", "value": "Support:Mid"}]` to the fixture's Minecraft entry, relaunch and run `list`.
-   The saved JSON must retain that pair; cards currently show only the game name and username. A missing `metas`
-   field loads as empty; a repeated key (including case variants) rejects the load and uses the documented fallback.
-4. `find Fixture`, then `gamelist 1 g/valorant`, then `exit`. Relaunch from the same folder.
+   The saved JSON must retain that pair; cards show the game name and `Username: Not provided` when the username is omitted.
+   A missing `metas` field loads as empty; a repeated key (including case variants) rejects the load and uses the documented fallback.
+4. Run `gameadd myself g/Test` without `u/`: expect success with `Username: Not provided` in feedback and the game card.
+   `gameadd myself g/Other u/` must fail. Exit and relaunch; the Test game must retain its empty username.
+5. `find Fixture`, then `gamelist 1 g/valorant`, then `exit`. Relaunch from the same folder.
    Expected: the edited friend phone, friend game and profile game survive, with Joash Updated's profile displayed
    and its phone still removed. Filters are reset.
-5. `clear`, then `exit` and relaunch. Expected: no friends, but the same updated profile and Minecraft username.
+6. `clear`, then `exit` and relaunch. Expected: no friends, but the same updated profile and Minecraft username.
 
 ### Missing, invalid and unwritable files
 

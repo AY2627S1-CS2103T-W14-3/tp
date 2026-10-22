@@ -96,7 +96,7 @@ public class GameEditCommandTest {
     public void execute_errors_leaveEveryFieldUnchanged() throws Exception {
         model.addFriend(friend);
         for (String input : new String[]{"gameedit 1 g/Valorant n/MINECRAFT", "gameedit 1 g/Val u/newPlayer",
-            "gameedit 2 g/Valorant u/newPlayer", "gameedit 1 g/Valorant u/",
+            "gameedit 2 g/Valorant u/newPlayer",
             "gameedit 1 g/Valorant n/New m/Role:Tank m/role:Tank", "gameedit 1 g/Valorant m/ m/Role:Tank"}) {
             GameMates before = new GameMates(model.getGameMates());
             assertThrows(Exception.class, () -> execute(input));

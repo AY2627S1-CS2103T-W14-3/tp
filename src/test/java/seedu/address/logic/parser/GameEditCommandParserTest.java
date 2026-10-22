@@ -35,6 +35,7 @@ public class GameEditCommandParserTest {
         assertParseSuccess(parser, " 2 g/Valorant u/player", command(null, new Username("player"), null));
         assertParseSuccess(parser, " 2 g/Valorant n/VALORANT", command(new GameName("VALORANT"), null, null));
         assertParseSuccess(parser, " 2 g/Valorant m/", command(null, null, Set.of()));
+        assertParseSuccess(parser, " 2 g/Valorant u/", command(null, Username.EMPTY, null));
         assertParseSuccess(parser, " 2 g/Valorant m/ role : Healer ",
                 command(null, null, Set.of(new Meta(new MetaKey("role"), new MetaValue("Healer")))));
     }
@@ -58,7 +59,7 @@ public class GameEditCommandParserTest {
         for (String field : new String[]{"n/", "n/!!!", "n/" + "a".repeat(51)}) {
             assertParseFailure(parser, " 2 g/Valorant " + field, GameName.MESSAGE_CONSTRAINTS);
         }
-        for (String value : new String[]{"", "!!!", "a".repeat(51)}) {
+        for (String value : new String[]{"!!!", "a".repeat(51)}) {
             assertParseFailure(parser, " 2 g/Valorant u/" + value, Username.MESSAGE_CONSTRAINTS);
         }
         for (String pairs : new String[]{"m/Role:Healer m/role:Healer", "m/Role:Healer m/ ROLE :Tank"}) {
