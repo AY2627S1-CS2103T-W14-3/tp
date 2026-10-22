@@ -22,8 +22,11 @@ public class CommandResult {
     /** The application should exit. */
     private final boolean exit;
 
-    /** The friend whose details the UI should show, when a command has one unambiguous result. */
+    /** The friend or profile whose details the UI should show, when a command has one unambiguous result. */
     private final Friend friendToShow;
+
+    /** Whether the selected details belong to the user's own profile. */
+    private final boolean showMyself;
 
     /** An optional filter applied only to the selected friend's game cards. */
     private final GameName gameFilter;
@@ -32,7 +35,7 @@ public class CommandResult {
      * Constructs a {@code CommandResult} with the specified fields.
      */
     public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
-        this(feedbackToUser, showHelp, exit, null, null);
+        this(feedbackToUser, showHelp, exit, null, null, false);
     }
 
     /**
@@ -47,19 +50,28 @@ public class CommandResult {
      * A non-null game filter requires a selected friend.
      */
     public CommandResult(String feedbackToUser, Friend friendToShow, GameName gameFilter) {
-        this(feedbackToUser, false, false, friendToShow, gameFilter);
+        this(feedbackToUser, friendToShow, gameFilter, false);
+    }
+
+    /**
+     * Constructs a result selecting a friend or the user's own profile, with an optional game filter.
+     * Selecting the profile requires a non-null friend payload.
+     */
+    public CommandResult(String feedbackToUser, Friend friendToShow, GameName gameFilter, boolean showMyself) {
+        this(feedbackToUser, false, false, friendToShow, gameFilter, showMyself);
     }
 
     private CommandResult(String feedbackToUser, boolean showHelp, boolean exit,
-            Friend friendToShow, GameName gameFilter) {
+            Friend friendToShow, GameName gameFilter, boolean showMyself) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
         this.friendToShow = friendToShow;
-        if (gameFilter != null) {
+        if (gameFilter != null || showMyself) {
             requireNonNull(friendToShow);
         }
         this.gameFilter = gameFilter;
+        this.showMyself = showMyself;
     }
 
     /**
@@ -89,6 +101,11 @@ public class CommandResult {
         return Optional.ofNullable(friendToShow);
     }
 
+    /** Returns whether the selected details belong to the user's own profile. */
+    public boolean isShowMyself() {
+        return showMyself;
+    }
+
     /** Returns the game-name filter for the details panel, or empty to show all games. */
     public Optional<GameName> getGameFilter() {
         return Optional.ofNullable(gameFilter);
@@ -108,13 +125,14 @@ public class CommandResult {
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
                 && exit == otherCommandResult.exit
+                && showMyself == otherCommandResult.showMyself
                 && Objects.equals(friendToShow, otherCommandResult.friendToShow)
                 && Objects.equals(gameFilter, otherCommandResult.gameFilter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit, friendToShow, gameFilter);
+        return Objects.hash(feedbackToUser, showHelp, exit, friendToShow, gameFilter, showMyself);
     }
 
     @Override
@@ -125,6 +143,7 @@ public class CommandResult {
                 .add("exit", exit)
                 .add("friendToShow", getFriendToShow())
                 .add("gameFilter", getGameFilter())
+                .add("showMyself", showMyself)
                 .toString();
     }
 
