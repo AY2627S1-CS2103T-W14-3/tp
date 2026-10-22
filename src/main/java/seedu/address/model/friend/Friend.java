@@ -47,6 +47,16 @@ public class Friend {
         this(name, phone, email, Collections.emptySet(), tags);
     }
 
+    private Friend(Friend original, Set<Game> replacementGames) {
+        requireAllNonNull(original, replacementGames);
+        replacementGames.forEach(Objects::requireNonNull);
+        name = original.name;
+        phone = original.phone;
+        email = original.email;
+        tags = original.tags;
+        games = Set.copyOf(replacementGames);
+    }
+
     public Name getName() {
         return name;
     }
@@ -65,6 +75,11 @@ public class Friend {
      */
     public Set<Game> getGames() {
         return games;
+    }
+
+    /** Copies all friend/profile fields while replacing only games. */
+    public Friend withGames(Set<Game> replacementGames) {
+        return new Friend(this, replacementGames);
     }
 
     /**

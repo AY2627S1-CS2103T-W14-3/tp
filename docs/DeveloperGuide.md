@@ -294,6 +294,31 @@ the previous predicate; they do not intersect filters. `find` does not parse pre
 The `find` parser only requires a non-empty keyword list; there is no 255-character keyword validation.
 No-match queries return successful empty results. Filtering never includes or edits the separate profile.
 
+### Editing an existing game
+
+`GameEditCommandParser` reuses `ArgumentTokenizer`, `ArgumentMultimap`, `ParserUtil.parseIndexOrMyself`,
+`parseGameName`, `parseUsername` and `parseMetas`. Its immutable `EditGameDescriptor` distinguishes omitted
+metadata (`null`) from a supplied empty replacement set. A single empty `m/` clears metadata; all other
+supplied pairs pass through the shared parser, including normalized duplicate-key checks and first-colon splitting.
+The model identity rules remain unchanged. On this master, `Username` has no empty value; `u/` clearing is
+rejected. Revisit that parser branch when optional usernames in PR #92 merge, without duplicating that feature here.
+
+`GameEditCommand` uses `FriendTargetResolver` and `Model.resolveFriend` for displayed indices or Myself.
+It requires exactly one matching existing game, constructs the complete replacement, then checks collisions
+against the other games before calling `Model.setFriend(target, updated)` once. Ambiguous duplicate names in
+externally edited JSON fail without mutation. `Friend.withGames` copies all current friend fields and defensively
+copies the replacement set. Its explicit copy constructor must also copy any new fields when integrating
+pinning or archiving. Preserve those fields in integration tests before publishing a combined build.
+
+The command retains the list predicate. A successful friend edit returns the updated friend through
+`CommandResult`, clearing any old game-card filter. A successful profile edit uses the existing profile refresh.
+Failures return no result and preserve the current details. `LogicManager` saves through the existing storage;
+there is no new persistence mechanism or transaction spanning model mutation and a failing disk write.
+Tests exercise command routing, atomic validation, displayed targets, metadata replacement, profile updates,
+case-only spelling, UI refresh and real JSON storage round trips.
+
+The [game edit sequence diagram source](diagrams/GameEditSequenceDiagram.puml) shows validation before mutation.
+
 ### Viewing a friend's games
 
 `gamelist <FRIEND_INDEX> [g/GAME_NAME]` selects a friend for the right-hand details panel without changing the
@@ -342,8 +367,8 @@ before publishing a complete v1.3 MVP guide.
 | Area | Submitted specification | Current implementation / follow-up |
 |------|-------------------------|------------------------------------|
 | Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | Use <code>edit FRIEND_INDEX&#124;myself ...</code>. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
-| Game add/delete | Add or delete a friend's game, with optional metadata on addition (pp. 17–23). | Use <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME u/USER_NAME</code> and <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code>. Game metadata input remains unavailable. See [Myself profile](#myself-profile). |
-| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | [PR #64](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64) has merged the model, parser utilities and JSON persistence. Command entry and game-card rendering remain unavailable. See [Game metadata](#game-metadata) for the implemented API. |
+| Game add/delete | Add or delete a friend's game, with optional metadata on addition (pp. 17–23). | Use <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME u/USER_NAME</code> and <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code>. Metadata can be edited with `gameedit`; adding metadata directly with `gameadd` remains pending. See [Myself profile](#myself-profile). |
+| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | [PR #64](https://github.com/AY2627S1-CS2103T-W14-3/tp/pull/64) has merged the model, parser utilities and JSON persistence. Metadata entry/replacement is available through `gameedit`; game-card rendering remains unavailable. See [Game metadata](#game-metadata) for the implemented API. |
 | Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
 | Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
 | Phone/email | Phone: 1–40 characters from a broad punctuation set. Email: 1–255 characters containing `@` (pp. 5–6). | Phone: 3–15 ASCII digits, or `+` with 2–15, with constrained grouping and no extensions. Email: at most 254 characters, local part at most 64, ASCII dot-atom and valid domain labels. |
@@ -357,8 +382,7 @@ game-text validation uses ISO-control rejection rather than a complete Unicode p
 recorded limits; no application fix is included in this documentation change.
 
 Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
-not a current use-case step. Game creation/deletion and own-profile editing are available; metadata entry/display
-remains pending.
+not a current use-case step. Game creation/deletion and own-profile editing are available; metadata editing is available through `gameedit`, while game-card metadata display remains pending.
 
 ### Game metadata
 
@@ -392,7 +416,7 @@ Missing separators and invalid fields cause `ParseException`.
 
 `parseMetas()` parses a collection of raw values and rejects duplicate normalized keys before returning a set.
 Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
-These are parser utilities; command-specific metadata flag handling is not yet implemented.
+`GameEditCommandParser` uses these utilities for metadata replacement and handles a single empty `m/` as clearing.
 
 #### Persistence and testing
 
@@ -675,7 +699,7 @@ This is a future requirement; there is no working handle-editing command in this
 
 ### Non-Functional Requirements
 
-The following are targets, not measured guarantees. Metadata entry/display remains pending integration;
+The following are targets, not measured guarantees. Game-card metadata display remains pending integration;
 startup/performance and large-data capacity need separate measurement.
 
 #### Environment
@@ -886,3 +910,12 @@ on open PRs labelled `type.Docs`; this task does not publish a preview or change
 Current screenshots must come from the application, not the specification mockups. `Ui.png` shows both panels,
 `findAlexDavidResult.png` shows name filtering, and `gamelistFiltered.png` / `gamelistNoMatch.png` show card filtering.
 Diagram sources live in `docs/diagrams`; regenerate their matching `docs/images/*.png` after changing a source.
+
+### Manual game edit checks
+
+Use a disposable data directory. Add `add n/Tester`, `gameadd 1 g/Valorant u/tester` and
+`gameadd 1 g/Minecraft u/builder`. Edit with `gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Role:Healer`.
+Expect both games and preserved friend fields. Try `gameedit 1 g/Valorant n/Minecraft` and repeated
+normalized metadata keys; expect errors with unchanged data and details. Clear with `gameedit 1 g/Valorant m/`.
+Add `gameadd myself g/Valorant u/own`, run `find Nobody`, then `gameedit myself g/Valorant u/newOwn`;
+expect updated profile despite the empty list. Restart from the same directory and confirm all edits persist.
