@@ -301,9 +301,13 @@ After success, `LogicManager` saves both `friends` and `myself` through `JsonSer
 `FindCommand` installs `NameContainsKeywordsPredicate`: any full name word matching any supplied keyword, ignoring
 case, is sufficient. `ListCommand` either installs `PREDICATE_SHOW_ALL_FRIENDS` or `GameNameMatchesPredicate`, which
 tests whether any of a friend's games has the exact `GameName`. Both operate over all stored friends and replace
-the previous predicate; they do not intersect filters. `find` does not parse prefixes and `list` does not parse `n/`.
-The `find` parser only requires a non-empty keyword list; there is no 255-character keyword validation.
-No-match queries return successful empty results. Filtering never includes or edits the separate profile.
+the previous predicate; they do not intersect filters. `list s/name` and `list s/game` set a `SortedList` comparator
+in `ModelManager` after filtering; `o/desc` reverses that comparator, while the default and `o/asc` are ascending.
+The default `list` clears the comparator and retains stored insertion order. Game sorting uses each friend's
+alphabetically first game name, with friends without games last and names as the tie-breaker. `find` does not parse
+prefixes and `list` does not parse `n/`. The `find` parser only requires a
+non-empty keyword list; there is no 255-character keyword validation. No-match queries return successful empty
+results. Filtering and sorting never include or edit the separate profile.
 
 ### Editing an existing game
 

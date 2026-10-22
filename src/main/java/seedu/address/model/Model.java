@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendSortCriterion;
 import seedu.address.model.friend.FriendTarget;
 
 /**
@@ -107,4 +108,14 @@ public interface Model {
 
     /** Returns the scope of the displayed list, including when it is empty. */
     FriendListScope getFriendListScope();
+
+    /**
+     * Sorts the currently displayed friend list by the given criterion and direction.
+     *
+     * @throws NullPointerException if {@code sortCriterion} is null.
+     */
+    void sortFilteredFriendList(FriendSortCriterion sortCriterion, boolean isDescending);
+
+    /** Clears the ordering applied to the currently displayed friend list. */
+    void clearFriendListSort();
 }
