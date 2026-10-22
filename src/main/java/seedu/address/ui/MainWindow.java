@@ -35,6 +35,7 @@ public class MainWindow extends UiPart<Stage> {
 
     // Independent Ui parts residing in this Ui container
     private FriendDetailsPanel friendDetailsPanel;
+    private FriendListPanel friendListPanel;
     private ResultDisplay resultDisplay;
     private final HelpWindow helpWindow;
 
@@ -127,8 +128,9 @@ public class MainWindow extends UiPart<Stage> {
         friendDetailsPanel = new FriendDetailsPanel(logic.getMyself(), true);
         friendDetailsPanelPlaceholder.getChildren().add(friendDetailsPanel.getRoot());
 
-        FriendListPanel friendListPanel = new FriendListPanel(logic.getFilteredFriendList(),
+        friendListPanel = new FriendListPanel(logic.getFilteredFriendList(),
                 this::showFriendDetails);
+        friendListPanel.setFriendListScope(logic.getFriendListScope());
         friendListPanelPlaceholder.getChildren().add(friendListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
@@ -226,6 +228,8 @@ public class MainWindow extends UiPart<Stage> {
             logger.info("An error occurred while executing command: " + commandText);
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
+        } finally {
+            friendListPanel.setFriendListScope(logic.getFriendListScope());
         }
     }
 }

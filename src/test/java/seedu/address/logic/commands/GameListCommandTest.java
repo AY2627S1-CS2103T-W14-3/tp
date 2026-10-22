@@ -113,7 +113,7 @@ public class GameListCommandTest {
     public void execute_afterFind_usesDisplayedIndexAndPreservesFilter() {
         NameContainsKeywordsPredicate predicate = new NameContainsKeywordsPredicate(List.of("Bob"));
         new FindCommand(predicate).execute(model);
-        expectedModel.updateFilteredFriendList(predicate);
+        expectedModel.updateSearchFriendList(predicate);
 
         assertCommandSuccess(new GameListCommand(INDEX_FIRST_FRIEND), model,
                 new CommandResult("Listed 1 game(s) that Bob plays:", bob), expectedModel);

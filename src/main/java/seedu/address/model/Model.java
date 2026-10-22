@@ -2,6 +2,7 @@ package seedu.address.model;
 
 import java.util.function.Predicate;
 
+import io.vavr.control.Option;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.index.Index;
@@ -56,6 +57,9 @@ public interface Model {
      */
     boolean hasFriend(Friend friend);
 
+    /** Returns the stored active or archived friend with the same identity, regardless of display filters. */
+    Option<Friend> findFriend(Friend friend);
+
     /**
      * Deletes the given friend.
      * The friend must exist in GameMates.
@@ -90,8 +94,17 @@ public interface Model {
     ObservableList<Friend> getFilteredFriendList();
 
     /**
-     * Updates the filter of the filtered friend list to filter by the given {@code predicate}.
+     * Shows active friends matching the given {@code predicate}, leaving the archive view.
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredFriendList(Predicate<Friend> predicate);
+
+    /** Shows archived friends matching the given predicate. */
+    void updateArchivedFriendList(Predicate<Friend> predicate);
+
+    /** Shows matching friends from both active and archived lists as search results. */
+    void updateSearchFriendList(Predicate<Friend> predicate);
+
+    /** Returns the scope of the displayed list, including when it is empty. */
+    FriendListScope getFriendListScope();
 }

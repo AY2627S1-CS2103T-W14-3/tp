@@ -45,6 +45,17 @@ public class UniqueFriendListTest {
     }
 
     @Test
+    public void findFriend_matchesIdentityAndReturnsStoredDetails() {
+        Friend archived = ALICE.withArchived(true);
+        Friend candidate = new FriendBuilder(ALICE).withPhone("91234567").build();
+        assertTrue(uniqueFriendList.findFriend(candidate).isEmpty());
+        uniqueFriendList.add(archived);
+        assertEquals(archived, uniqueFriendList.findFriend(candidate).get());
+        assertTrue(uniqueFriendList.findFriend(candidate).get().isArchived());
+        assertThrows(NullPointerException.class, () -> uniqueFriendList.findFriend(null));
+    }
+
+    @Test
     public void add_nullFriend_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> uniqueFriendList.add(null));
     }

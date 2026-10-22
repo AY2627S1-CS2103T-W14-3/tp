@@ -6,6 +6,7 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 import java.util.Iterator;
 import java.util.List;
 
+import io.vavr.control.Option;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.model.friend.exceptions.DuplicateFriendException;
@@ -32,8 +33,13 @@ public class UniqueFriendList implements Iterable<Friend> {
      * Returns true if the list contains an equivalent friend as the given argument.
      */
     public boolean contains(Friend toCheck) {
+        return findFriend(toCheck).isDefined();
+    }
+
+    /** Returns the stored friend with the same identity, or none when no match exists. */
+    public Option<Friend> findFriend(Friend toCheck) {
         requireNonNull(toCheck);
-        return internalList.stream().anyMatch(toCheck::isSameFriend);
+        return Option.ofOptional(internalList.stream().filter(toCheck::isSameFriend).findFirst());
     }
 
     /**
