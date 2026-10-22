@@ -18,7 +18,7 @@ Your friends and game entries are saved locally for your next session.
 
 * Add friends with just a name, optional phone/email details and tags; edit or delete them later.
 * Find friends by name or list friends who play a particular game.
-* View a friend's games and in-game usernames, or show only one matching game with `gamelist`.
+* View a friend's or your own games and in-game usernames, or show only one matching game with `gamelist`.
 * Add or remove games for a friend or your own profile using `gameadd` and `gamedel`.
 * Edit your own profile using `edit myself`, keep it separate from friends, and back up your local data file.
 

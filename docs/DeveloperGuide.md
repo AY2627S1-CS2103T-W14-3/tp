@@ -90,7 +90,7 @@ The `UI` component,
 * depends on some classes in the `Model` component because it displays `Friend` objects from the model.
 
 `FriendListPanel` sends selection changes to a consumer owned by `MainWindow`. Command-driven selection uses
-`CommandResult.friendToShow` and `gameFilter`, described under [Viewing a friend's games](#viewing-a-friends-games).
+`CommandResult.friendToShow`, `showMyself` and `gameFilter`, described under [Viewing games](#viewing-games).
 Successful results without a friend payload show `Logic.getMyself()`; a single-result `find` selects that friend.
 Parse or command failures update feedback without explicitly refreshing details. A game filter is applied only
 while rendering cards, preserving both the model and the left-hand friend-list predicate.
@@ -190,7 +190,7 @@ Startup uses sample data for a missing GameMates file
 and an empty GameMates for a loading error. Missing or unreadable preferences use default preferences.
 JSON contact fields that are null or empty map to the corresponding empty contact value; invalid
 nonempty contact values are rejected without trimming. Missing `games` or `tags` load as empty sets, and missing
-`myself` retains `Friend.DEFAULT_MYSELF`. Stored games require a valid `name`. Missing, null or empty usernames 
+`myself` retains `Friend.DEFAULT_MYSELF`. Stored games require a valid `name`. Missing, null or empty usernames
 are mapped to `Username.EMPTY` and invalid non-empty values, including whitespace-only strings, are rejected.
 Duplicate friend names reject the whole data load, including a previously parsed profile; startup uses a new empty `GameMates`.
 
@@ -324,22 +324,25 @@ The [game edit sequence diagram source](diagrams/GameEditSequenceDiagram.puml) s
 
 ### Viewing a friend's games
 
-`gamelist <FRIEND_INDEX> [g/GAME_NAME]` selects a friend for the right-hand details panel without changing the
-left-hand friend list. The flow is:
+`gamelist FRIEND_INDEX|myself [g/GAME_NAME]` selects a friend or the user profile for the right-hand details panel
+without changing the left-hand friend list. The flow is:
 
-1. `GameMatesParser` routes `gamelist` to `GameListCommandParser`. The parser requires one positional index before
-   at most one `g/` filter. It recognizes prefixes at whitespace boundaries so unknown prefixes and repeated
+1. `GameMatesParser` routes `gamelist` to `GameListCommandParser`. The parser requires one positional index or
+   `myself` selector before at most one `g/` filter. It recognizes prefixes at whitespace boundaries so unknown prefixes and repeated
    `g/` tokens cannot silently become part of a multiword game name. Other words after `g/` belong to the name.
-   Index parsing uses `ParserUtil.parseIndex`, and game validation uses the existing `GameName` rules.
+   Selector parsing uses `ParserUtil.parseIndexOrMyself`, and game validation uses the existing `GameName` rules.
    Command-specific errors are translated locally, leaving other commands' validation and messages unchanged.
 2. `GameListCommand.execute` resolves the index against `Model.getFilteredFriendList()`, so indices remain correct
-   after both name searches and game-based friend filtering. It checks empty and out-of-range lists before lookup.
+   after both name searches and game-based friend filtering. It checks empty and out-of-range lists before
+   numeric lookup. `Model.resolveFriend` resolves the selected friend or the separate profile; `myself` works even with an empty displayed list.
    It uses `GameName.equals` for exact, case-insensitive matching. No match and no games return successful results.
-3. `CommandResult` carries the original `Friend` in `friendToShow` and an optional `GameName` in `gameFilter`.
+3. `CommandResult` carries the original `Friend` in `friendToShow` and an optional `GameName` in `gameFilter`,
+   plus `showMyself` to distinguish the profile from a friend with identical details.
    The filter requires a selected friend, participates in equality, hashing and diagnostic output, and defaults
    to empty in the existing constructors. Feedback uses the stored game name on a match and the trimmed query
    when there is no match.
-4. `MainWindow.refreshFriendDetails` forwards both payload fields to `FriendDetailsPanel.setFriend`.
+4. `MainWindow.refreshFriendDetails` forwards the selected friend, profile flag and game filter to
+   `FriendDetailsPanel.setFriend`.
    The panel filters the stream used to construct `GameDetailsCard` instances and displays an explicit empty label
    if the stream has no entries. It never constructs a replacement friend or modifies the original game set.
    An unfiltered command clears the game filter. The existing two-argument `setFriend` also clears it, including
@@ -347,7 +350,8 @@ left-hand friend list. The flow is:
    Parse and execution failures do not refresh the panel, preserving the previous game display.
 
 The command does not update the model's friend-list predicate, friends, games, preferences or Myself profile.
-The existing profile fallback and its rendering are preserved. `GameDetailsCard` currently renders the available
+The profile fallback still shows all profile games; explicit profile selection supports game filtering.
+`GameDetailsCard` currently renders the available
 `Game.getGameName()` and `Game.getUsername()` fields. Metadata storage has merged, but cards do not yet render
 `Game.getMetas()`. Extend the card using `Meta.getKey()` and `Meta.getValue()` and add rendering/preservation tests;
 the command's original-friend payload already retains metadata without copying or removing it.
@@ -831,6 +835,10 @@ Prerequisite: fresh sample data.
    proving that selecting another friend clears the display filter. No stored game entry should be removed.
 6. `gamelist 3 g/Stardew Valley`: expected Charlotte's Stardew Valley card. `find David`, then `gamelist 1`,
    selects David rather than Alex. `list g/Unknown`, then `gamelist 1`, reports an empty displayed list.
+7. `gamelist myself`: expected `Your details` and all profile games. `gamelist myself g/Valorant` shows only
+   your Valorant card if present. `find Unknown`, then `gamelist MYSELF`, still selects your profile with the empty
+   friend list unchanged. `gamelist myself g/Unknown` reports no match. If no profile details exist, the panel
+   continues showing `No details added`.
 
 ### Deletion and clearing
 

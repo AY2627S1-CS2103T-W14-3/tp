@@ -90,6 +90,30 @@ class MainWindowTest {
     }
 
     @Test
+    void gameList_myself_selectsProfileAndClearsFilter() {
+        FxTestUtil.runAndWait(() -> {
+            Friend profile = new FriendBuilder().withName("Alice").withGames(
+                    new GameBuilder().withGameName("Valorant").build(), new GameBuilder().build()).build();
+            // An identical friend must still be labelled as a friend when selected by numeric index.
+            StubLogic logic = new StubLogic(profile);
+            logic.model.setMyself(profile);
+            MainWindow window = new MainWindow(new Stage(), logic, Path.of("test-data.json"));
+            window.fillInnerParts();
+            window.getRoot().getScene().getRoot().applyCss();
+
+            executeCommand(window, "gamelist 1");
+            assertEquals("Friend details", getLabel(window, "#title").getText());
+            executeCommand(window, "gamelist myself g/valorant");
+            assertEquals("Your details", getLabel(window, "#title").getText());
+            assertEquals(1, getGames(window).getChildren().size());
+            assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
+
+            executeCommand(window, "gamelist myself");
+            assertEquals(2, getGames(window).getChildren().size());
+        });
+    }
+
+    @Test
     void gameList_invalidCommands_preserveDetailsAndGameFilter() {
         FxTestUtil.runAndWait(() -> {
             Friend friend = new FriendBuilder().withName("Alice").withGames(
