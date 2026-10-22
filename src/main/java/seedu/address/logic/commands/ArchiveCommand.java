@@ -14,10 +14,11 @@ import seedu.address.model.friend.Friend;
 public class ArchiveCommand extends Command {
     public static final String COMMAND_WORD = "archive";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Archives a friend by its displayed index in the active list. Run list first.\n"
+            + ": Archives an active friend by its displayed index in the active list or search results.\n"
             + "Parameters: FRIEND_INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 1";
     public static final String MESSAGE_WRONG_VIEW = "Please switch back to list to archive a friend.";
+    public static final String MESSAGE_WRONG_STATUS = "This friend is already archived.";
     public static final String MESSAGE_SUCCESS = "Archived %1$s.";
     public static final String MESSAGE_MYSELF = "Your Myself profile cannot be archived or unarchived.";
 
@@ -33,13 +34,16 @@ public class ArchiveCommand extends Command {
         if (targetIndex.isMyself()) {
             throw new CommandException(MESSAGE_MYSELF);
         }
-        if (model.getFriendListView() != FriendListView.ACTIVE) {
+        if (model.getFriendListView() == FriendListView.ARCHIVED) {
             throw new CommandException(MESSAGE_WRONG_VIEW);
         }
         if (targetIndex.getZeroBased() >= model.getFilteredFriendList().size()) {
             throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
         }
         Friend friend = model.getFilteredFriendList().get(targetIndex.getZeroBased());
+        if (friend.isArchived()) {
+            throw new CommandException(MESSAGE_WRONG_STATUS);
+        }
         model.setFriend(friend, friend.withArchived(true));
         return new CommandResult(String.format(MESSAGE_SUCCESS, friend.getName()));
     }
