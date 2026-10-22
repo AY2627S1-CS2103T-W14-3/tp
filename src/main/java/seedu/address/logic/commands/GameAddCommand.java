@@ -57,12 +57,28 @@ public class GameAddCommand extends Command {
 
         FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
         Friend friend = target.friend();
-        checkForDuplicate(friend);
+        checkForDuplicateGame(friend);
+        model.setFriend(target, createFriendWithAddedGame(friend));
+        return new CommandResult(formatSuccessMessage(friend));
+    }
+
+    /** Rejects adding a game that the selected friend or profile already has. */
+    private void checkForDuplicateGame(Friend friend) throws CommandException {
+        if (friend.getGames().stream().anyMatch(existing -> existing.isSameGame(toAdd))) {
+            throw new CommandException(String.format(MESSAGE_DUPLICATE_GAME, friend.getName(), toAdd.getGameName()));
+        }
+    }
+
+    /** Creates a friend with the added game, preserving their other details and games. */
+    private Friend createFriendWithAddedGame(Friend friend) {
         Set<Game> games = new HashSet<>(friend.getGames());
         games.add(toAdd);
-        Friend updatedFriend = new Friend(friend.getName(), friend.getPhone(), friend.getEmail(),
+        return new Friend(friend.getName(), friend.getPhone(), friend.getEmail(),
                 games, friend.getTags());
-        model.setFriend(target, updatedFriend);
+    }
+
+    /** Formats success feedback with the username and any metadata sorted by key ignoring case. */
+    private String formatSuccessMessage(Friend friend) {
         String feedback = String.format(MESSAGE_SUCCESS,
                 toAdd.getGameName(), friend.getName(),
                 toAdd.getUsername().isEmpty() ? "Not provided" : toAdd.getUsername());
@@ -72,14 +88,7 @@ public class GameAddCommand extends Command {
                     .map(meta -> " - " + meta.getKey() + ": " + meta.getValue())
                     .collect(Collectors.joining("\n", "\nMetadata:\n", ""));
         }
-        return new CommandResult(feedback);
-    }
-
-    /** Rejects adding a game that the selected friend or profile already has. */
-    private void checkForDuplicate(Friend friend) throws CommandException {
-        if (friend.getGames().stream().anyMatch(existing -> existing.isSameGame(toAdd))) {
-            throw new CommandException(String.format(MESSAGE_DUPLICATE_GAME, friend.getName(), toAdd.getGameName()));
-        }
+        return feedback;
     }
 
     @Override
