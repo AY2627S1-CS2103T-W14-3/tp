@@ -215,11 +215,15 @@ Examples:
 
 ### Adding a game: `gameadd`
 
-Adds a game and in-game username to a friend or your own profile.
+Adds a game with an optional in-game username to a friend or your own profile.
 
-Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME u/USER_NAME`
+Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME]`
 
-* Both fields are required, non-empty and limited to 50 characters each, with at least one letter or digit.
+* The game name is required. The username is optional, omit `u/` if you do not know it.
+* Game names and supplied usernames must contain 1–50 printable characters after trimming,
+  including at least one letter or digit.
+* Supplying `u/` without a value, or with only whitespace, is rejected. Omit the prefix instead.
+* Repeated `g/` or `u/` prefixes are rejected, even when the values are identical.
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
 
@@ -227,6 +231,8 @@ Examples:
 
 * `gameadd 1 g/Valorant u/player123`
 * `gameadd myself g/Minecraft u/myUsername`
+* `gameadd 1 g/Valorant` adds the game without a username.
+* `gameadd myself g/Stardew Valley` adds a game to your profile without a username.
 
 ### Deleting a game: `gamedel`
 
@@ -245,7 +251,7 @@ Examples:
 ### Viewing a friend's games: `gamelist`
 
 Shows a friend's details and game cards in the right panel, keeping the friend list and its current filter on the left.
-Each game card shows the game name and in-game username.
+Each game card shows the game name and in-game username if provided.
 
 Format: `gamelist <FRIEND_INDEX> [g/GAME_NAME]`
 
@@ -453,8 +459,9 @@ close the destination app, back up its current file, replace it with your copy a
 Copy `preferences.json` only if you also want the saved window settings.
 
 If you edit JSON manually, close the app first and keep a backup. Friend entries contain `name`, optional
-`phone` and `email`, `tags`, and `games`. A game has a `name` and `username`. Existing files that omit `games`
-load with no games; files that omit `myself` use the default empty profile. Empty or missing contact fields mean
+`phone` and `email`, `tags`, and `games`. A game has a required `name` and an optional `username`.
+An empty or missing `username` means no username has been provided; the game entry is still retained.
+Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile. Empty or missing contact fields mean
 `Not provided`. Use the same validation rules as command input. Stored game metadata is supported as an optional
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
@@ -501,7 +508,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Delete** | `delete FRIEND_INDEX`<br> e.g., `delete 3` |
 | **Edit** | <code>edit FRIEND_INDEX&#124;myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
-| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME u/USER_NAME</code><br> e.g., `gameadd myself g/Valorant u/player123` |
+| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME]</code><br> e.g., `gameadd myself g/Valorant u/player123` or `gameadd 1 g/Minecraft` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | `gamelist <FRIEND_INDEX> [g/GAME_NAME]`<br> e.g., `gamelist 2 g/Valorant` |
 | **Squad metadata** | `squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`<br> e.g., `squad g/Valorant n/3 m/Role:Healer` |

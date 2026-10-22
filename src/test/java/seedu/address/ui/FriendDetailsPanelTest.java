@@ -10,11 +10,25 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
+import seedu.address.model.game.Username;
 import seedu.address.testutil.FriendBuilder;
 import seedu.address.testutil.GameBuilder;
 
 class FriendDetailsPanelTest {
+
+    @Test
+    void setFriend_gameWithoutUsername_showsNotProvided() {
+        FxTestUtil.runAndWait(() -> {
+            Friend friend = new FriendBuilder().withGames(
+                    new Game(new GameName("Valorant"), Username.EMPTY)).build();
+            FriendDetailsPanel panel = new FriendDetailsPanel(friend, false);
+            assertEquals("Valorant", getGameCardLabel(getFirstGameCard(panel), ".details-game-name").getText());
+            assertEquals("Username: Not provided",
+                    getGameCardLabel(getFirstGameCard(panel), ".details-game-username").getText());
+        });
+    }
 
     @Test
     void setFriend_defaultProfile_showsEmptyState() {
