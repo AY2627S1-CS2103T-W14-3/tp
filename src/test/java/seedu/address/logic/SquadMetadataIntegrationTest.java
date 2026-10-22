@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.GameMates;
 import seedu.address.model.ModelManager;
 import seedu.address.storage.JsonGameMatesStorage;
@@ -23,6 +24,47 @@ import seedu.address.testutil.GameBuilder;
 public class SquadMetadataIntegrationTest {
     @TempDir
     public Path directory;
+
+    @Test
+    public void execute_gameaddMetadataAndSortedPinnedFriends_filterSameGameAndPreserveStorage() throws Exception {
+        ModelManager model = new ModelManager();
+        Path file = directory.resolve("routed-metadata.json");
+        JsonGameMatesStorage json = new JsonGameMatesStorage(file);
+        LogicManager logic = new LogicManager(model,
+                new StorageManager(json, new JsonUserPrefsStorage(directory.resolve("preferences.json"))));
+        logic.execute("add n/Alpha");
+        logic.execute("add n/Beta");
+        logic.execute("add n/Cross Game");
+        logic.execute("gameadd 1 g/Valorant m/Role:Healer m/Region:Asia");
+        logic.execute("gameadd 2 g/Valorant m/role:Healer m/REGION:Asia");
+        logic.execute("gameadd 3 g/Valorant m/Role:Healer");
+        logic.execute("gameadd 3 g/Minecraft m/Region:Asia");
+        logic.execute("pin 2");
+        logic.execute("list s/name o/desc");
+        GameMates before = new GameMates(model.getGameMates());
+        var displayed = new ArrayList<>(model.getFilteredFriendList());
+        String saved = Files.readString(file);
+        var result = logic.execute("squad g/valorant n/3 m/role:Healer m/region:Asia");
+        assertEquals("Found squad of 3 people:\n1. Me\n2. Beta (index: 2)\n3. Alpha (index: 3)",
+                result.getFeedbackToUser());
+        assertTrue(result.isPreserveDetails());
+        assertEquals(FriendListScope.ACTIVE, model.getFriendListScope());
+        assertEquals(before, model.getGameMates());
+        assertEquals(displayed, model.getFilteredFriendList());
+        assertEquals(saved, Files.readString(file));
+        logic.execute("archive 2");
+        logic.execute("archivelist");
+        before = new GameMates(model.getGameMates());
+        saved = Files.readString(file);
+        assertEquals("Found squad of 2 people:\n1. Me\n2. Beta (index: 1)",
+                logic.execute("squad g/Valorant n/2 m/Role:Healer m/Region:Asia").getFeedbackToUser());
+        assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
+        assertEquals(before, model.getGameMates());
+        assertTrue(model.getFilteredFriendList().getFirst().isPinned());
+        assertTrue(model.getFilteredFriendList().getFirst().isArchived());
+        assertEquals(saved, Files.readString(file));
+        assertEquals(before, json.readGameMates().get());
+    }
 
     @Test
     public void execute_routedConditions_preserveModelAndPersistedData() throws Exception {

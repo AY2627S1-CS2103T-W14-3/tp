@@ -14,9 +14,11 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.ParserUtil;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.GameMates;
 import seedu.address.model.ModelManager;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendSortCriterion;
 import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
 import seedu.address.model.game.Username;
@@ -57,6 +59,40 @@ public class SquadMetadataCommandTest {
         assertEquals(visible, model.getFilteredFriendList());
         model.updateFilteredFriendList(friend -> true);
         assertEquals(7, model.getFilteredFriendList().size());
+    }
+
+    @Test
+    public void execute_sortedScopes_preservesIndicesPinArchiveStatusesAndState() throws Exception {
+        for (FriendListScope scope : FriendListScope.values()) {
+            ModelManager scoped = new ModelManager();
+            Friend hidden = player("Hidden", "Healer", "Asia").withArchived(scope == FriendListScope.ARCHIVED);
+            Friend alpha = player("Alpha", "Healer", "Asia").withPinned(true)
+                    .withArchived(scope != FriendListScope.ACTIVE);
+            Friend beta = player("Beta", "Healer", "Asia").withArchived(scope == FriendListScope.ARCHIVED);
+            Friend wrongRole = player("Wrong Role", "Tank", "Asia").withArchived(scope == FriendListScope.ARCHIVED);
+            for (Friend friend : List.of(hidden, alpha, wrongRole, beta)) {
+                scoped.addFriend(friend);
+            }
+            switch (scope) {
+                case ACTIVE -> scoped.updateFilteredFriendList(friend -> !friend.equals(hidden));
+                case ARCHIVED -> scoped.updateArchivedFriendList(friend -> !friend.equals(hidden));
+                case SEARCH -> scoped.updateSearchFriendList(friend -> !friend.equals(hidden));
+                default -> throw new AssertionError("Unhandled scope: " + scope);
+            }
+            scoped.sortFilteredFriendList(FriendSortCriterion.NAME, true);
+            GameMates before = new GameMates(scoped.getGameMates());
+            List<Friend> displayed = List.copyOf(scoped.getFilteredFriendList());
+            CommandResult result = command(3, "Role:Healer", "Region:Asia").execute(scoped);
+            assertEquals("Found squad of 3 people:\n1. Me\n2. Beta (username: Amy123, index: 2)"
+                    + "\n3. Alpha (username: Amy123, index: 3)", result.getFeedbackToUser());
+            assertTrue(result.isPreserveDetails());
+            assertThrows(CommandException.class, "Could not find a squad of 4 people.", () ->
+                    command(4, "Role:Healer", "Region:Asia").execute(scoped));
+            assertTrue(command(4).execute(scoped).getFeedbackToUser().contains("Wrong Role"));
+            assertEquals(before, scoped.getGameMates());
+            assertEquals(displayed, scoped.getFilteredFriendList());
+            assertEquals(scope, scoped.getFriendListScope());
+        }
     }
 
     @Test

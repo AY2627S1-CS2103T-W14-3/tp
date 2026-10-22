@@ -55,6 +55,12 @@ public class GameBuilder {
         return this;
     }
 
+    /** Sets the username to the value used when the username is omitted. */
+    public GameBuilder withoutUsername() {
+        this.username = Username.EMPTY;
+        return this;
+    }
+
     /**
      * Sets the metadata of the game being built.
      */

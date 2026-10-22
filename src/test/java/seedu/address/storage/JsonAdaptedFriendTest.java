@@ -50,6 +50,20 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
+    public void toModelType_archivedFriend_roundTrips() throws Exception {
+        Friend original = new FriendBuilder(BENSON).withGames(
+                new GameBuilder().addMeta("Role", "Support").build()).build().withArchived(true);
+        String json = JsonUtil.toJsonString(new JsonAdaptedFriend(original));
+        assertEquals(original, JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType());
+    }
+
+    @Test
+    public void toModelType_missingArchiveStatus_defaultsToActive() throws Exception {
+        String json = "{\"name\":\"Alice Tan\"}";
+        assertFalse(JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType().isArchived());
+    }
+
+    @Test
     public void toModelType_games_roundTrips() throws Exception {
         Friend original = new FriendBuilder(BENSON).withGames(
                 new GameBuilder().withGameName("Valorant").withUsername("benson").build(),
@@ -79,6 +93,19 @@ public class JsonAdaptedFriendTest {
     public void toModelType_validFriendDetails_returnsFriend() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(BENSON);
         assertEquals(BENSON, friend.toModelType());
+    }
+
+    @Test
+    public void toModelType_pinnedFriend_roundTrips() throws Exception {
+        Friend pinnedFriend = new FriendBuilder(BENSON).withPinned(true).build();
+        assertEquals(pinnedFriend, new JsonAdaptedFriend(pinnedFriend).toModelType());
+    }
+
+    @Test
+    public void toModelType_missingPinnedField_defaultsToUnpinnedFriend() throws Exception {
+        JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                VALID_GAMES, VALID_TAGS);
+        assertFalse(friend.toModelType().isPinned());
     }
 
     @Test

@@ -29,7 +29,8 @@ public class SquadCommand extends Command {
     public static final String MESSAGE_USAGE = "Invalid command format. Usage: " + COMMAND_WORD + " "
             + PREFIX_GAME + "GAME "
             + PREFIX_NAME + "NUMBER_OF_PEOPLE [" + PREFIX_META + "KEY:VALUE]...\n"
-            + "All metadata conditions must match the requested game; keys ignore case, values preserve case."
+            + "All metadata conditions must match the requested game; keys ignore case, values match exactly,"
+            + " including case."
             + " Repeated keys and empty metadata are rejected. Me is always included and counts towards the size.";
     public static final String MESSAGE_SUCCESS = "Found squad of %1$d people:";
     public static final String MESSAGE_SUCCESS_SINGULAR = "Found squad of 1 person:";

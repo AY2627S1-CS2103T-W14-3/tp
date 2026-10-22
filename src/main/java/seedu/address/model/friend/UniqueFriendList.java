@@ -3,9 +3,11 @@ package seedu.address.model.friend;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import io.vavr.control.Option;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.model.friend.exceptions.DuplicateFriendException;
@@ -24,6 +26,8 @@ import seedu.address.model.friend.exceptions.FriendNotFoundException;
  */
 public class UniqueFriendList implements Iterable<Friend> {
 
+    private static final Comparator<Friend> PINNED_FRIENDS_FIRST = Comparator.comparing(Friend::isPinned).reversed();
+
     private final ObservableList<Friend> internalList = FXCollections.observableArrayList();
     private final ObservableList<Friend> internalUnmodifiableList =
             FXCollections.unmodifiableObservableList(internalList);
@@ -32,8 +36,13 @@ public class UniqueFriendList implements Iterable<Friend> {
      * Returns true if the list contains an equivalent friend as the given argument.
      */
     public boolean contains(Friend toCheck) {
+        return findFriend(toCheck).isDefined();
+    }
+
+    /** Returns the stored friend with the same identity, or none when no match exists. */
+    public Option<Friend> findFriend(Friend toCheck) {
         requireNonNull(toCheck);
-        return internalList.stream().anyMatch(toCheck::isSameFriend);
+        return Option.ofOptional(internalList.stream().filter(toCheck::isSameFriend).findFirst());
     }
 
     /**
@@ -46,6 +55,7 @@ public class UniqueFriendList implements Iterable<Friend> {
             throw new DuplicateFriendException();
         }
         internalList.add(toAdd);
+        movePinnedFriendsToTop();
     }
 
     /**
@@ -66,6 +76,7 @@ public class UniqueFriendList implements Iterable<Friend> {
         }
 
         internalList.set(index, editedFriend);
+        movePinnedFriendsToTop();
     }
 
     /**
@@ -82,6 +93,7 @@ public class UniqueFriendList implements Iterable<Friend> {
     public void setFriends(UniqueFriendList replacement) {
         requireNonNull(replacement);
         internalList.setAll(replacement.internalList);
+        movePinnedFriendsToTop();
     }
 
     /**
@@ -95,6 +107,7 @@ public class UniqueFriendList implements Iterable<Friend> {
         }
 
         internalList.setAll(friends);
+        movePinnedFriendsToTop();
     }
 
     /**
@@ -145,5 +158,12 @@ public class UniqueFriendList implements Iterable<Friend> {
             }
         }
         return true;
+    }
+
+    /**
+     * Keeps pinned friends before unpinned friends while retaining their existing relative order.
+     */
+    private void movePinnedFriendsToTop() {
+        FXCollections.sort(internalList, PINNED_FRIENDS_FIRST);
     }
 }

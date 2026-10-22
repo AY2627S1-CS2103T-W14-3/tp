@@ -29,19 +29,30 @@ class JsonAdaptedFriend {
     private final String name;
     private final String phone;
     private final String email;
+    private final boolean archived;
+    private final boolean pinned;
     private final List<JsonAdaptedGame> games = new ArrayList<>();
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
      * Constructs a {@code JsonAdaptedFriend} with the given friend details.
      */
+    public JsonAdaptedFriend(String name, String phone, String email, List<JsonAdaptedGame> games,
+            List<JsonAdaptedTag> tags) {
+        this(name, phone, email, games, tags, false, null);
+    }
+
+    /** Missing archive and pin statuses in older save files default to false. */
     @JsonCreator
     public JsonAdaptedFriend(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("games") List<JsonAdaptedGame> games,
-            @JsonProperty("tags") List<JsonAdaptedTag> tags) {
+            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("archived") boolean archived,
+            @JsonProperty("pinned") Boolean pinned) {
+        this.archived = archived;
         this.name = name;
         this.phone = phone;
         this.email = email;
+        this.pinned = Boolean.TRUE.equals(pinned);
         if (games != null) {
             this.games.addAll(games);
         }
@@ -54,9 +65,11 @@ class JsonAdaptedFriend {
      * Converts a given {@code Friend} into this class for Jackson use.
      */
     public JsonAdaptedFriend(Friend source) {
+        archived = source.isArchived();
         name = source.getName().fullName;
         phone = source.getPhone().value;
         email = source.getEmail().value;
+        pinned = source.isPinned();
         games.addAll(source.getGames().stream().map(JsonAdaptedGame::new).toList());
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
@@ -101,7 +114,7 @@ class JsonAdaptedFriend {
         })).getOrElse(Email.EMPTY);
 
         final Set<Tag> modelTags = new HashSet<>(friendTags);
-        return new Friend(modelName, modelPhone, modelEmail, modelGames, modelTags);
+        return new Friend(modelName, modelPhone, modelEmail, modelGames, modelTags, archived, pinned);
     }
 
 }
