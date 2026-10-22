@@ -230,6 +230,8 @@ Format: `pin FRIEND_INDEX`
   is rejected without changing the list.
 * Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
   filtering the list by game.
+* A newly pinned friend is placed after friends already in the pinned group, while remaining above all unpinned
+  friends.
 * Pinned friend cards display a `Pinned` badge, making the boundary between pinned and unpinned friends visible.
 
 Examples:
