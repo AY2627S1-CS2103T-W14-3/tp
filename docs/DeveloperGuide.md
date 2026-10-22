@@ -326,10 +326,9 @@ without changing the left-hand friend list. The flow is:
 
 The command does not update the model's friend-list predicate, friends, games, preferences or Myself profile.
 The profile fallback still shows all profile games; explicit profile selection supports game filtering.
-`GameDetailsCard` currently renders the available
-`Game.getGameName()` and `Game.getUsername()` fields. Metadata storage has merged, but cards do not yet render
-`Game.getMetas()`. Extend the card using `Meta.getKey()` and `Meta.getValue()` and add rendering/preservation tests;
-the command's original-friend payload already retains metadata without copying or removing it.
+`GameDetailsCard` renders `Game.getGameName()`, `Game.getUsername()` and `Game.getMetas()`.
+Metadata pairs appear below the username as wrapping `Key: Value` labels, sorted by key ignoring case.
+The command's original-friend payload retains metadata without copying or removing it.
 
 Parser and command tests cover errors, exact matching, empty results, displayed-list indexing and unchanged model
 data. JavaFX panel and window tests exercise filtered payloads, empty states, clearing by commands and selection,
@@ -737,7 +736,7 @@ The following are targets, not measured guarantees. Startup/performance and larg
 * **Role**: A job or duty a friend plays as in a particular game, for example a friend can play as a `Sniper` or a `Healer`.
 * **Game name**: The user-provided name used to identify a game within one friend’s game entries. Aliases such as “Val” and “Valorant” are treated as different game names.
 * **In-game username/Handle**: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.
-* **Metadata**: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; command entry and card rendering are not yet supported.
+* **Metadata**: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; entered through `gameadd` using `m/KEY:VALUE` and displayed below the username in game cards.
 * **Metadata key**: The label before the first colon in a metadata item. For example, `Role` in `Role:Sentinel`.
 * **Metadata value**: The information after the first colon in a metadata item. For example, `Sentinel` in `Role:Sentinel`.
 * **Friend index**: A positive number representing a friend’s position in the currently displayed friend list.
@@ -861,10 +860,11 @@ This seeds existing data for testing; it is not an own-profile edit command.
 2. `list g/Unknown`, then `edit MYSELF n/Joash Updated p/`: expected the renamed profile with no phone number and
    its Minecraft game preserved. The left friend list remains empty. `edit myself n/Fixture Friend` rejects the
    duplicate name, and `add n/joash updated` rejects a name matching the profile.
-3. Try `edit n/Changed`: expected a missing-index error. Run `gameadd myself g/Test u/player`, then
-   `gamedel myself g/Test`: expected success and the original Minecraft entry preserved after both commands.
-   Metadata command entry cannot be tested because no routed command supports it yet. To test storage, close the app,
-   add `"metas": [{"key": "Role", "value": "Support:Mid"}]` to the fixture's Minecraft entry, relaunch and run `list`.
+3. Try `edit n/Changed`: expected a missing-index error. Run `gameadd myself g/Test u/player m/Role:Support:Mid`, then
+   `gamelist myself g/Test`: expected `Role: Support:Mid` in the addition feedback and below the username in the game card.
+   Run `gamedel myself g/Test`: expected success and the original Minecraft entry preserved.
+   To also test loading metadata from JSON, close the app, add
+   `"metas": [{"key": "Role", "value": "Support:Mid"}]` to the fixture's Minecraft entry, relaunch and run `list`.
    The saved JSON must retain that pair; cards show the game name and `Username: Not provided` when the username is omitted.
    A missing `metas` field loads as empty; a repeated key (including case variants) rejects the load and uses the documented fallback.
 4. Run `gameadd myself g/Test` without `u/`: expect success with `Username: Not provided` in feedback and the game card.

@@ -227,8 +227,9 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 * Repeated `g/` or `u/` prefixes are rejected, even when the values are identical.
 * Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters;
   values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.
-* Repeat `m/` for distinct keys, ignoring case. Malformed pairs, empty fields or duplicate keys reject the whole
-  command, even if values match. Omit `m/` entirely for no metadata.
+* Repeat `m/` for distinct keys. Metadata keys are case-insensitive, so `Role` and `role` are duplicates.
+  Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
+  Omit `m/` entirely for no metadata.
 * A space followed by `g/`, `u/` or `m/` starts a new parameter, even inside quotes; avoid these in field values.
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
@@ -503,5 +504,3 @@ while copying the file, then launch the destination app from its usual data fold
 | **List** | `list [g/GAME_NAME]`<br> e.g., `list g/Valorant` |
 | **Help** | `help` |
 | **Exit** | `exit` |
-
-Metadata entry is not supported.
