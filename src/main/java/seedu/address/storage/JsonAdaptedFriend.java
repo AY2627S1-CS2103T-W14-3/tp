@@ -17,6 +17,7 @@ import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.Name;
 import seedu.address.model.friend.Phone;
 import seedu.address.model.game.Game;
+import seedu.address.model.game.GameName;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -25,6 +26,7 @@ import seedu.address.model.tag.Tag;
 class JsonAdaptedFriend {
 
     public static final String MISSING_FIELD_MESSAGE_FORMAT = "Friend's %s field is missing!";
+    public static final String MESSAGE_DUPLICATE_GAME = "Games list contains duplicate game name(s).";
 
     private final String name;
     private final String phone;
@@ -83,8 +85,13 @@ class JsonAdaptedFriend {
      */
     public Friend toModelType() throws IllegalValueException {
         final Set<Game> modelGames = new HashSet<>();
+        final Set<GameName> gameNames = new HashSet<>();
         for (JsonAdaptedGame game : games) {
-            modelGames.add(game.toModelType());
+            Game modelGame = game.toModelType();
+            if (!gameNames.add(modelGame.getGameName())) {
+                throw new IllegalValueException(MESSAGE_DUPLICATE_GAME);
+            }
+            modelGames.add(modelGame);
         }
         final List<Tag> friendTags = new ArrayList<>();
         for (JsonAdaptedTag tag : tags) {
