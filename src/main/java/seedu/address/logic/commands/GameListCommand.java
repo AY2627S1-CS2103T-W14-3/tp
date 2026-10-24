@@ -62,7 +62,7 @@ public class GameListCommand extends Command {
         }
 
         FriendTarget target = model.resolveFriend(friendIndex);
-        FriendValidator.checkCanAccessGames(target);
+        FriendValidator.checkFriendInitialized(target);
         Friend friend = target.friend();
         String feedback;
         if (gameFilter == null) {

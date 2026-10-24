@@ -38,8 +38,8 @@ final class FriendValidator {
         }
     }
 
-    /** Rejects when they target an uninitialized profile, e.g. Myself profile whose name is empty. */
-    static void checkCanAccessGames(FriendTarget target) throws CommandException {
+    /** Rejects an uninitialized friend target, such as a Myself profile with an empty name. */
+    static void checkFriendInitialized(FriendTarget target) throws CommandException {
         requireAllNonNull(target);
         if (target.isMyself() && target.friend().getName().isEmpty()) {
             throw new CommandException(Messages.MESSAGE_MYSELF_NOT_INITIALIZED);

@@ -55,7 +55,7 @@ public class GameEditCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
-        FriendValidator.checkCanAccessGames(target);
+        FriendValidator.checkFriendInitialized(target);
         Friend friend = target.friend();
         List<Game> matches = friend.getGames().stream()
                 .filter(game -> game.getGameName().equals(existingGame)).toList();

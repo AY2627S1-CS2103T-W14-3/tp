@@ -288,7 +288,7 @@ The class diagram omits unrelated members and shows records as ordinary classes.
 For profile edits, `EditCommand` constructs the replacement before `FriendValidator` checks for name conflicts
 with all stored friends, including those hidden by the current filter. Profile edits, `gameadd`, `gameedit`,
 `gamedel` and `gamelist` preserve the friend-list filter.
-`FriendValidator.checkCanAccessGames` rejects those four commands targeting `myself` until
+`FriendValidator.checkFriendInitialized` rejects those four commands targeting `myself` until
 `edit myself n/NAME` sets the profile name.
 
 The sequence shows `gameadd myself g/Valorant u/player` after parsing. Helper calls and subsequent saving are omitted.
