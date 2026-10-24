@@ -90,6 +90,21 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
+    public void toModelType_duplicateGameNames_throwsIllegalValueException() {
+        JsonAdaptedGame original = new JsonAdaptedGame("Valorant", "player");
+        // Two partitions: identical entries, and the same normalized name with different details.
+        for (JsonAdaptedGame duplicate : List.of(
+                new JsonAdaptedGame("Valorant", "player"),
+                new JsonAdaptedGame(" VALORANT ", "anotherPlayer",
+                        List.of(new JsonAdaptedMeta("Role", "Support"))))) {
+            JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                    List.of(original, duplicate), VALID_TAGS);
+            assertThrows(IllegalValueException.class, JsonAdaptedFriend.MESSAGE_DUPLICATE_GAME,
+                    friend::toModelType);
+        }
+    }
+
+    @Test
     public void toModelType_validFriendDetails_returnsFriend() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(BENSON);
         assertEquals(BENSON, friend.toModelType());

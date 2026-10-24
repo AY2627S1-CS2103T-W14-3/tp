@@ -12,6 +12,7 @@ import static seedu.address.testutil.TypicalFriends.getTypicalGameMates;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -80,6 +81,16 @@ public class JsonGameMatesStorageTest {
     @Test
     public void readGameMates_invalidAndValidFriendGameMates_throwDataLoadingException() {
         assertThrows(DataLoadingException.class, () -> readGameMates("invalidAndValidFriendGameMates.json"));
+    }
+
+    @Test
+    public void readGameMates_duplicateGameNames_throwDataLoadingException() {
+        for (String fileName : List.of("duplicateFriendGameNamesGameMates.json",
+                "duplicateMyselfGameNamesGameMates.json")) {
+            DataLoadingException exception = assertThrows(DataLoadingException.class, () -> readGameMates(fileName));
+            assertInstanceOf(IllegalValueException.class, exception.getCause());
+            assertEquals(JsonAdaptedFriend.MESSAGE_DUPLICATE_GAME, exception.getCause().getMessage());
+        }
     }
 
     @Test
