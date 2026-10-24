@@ -255,7 +255,9 @@ characters/spaces, phones validate digit counts and grouping, and emails validat
 with length limits. The [User Guide](UserGuide.html#adding-a-friend-add) specifies the accepted input for users.
 No phone, email, game name or username is verified against an external service.
 Supplied `GameName` and `Username` values trim with `String.strip()`, count UTF-16 code units with `String.length()`,
-require a letter/digit code point and reject ISO control code points. This is not a general Unicode printability test.
+require a letter/digit code point and reject non-printable Unicode after trimming. The shared text validator rejects
+Unicode categories C (controls, format characters, unpaired surrogates, private use and unassigned characters),
+Zl (line separators) and Zp (paragraph separators). Printable Unicode, combining marks and emoji remain accepted.
 
 ### Myself profile
 
@@ -402,9 +404,8 @@ before publishing a complete v1.3 MVP guide.
 | Errors | Command-specific index and validation wording. | Messages differ across commands; use the verified wording in the User Guide instead of copying spec errors. |
 | Game uniqueness | One or no username per game name within a friend (pp. 16–19). | `gameadd` rejects duplicate game names through `Game.isSameGame`. Stored sets use full equality, so JSON can still contain the same game name with different usernames. |
 
-Additional integration issues found during the audit: root-level JSON `null` bypasses the loading fallback, and
-game-text validation uses ISO-control rejection rather than a complete Unicode printability check. These are
-recorded limits; no application fix is included in this documentation change.
+The audit's root-level JSON `null` loading issue remains unresolved. Game-text validation now rejects
+non-printable Unicode through the shared text validator described above.
 
 Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
 not a current use-case step. Game creation/deletion, metadata entry/display and own-profile editing are available.
@@ -419,9 +420,9 @@ exposes it as an unmodifiable set through `getMetas()`; the two-argument constru
 #### Validation and equality
 
 Leading and trailing whitespace is removed with `String.strip()` before validation and storage.
-`StringUtil.isValidTextField()` requires non-empty text with at least one letter or digit and no ISO control characters.
+`StringUtil.isValidTextField()` requires non-empty text with at least one letter or digit and only printable Unicode.
 Limits use `String.length()` (UTF-16 units), so supplementary characters count as two.
-This check allows punctuation and does not exclude other Unicode categories, such as format characters.
+Surrounding whitespace is trimmed as before; non-printable characters remaining inside the value are rejected.
 `GameName` and `Username` also use this utility.
 
 | Field | Length after trimming | Colon handling | Equality |

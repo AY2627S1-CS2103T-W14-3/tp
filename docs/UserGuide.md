@@ -277,11 +277,12 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 
 * The game name is required. The username is optional; omit `u/` if you do not know it.
 * Game names and supplied usernames must contain 1–50 printable characters after trimming,
-  including at least one letter or digit.
+  including at least one letter or digit. Surrounding whitespace is trimmed; controls, invisible formatting
+  characters (such as zero-width spaces), malformed Unicode and line/paragraph separators inside values are rejected.
 * Supplying `u/` without a value, or with only whitespace, is rejected. Omit the prefix instead.
 * Repeated `g/` or `u/` prefixes are rejected, even when the values are identical.
 * Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters;
-  values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.
+  values allow 1–200. Both need a letter or digit and only printable characters. Only values may contain colons.
 * Repeat `m/` for distinct keys. Metadata keys are case-insensitive, so `Role` and `role` are duplicates.
   Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
   Omit `m/` entirely for no metadata.

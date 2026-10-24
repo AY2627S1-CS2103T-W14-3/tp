@@ -25,13 +25,23 @@ public class StringUtilTest {
     @Test
     public void isValidTextField_validInputs_returnsTrue() {
         for (String input : new String[] {"A", "1", "Role!", "Support:Mid", "O'Connor-Jane", "李明",
-            "a😀", "a\u200bb"}) {
+            "a😀", "e\u0301", "\tA\n", "\u2003A\u2003"}) {
             assertTrue(StringUtil.isValidTextField(input, 50));
         }
         assertTrue(StringUtil.isValidTextField(" A ", 1));
         assertTrue(StringUtil.isValidTextField("  " + "a".repeat(50) + "  ", 50));
         assertTrue(StringUtil.isValidTextField("a".repeat(200), 200));
         assertFalse(StringUtil.isValidTextField("a".repeat(201), 200));
+    }
+
+    @Test
+    public void isValidTextField_nonPrintableUnicode_returnsFalse() {
+        // EPs: formatting (BMP/supplementary), lone surrogates, private use, unassigned,
+        // and internal line/paragraph separators. Controls and length BVA are covered above.
+        for (String input : new String[] {"Halo\u200b", "a\uDB40\uDC01b", "a\uD800", "a\uDC00",
+            "a\uE000b", "a\u0378b", "a\u2028b", "a\u2029b"}) {
+            assertFalse(StringUtil.isValidTextField(input, 50));
+        }
     }
 
     @Test
