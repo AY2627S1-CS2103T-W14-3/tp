@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -41,6 +42,15 @@ public class JsonUserPrefsStorageTest {
     @Test
     public void readUserPrefs_notJsonFormat_exceptionThrown() {
         assertThrows(DataLoadingException.class, () -> readUserPrefs("NotJsonFormatUserPrefs.json"));
+    }
+
+    @Test
+    public void readUserPrefs_nullJson_throwsDataLoadingException() throws IOException {
+        Path filePath = testFolder.resolve("preferences.json");
+        Files.writeString(filePath, "null");
+        JsonUserPrefsStorage storage = new JsonUserPrefsStorage(filePath);
+
+        assertThrows(DataLoadingException.class, storage::readUserPrefs);
     }
 
     private Path addToTestDataPathIfNotNull(String userPrefsFileInTestDataFolder) {

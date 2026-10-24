@@ -10,6 +10,7 @@ import static seedu.address.testutil.TypicalFriends.IDA;
 import static seedu.address.testutil.TypicalFriends.getTypicalGameMates;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -67,6 +68,16 @@ public class JsonGameMatesStorageTest {
     public void read_notJsonFormat_exceptionThrown() {
         DataLoadingException exception = assertThrows(
                 DataLoadingException.class, () -> readGameMates("notJsonFormatGameMates.json"));
+        assertInstanceOf(IOException.class, exception.getCause());
+    }
+
+    @Test
+    public void readGameMates_nullJson_throwsDataLoadingException() throws IOException {
+        Path filePath = testFolder.resolve("gamemates.json");
+        Files.writeString(filePath, " \n null \n ");
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(filePath);
+
+        DataLoadingException exception = assertThrows(DataLoadingException.class, storage::readGameMates);
         assertInstanceOf(IOException.class, exception.getCause());
     }
 
