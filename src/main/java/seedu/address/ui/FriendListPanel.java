@@ -3,10 +3,15 @@ package seedu.address.ui;
 import java.util.function.Consumer;
 
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventDispatcher;
+import javafx.event.EventTarget;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import seedu.address.model.FriendListScope;
 import seedu.address.model.friend.Friend;
@@ -34,8 +39,32 @@ public class FriendListPanel extends UiPart<Region> {
         super(FXML);
         friendListView.setItems(friendList);
         friendListView.setCellFactory(_ -> new FriendListViewCell());
+        preventMouseSelection();
         friendListView.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) ->
                 onFriendSelected.accept(newValue));
+    }
+
+    /** Prevents presses on a friend card from reaching the list's selection behavior. */
+    private void preventMouseSelection() {
+        EventDispatcher defaultDispatcher = friendListView.getEventDispatcher();
+        friendListView.setEventDispatcher((event, tail) -> {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED && isPressOnFriendCard(event)) {
+                event.consume();
+                return event;
+            }
+            return defaultDispatcher.dispatchEvent(event, tail);
+        });
+    }
+
+    private boolean isPressOnFriendCard(Event event) {
+        EventTarget target = event.getTarget();
+        while (target instanceof Node node) {
+            if (node instanceof FriendListViewCell) {
+                return true;
+            }
+            target = node.getParent();
+        }
+        return false;
     }
 
     /** Updates the heading even when the current list is empty. */

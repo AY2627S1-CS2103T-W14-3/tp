@@ -11,8 +11,12 @@ import org.junit.jupiter.api.Test;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import seedu.address.model.FriendListScope;
 import seedu.address.model.friend.Friend;
 import seedu.address.testutil.FriendBuilder;
@@ -20,6 +24,7 @@ import seedu.address.testutil.FriendBuilder;
 class FriendListPanelTest {
 
     @Test
+    @SuppressWarnings("unchecked")
     void selectionChanged_notifiesConsumer() {
         FxTestUtil.runAndWait(() -> {
             Friend amy = new FriendBuilder().withName("Amy").build();
@@ -30,8 +35,25 @@ class FriendListPanelTest {
 
             ListView<Friend> listView = getListView(panel);
             assertEquals(friends, listView.getItems());
+            assertFalse(listView.isMouseTransparent());
 
+            new Scene(panel.getRoot());
+            panel.getRoot().resize(500, 500);
+            panel.getRoot().applyCss();
+            panel.getRoot().layout();
+            ListCell<Friend> cell = listView.lookupAll(".list-cell").stream()
+                    .map(node -> (ListCell<Friend>) node)
+                    .filter(listCell -> amy.equals(listCell.getItem()))
+                    .findFirst()
+                    .orElseThrow();
             listView.getSelectionModel().select(ben);
+            assertEquals(ben, selectedFriend.get());
+
+            MouseEvent mousePressed = new MouseEvent(MouseEvent.MOUSE_PRESSED, 0, 0, 0, 0,
+                    MouseButton.PRIMARY, 1, false, false, false, false, true, false, false,
+                    true, false, false, null);
+            cell.fireEvent(mousePressed);
+            assertEquals(ben, listView.getSelectionModel().getSelectedItem());
             assertEquals(ben, selectedFriend.get());
 
             listView.getSelectionModel().clearSelection();
