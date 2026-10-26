@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.model.friend.exceptions.DuplicateFriendException;
 import seedu.address.model.friend.exceptions.FriendNotFoundException;
+import seedu.address.model.friend.exceptions.PinnedFriendLimitExceededException;
 import seedu.address.testutil.FriendBuilder;
 
 public class UniqueFriendListTest {
@@ -139,6 +140,20 @@ public class UniqueFriendListTest {
 
         assertEquals(List.of(firstPinnedFriend, secondPinnedFriend, firstUnpinnedFriend, secondUnpinnedFriend),
                 uniqueFriendList.asUnmodifiableObservableList());
+    }
+
+    @Test
+    public void setFriends_moreThanMaximumPinnedFriends_throwsPinnedFriendLimitExceededException() {
+        List<Friend> pinnedFriends = List.of(
+                new FriendBuilder().withName("Pinned Friend 1").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 2").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 3").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 4").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 5").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 6").withPinned(true).build());
+
+        assertThrows(PinnedFriendLimitExceededException.class, () -> uniqueFriendList.setFriends(pinnedFriends));
+        assertTrue(uniqueFriendList.asUnmodifiableObservableList().isEmpty());
     }
 
     @Test

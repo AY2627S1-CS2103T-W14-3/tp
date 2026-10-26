@@ -12,6 +12,7 @@ import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.GameMates;
 import seedu.address.model.ReadOnlyGameMates;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.exceptions.PinnedFriendLimitExceededException;
 
 /**
  * An Immutable GameMates that is serializable to JSON format.
@@ -20,6 +21,8 @@ import seedu.address.model.friend.Friend;
 class JsonSerializableGameMates {
 
     public static final String MESSAGE_DUPLICATE_FRIEND = "Friends list contains duplicate friend(s).";
+    public static final String MESSAGE_TOO_MANY_PINNED_FRIENDS = "Friends list contains more than "
+            + "the maximum number of pinned friends.";
 
     private final List<JsonAdaptedFriend> friends = new ArrayList<>();
     private final JsonAdaptedFriend myself;
@@ -62,7 +65,11 @@ class JsonSerializableGameMates {
             }
             modelFriends.add(friend);
         }
-        gameMates.setFriends(modelFriends);
+        try {
+            gameMates.setFriends(modelFriends);
+        } catch (PinnedFriendLimitExceededException e) {
+            throw new IllegalValueException(MESSAGE_TOO_MANY_PINNED_FRIENDS, e);
+        }
         return gameMates;
     }
 
