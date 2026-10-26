@@ -68,6 +68,16 @@ public class UniqueFriendListTest {
     }
 
     @Test
+    public void add_sixthPinnedFriend_throwsPinnedFriendLimitExceededException() {
+        for (int i = 1; i <= UniqueFriendList.MAX_PINNED_FRIENDS; i++) {
+            uniqueFriendList.add(createPinnedFriend(i));
+        }
+
+        assertThrows(PinnedFriendLimitExceededException.class, () -> uniqueFriendList.add(createPinnedFriend(6)));
+        assertEquals(UniqueFriendList.MAX_PINNED_FRIENDS, uniqueFriendList.asUnmodifiableObservableList().size());
+    }
+
+    @Test
     public void setFriend_nullTargetFriend_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> uniqueFriendList.setFriend(null, ALICE));
     }
@@ -119,6 +129,30 @@ public class UniqueFriendListTest {
         uniqueFriendList.setFriend(BOB, pinnedBob);
 
         assertEquals(List.of(pinnedBob, ALICE), uniqueFriendList.asUnmodifiableObservableList());
+    }
+
+    @Test
+    public void setFriend_sixthPinnedFriend_throwsPinnedFriendLimitExceededException() {
+        for (int i = 1; i <= UniqueFriendList.MAX_PINNED_FRIENDS; i++) {
+            uniqueFriendList.add(createPinnedFriend(i));
+        }
+        Friend unpinnedFriend = new FriendBuilder().withName("Unpinned Friend").build();
+        Friend sixthPinnedFriend = unpinnedFriend.withPinned(true);
+        uniqueFriendList.add(unpinnedFriend);
+
+        assertThrows(PinnedFriendLimitExceededException.class, () -> uniqueFriendList.setFriend(unpinnedFriend,
+                sixthPinnedFriend));
+        assertFalse(uniqueFriendList.asUnmodifiableObservableList().getLast().isPinned());
+    }
+
+    @Test
+    public void setFriend_unpinsFriend_success() {
+        Friend pinnedFriend = createPinnedFriend(1);
+        uniqueFriendList.add(pinnedFriend);
+
+        uniqueFriendList.setFriend(pinnedFriend, pinnedFriend.withPinned(false));
+
+        assertFalse(uniqueFriendList.asUnmodifiableObservableList().getFirst().isPinned());
     }
 
     @Test
@@ -225,5 +259,9 @@ public class UniqueFriendListTest {
     @Test
     public void toStringMethod() {
         assertEquals(uniqueFriendList.asUnmodifiableObservableList().toString(), uniqueFriendList.toString());
+    }
+
+    private static Friend createPinnedFriend(int index) {
+        return new FriendBuilder().withName("Pinned Friend " + index).withPinned(true).build();
     }
 }
