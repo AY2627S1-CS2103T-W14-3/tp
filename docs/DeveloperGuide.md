@@ -612,6 +612,15 @@ The logic layer exposes `getFriendListScope()` to the UI. `MainWindow` updates t
    displayed position with updated status. Neither command resets the predicate or scope.
 1. `LogicManager` saves the updated collection through the existing storage path.
 
+The sequence diagram below shows a successful `archive 1` in the active or search view, with an active friend
+at displayed index 1 and a successful save. Index parsing details, repeated collection access, result construction,
+model internals and UI callbacks are omitted. The parser and command lifelines start at their creation messages.
+
+![Successful archive command from parsing through persistence](images/ArchiveSequenceDiagram.png)
+
+Validation failures stop before replacing the friend and skip saving. A storage failure occurs after the model
+update and does not roll it back, as described under [Logic component](#logic-component).
+
 `edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status when constructing replacement friends.
 `gameedit` retains the current scope and predicate. Friend edits clear
 filters within active/archive scopes, while global searches retain their name predicate. Renaming a search
