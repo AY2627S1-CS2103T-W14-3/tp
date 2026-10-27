@@ -145,6 +145,8 @@ adapters propagate the original exception, so invalid input is never treated as 
 
 <img src="images/ModelClassDiagram.png" width="625" />
 
+This partial class diagram shows selected archive-related attributes and operations; unrelated members are omitted.
+`ModelManager.friendListScope` uses the `FriendListScope` enumeration to identify the displayed view.
 
 The `Model` component,
 
