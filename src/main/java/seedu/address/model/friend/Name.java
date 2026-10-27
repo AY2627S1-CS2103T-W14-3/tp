@@ -69,7 +69,7 @@ public class Name {
 
     @Override
     public int hashCode() {
-        return fullName.toLowerCase(Locale.ROOT).hashCode();
+        return normalisedName().toLowerCase(Locale.ROOT).hashCode();
     }
 
 }

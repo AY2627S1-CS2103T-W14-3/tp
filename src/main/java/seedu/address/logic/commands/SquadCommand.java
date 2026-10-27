@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import seedu.address.commons.util.ToStringBuilder;
@@ -103,6 +104,11 @@ public class SquadCommand extends Command {
 
         return gameName.equals(otherSquadCommand.gameName)
                 && size == otherSquadCommand.size;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameName, size);
     }
 
     @Override
