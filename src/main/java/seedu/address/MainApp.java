@@ -41,6 +41,7 @@ public class MainApp extends Application {
     protected Logic logic;
     protected Storage storage;
     protected Model model;
+    protected String startupMessage = "";
 
     @Override
     public void init() throws Exception {
@@ -56,7 +57,7 @@ public class MainApp extends Application {
 
         logic = new LogicManager(model, storage);
 
-        ui = new UiManager(logic, storage.getGameMatesFilePath());
+        ui = new UiManager(logic, storage.getGameMatesFilePath(), startupMessage);
     }
 
     /**
@@ -64,8 +65,9 @@ public class MainApp extends Application {
      * The data from the sample GameMates will be used instead if {@code storage}'s GameMates is not found,
      * or an empty GameMates will be used instead if errors occur when reading {@code storage}'s GameMates.
      */
-    private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
+    protected Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
         logger.info("Using data file : " + storage.getGameMatesFilePath());
+        startupMessage = "";
 
         ReadOnlyGameMates initialData;
         try {
@@ -74,6 +76,8 @@ public class MainApp extends Application {
                             + " populated with a sample GameMates."))
                     .getOrElse(SampleDataUtil::getSampleGameMates);
         } catch (DataLoadingException e) {
+            startupMessage = "Failed to load " + storage.getGameMatesFilePath() + " due to: "
+                    + e.getCause().getMessage() + "\nStarting with an empty GameMates.";
             logger.warning("Data file at " + storage.getGameMatesFilePath() + " could not be loaded."
                     + " Will be starting with an empty GameMates.");
             initialData = new GameMates();
