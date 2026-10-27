@@ -14,6 +14,10 @@ public enum FriendSortCriterion {
     private static final Comparator<Friend> GAME_COMPARATOR = Comparator.comparing(
             FriendSortCriterion::getFirstGameName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
             .thenComparing(NAME_COMPARATOR);
+    private static final Comparator<Friend> DESCENDING_GAME_COMPARATOR = Comparator.comparing(
+            FriendSortCriterion::getFirstGameName,
+            Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER.reversed()))
+            .thenComparing(NAME_COMPARATOR.reversed());
 
     /**
      * Returns the comparator for this criterion.
@@ -25,6 +29,21 @@ public enum FriendSortCriterion {
         return switch (this) {
             case NAME -> NAME_COMPARATOR;
             case GAME -> GAME_COMPARATOR;
+        };
+    }
+
+    /**
+     * Returns the comparator for this criterion in the requested direction.
+     *
+     * <p>Friends without games always appear after friends with games when sorting by game.</p>
+     */
+    public Comparator<Friend> comparator(boolean isDescending) {
+        if (!isDescending) {
+            return comparator();
+        }
+        return switch (this) {
+            case NAME -> NAME_COMPARATOR.reversed();
+            case GAME -> DESCENDING_GAME_COMPARATOR;
         };
     }
 

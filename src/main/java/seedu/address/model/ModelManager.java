@@ -170,9 +170,7 @@ public class ModelManager implements Model {
     @Override
     public void sortFilteredFriendList(FriendSortCriterion sortCriterion, boolean isDescending) {
         requireNonNull(sortCriterion);
-        Comparator<Friend> sortComparator = isDescending
-                ? sortCriterion.comparator().reversed() : sortCriterion.comparator();
-        sortedFriends.setComparator(PINNED_FRIENDS_FIRST.thenComparing(sortComparator));
+        sortedFriends.setComparator(PINNED_FRIENDS_FIRST.thenComparing(sortCriterion.comparator(isDescending)));
     }
 
     @Override
