@@ -5,12 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventType;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -49,12 +52,20 @@ class FriendListPanelTest {
             listView.getSelectionModel().select(ben);
             assertEquals(ben, selectedFriend.get());
 
-            MouseEvent mousePressed = new MouseEvent(MouseEvent.MOUSE_PRESSED, 0, 0, 0, 0,
-                    MouseButton.PRIMARY, 1, false, false, false, false, true, false, false,
-                    true, false, false, null);
-            cell.fireEvent(mousePressed);
+            Node friendCard = cell.getGraphic();
+            friendCard.fireEvent(newMousePressedEvent());
             assertEquals(ben, listView.getSelectionModel().getSelectedItem());
             assertEquals(ben, selectedFriend.get());
+
+            AtomicBoolean listViewPressReceived = new AtomicBoolean();
+            listView.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> listViewPressReceived.set(true));
+            listView.fireEvent(newMousePressedEvent());
+            assertTrue(listViewPressReceived.get());
+
+            AtomicBoolean friendCardReleaseReceived = new AtomicBoolean();
+            listView.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> friendCardReleaseReceived.set(true));
+            friendCard.fireEvent(newMouseEvent(MouseEvent.MOUSE_RELEASED));
+            assertTrue(friendCardReleaseReceived.get());
 
             listView.getSelectionModel().clearSelection();
             assertNull(selectedFriend.get());
@@ -95,5 +106,14 @@ class FriendListPanelTest {
     @SuppressWarnings("unchecked")
     private ListView<Friend> getListView(FriendListPanel panel) {
         return (ListView<Friend>) panel.getRoot().lookup("#friendListView");
+    }
+
+    private MouseEvent newMousePressedEvent() {
+        return newMouseEvent(MouseEvent.MOUSE_PRESSED);
+    }
+
+    private MouseEvent newMouseEvent(EventType<MouseEvent> eventType) {
+        return new MouseEvent(eventType, 0, 0, 0, 0, MouseButton.PRIMARY, 1,
+                false, false, false, false, true, false, false, true, false, false, null);
     }
 }
