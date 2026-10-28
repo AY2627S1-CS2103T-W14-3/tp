@@ -697,6 +697,17 @@ while copying the file, then launch the destination app from its usual data fold
 
 --------------------------------------------------------------------------------------------------------------------
 
+## Known limitations
+
+1. **Only one instance of GameMates can run at a time.** Multiple instances write to the same `data/gamemates.json`
+   and may overwrite each other's changes, causing data loss.
+2. **GameMates primarily supports English.** Friend names, tags, phones and emails accept only ASCII characters.
+   Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.
+3. **Some characters count as more than one toward length limits.** Lengths are counted in UTF-16 code units, so
+   `😀` counts as 2 and `👨‍👩‍👧` (built from 3 emoji and 2 joiners) counts as 8.
+
+--------------------------------------------------------------------------------------------------------------------
+
 ## Known issues
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
