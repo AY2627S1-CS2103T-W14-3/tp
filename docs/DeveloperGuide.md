@@ -90,7 +90,7 @@ The `UI` component,
 * depends on some classes in the `Model` component because it displays `Friend` objects from the model.
 
 `FriendListPanel` sends selection changes to a consumer owned by `MainWindow`. Command-driven selection uses
-`CommandResult.friendToShow`, `showMyself` and `gameFilter`, described under [Viewing games](#viewing-games).
+`CommandResult.friendToShow`, `showMyself` and `gameFilter`, described under [Viewing games](#viewing-a-friends-games).
 Successful results without a friend payload show `Logic.getMyself()`; a single-result `find` selects that friend.
 Parse or command failures update feedback without explicitly refreshing details. A game filter is applied only
 while rendering cards, preserving both the model and the left-hand friend-list predicate.
