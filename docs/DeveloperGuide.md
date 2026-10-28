@@ -397,7 +397,7 @@ before publishing a complete v1.3 MVP guide.
 | Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
 | Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
 | Phone/email | Phone: 1–40 characters from a broad punctuation set. Email: 1–255 characters containing `@` (pp. 5–6). | Phone: 3–15 ASCII digits, or `+` with 2–15, with constrained grouping and no extensions. Email: at most 254 characters, local part at most 64, ASCII dot-atom and valid domain labels. |
-| Friend filtering | Combined `list [n/KEYWORDS] [g/GAME]`, with named empty-result feedback (pp. 14–15). | Separate `find KEYWORD...` and `list [g/GAME]`; a new command replaces the previous filter. Feedback is `Listed all friends.` or `N friend(s) listed!`, including zero. |
+| Friend filtering | Combined `list [n/KEYWORDS] [g/GAME]`, with named empty-result feedback (pp. 14–15). | Separate `find KEYWORD...` and `list [g/GAME]`; a new command replaces the previous filter. Feedback is `Listed all active friends.` or `N friend(s) listed!`, including zero. |
 | GUI | Feature-spec mockups replace the friend panel with a game's list (pp. 15, 25); later v1.3 notes call for a split panel. | The adopted split layout matches those later notes: friends stay on the left and details/game cards appear on the right. `gamelist` filters cards only. Retire the earlier mockups. |
 | Errors | Command-specific index and validation wording. | Messages differ across commands; use the verified wording in the User Guide instead of copying spec errors. |
 | Game uniqueness | One or no username per game name within a friend (pp. 16–19). | `gameadd` rejects duplicate game names through `Game.isSameGame`. Stored sets use full equality, so JSON can still contain the same game name with different usernames. |
@@ -916,7 +916,7 @@ Prerequisite: fresh sample data.
 3. `list g/minecraft`: expected Bernice Yu and Roy Balakrishnan, replacing the David filter.
 4. `gamelist 1`: expected Bernice's Minecraft card, although Bernice was full-list index 2. Both Minecraft players
    remain on the left. `find Alex` now finds Alex from the full data, not from the two Minecraft results.
-5. `list g/Val`: expected zero results. `list` restores all six friends and returns `Listed all friends.`.
+5. `list g/Val`: expected zero results. `list` restores all six friends and returns `Listed all active friends.`.
 6. `list n/Alex g/Valorant`: expected invalid-format feedback; combined filtering is not supported.
 
 ### Game cards, empty states and display-filter clearing
@@ -948,8 +948,8 @@ Prerequisite: fresh sample data. These actions are destructive within the dispos
    reappear with `list`. Bernice's games are removed with her, while Roy's Minecraft entry remains.
 2. `delete`, `delete 0`, `delete -1`, `delete x`, `delete 2147483648`, `delete 1 2` and `delete 999`:
    expected errors without deleting anyone. Missing index reports `Please provide an index.`; malformed values
-   report `Index must be a positive integer.`; an out-of-range index reports `The friend index provided is invalid.`.
-3. `clear`: expected immediate empty list and `Friend list has been cleared!`. `delete 1` then reports the generic
+   report `Index must be a positive integer between 1 and 2147483647 (inclusive).`; an out-of-range index reports `The friend index provided is invalid.`.
+3. `clear`: expected immediate empty list and `All active and archived friends have been cleared!`. `delete 1` then reports the generic
    invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list. There is no undo.
 
 ### Saved profile and game round trip
@@ -997,7 +997,7 @@ Prerequisite: independent disposable app folders and closed app instances before
 |------------------|-----------------|
 | Start in an empty folder without `data/gamemates.json`; enter `list`. | Six sample friends and a default profile; the successful command creates the data file. |
 | Save the fixture above, close the app, copy the data file to a backup, then replace its contents with `{broken`. Relaunch without entering commands. | Empty friends and default profile; the malformed file stays on disk. No automatic backup or recovery prompt. Close the app and restore the backup to recover. |
-| Repeat the invalid-file setup, then enter `list`. | `Listed all friends.` with an empty list; the file is overwritten with the empty fallback data. |
+| Repeat the invalid-file setup, then enter `list`. | `Listed all active friends.` with an empty list; the file is overwritten with the empty fallback data. |
 | In a separate disposable folder, replace the data file with the literal `null`, then launch. | Known defect: startup can fail with an uncaught null-value error instead of the empty-data fallback. Restore a valid backup to continue. |
 | In a copy of the valid fixture, use an invalid phone such as `12`, or duplicate the friend with an equal name. Relaunch. | The whole data load fails; empty friends and default profile. Restore the backup before continuing. |
 | Remove the `myself` and `games` properties from a valid copy, then relaunch. | Default profile and a friend with no games. Empty/missing phone and email are accepted; invalid non-empty contacts are not. |
