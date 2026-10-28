@@ -1,0 +1,91 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam sequenceMessageAlign left
+
+participant "<u>:LogicManager</u>" as Logic LOGIC_COLOR
+participant "<u>:GameMatesParser</u>" as Router LOGIC_COLOR
+participant "<u>:ArchiveCommandParser</u>" as Parser LOGIC_COLOR
+participant "<u>command:ArchiveCommand</u>" as Command LOGIC_COLOR
+participant "<u>model:ModelManager</u>" as Model MODEL_COLOR
+participant "<u>friend:Friend</u>" as Friend MODEL_COLOR
+participant "<u>:StorageManager</u>" as Storage STORAGE_COLOR
+
+[-> Logic : execute("archive 1")
+activate Logic
+Logic -> Router : parseCommand("archive 1")
+activate Router
+create Parser
+Router -> Parser : ArchiveCommandParser()
+Router -> Parser : parse(" 1")
+activate Parser
+note over Parser
+ParserUtil.parseIndex(" 1") returns index.
+Index parsing details are omitted.
+end note
+create Command
+Parser -> Command : ArchiveCommand(index)
+Parser --> Router : command
+deactivate Parser
+Router --> Logic : command
+deactivate Router
+
+Logic -> Command : execute(model)
+activate Command
+Command -> Model : getFriendListScope()
+activate Model
+Model --> Command : scope
+deactivate Model
+note over Command, Model
+Successful scenario: scope is ACTIVE or SEARCH,
+and displayed index 1 exists.
+end note
+Command -> Model : getFilteredFriendList()
+activate Model
+Model --> Command : displayedFriends
+deactivate Model
+note over Command
+Check the displayed index and select friend.
+Repeated list access and collection calls are omitted.
+end note
+Command -> Friend : isArchived()
+activate Friend
+Friend --> Command : false
+deactivate Friend
+Command -> Friend : withArchived(true)
+activate Friend
+note right of Friend
+Creates a new Friend, preserving
+all other fields. The original
+Friend remains unchanged.
+end note
+Friend --> Command : archivedFriend
+deactivate Friend
+Command -> Model : setFriend(friend, archivedFriend)
+activate Model
+note over Model, Friend
+Replace the friend in the existing collection.
+The observable view updates with the same scope and filter:
+ACTIVE hides the friend; SEARCH retains the matching friend.
+end note
+Model --> Command
+deactivate Model
+note over Command
+Construct result with feedback "Archived FRIEND_NAME."
+Result construction and name access are omitted.
+end note
+Command --> Logic : result
+deactivate Command
+
+Logic -> Model : getGameMates()
+activate Model
+Model --> Logic : gameMates
+deactivate Model
+Logic -> Storage : saveGameMates(gameMates)
+activate Storage
+Storage --> Logic
+deactivate Storage
+[<-- Logic : result
+deactivate Logic
+@enduml
