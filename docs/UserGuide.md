@@ -387,7 +387,7 @@ Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME
   `g/"PUBG n/Game"` selects the literal name `PUBG n/Game`. Without quotes, these prefixes introduce command options.
   This also works for new names (`n/"PUBG m/Edition"`), usernames and metadata. Within quoted values, use `\"` for
   a literal double quote and `\\` for a backslash. Unclosed quotes, invalid escapes and extra text after a closing
-  quote are rejected before any change. Quoting is specific to `gameedit`; other commands retain their existing syntax.
+  quote are rejected before any change. Quoting is supported by `gameedit` and `squad`; other commands retain their existing syntax.
 * `n/` renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.
 * Omitted fields retain their values. Other games, contact details, tags, archive status and pin status are preserved.
   The current friend-list scope and filter are retained, including archived lists and search results;
@@ -414,6 +414,10 @@ Lists each member's name, in-game username when available, and displayed friend 
 Format: `squad g/GAME n/NUMBER_OF_PEOPLE`
 
 * Both `g/` and `n/` are required and may appear in either order.
+* Quote the whole game name when it contains a space followed by `g/` or `n/`. For example,
+  `squad g/"Version n/2" n/2` selects the game named `Version n/2`; the final `n/2` requests two people.
+  Within quoted values, use `\"` for a literal double quote and `\\` for a backslash.
+  Unclosed quotes, invalid escapes and text after a closing quote are rejected.
 * `GAME` uses the same game-name rules as `gamelist`: 1–50 printable characters after trimming,
   including at least one letter or digit. Multiword names are accepted. Matching uses the complete
   game name and is case-insensitive; `valorant` matches `Valorant`, but `Val` does not.
@@ -428,6 +432,7 @@ Examples:
 
 * `squad g/Valorant n/3`
 * `squad g/Stardew Valley n/4`
+* After `gameadd 1 g/Version n/2`, `squad g/"Version n/2" n/2` can select that friend.
 
 Assuming Benedict and Melody are at indices 1 and 2 in the currently displayed friend list.
 Example success feedback for `squad g/Valorant n/3`:
@@ -449,6 +454,9 @@ Could not find a squad of <n> people.
 `<n>` is replaced with the requested squad size, for example `Could not find a squad of 3 people.`
 
 Possible errors:
+
+Usage feedback also includes guidance on quoting game names. Malformed quoted values report
+`Invalid quoted value. Enclose the entire value in double quotes; escape double quotes and backslashes with a backslash.`
 
 | Input problem | Feedback |
 |---------------|----------|

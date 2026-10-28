@@ -235,6 +235,20 @@ Ascending game order puts friends without games last; reversing the comparator c
 `find` accepts a non-empty keyword list, without prefixes or a keyword-length cap; `list` does not accept `n/`.
 No matches is a successful empty result. Filtering/sorting does not include or modify the separate profile.
 
+### Squad selection
+
+`SquadCommandParser` parses `squad g/GAME n/NUMBER_OF_PEOPLE` using
+`ArgumentTokenizer.tokenizeWithQuotedValues()`. Whole-value quotes preserve literal `g/` and `n/` text:
+`squad g/"Version n/2" n/2`. It shares the quote/escape rules used by `gameedit`; malformed quotes, duplicate
+prefixes, invalid game names and sizes outside 1–20 are rejected before execution.
+
+`SquadCommand` finds matching games in the displayed friend list, randomly selects `size - 1` distinct friends,
+and reports them in displayed-index order. Myself is always the first member, even without a matching profile game.
+The command preserves stored data, scope, filters and sorting.
+
+Regression tests cover prefix-containing names added by `gameadd`, either parameter order, escaped quotes/backslashes,
+malformed input and preservation of the filtered view.
+
 ### Editing an existing game
 
 `GameEditCommandParser` reuses the shared field validators and `tokenizeWithQuotedValues()`.
@@ -809,6 +823,16 @@ on open PRs labelled `type.Docs`; this task does not publish a preview or change
 Current screenshots must come from the application, not the specification mockups. `Ui.png` shows both panels,
 `findAlexDavidResult.png` shows name filtering, and `gamelistFiltered.png` / `gamelistNoMatch.png` show card filtering.
 Diagram sources live in `docs/diagrams`; regenerate their matching `docs/images/*.png` after changing a source.
+
+### Manual squad selection checks
+
+Use a disposable data folder. Run `clear`, `add n/Tester`, then `gameadd 1 g/Version n/2 u/player`.
+
+1. Run `find Tester`, then `squad g/"Version n/2" n/2`. Expect Me and Tester, with username `player` and index 1.
+2. Run `squad n/2 g/"Version n/2"`. Expect the same two members; the parameter order does not change selection.
+3. Try an unclosed quoted value, `squad g/"Version n/2 n/2`, and duplicate size prefixes,
+   `squad g/"Version n/2" n/2 n/2`. Expect errors with stored data and the search filter unchanged.
+4. Run `squad g/"Version n/2" n/3`. Expect `Could not find a squad of 3 people.` without changing the view.
 
 ### Manual game edit checks
 
