@@ -242,8 +242,9 @@ optional values to distinguish omission from a supplied empty contact field. `Ed
 with the original games. Name/contact values replace
 existing values. Supplied tags are toggled by set membership; duplicates in one command are deduplicated, and a
 single empty `t/` clears all tags. Empty and non-empty tag parameters together fail validation.
-After a successful add or friend edit, the model resets the friend-list predicate to show all friends.
-Editing Myself preserves that predicate, including an empty displayed list.
+Adding a friend switches to the unfiltered active view. Editing a displayed friend clears the filter within
+active/archive views, but preserves a global name-search predicate. A renamed search result can disappear if
+its name no longer matches. Editing Myself preserves the current scope and predicate, including an empty list.
 
 `DeleteCommand` uses the same displayed-list indexing but keeps the current predicate. It removes the entire friend
 and their games immediately; there is no confirmation state. Its out-of-range/empty-list error is the shared generic
@@ -406,8 +407,8 @@ Additional integration issues found during the audit: root-level JSON `null` byp
 game-text validation uses ISO-control rejection rather than a complete Unicode printability check. These are
 recorded limits; no application fix is included in this documentation change.
 
-Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
-not a current use-case step. Game creation/deletion, metadata entry/display and own-profile editing are available.
+Deletion confirmation and undo are outside the product scope. Deletion takes effect immediately.
+Game creation/deletion, game username editing, metadata entry/display and own-profile editing are available.
 
 ### Game metadata
 
@@ -475,88 +476,6 @@ Command tests also cover optional and interleaved metadata flags, malformed inpu
 to displayed friends and `myself`, including filter preservation, duplicate-game rejection and JSON round-trips.
 `GameBuilder.addMeta("Role", "Support")` appends a pair; `withMetas(...)` replaces the collection.
 Duplicate keys added through the builder are rejected by `build()`.
-
-### \[Proposed\] Undo/redo feature
-
-#### Proposed Implementation
-
-The proposed undo/redo mechanism is facilitated by `VersionedGameMates`. It extends `GameMates` with an undo/redo history, stored internally as an `gameMatesStateList` and `currentStatePointer`. Additionally, it implements the following operations:
-
-* `VersionedGameMates#commit()` — Saves the current GameMates state in its history.
-* `VersionedGameMates#undo()` — Restores the previous GameMates state from its history.
-* `VersionedGameMates#redo()` — Restores a previously undone GameMates state from its history.
-
-These operations are exposed in the `Model` interface as `Model#commitGameMates()`, `Model#undoGameMates()` and `Model#redoGameMates()` respectively.
-
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
-
-Step 1. The user launches the application for the first time. The `VersionedGameMates` will be initialized with the initial GameMates state, and the `currentStatePointer` pointing to that single GameMates state.
-
-![UndoRedoState0](images/UndoRedoState0.png)
-
-Step 2. The user executes `delete 5` command to delete the 5th friend in the GameMates. The `delete` command calls `Model#commitGameMates()`, causing the modified state of the GameMates after the `delete 5` command executes to be saved in the `gameMatesStateList`, and the `currentStatePointer` is shifted to the newly inserted GameMates state.
-
-![UndoRedoState1](images/UndoRedoState1.png)
-
-Step 3. The user executes `add n/David …​` to add a new friend. The `add` command also calls `Model#commitGameMates()`, causing another modified GameMates state to be saved into the `gameMatesStateList`.
-
-![UndoRedoState2](images/UndoRedoState2.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If a command fails its execution, it will not call `Model#commitGameMates()`, so the GameMates state will not be saved into the `gameMatesStateList`.
-
-</div>
-
-Step 4. The user now decides that adding the friend was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoGameMates()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous GameMates state, and restores the GameMates to that state.
-
-![UndoRedoState3](images/UndoRedoState3.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index 0, pointing to the initial GameMates state, then there are no previous GameMates states to restore. The `undo` command uses `Model#canUndoGameMates()` to check if this is the case. If so, it will return an error to the user rather
-than attempting to perform the undo.
-
-</div>
-
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
-
-![UndoSequenceDiagram](images/UndoSequenceDiagram-Logic.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `UndoCommand` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
-
-</div>
-
-Similarly, how an undo operation goes through the `Model` component is shown below:
-
-![UndoSequenceDiagram](images/UndoSequenceDiagram-Model.png)
-
-The `redo` command does the opposite — it calls `Model#redoGameMates()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the GameMates to that state.
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index `gameMatesStateList.size() - 1`, pointing to the latest GameMates state, then there are no undone GameMates states to restore. The `redo` command uses `Model#canRedoGameMates()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-
-</div>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the GameMates, such as `list`, will usually not call `Model#commitGameMates()`, `Model#undoGameMates()` or `Model#redoGameMates()`. Thus, the `gameMatesStateList` remains unchanged.
-
-![UndoRedoState4](images/UndoRedoState4.png)
-
-Step 6. The user executes `clear`, which calls `Model#commitGameMates()`. Since the `currentStatePointer` is not pointing at the end of the `gameMatesStateList`, all GameMates states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …​` command. This is the behavior that most modern desktop applications follow.
-
-![UndoRedoState5](images/UndoRedoState5.png)
-
-The following activity diagram summarizes what happens when a user executes a new command:
-
-<img src="images/CommitActivityDiagram.png" width="250" />
-
-#### Design considerations:
-
-**Aspect: How undo & redo execute:**
-
-* **Alternative 1 (current choice):** Saves the entire GameMates.
-  * Pros: Easy to implement.
-  * Cons: May have performance issues in terms of memory usage.
-
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the friend being deleted).
-  * Cons: We must ensure that the implementation of each individual command is correct.
 
 ### Friend archiving
 
@@ -677,13 +596,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | gamer                            | add games to a friend's entry                          | remember what games they play                                    |
 | `* * *`  | gamer                            | remove games from a friend's entry                     | know which games they no longer play                             |
 | `* * *`  | gamer                            | add a friend's in-game username for a game or platform | know what name to search for when inviting them                  |
-| `* * *`  | gamer                            | edit a friend's platform handle                        | keep it up to date when they change their username               |
+| `* * *`  | gamer                            | edit a friend's in-game username                       | keep it up to date when they change their username               |
 | `* * *`  | gamer                            | search for a friend by name                            | find the people I want without scrolling through the whole list  |
 | `* * *`  | gamer                            | filter my friends by game or platform                  | quickly find friends relevant to what I am currently playing     |
 | `* * *`  | gamer                            | add my own details                                     | see how I fit into the context of my friends                     |
 | `* * *`  | gamer                            | edit my own details                                    | keep my profile accurate as my games and usernames change        |
 | `* * *`  | gamer                            | have my data saved automatically                       | keep my friend list after closing the App                        |
-| `* *`    | gamer                            | be asked to confirm before deleting a friend           | avoid deleting someone by accident                               |
 | `* *`    | gamer                            | be warned when adding a friend who already exists      | avoid duplicate entries                                          |
 | `* *`    | gamer                            | see which games my friends and I have in common        | decide what to play together                                     |
 | `* *`    | gamer who plays many games       | see all the games a friend plays                       | know which games I can invite them to                            |
@@ -696,7 +614,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `*`      | gamer with many friends          | sort friends by name                                   | locate a friend easily                                           |
 | `*`      | gamer                            | mark friends as favourites                             | find my regular teammates first                                  |
 | `*`      | gamer with friends abroad        | record a friend's time zone                            | know when they are likely to be online                           |
-| `*`      | gamer                            | undo my last command                                   | recover from mistakes quickly                                    |
 | `*`      | gamer                            | record when I last played with a friend                | reconnect with friends I have not played with in a while         |
 | `*`      | gamer                            | export my friend list                                  | back up my data or move it to another computer                   |
 
@@ -744,15 +661,16 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
   * 3a1. GameMates shows an error message.
 
     Use case resumes at step 2.
-**[Proposed] Use case: Edit a friend's platform handle**
 
-This is a future requirement; there is no working handle-editing command in this checkout.
+**Use case: Edit a friend's in-game username**
+
+Implemented by `gameedit FRIEND_INDEX g/GAME_NAME u/USERNAME`. The `myself` selector also supports profile games.
 
 **MSS**
 1. User requests to list friends.
 2. GameMates shows a list of friends.
-3. User requests to edit a specific friend's handle for a platform, providing the new handle.
-4. GameMates updates the handle and shows a confirmation.
+3. User selects a displayed friend and an existing game, providing the new username.
+4. GameMates updates that game's username and shows the updated friend details and command feedback.
 
    Use case ends.
 
@@ -765,11 +683,17 @@ This is a future requirement; there is no working handle-editing command in this
   * 3a1. GameMates shows an error message.
 
     Use case resumes at step 2.
-* 3b. The specified platform does not exist for that friend.
+* 3b. The specified game does not exist for that friend.
 
   * 3b1. GameMates shows an error message.
 
     Use case resumes at step 2.
+
+* 3c. The supplied username is invalid.
+
+  * 3c1. GameMates shows a validation error without changing the game or current details view.
+
+    Use case resumes at step 3.
 
 
 **Use case: Search for a friend**
@@ -893,7 +817,7 @@ Prerequisite: fresh sample data. These steps deliberately add a disposable frien
 |------|--------------|-----------------|
 | 1 | `add n/Joash Test t/duo` | Seven friends. Feedback starts `Added Joash Test.` and shows `Not provided` for phone and email. |
 | 2 | `add n/joash   test t/other` | Duplicate-name error; still seven friends. A different tag does not bypass identity checks. |
-| 3 | `find Joash`, then `edit 1 p/+65 9123-4567 e/joash@example.com t/duo t/casual` | Edits Joash rather than full-list friend 1. All seven friends become visible. Games remain unchanged; `duo` is removed and `casual` added. |
+| 3 | `find Joash`, then `edit 1 p/+65 9123-4567 e/joash@example.com t/duo t/casual` | Edits Joash rather than full-list friend 1. The search remains filtered to Joash. Games remain unchanged; `duo` is removed and `casual` added. |
 | 4 | `find Joash`, then click the result | Right panel shows the formatted phone, email and only `casual`. |
 | 5 | `edit 1 p/ e/ t/casual t/casual` | Phone/email removed; `casual` toggled off once. Feedback lists removed details. |
 | 6 | `find Joash`, then `edit 1 t/duo t/casual`, then `find Joash`, then `edit 1 t/` | Both tags are added, then all are cleared. Omitted name/contact fields are preserved. |

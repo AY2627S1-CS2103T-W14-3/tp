@@ -103,7 +103,8 @@ The main window has two panels: the friend list on the left and a details panel 
 * Successful commands other than `gamelist`, a friend-targeted `gameedit` or a single-result `find` return the right panel to your profile.
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
-  Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.
+  Adding a friend shows all active friends. Editing a friend clears filters in active/archive views, but keeps
+  the name filter in Search results. Deleting a friend keeps the current friend-list filter.
 * Pinned friends always appear above unpinned friends. The current ordering is retained within each group.
 
 ### Your profile and game entries
