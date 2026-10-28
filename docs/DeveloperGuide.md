@@ -67,7 +67,7 @@ A concrete `{Component Name}Manager` class implements that interface and provide
 
 For example, `Logic.java` defines the Logic API, and `LogicManager.java` implements it.
 Other components use the interface instead of the concrete class.
-This prevents them from depending on the details of that implementation.
+This prevents coupling to the concrete implementation.
 The following partial class diagram shows this relationship.
 
 <img src="images/ComponentManagers.png" width="300" />
@@ -104,7 +104,7 @@ The UI also depends on model classes because it displays `Friend` objects.
 **Selection and command results**
 
 `FriendListPanel` sends selection changes to a consumer in `MainWindow`.
-Commands control selection through `CommandResult.friendToShow`, `showMyself` and `gameFilter`.
+Command-driven selection uses `CommandResult.friendToShow`, `showMyself` and `gameFilter`.
 See [Viewing games](#viewing-a-friends-games).
 
 If a successful result has no friend payload, the details panel shows `Logic.getMyself()`.
@@ -208,9 +208,9 @@ Its classes represent domain data and make sense without those other components.
 It also contains immutable `archived` and `pinned` states.
 See [Friend archiving](#friend-archiving) for the scope, identity and persistence rules.
 
-After additions and replacements, `UniqueFriendList` moves pinned friends before unpinned friends.
+After additions and replacements, `UniqueFriendList` stably partitions friends, with pinned friends before unpinned friends.
 It preserves the existing relative order within each group.
-Filters use that stored order, so filtering preserves the groups.
+Filters use that stored order, so filtering preserves this invariant.
 An explicit sort uses a separate display comparator and can override the pin order in the current implementation.
 
 **Game fields and identity**
@@ -634,7 +634,7 @@ The validation allows punctuation. It does not exclude other Unicode categories,
 | `MetaValue` | 1–200 | Colons allowed | Case-sensitive |
 
 Keys must be unique within each game entry, even if repeated pairs have identical values.
-The same key can occur in other games or friends. `Game` enforces this rule during construction.
+The same key can occur in other games or friends. `Game` enforces this invariant during construction.
 
 `Meta.equals()` compares both fields. `Game.equals()` includes metadata, but `isSameGame()` compares only the game name.
 
