@@ -42,8 +42,8 @@ The `Main` component controls application startup and shutdown. It consists of
 [`Main`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/Main.java) and
 [`MainApp`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/MainApp.java).
 
-At startup, this component initializes the other components in the necessary sequence and connects them.
-At shutdown, it stops the other components and calls cleanup methods where necessary.
+* At startup, this component initializes the other components in the necessary sequence and connects them.
+* At shutdown, it stops the other components and calls cleanup methods where necessary.
 
 **Main components**
 
@@ -65,7 +65,7 @@ The following sequence diagram shows how the components interact when the user e
 Each main component defines its API in an `interface` with the same name as the component.
 A concrete `{Component Name}Manager` class implements that interface and provides the component's behavior.
 
-For example, `Logic.java` defines the Logic API, and `LogicManager.java` implements it.
+For example, `Logic.java` defines the `Logic` API, and `LogicManager.java` implements it.
 Other components use the interface instead of the concrete class.
 This prevents coupling to the concrete implementation.
 The following partial class diagram shows this relationship.
@@ -83,13 +83,23 @@ The component API is defined in
 
 **UI classes and layouts**
 
-The UI consists of `MainWindow`, `CommandBox`, `ResultDisplay`, `FriendListPanel`, `FriendDetailsPanel`,
-`GameDetailsCard`, `HelpWindow` and `StatusBarFooter`. These classes inherit from `UiPart`, which loads the matching FXML layouts.
+The `UI` consists of these classes, which inherit from `UiPart`:
+
+* `MainWindow`
+* `CommandBox`
+* `ResultDisplay`
+* `FriendListPanel`
+* `FriendDetailsPanel`
+* `GameDetailsCard`
+* `HelpWindow`
+* `StatusBarFooter`
+
+`UiPart` loads the matching FXML layouts.
 
 `MainWindow.fxml` uses a `SplitPane`. The observable friend list is on the left, and the details panel is on the right.
 `FriendDetailsPanel` shows contact details, tags and sorted game cards. It does not replace the friend list.
 
-The UI uses the JavaFX framework. Its `.fxml` layout files are in `src/main/resources/view`.
+The `UI` uses the JavaFX framework. Its `.fxml` layout files are in `src/main/resources/view`.
 For example,
 [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/resources/view/MainWindow.fxml)
 defines the layout of
@@ -97,9 +107,11 @@ defines the layout of
 
 **Component responsibilities**
 
-The UI executes user commands through Logic and keeps a reference to that component.
-It listens for changes to Model data so that the display can show those changes.
-The UI also depends on model classes because it displays `Friend` objects.
+The `UI` component:
+
+* Executes user commands through `Logic` and keeps a reference to that component.
+* Listens for changes to `Model` data so that the display can show those changes.
+* Depends on model classes because it displays `Friend` objects.
 
 **Selection and command results**
 
@@ -118,7 +130,7 @@ The filter does not change the model or the predicate for the left-hand friend l
 
 **API:** [`Logic.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/logic/Logic.java)
 
-The following partial class diagram shows the Logic component.
+The following partial class diagram shows the `Logic` component.
 
 <img src="images/LogicClassDiagram.png" width="550"/>
 
@@ -135,17 +147,18 @@ A PlantUML limitation makes it continue to the end of the diagram.
 
 `LogicManager.execute(commandText)` follows this sequence:
 
-1. Logic passes the command text to a `GameMatesParser` object.
-   This object creates a matching parser, such as `DeleteCommandParser`, and uses it to parse the command.
-2. The parser creates a `Command` subclass, such as `DeleteCommand`. `LogicManager` executes that command.
-3. The command communicates with Model as necessary, for example to delete a friend.
+1. `LogicManager` passes the command text to a `GameMatesParser` object.
+   This object creates a matching parser instance, such as a `DeleteCommandParser`, and uses it to parse the command.
+2. The parser creates an instance of a `Command` subclass, such as `DeleteCommand`.
+   `LogicManager` executes that command object.
+3. The command communicates with `Model` as necessary, for example to delete a friend.
    The diagram shows one interaction for simplicity. The code can use more than one interaction to complete the operation.
 4. The command creates a `CommandResult`.
    `LogicManager` obtains the data through `Model.getGameMates()`.
-   Before it returns the result to the UI, `LogicManager` saves the complete `ReadOnlyGameMates` through Storage.
+   Before it returns the result to the `UI`, `LogicManager` saves the complete `ReadOnlyGameMates` through `Storage`.
 
 Viewing commands also save data. Parse failures and execution failures skip the save.
-If an I/O error occurs after execution, Logic reports a `CommandException`.
+If an I/O error occurs after execution, `LogicManager` reports a `CommandException`.
 It does not roll back the change in memory.
 
 **Command parsing**
@@ -154,9 +167,9 @@ The following diagram shows the parsing classes omitted from the class diagram a
 
 <img src="images/ParserClasses.png" width="600"/>
 
-`GameMatesParser` creates an `XYZCommandParser`, where `XYZ` represents the command name.
-Each parser uses the shared parsing classes to create its `XYZCommand`.
-For example, `AddCommandParser` creates an `AddCommand`.
+`GameMatesParser` creates an instance of an `XYZCommandParser`, where `XYZ` represents the command name.
+Each parser uses the shared parsing classes to create an instance of its `XYZCommand` class.
+For example, `AddCommandParser` creates an `AddCommand` object.
 `GameMatesParser` returns the result as a `Command` object.
 
 All command parsers implement the `Parser` interface, including `AddCommandParser` and `DeleteCommandParser`.
@@ -186,7 +199,7 @@ It rejects a supplied blank `u/`.
 
 **Stored data and views**
 
-The Model stores friends in `GameMates` through `UniqueFriendList`.
+The `Model` stores friends in `GameMates` through `UniqueFriendList`.
 It stores a separate `Friend myself` profile with a default value. The profile is not part of the friend list.
 Add and edit commands prevent a friend and the profile from sharing a name.
 
@@ -196,10 +209,10 @@ Its predicate operates on the full collection; the filter does not create a seco
 `ModelManager` exposes a `SortedList` over this filtered list to apply the display order.
 
 Each friend's games are `Game` objects. Each object contains a game name, an optional username and optional metadata.
-The Model also stores a `UserPrefs` object, which currently holds GUI settings.
+The `Model` also stores a `UserPrefs` object, which currently holds GUI settings.
 Other components read these preferences through `ReadOnlyUserPrefs`.
 
-Model does not depend on UI, Logic or Storage.
+`Model` does not depend on `UI`, `Logic` or `Storage`.
 Its classes represent domain data and make sense without those other components.
 
 **Friend fields and pin order**
@@ -245,9 +258,9 @@ The diagram below shows this alternative.
 
 **Storage classes**
 
-Storage saves GameMates data and user preferences in JSON files. It reads those files back into the corresponding objects.
+`Storage` saves GameMates data and user preferences in JSON files. It reads those files back into the corresponding objects.
 `StorageManager` delegates file access to `JsonGameMatesStorage` and `JsonUserPrefsStorage`, with one class per data file.
-Storage depends on model classes because it saves and restores model objects.
+`Storage` depends on model classes because it saves and restores model objects.
 
 `JsonAdaptedGame` and `JsonAdaptedMeta` convert game metadata.
 They validate fields and reject duplicate metadata keys during the load.
@@ -256,7 +269,7 @@ They validate fields and reject duplicate metadata keys during the load.
 
 **Read results and startup defaults**
 
-Storage reads return Vavr `Option`. A missing file produces an absent value.
+`Storage` reads return Vavr `Option`. A missing file produces an absent value.
 Malformed JSON or invalid stored friend data causes `DataLoadingException`.
 Vavr `Try` captures JSON read failures and model-conversion failures.
 It converts them to checked `DataLoadingException` instances and keeps the original cause.
@@ -516,7 +529,7 @@ There is no transaction across model mutation and a disk-write failure.
 Tests cover pinned order and archived targets in archive and global search scopes.
 Save/reload tests verify both archive and pin status.
 Other tests cover command routing, atomic validation, displayed targets, metadata replacement and profile updates.
-They also cover case-only spelling, UI refresh and real JSON storage round trips.
+They also cover case-only spelling, `UI` refresh and real JSON storage round trips.
 
 The [game edit sequence diagram source](diagrams/GameEditSequenceDiagram.puml) shows validation before mutation.
 
@@ -740,7 +753,7 @@ Each `list`, `archivelist` or `find` command replaces the previous predicate.
 An unfiltered empty archive gives guidance on archiving.
 An empty filtered archive reports that no archived friends match the game filter.
 
-The logic layer exposes `getFriendListScope()` to the UI.
+The logic layer exposes `getFriendListScope()` to the `UI`.
 `MainWindow` sets the heading to **Active friends**, **Archived friends** or **Search results**.
 `FriendCard` shows an **Archived** badge where applicable.
 
