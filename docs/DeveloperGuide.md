@@ -213,11 +213,6 @@ disappear on the next serialization. Loading a damaged file does not repair or b
 the next successful command can overwrite it with the fallback data. There is no automatic recovery or atomic
 transaction spanning command execution and file writing.
 
-Known loading exception: a JSON file containing only the literal `null` reaches `JsonUtil.readJsonFile`'s
-`requireNonNull` outside its captured conversion, throwing `NullPointerException` rather than `DataLoadingException`.
-It bypasses the normal empty-data fallback and can prevent startup. This needs an application fix separately;
-the documentation change does not alter the loader.
-
 ### Common classes
 
 Classes used by multiple components are in the `seedu.address.commons` package.
@@ -998,7 +993,7 @@ Prerequisite: independent disposable app folders and closed app instances before
 | Start in an empty folder without `data/gamemates.json`; enter `list`. | Six sample friends and a default profile; the successful command creates the data file. |
 | Save the fixture above, close the app, copy the data file to a backup, then replace its contents with `{broken`. Relaunch without entering commands. | Empty friends and default profile; the malformed file stays on disk. No automatic backup or recovery prompt. Close the app and restore the backup to recover. |
 | Repeat the invalid-file setup, then enter `list`. | `Listed all friends.` with an empty list; the file is overwritten with the empty fallback data. |
-| In a separate disposable folder, replace the data file with the literal `null`, then launch. | Known defect: startup can fail with an uncaught null-value error instead of the empty-data fallback. Restore a valid backup to continue. |
+| In a separate disposable folder, replace the data file with the literal `null`, then launch. | Empty friends and default profile; the null value is rejected as a loading error. Restore a valid backup to recover. |
 | In a copy of the valid fixture, use an invalid phone such as `12`, or duplicate the friend with an equal name. Relaunch. | The whole data load fails; empty friends and default profile. Restore the backup before continuing. |
 | Remove the `myself` and `games` properties from a valid copy, then relaunch. | Default profile and a friend with no games. Empty/missing phone and email are accepted; invalid non-empty contacts are not. |
 | Copy the same JAR to a second empty folder and launch there. | A separate sample dataset, not the first folder's saved friends. Restore a backup into the second folder to transfer data. |
