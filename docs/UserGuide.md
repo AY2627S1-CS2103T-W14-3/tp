@@ -278,12 +278,14 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 
 * For `myself`, [set up your profile first](#your-profile-and-game-entries).
 * The game name is required. The username is optional. Omit `u/` if you do not know it.
-* Game names and supplied usernames must contain 1–50 printable characters after trimming,
-  including at least one letter or digit.
+* Game names and usernames must be 1–50 characters after trimming, with at least one letter or digit.
+* Control characters and line breaks are rejected. So are invisible characters, zero-width spaces, Hangul fillers
+  and no-break spaces.
 * Supplying `u/` without a value, or with only whitespace, is rejected. Omit the prefix instead.
 * Repeated `g/` or `u/` prefixes are rejected, even when the values are identical.
-* Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters.
-  Values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.
+* Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace.
+  Keys allow 1–50 characters and values allow 1–200. Both follow the game-name character rules.
+  Only values may contain colons.
 * Repeat `m/` for distinct keys. Metadata keys are case-insensitive, so `Role` and `role` are duplicates.
   Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
   Omit `m/` entirely for no metadata.
@@ -292,6 +294,10 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 * Other details and games are preserved. The friend-list filter stays unchanged.
 * Metadata appears below the username, sorted by key ignoring case. Long fields wrap. Scroll for additional rows.
 * The success message also lists supplied metadata below the username, sorted by key ignoring case.
+
+<div markdown="span" class="alert alert-primary">:bulb: **Tip:**
+Text copied from websites or game apps can contain hidden characters. If an input is rejected or a search does not match, retype it by hand.
+</div>
 
 Examples:
 
@@ -331,8 +337,8 @@ Format: `gamelist FRIEND_INDEX|myself [g/GAME_NAME]`
 * Without `g/`, all of the selected person's games are shown. This also clears a previous game display filter.
 * With `g/`, only a game with the complete matching name is shown. Matching is case-insensitive:
   `valorant` matches `Valorant`, but `Val` does not. Usernames are not searched.
-* Leading and trailing whitespace in the game name is removed. Game names may contain 1–50 printable characters
-  and must include at least one letter or digit. Multiword names are accepted.
+* Game names follow the same rules as in `gameadd`. Surrounding whitespace is removed.
+  Multiword names are accepted.
 * Put the selector before the optional filter. Only one `g/` is allowed, even if repeated values are identical.
   Unknown prefixes and extra words before `g/` are rejected. All words after `g/` form the game name.
   Whitespace-separated tokens such as `x/` are treated as parameter prefixes, not part of the name.
@@ -418,9 +424,9 @@ Lists each member's name, in-game username when available, and displayed friend 
 Format: `squad g/GAME n/NUMBER_OF_PEOPLE`
 
 * Both `g/` and `n/` are required and may appear in either order.
-* `GAME` uses the same game-name rules as `gamelist`: 1–50 printable characters after trimming,
-  including at least one letter or digit. Multiword names are accepted. Matching uses the complete
-  game name and is case-insensitive; `valorant` matches `Valorant`, but `Val` does not.
+* `GAME` follows the same rules as in `gameadd`. Multiword names are accepted.
+* Matching uses the complete game name and is case-insensitive.
+  `valorant` matches `Valorant`, but `Val` does not.
 * `NUMBER_OF_PEOPLE` must be a whole number from 1 to 20, inclusive.
 * The requested size includes you: `n/3` selects you and two friends; `n/1` returns only you.
 * You are always included as the first member, labelled `Me`, even if your profile does not contain `GAME`.
