@@ -26,12 +26,23 @@ final class FriendValidator {
     static void checkCanEdit(Model model, FriendTarget target, Friend candidate) throws CommandException {
         requireAllNonNull(model, target, candidate);
         if (target.isMyself()) {
+            if (candidate.getName().isEmpty()) {
+                throw new CommandException(Messages.MESSAGE_MYSELF_NOT_INITIALIZED);
+            }
             checkForDuplicateFriend(model, candidate);
         } else {
             checkForDuplicateMyself(model, candidate);
             if (!target.friend().isSameFriend(candidate)) {
                 checkForDuplicateFriend(model, candidate);
             }
+        }
+    }
+
+    /** Rejects an uninitialized friend target, such as a Myself profile with an empty name. */
+    static void checkFriendInitialized(FriendTarget target) throws CommandException {
+        requireAllNonNull(target);
+        if (target.isMyself() && target.friend().getName().isEmpty()) {
+            throw new CommandException(Messages.MESSAGE_MYSELF_NOT_INITIALIZED);
         }
     }
 

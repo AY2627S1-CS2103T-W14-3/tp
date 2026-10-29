@@ -183,7 +183,7 @@ public class GameEditCommandTest {
         Friend ambiguous = new FriendBuilder(friend).withGames(original,
                 new GameBuilder(original).withUsername("anotherPlayer").build()).build();
         model.addFriend(ambiguous);
-        assertThrows(CommandException.class, String.format(GameEditCommand.MESSAGE_AMBIGUOUS_GAME, "Valorant"), () ->
+        assertThrows(CommandException.class, String.format(GameTargetResolver.MESSAGE_AMBIGUOUS_GAME, "Valorant"), () ->
                 execute("gameedit 1 g/Valorant u/player"));
         assertSame(ambiguous, model.getFilteredFriendList().getFirst());
     }

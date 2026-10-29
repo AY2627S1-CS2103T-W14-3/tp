@@ -1,0 +1,14 @@
+{
+  "friends": [ {
+    "name": "Bob"
+  }, {
+    "name": "Alice",
+    "games": [ {
+      "name": "Valorant",
+      "username": "player"
+    }, {
+      "name": " VALORANT ",
+      "username": "anotherPlayer"
+    } ]
+  } ]
+}

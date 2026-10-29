@@ -17,6 +17,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.exceptions.DuplicateFriendException;
+import seedu.address.model.friend.exceptions.PinnedFriendLimitExceededException;
 import seedu.address.testutil.FriendBuilder;
 
 public class GameMatesTest {
@@ -76,6 +77,21 @@ public class GameMatesTest {
         GameMatesStub newData = new GameMatesStub(newFriends);
 
         assertThrows(DuplicateFriendException.class, () -> gameMates.resetData(newData));
+    }
+
+    @Test
+    public void resetData_withMoreThanMaximumPinnedFriends_throwsPinnedFriendLimitExceededException() {
+        List<Friend> pinnedFriends = List.of(
+                new FriendBuilder().withName("Pinned Friend 1").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 2").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 3").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 4").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 5").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 6").withPinned(true).build());
+        GameMatesStub newData = new GameMatesStub(pinnedFriends);
+
+        assertThrows(PinnedFriendLimitExceededException.class, () -> gameMates.resetData(newData));
+        assertTrue(gameMates.getFriendList().isEmpty());
     }
 
     @Test

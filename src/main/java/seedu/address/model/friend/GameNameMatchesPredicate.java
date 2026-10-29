@@ -37,6 +37,11 @@ public class GameNameMatchesPredicate implements Predicate<Friend> {
     }
 
     @Override
+    public int hashCode() {
+        return gameName.hashCode();
+    }
+
+    @Override
     public String toString() {
         return new ToStringBuilder(this).add("gameName", gameName).toString();
     }

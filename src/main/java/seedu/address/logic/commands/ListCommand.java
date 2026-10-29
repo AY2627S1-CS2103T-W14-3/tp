@@ -3,6 +3,7 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_FRIENDS;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import seedu.address.commons.util.ToStringBuilder;
@@ -111,6 +112,11 @@ public class ListCommand extends Command {
                 && isFilteredByGame == otherListCommand.isFilteredByGame
                 && sortCriterion == otherListCommand.sortCriterion
                 && isDescending == otherListCommand.isDescending;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(predicate, isFilteredByGame, sortCriterion, isDescending);
     }
 
     @Override
