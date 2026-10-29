@@ -821,11 +821,11 @@ These requirements are targets, not measured guarantees. Capacity and performanc
 
 #### Capacity
 
-1. Should support up to 1000 friends, each with up to 100 game entries.
+1. Should support up to 1000 friends in total across the active and archived lists, excluding the user profile, each with up to 100 game entries.
 
 #### Performance
 
-On a _modern computer_ running Java `25`, with up to 1000 friends and 100 game entries per friend:
+On a _modern computer_ running Java `25`, with up to 1000 friends in total across the active and archived lists, excluding the user profile, and 100 game entries per friend:
 
 1. Should be ready to accept commands within 3 seconds of launch.
 1. Should display friend listing or filtering results within 2 seconds of command submission.
