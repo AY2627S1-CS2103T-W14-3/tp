@@ -165,12 +165,11 @@ For example, if the command specifies <code class="language-plaintext highlighte
     </li>
     <li>Use spaces between parameters and lower-case command words and prefixes. Do not type square or angle brackets.
 Quotes are not needed around multiword names. Use only the prefixes documented for each command.</li>
-    <li>A space followed by a prefix such as <code class="language-plaintext highlighter-rouge">n/</code> starts a new parameter. To use such text in a value, wrap the whole
-value in double quotes. For example, <code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> is the game name <code class="language-plaintext highlighter-rouge">PUBG n/Game</code>.</li>
-    <li>A value is quoted when it starts with <code class="language-plaintext highlighter-rouge">"</code>. Spaces at the start and end inside the quotes are removed.
-A missing closing quote or text after the closing quote is rejected.</li>
-    <li>In any value, use <code class="language-plaintext highlighter-rouge">\"</code> for a literal double quote. Other backslashes are kept as typed.
-For example, <code class="language-plaintext highlighter-rouge">g/\"Game u/player</code> is the game name <code class="language-plaintext highlighter-rouge">"Game</code>, and <code class="language-plaintext highlighter-rouge">g/"\"Game u/2"</code> is <code class="language-plaintext highlighter-rouge">"Game u/2</code>.</li>
+    <li>To use prefix text such as ` n/<code class="language-plaintext highlighter-rouge"> in a value, wrap the whole value in double quotes.
+For example, </code>g/”PUBG u/Game”<code class="language-plaintext highlighter-rouge"> is the game name </code>PUBG u/Game`. Spaces at the start and end of the quoted value are removed.</li>
+    <li>Write every other double quote as <code class="language-plaintext highlighter-rouge">\"</code>, to use them as a string literal. Other backslashes are kept as typed.
+For example, <code class="language-plaintext highlighter-rouge">g/\"Game</code> is the game name <code class="language-plaintext highlighter-rouge">"Game</code>.</li>
+    <li>A bare <code class="language-plaintext highlighter-rouge">"</code> in the middle of a value, a missing closing quote or text after the closing quote is rejected.</li>
     <li>Repeating a single-value <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> parameter in <code class="language-plaintext highlighter-rouge">add</code> or <code class="language-plaintext highlighter-rouge">edit</code> is rejected, even with identical values.
 Tags may be repeated. Identical tag values are applied once.</li>
     <li>Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run <code class="language-plaintext highlighter-rouge">list</code> to see all active friends
@@ -436,7 +435,7 @@ Only values may contain colons.</li>
   <li>Repeat <code class="language-plaintext highlighter-rouge">m/</code> for distinct keys. Metadata keys are case-insensitive, so <code class="language-plaintext highlighter-rouge">Role</code> and <code class="language-plaintext highlighter-rouge">role</code> are duplicates.
 Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
 Omit <code class="language-plaintext highlighter-rouge">m/</code> entirely for no metadata.</li>
-  <li>A space followed by <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code> starts a new parameter. Quote the whole value to use these in field values.</li>
+  <li>A space followed by <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code> starts a new parameter. Quote the whole value to include such text.</li>
   <li>A game name already present on the selected friend or profile is rejected, ignoring case.</li>
   <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
   <li>Metadata appears below the username, sorted by key ignoring case. Long fields wrap. Scroll for additional rows.</li>
@@ -625,9 +624,7 @@ while the left panel continues showing only Minecraft players.</li>
   <li>Use the index from the <strong>currently displayed</strong> friend list, or case-insensitive <code class="language-plaintext highlighter-rouge">myself</code>. The profile can be edited even when the displayed list is empty.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">g/</code> selects a complete existing game name, ignoring case. Partial names do not match. Supply at least one of <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code>. Repeatable <code class="language-plaintext highlighter-rouge">m/</code> pairs can appear in any order with the other prefixes; <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">n/</code> and <code class="language-plaintext highlighter-rouge">u/</code> may each appear only once.</li>
-  <li>Wrap the <strong>whole value</strong> in double quotes if it contains a space followed by <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code>.
-For example, <code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> selects the literal name <code class="language-plaintext highlighter-rouge">PUBG n/Game</code>. This also works for new names,
-usernames and metadata. Malformed quoted values are rejected before any change.</li>
+  <li>Quote the whole value to include text such as ` n/<code class="language-plaintext highlighter-rouge">. For example, </code>g/”PUBG n/Game”<code class="language-plaintext highlighter-rouge"> selects </code>PUBG n/Game`.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">n/</code> renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.</li>
   <li>Omitted fields retain their values. Other games, contact details, tags, archive status and pin status are preserved.

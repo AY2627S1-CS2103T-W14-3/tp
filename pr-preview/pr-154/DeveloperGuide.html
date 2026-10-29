@@ -48,6 +48,7 @@
       <li>
 <a href="#logic-component" id="markdown-toc-logic-component">Logic component</a>        <ul>
           <li><a href="#optional-values" id="markdown-toc-optional-values">Optional values</a></li>
+          <li><a href="#quoted-values" id="markdown-toc-quoted-values">Quoted values</a></li>
         </ul>
       </li>
       <li><a href="#model-component" id="markdown-toc-model-component">Model component</a></li>
@@ -277,6 +278,18 @@ setters retain defensive copies.</p>
 adapters propagate the original exception, so invalid input is never treated as an omitted argument.
 <code class="language-plaintext highlighter-rouge">GameAddCommandParser</code> similarly defaults omitted <code class="language-plaintext highlighter-rouge">u/</code> to <code class="language-plaintext highlighter-rouge">Username.EMPTY</code>; a supplied blank <code class="language-plaintext highlighter-rouge">u/</code> is rejected.</p>
 
+<h4 id="quoted-values">Quoted values</h4>
+
+<p><code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code> lets users wrap a whole value in double quotes. Prefixes inside the quotes are literal text,
+so <code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> gives <code class="language-plaintext highlighter-rouge">PUBG n/Game</code>.</p>
+
+<ul>
+  <li>A value is quoted when its first character after trimming is <code class="language-plaintext highlighter-rouge">"</code>. Its content is trimmed like any value.</li>
+  <li>In any value, <code class="language-plaintext highlighter-rouge">\"</code> is a literal <code class="language-plaintext highlighter-rouge">"</code>. Only the backslash right before a quote is removed, so <code class="language-plaintext highlighter-rouge">\\"</code> gives <code class="language-plaintext highlighter-rouge">\"</code>.</li>
+  <li>A bare <code class="language-plaintext highlighter-rouge">"</code> in an unquoted value, a missing closing quote or text after the closing quote throws a <code class="language-plaintext highlighter-rouge">ParseException</code>.</li>
+  <li>The preamble is not parsed for quotes.</li>
+</ul>
+
 <h3 id="model-component">Model component</h3>
 <p><strong>API</strong> : <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java"><code class="language-plaintext highlighter-rouge">Model.java</code></a></p>
 
@@ -470,13 +483,6 @@ metadata (<code class="language-plaintext highlighter-rouge">null</code>) from a
 supplied pairs pass through the shared parser, including normalized duplicate-key checks and first-colon splitting.
 The model identity rules remain unchanged. The merged optional-username model provides <code class="language-plaintext highlighter-rouge">Username.EMPTY</code>. A supplied empty <code class="language-plaintext highlighter-rouge">u/</code> maps to that value.
 Omitting <code class="language-plaintext highlighter-rouge">u/</code> preserves the original username, including an absent username.</p>
-
-<p><code class="language-plaintext highlighter-rouge">ArgumentTokenizer.tokenize</code> lets any command double quote a whole field value. A value is quoted when its
-first character after trimming is <code class="language-plaintext highlighter-rouge">"</code>. Recognized prefixes inside the quotes are literal text, so
-<code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> selects that complete stored name. In any value, only a backslash right before <code class="language-plaintext highlighter-rouge">"</code> is removed,
-so <code class="language-plaintext highlighter-rouge">\\"</code> becomes <code class="language-plaintext highlighter-rouge">\"</code>. A value starting with <code class="language-plaintext highlighter-rouge">\"</code> is therefore unquoted. Quoted values are trimmed like
-unquoted ones. A missing closing quote or text after it
-throws a <code class="language-plaintext highlighter-rouge">ParseException</code>. The decoded values then pass through the same field validators and duplicate-prefix checks.</p>
 
 <p><code class="language-plaintext highlighter-rouge">GameEditCommand</code> uses <code class="language-plaintext highlighter-rouge">FriendTargetResolver</code> and <code class="language-plaintext highlighter-rouge">Model.resolveFriend</code> for displayed indices or Myself.
 It requires exactly one matching existing game, constructs the complete replacement, then checks collisions
