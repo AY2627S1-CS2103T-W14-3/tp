@@ -179,7 +179,7 @@ public class ParserUtilTest {
     }
 
     @Test
-    public void parseMetas_repeatedFlags_throwsParseException() {
+    public void parseMetas_repeatedFlags_throwsParseException() throws Exception {
         Prefix metaPrefix = new Prefix("m/");
         ArgumentMultimap arguments = ArgumentTokenizer.tokenize(" m/Role:Support m/role:Mid", metaPrefix);
         assertThrows(ParseException.class, Meta.MESSAGE_DUPLICATE_KEY, ()

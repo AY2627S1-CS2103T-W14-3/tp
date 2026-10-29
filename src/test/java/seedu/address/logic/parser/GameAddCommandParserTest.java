@@ -182,4 +182,10 @@ public class GameAddCommandParserTest {
         assertParseSuccess(parser, " 1 g/Valorant u/player m/Role:Support m/Style:Support"
                 + " m/Play style:Casual m/Play  style:Competitive", new GameAddCommand(Index.fromOneBased(1), game));
     }
+
+    @Test
+    public void parse_quotedValuesWithPrefix_success() {
+        assertParseSuccess(parser, " 1 g/\"Version u/2\" u/player", new GameAddCommand(Index.fromOneBased(1),
+                new Game(new GameName("Version u/2"), new Username("player"))));
+    }
 }

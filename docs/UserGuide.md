@@ -75,6 +75,12 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
 
 * Use spaces between parameters and lower-case command words and prefixes. Do not type square or angle brackets.
   Quotes are not needed around multiword names. Use only the prefixes documented for each command.
+* A space followed by a prefix such as `n/` starts a new parameter. To use such text in a value, wrap the whole
+  value in double quotes. For example, `g/"PUBG n/Game"` is the game name `PUBG n/Game`.
+* A value is quoted when it starts with `"`. Spaces at the start and end inside the quotes are removed.
+  A missing closing quote or text after the closing quote is rejected.
+* In any value, use `\"` for a literal double quote. Other backslashes are kept as typed.
+  For example, `g/\"Game u/player` is the game name `"Game`, and `g/"\"Game u/2"` is `"Game u/2`.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
   Tags may be repeated. Identical tag values are applied once.
 * Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all active friends
@@ -290,7 +296,7 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 * Repeat `m/` for distinct keys. Metadata keys are case-insensitive, so `Role` and `role` are duplicates.
   Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
   Omit `m/` entirely for no metadata.
-* A space followed by `g/`, `u/` or `m/` starts a new parameter, even inside quotes. Avoid these in field values.
+* A space followed by `g/`, `u/` or `m/` starts a new parameter. Quote the whole value to use these in field values.
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
 * Metadata appears below the username, sorted by key ignoring case. Long fields wrap. Scroll for additional rows.
@@ -341,8 +347,7 @@ Format: `gamelist FRIEND_INDEX|myself [g/GAME_NAME]`
 * Game names follow the same rules as in `gameadd`. Surrounding whitespace is removed.
   Multiword names are accepted.
 * Put the selector before the optional filter. Only one `g/` is allowed, even if repeated values are identical.
-  Unknown prefixes and extra words before `g/` are rejected. All words after `g/` form the game name.
-  Whitespace-separated tokens such as `x/` are treated as parameter prefixes, not part of the name.
+  Extra words before `g/` are rejected. All text after `g/` forms the game name, including text such as `x/`.
 * An absent game is a successful empty result, including when the selected person has no games. Stored friend details,
   game entries and your Myself profile are unchanged. Invalid commands leave the previous details display unchanged.
 
@@ -376,12 +381,12 @@ Errors:
 | Input problem | Feedback |
 |---------------|----------|
 | `myself` before profile setup | `Set your profile name first using edit myself n/NAME.` |
-| Missing selector, unknown prefix or extra positional argument | <code>Invalid command format. Usage: gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code> |
-| Malformed, zero, negative or overflowing index | `Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive), or myself.` |
+| Missing selector or extra words before `g/` | <code>Invalid command format. Usage: gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code> |
+| Malformed, zero, negative or overflowing index | `Index must be a positive integer between 1 and 2147483647 (inclusive).` |
 | Positive index outside the displayed list | `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.` |
 | Numeric index with an empty displayed list | `No friends are currently displayed. Use list to show all friends.` |
-| Invalid game name, including empty `g/` | `Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.` |
-| Repeated `g/` | `Only one game can be filtered per command. Run gamelist separately for each game.` |
+| Invalid game name, including empty `g/` | `Game names must contain 1 to 50 printable characters and include at least one letter or digit.` |
+| Repeated `g/` | `Multiple values specified for the following single-valued field(s): g/` |
 
 For your own profile, feedback uses the name you set during setup.
 
@@ -394,11 +399,9 @@ Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME
 * For `myself`, [set up your profile first](#your-profile-and-game-entries).
 * Use the index from the **currently displayed** friend list, or case-insensitive `myself`. The profile can be edited even when the displayed list is empty.
 * `g/` selects a complete existing game name, ignoring case. Partial names do not match. Supply at least one of `n/`, `u/` or `m/`. Repeatable `m/` pairs can appear in any order with the other prefixes; `g/`, `n/` and `u/` may each appear only once.
-* Wrap the **whole value** in double quotes if it contains a space followed by `g/`, `n/`, `u/` or `m/`:
-  `g/"PUBG n/Game"` selects the literal name `PUBG n/Game`. Without quotes, these prefixes introduce command options.
-  This also works for new names (`n/"PUBG m/Edition"`), usernames and metadata. Within quoted values, use `\"` for
-  a literal double quote and `\\` for a backslash. Unclosed quotes, invalid escapes and extra text after a closing
-  quote are rejected before any change. Quoting is specific to `gameedit`. Other commands retain their existing syntax.
+* Wrap the **whole value** in double quotes if it contains a space followed by `g/`, `n/`, `u/` or `m/`.
+  For example, `g/"PUBG n/Game"` selects the literal name `PUBG n/Game`. This also works for new names,
+  usernames and metadata. Malformed quoted values are rejected before any change.
 * `n/` renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.
 * Omitted fields retain their values. Other games, contact details, tags, archive status and pin status are preserved.
   The current friend-list scope and filter are retained, including archived lists and search results.

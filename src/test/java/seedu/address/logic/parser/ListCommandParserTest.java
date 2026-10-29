@@ -96,4 +96,10 @@ public class ListCommandParserTest {
     public void parse_invalidGameName_throwsParseException() {
         assertParseFailure(parser, " g/!!!", GameName.MESSAGE_CONSTRAINTS);
     }
+
+    @Test
+    public void parse_quotedGameNameWithPrefix_success() {
+        assertParseSuccess(parser, " g/\"Mode s/Ranked o/asc\" s/name o/desc", new ListCommand(
+                new GameNameMatchesPredicate(new GameName("Mode s/Ranked o/asc")), FriendSortCriterion.NAME, true));
+    }
 }
