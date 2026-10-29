@@ -2,8 +2,8 @@ package seedu.address.model.friend;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
+import static seedu.address.model.friend.FriendSortCriterion.PINNED_FRIENDS_FIRST;
 
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,8 +25,6 @@ import seedu.address.model.friend.exceptions.FriendNotFoundException;
  * @see Friend#isSameFriend(Friend)
  */
 public class UniqueFriendList implements Iterable<Friend> {
-
-    private static final Comparator<Friend> PINNED_FRIENDS_FIRST = Comparator.comparing(Friend::isPinned).reversed();
 
     private final ObservableList<Friend> internalList = FXCollections.observableArrayList();
     private final ObservableList<Friend> internalUnmodifiableList =
