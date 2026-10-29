@@ -18,7 +18,7 @@ public class FriendSortCriterionTest {
         Friend zoe = new FriendBuilder().withName("Zoe").build();
         Friend alex = new FriendBuilder().withName("alex").build();
 
-        List<Friend> friends = List.of(zoe, alex).stream().sorted(FriendSortCriterion.NAME.comparator()).toList();
+        List<Friend> friends = List.of(zoe, alex).stream().sorted(FriendSortCriterion.NAME.comparator(false)).toList();
 
         assertEquals(List.of(alex, zoe), friends);
     }
@@ -35,7 +35,7 @@ public class FriendSortCriterionTest {
         Friend noGames = new FriendBuilder().withName("No Games").build();
 
         List<Friend> friends = List.of(zelda, anna, noGames, andy).stream()
-                .sorted(FriendSortCriterion.GAME.comparator()).toList();
+                .sorted(FriendSortCriterion.GAME.comparator(false)).toList();
 
         assertEquals(List.of(andy, anna, zelda, noGames), friends);
     }

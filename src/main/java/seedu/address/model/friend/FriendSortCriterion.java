@@ -20,30 +20,15 @@ public enum FriendSortCriterion {
             .thenComparing(NAME_COMPARATOR.reversed());
 
     /**
-     * Returns the comparator for this criterion.
-     *
-     * <p>Friends without games are ordered after friends with games when sorting by game. Friends with more than
-     * one game are ordered by their alphabetically first game name. Name is used to break game-name ties.</p>
-     */
-    public Comparator<Friend> comparator() {
-        return switch (this) {
-            case NAME -> NAME_COMPARATOR;
-            case GAME -> GAME_COMPARATOR;
-        };
-    }
-
-    /**
      * Returns the comparator for this criterion in the requested direction.
      *
-     * <p>Friends without games always appear after friends with games when sorting by game.</p>
+     * <p>Friends without games always appear after friends with games when sorting by game. Friends with more than
+     * one game are ordered by their alphabetically first game name. Name is used to break game-name ties.</p>
      */
     public Comparator<Friend> comparator(boolean isDescending) {
-        if (!isDescending) {
-            return comparator();
-        }
         return switch (this) {
-            case NAME -> NAME_COMPARATOR.reversed();
-            case GAME -> DESCENDING_GAME_COMPARATOR;
+            case NAME -> isDescending ? NAME_COMPARATOR.reversed() : NAME_COMPARATOR;
+            case GAME -> isDescending ? DESCENDING_GAME_COMPARATOR : GAME_COMPARATOR;
         };
     }
 
