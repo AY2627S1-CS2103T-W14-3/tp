@@ -51,6 +51,7 @@ public class GameEditCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
+        FriendValidator.checkFriendInitialized(target);
         Friend friend = target.friend();
         Game original = GameTargetResolver.resolve(friend, existingGame);
         Game replacement = new Game(changes.gameName() == null ? original.getGameName() : changes.gameName(),

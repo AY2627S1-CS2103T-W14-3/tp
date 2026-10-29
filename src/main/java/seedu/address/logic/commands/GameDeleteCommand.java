@@ -40,6 +40,7 @@ public class GameDeleteCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
+        FriendValidator.checkFriendInitialized(target);
         Friend friend = target.friend();
         Game toDelete = GameTargetResolver.resolve(friend, gameName);
         Set<Game> games = new HashSet<>(friend.getGames());

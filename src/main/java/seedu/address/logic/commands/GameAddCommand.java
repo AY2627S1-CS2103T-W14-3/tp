@@ -55,6 +55,7 @@ public class GameAddCommand extends Command {
         requireNonNull(model);
 
         FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
+        FriendValidator.checkFriendInitialized(target);
         Friend friend = target.friend();
         GameValidator.checkCanAdd(friend, toAdd);
         model.setFriend(target, createFriendWithAddedGame(friend));
