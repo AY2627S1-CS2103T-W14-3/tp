@@ -7,6 +7,7 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_USERNAME;
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -96,6 +97,11 @@ public class GameAddCommand extends Command {
 
         return targetIndex.equals(otherGameAddCommand.targetIndex)
                 && toAdd.equals(otherGameAddCommand.toAdd);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(targetIndex, toAdd);
     }
 
     @Override

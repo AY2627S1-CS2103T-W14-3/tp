@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class GameEditCommand extends Command {
             + " Keys are unique ignoring case; values preserve case and may contain colons."
             + " An empty u/ clears the username.\n"
             + "Quote whole values containing prefix-like text: g/\"PUBG n/Game\"."
-            + " Inside quotes, use \\\" for a literal double quote.\n"
+            + " Write any other double quote as \\\".\n"
             + "Example: gameedit myself g/Valorant u/newPlayer m/Role:Healer";
     public static final String MESSAGE_NOT_EDITED = "Provide at least one of n/, u/ or m/ to edit a game.";
     public static final String MESSAGE_SUCCESS = "Edited %1$s's game: %2$s\nUsername: %3$s\nMetadata: %4$s";
@@ -75,6 +76,11 @@ public class GameEditCommand extends Command {
         return other == this || other instanceof GameEditCommand command
                 && targetIndex.equals(command.targetIndex) && existingGame.equals(command.existingGame)
                 && changes.equals(command.changes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(targetIndex, existingGame, changes);
     }
 
     @Override

@@ -101,7 +101,7 @@ public class GameListCommandParserTest {
         assertParseFailure(parser, "1 x/a g/\"Version n/2\"", GameListCommand.MESSAGE_USAGE);
         assertParseFailure(parser, "1 g/\"Version\" g/Other",
                 Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_GAME));
-        assertParseFailure(parser, "1 g/\"Version n/2", ArgumentTokenizer.MESSAGE_INVALID_QUOTED_VALUE);
+        assertParseFailure(parser, "1 g/\"Version n/2", ArgumentTokenizer.MESSAGE_UNCLOSED_QUOTE);
         assertParseFailure(parser, "1 g/\"" + "a".repeat(51) + "\"", GameName.MESSAGE_CONSTRAINTS);
     }
 }

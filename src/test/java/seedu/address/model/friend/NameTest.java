@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
 public class NameTest {
@@ -66,6 +68,8 @@ public class NameTest {
         Name variant = new Name("john   doe ");
         assertTrue(name.equals(variant));
         assertTrue(name.equals(new Name("john doe")));
+        assertEquals(name.hashCode(), variant.hashCode());
+        assertTrue(Set.of(name).contains(variant));
     }
 
     @Test

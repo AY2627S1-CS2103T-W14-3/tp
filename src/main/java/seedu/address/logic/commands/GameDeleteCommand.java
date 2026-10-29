@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME_NAME;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
@@ -58,6 +59,11 @@ public class GameDeleteCommand extends Command {
             return false;
         }
         return targetIndex.equals(otherCommand.targetIndex) && gameName.equals(otherCommand.gameName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(targetIndex, gameName);
     }
 
     @Override

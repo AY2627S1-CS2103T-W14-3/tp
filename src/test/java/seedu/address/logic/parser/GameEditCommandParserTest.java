@@ -59,10 +59,13 @@ public class GameEditCommandParserTest {
 
     @Test
     public void parse_malformedQuotedValues_failure() {
-        for (String input : new String[]{" 2 g/\"PUBG n/Game u/player", " 2 g/\"PUBG\"extra u/player",
-            " 2 g/Valorant u/\"player\\\"", " 2 g/\"PUBG\" extra u/player"}) {
-            assertParseFailure(parser, input, ArgumentTokenizer.MESSAGE_INVALID_QUOTED_VALUE);
+        for (String input : new String[]{" 2 g/\"PUBG n/Game u/player", " 2 g/Valorant u/\"player\\\""}) {
+            assertParseFailure(parser, input, ArgumentTokenizer.MESSAGE_UNCLOSED_QUOTE);
         }
+        for (String input : new String[]{" 2 g/\"PUBG\"extra u/player", " 2 g/\"PUBG\" extra u/player"}) {
+            assertParseFailure(parser, input, ArgumentTokenizer.MESSAGE_TEXT_AFTER_QUOTE);
+        }
+        assertParseFailure(parser, " 2 g/Valorant m/rank:\"Gold u/1\"", ArgumentTokenizer.MESSAGE_BARE_QUOTE);
     }
 
     @Test
