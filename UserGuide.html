@@ -76,6 +76,7 @@ See <a href="#your-profile-and-game-entries">Your profile and game entries</a> f
     </ul>
   </li>
   <li><a href="#faq" id="markdown-toc-faq">FAQ</a></li>
+  <li><a href="#known-limitations" id="markdown-toc-known-limitations">Known limitations</a></li>
   <li><a href="#known-issues" id="markdown-toc-known-issues">Known issues</a></li>
   <li><a href="#command-summary" id="markdown-toc-command-summary">Command summary</a></li>
 </ul>
@@ -1035,6 +1036,22 @@ Unknown JSON fields are ignored and are not preserved on the next save. Use the 
 <p><strong>Q</strong>: How do I transfer my data to another computer?<br>
 <strong>A</strong>: Follow the backup and restore steps in <a href="#editing-the-data-file">Editing the data file</a>. Keep both apps closed
 while copying the file, then launch the destination app from its usual data folder.</p>
+
+<hr>
+
+<h2 id="known-limitations">Known limitations</h2>
+
+<ol>
+  <li>
+<strong>Only one instance of GameMates can run at a time.</strong> Multiple instances write to the same <code class="language-plaintext highlighter-rouge">data/gamemates.json</code>
+and may overwrite each other’s changes, causing data loss.</li>
+  <li>
+<strong>GameMates primarily supports English.</strong> Friend names, tags, phones and emails accept only ASCII characters.
+Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.</li>
+  <li>
+<strong>Some characters count as more than one toward length limits.</strong> Lengths are counted in UTF-16 code units, so
+<code class="language-plaintext highlighter-rouge">😀</code> counts as 2 and <code class="language-plaintext highlighter-rouge">👨‍👩‍👧</code> (built from 3 emoji and 2 joiners) counts as 8.</li>
+</ol>
 
 <hr>
 
