@@ -131,6 +131,24 @@ public class ListCommandTest {
     }
 
     @Test
+    public void execute_descendingGameSort_placesFriendsWithoutGamesLast() {
+        Friend zelda = new FriendBuilder().withName("Zelda").withGames(
+                new Game(new GameName("Zelda"), new Username("zeldaPlayer"))).build();
+        Friend anna = new FriendBuilder().withName("Anna").withGames(
+                new Game(new GameName("Minecraft"), new Username("miner")),
+                new Game(new GameName("Animal Crossing"), new Username("islander"))).build();
+        Friend andy = new FriendBuilder().withName("Andy").withGames(
+                new Game(new GameName("animal crossing"), new Username("anotherIslander"))).build();
+        Friend noGames = new FriendBuilder().withName("No Games").build();
+        GameMates gameMates = gameMatesWith(zelda, anna, noGames, andy);
+        model = new ModelManager(gameMates, new UserPrefs());
+
+        assertCommandSuccess(new ListCommand(FriendSortCriterion.GAME, true), model, ListCommand.MESSAGE_SUCCESS,
+                new ModelManager(gameMates, new UserPrefs()));
+        assertEquals(List.of(zelda, anna, andy, noGames), model.getFilteredFriendList());
+    }
+
+    @Test
     public void execute_nameSortOnEmptyList_showsEmptyList() {
         model = new ModelManager();
         expectedModel = new ModelManager();
