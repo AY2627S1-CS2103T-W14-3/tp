@@ -48,6 +48,7 @@
       <li>
 <a href="#logic-component" id="markdown-toc-logic-component">Logic component</a>        <ul>
           <li><a href="#optional-values" id="markdown-toc-optional-values">Optional values</a></li>
+          <li><a href="#quoted-values" id="markdown-toc-quoted-values">Quoted values</a></li>
         </ul>
       </li>
       <li><a href="#model-component" id="markdown-toc-model-component">Model component</a></li>
@@ -327,6 +328,23 @@ Thus, an invalid value is not treated as an omitted argument.</p>
 
 <p><code class="language-plaintext highlighter-rouge">GameAddCommandParser</code> uses <code class="language-plaintext highlighter-rouge">Username.EMPTY</code> when <code class="language-plaintext highlighter-rouge">u/</code> is omitted.
 It rejects a supplied blank <code class="language-plaintext highlighter-rouge">u/</code>.</p>
+
+<h4 id="quoted-values">Quoted values</h4>
+
+<p><code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code> lets users wrap a whole value in double quotes. Prefixes inside the quotes are literal text,
+so <code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> gives <code class="language-plaintext highlighter-rouge">PUBG n/Game</code>.</p>
+
+<ul>
+  <li>A value is quoted when its first character after trimming is <code class="language-plaintext highlighter-rouge">"</code>. Its content is trimmed like any value.</li>
+  <li>In any value, <code class="language-plaintext highlighter-rouge">\"</code> is a literal <code class="language-plaintext highlighter-rouge">"</code>. Only the backslash right before a quote is removed, so <code class="language-plaintext highlighter-rouge">\\"</code> gives <code class="language-plaintext highlighter-rouge">\"</code>.</li>
+  <li>A quoted value cannot end with <code class="language-plaintext highlighter-rouge">\</code> right before the closing quote, since <code class="language-plaintext highlighter-rouge">\"</code> is read as a literal <code class="language-plaintext highlighter-rouge">"</code>.
+Users add a space before the closing quote instead, which trimming removes.</li>
+  <li>A bare <code class="language-plaintext highlighter-rouge">"</code> in an unquoted value, a missing closing quote or text after the closing quote throws a <code class="language-plaintext highlighter-rouge">ParseException</code>.
+Each case has its own message.</li>
+  <li>Only straight quotes <code class="language-plaintext highlighter-rouge">"</code> are supported. Other quotes such as curly quotes <code class="language-plaintext highlighter-rouge">“ ”</code> do not start or end a quoted value.
+They are kept as normal text.</li>
+  <li>The preamble is not parsed for quotes.</li>
+</ul>
 
 <h3 id="model-component">Model component</h3>
 
@@ -640,16 +658,7 @@ The model identity rules do not change.</p>
 A supplied empty <code class="language-plaintext highlighter-rouge">u/</code> maps to that value.
 If <code class="language-plaintext highlighter-rouge">u/</code> is omitted, the command preserves the original username, including an absent username.</p>
 
-<p><strong>Quoted values</strong></p>
-
-<p>The parser uses <code class="language-plaintext highlighter-rouge">ArgumentTokenizer.tokenizeWithQuotedValues</code> to accept double quotes around a whole field value.
-Inside that value, recognized prefixes are literal text.
-For example, <code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> selects the complete stored name <code class="language-plaintext highlighter-rouge">PUBG n/Game</code>.</p>
-
-<p>The tokenizer decodes <code class="language-plaintext highlighter-rouge">\"</code> and <code class="language-plaintext highlighter-rouge">\\</code>. It rejects malformed quotes, invalid escapes and trailing text.
-The decoded values pass through the same field validators and duplicate-prefix validation.
-Unquoted prefixes keep their existing command meaning.
-The ordinary tokenizer and other commands’ syntax are unchanged. Quoted-value parsing is specific to <code class="language-plaintext highlighter-rouge">gameedit</code> in this checkout.</p>
+<p>Quoted field values use the shared <code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code> behavior described in <a href="#quoted-values">Quoted values</a>.</p>
 
 <p><strong>Validation before mutation</strong></p>
 
@@ -695,12 +704,11 @@ It does not change the left-hand friend list.</p>
 
 <p><code class="language-plaintext highlighter-rouge">GameMatesParser</code> routes <code class="language-plaintext highlighter-rouge">gamelist</code> to <code class="language-plaintext highlighter-rouge">GameListCommandParser</code>.
 The parser accepts one positional index or <code class="language-plaintext highlighter-rouge">myself</code> before at most one <code class="language-plaintext highlighter-rouge">g/</code> filter.
-It recognizes prefixes at whitespace boundaries and rejects unknown prefixes or repeated <code class="language-plaintext highlighter-rouge">g/</code> tokens.
-Thus, those tokens cannot silently become part of a multiword game name.
-Other words after <code class="language-plaintext highlighter-rouge">g/</code> belong to the game name.</p>
+It uses the shared <code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code>, so all text after <code class="language-plaintext highlighter-rouge">g/</code> belongs to the name unless it is another ` g/<code class="language-plaintext highlighter-rouge">.
+Quoted values can include literal </code> g/<code class="language-plaintext highlighter-rouge"> text. Repeated </code>g/` tokens outside quotes are rejected.</p>
 
 <p>The parser uses <code class="language-plaintext highlighter-rouge">ParserUtil.parseIndexOrMyself</code> for selectors and the existing <code class="language-plaintext highlighter-rouge">GameName</code> rules for game validation.
-It translates command-specific errors locally. Other commands keep their existing validation and messages.</p>
+Index, repeated-prefix and game-name errors use the same shared messages as other commands.</p>
 
 <p><code class="language-plaintext highlighter-rouge">GameListCommand.execute</code> resolves numeric indices against <code class="language-plaintext highlighter-rouge">Model.getFilteredFriendList()</code>.
 This keeps indices consistent after name searches and game-based filtering.
