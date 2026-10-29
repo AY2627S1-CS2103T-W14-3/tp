@@ -153,9 +153,12 @@ public class MainWindow extends UiPart<Stage> {
             return;
         }
         if (commandResult.getFriendToShow().isPresent()) {
-            friendDetailsPanel.setFriend(commandResult.getFriendToShow().get(), commandResult.isShowMyself(),
+            Friend friend = commandResult.getFriendToShow().get();
+            friendListPanel.selectFriend(commandResult.isShowMyself() ? null : friend);
+            friendDetailsPanel.setFriend(friend, commandResult.isShowMyself(),
                     commandResult.getGameFilter().orElse(null));
         } else {
+            friendListPanel.selectFriend(null);
             showFriendDetails(null);
         }
     }

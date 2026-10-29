@@ -143,9 +143,11 @@ public class EditFriendIntegrationTest {
 
         GameMates before = new GameMates(model.getGameMates());
         assertThrows(ParseException.class, () -> parser.parseCommand("edit myself n/Alex e/invalid"));
+        assertThrows(CommandException.class, Messages.MESSAGE_MYSELF_NOT_INITIALIZED, ()
+                -> parser.parseCommand("edit myself e/alex@example.com").execute(model));
         assertEquals(before, model.getGameMates());
         model.updateFilteredFriendList(friend -> false);
-        parser.parseCommand("edit myself e/alex@example.com").execute(model);
+        parser.parseCommand("edit myself n/Alex e/alex@example.com").execute(model);
         assertTrue(model.getFilteredFriendList().isEmpty());
         assertEquals("alex@example.com", model.getGameMates().getMyself().getEmail().value);
     }

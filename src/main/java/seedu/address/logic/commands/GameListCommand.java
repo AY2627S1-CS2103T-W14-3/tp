@@ -12,6 +12,7 @@ import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.FriendTarget;
 import seedu.address.model.game.Game;
 import seedu.address.model.game.GameName;
 
@@ -60,7 +61,9 @@ public class GameListCommand extends Command {
             }
         }
 
-        Friend friend = model.resolveFriend(friendIndex).friend();
+        FriendTarget target = model.resolveFriend(friendIndex);
+        FriendValidator.checkFriendInitialized(target);
+        Friend friend = target.friend();
         String feedback;
         if (gameFilter == null) {
             feedback = friend.getGames().isEmpty()

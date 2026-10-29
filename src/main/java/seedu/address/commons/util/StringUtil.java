@@ -6,16 +6,25 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 /**
  * Helper functions for handling strings.
  */
 public class StringUtil {
 
+    // Unicode Other categories (C), plus line and paragraph separators, are non-printable.
+    // Hangul fillers, the blank Braille pattern and the combining grapheme joiner render blank
+    // despite being letters, symbols or marks. No-break spaces look like regular spaces but do not match them.
+    private static final Pattern NON_PRINTABLE_PATTERN = Pattern.compile(
+            "[\\p{C}\\p{Zl}\\p{Zp}\\u115F\\u1160\\u3164\\uFFA0\\u2800\\u034F\\u00A0\\u2007\\u202F]");
+
     /**
      * Returns whether a text field is non-empty after stripping whitespace, within {@code maxLength},
-     * contains at least one letter or digit, and contains no ISO control characters.
-     * Punctuation and other non-control characters are allowed. Length uses {@link String#length()}.
+     * contains at least one letter or digit, and contains only printable Unicode characters.
+     * Controls, format characters, unpaired surrogates, private-use/unassigned characters,
+     * line/paragraph separators, blank-rendering fillers and no-break spaces are rejected after stripping.
+     * Length uses {@link String#length()}.
      * Null input and non-positive length limits return false.
      */
     public static boolean isValidTextField(String text, int maxLength) {
@@ -26,7 +35,7 @@ public class StringUtil {
         return !trimmedText.isEmpty()
                 && trimmedText.length() <= maxLength
                 && trimmedText.codePoints().anyMatch(Character::isLetterOrDigit)
-                && trimmedText.codePoints().noneMatch(Character::isISOControl);
+                && !NON_PRINTABLE_PATTERN.matcher(trimmedText).find();
     }
 
     /**

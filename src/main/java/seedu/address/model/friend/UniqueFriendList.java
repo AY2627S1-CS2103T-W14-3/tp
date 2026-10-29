@@ -12,6 +12,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.model.friend.exceptions.DuplicateFriendException;
 import seedu.address.model.friend.exceptions.FriendNotFoundException;
+import seedu.address.model.friend.exceptions.PinnedFriendLimitExceededException;
 
 /**
  * A list of friends that enforces uniqueness between its elements and does not allow nulls.
@@ -25,6 +26,8 @@ import seedu.address.model.friend.exceptions.FriendNotFoundException;
  * @see Friend#isSameFriend(Friend)
  */
 public class UniqueFriendList implements Iterable<Friend> {
+
+    public static final int MAX_PINNED_FRIENDS = 5;
 
     private static final Comparator<Friend> PINNED_FRIENDS_FIRST = Comparator.comparing(Friend::isPinned).reversed();
 
@@ -54,6 +57,7 @@ public class UniqueFriendList implements Iterable<Friend> {
         if (contains(toAdd)) {
             throw new DuplicateFriendException();
         }
+        verifyPinnedFriendLimitAfterAddition(toAdd);
         internalList.add(toAdd);
         movePinnedFriendsToTop();
     }
@@ -75,6 +79,8 @@ public class UniqueFriendList implements Iterable<Friend> {
             throw new DuplicateFriendException();
         }
 
+        verifyPinnedFriendLimitAfterReplacement(target, editedFriend);
+
         internalList.set(index, editedFriend);
         movePinnedFriendsToTop();
     }
@@ -92,6 +98,7 @@ public class UniqueFriendList implements Iterable<Friend> {
 
     public void setFriends(UniqueFriendList replacement) {
         requireNonNull(replacement);
+        verifyPinnedFriendLimit(replacement.internalList);
         internalList.setAll(replacement.internalList);
         movePinnedFriendsToTop();
     }
@@ -105,6 +112,7 @@ public class UniqueFriendList implements Iterable<Friend> {
         if (!friendsAreUnique(friends)) {
             throw new DuplicateFriendException();
         }
+        verifyPinnedFriendLimit(friends);
 
         internalList.setAll(friends);
         movePinnedFriendsToTop();
@@ -158,6 +166,33 @@ public class UniqueFriendList implements Iterable<Friend> {
             }
         }
         return true;
+    }
+
+    /** Throws if the given friend list exceeds the pinned friend limit. */
+    private void verifyPinnedFriendLimit(List<Friend> friends) {
+        long pinnedFriendCount = friends.stream().filter(Friend::isPinned).count();
+        if (pinnedFriendCount > MAX_PINNED_FRIENDS) {
+            throw new PinnedFriendLimitExceededException();
+        }
+    }
+
+    /** Throws if adding {@code friend} to this list would exceed the pinned friend limit. */
+    private void verifyPinnedFriendLimitAfterAddition(Friend friend) {
+        long pinnedFriendCount = internalList.stream().filter(Friend::isPinned).count()
+                + (friend.isPinned() ? 1 : 0);
+        if (pinnedFriendCount > MAX_PINNED_FRIENDS) {
+            throw new PinnedFriendLimitExceededException();
+        }
+    }
+
+    /** Throws if replacing {@code target} with {@code replacement} would exceed the pinned friend limit. */
+    private void verifyPinnedFriendLimitAfterReplacement(Friend target, Friend replacement) {
+        long pinnedFriendCount = internalList.stream().filter(Friend::isPinned).count()
+                - (target.isPinned() ? 1 : 0)
+                + (replacement.isPinned() ? 1 : 0);
+        if (pinnedFriendCount > MAX_PINNED_FRIENDS) {
+            throw new PinnedFriendLimitExceededException();
+        }
     }
 
     /**

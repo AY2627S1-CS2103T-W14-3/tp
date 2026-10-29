@@ -48,6 +48,7 @@ public class GameAddMetadataIntegrationTest {
     public void execute_metadataWithoutUsername_survivesReloadForFriendAndMyself() throws Exception {
         Model model = new ModelManager();
         model.addFriend(new FriendBuilder().withName("Alex").build());
+        model.setMyself(new FriendBuilder().withName("Own Profile").build());
         GameMatesParser parser = new GameMatesParser();
         Game expected = new GameBuilder().withGameName("Valorant").withoutUsername()
                 .addMeta("Role", "Support").build();
@@ -55,7 +56,7 @@ public class GameAddMetadataIntegrationTest {
         for (String selector : List.of("1", "myself")) {
             CommandResult result = parser.parseCommand("gameadd " + selector + " g/Valorant m/Role:Support")
                     .execute(model);
-            String name = selector.equals("myself") ? model.getGameMates().getMyself().getName().toString() : "Alex";
+            String name = selector.equals("myself") ? "Own Profile" : "Alex";
             assertEquals("Added Valorant to " + name + "'s games.\nUsername: Not provided\nMetadata:\n - Role: Support",
                     result.getFeedbackToUser());
         }
@@ -75,7 +76,7 @@ public class GameAddMetadataIntegrationTest {
         Friend hidden = new FriendBuilder().withName("Hidden").build();
         model.addFriend(hidden);
         model.addFriend(original);
-        model.setMyself(original);
+        model.setMyself(new FriendBuilder(original).withName("Own Profile").build());
         model.updateFilteredFriendList(friend -> friend.getName().equals(original.getName()));
         GameMates before = new GameMates(model.getGameMates());
         Path path = testFolder.resolve("invalid-metadata.json");
@@ -113,6 +114,7 @@ public class GameAddMetadataIntegrationTest {
     @Test
     public void execute_metadataKeysAreScopedToEachGameEntry() throws Exception {
         Model model = new ModelManager();
+        model.setMyself(new FriendBuilder().withName("Own Profile").build());
         Game existing = new GameBuilder().addMeta("Role", "Builder").build();
         model.addFriend(new FriendBuilder().withName("Alex").withGames(existing).build());
         model.addFriend(new FriendBuilder().withName("Bob").build());
@@ -138,7 +140,8 @@ public class GameAddMetadataIntegrationTest {
         Friend hidden = new FriendBuilder().withName("Hidden").build();
         model.addFriend(hidden);
         model.addFriend(original);
-        model.setMyself(original);
+        Friend profile = new FriendBuilder(original).withName("Own Profile").build();
+        model.setMyself(profile);
         model.updateFilteredFriendList(friend -> friend.getName().equals(original.getName()));
         Game added = new GameBuilder().withGameName("Valorant").withUsername("player")
                 .addMeta("Role", "Support:Mid").addMeta("level", "20").build();
@@ -147,16 +150,19 @@ public class GameAddMetadataIntegrationTest {
         CommandResult result = parser.parseCommand("gameadd " + selector
                 + " g/Valorant u/player m/Role:Support:Mid m/level:20")
                 .execute(model);
-        assertEquals("Added Valorant to Alex's games.\nUsername: player\nMetadata:\n - level: 20\n - Role: Support:Mid",
+        String name = selector.equals("myself") ? "Own Profile" : "Alex";
+        assertEquals("Added Valorant to " + name
+                + "'s games.\nUsername: player\nMetadata:\n - level: 20\n - Role: Support:Mid",
                 result.getFeedbackToUser());
 
         boolean isMyself = selector.equals("myself");
         assertEquals(isMyself ? original : updated, model.getFilteredFriendList().getFirst());
-        assertEquals(isMyself ? updated : original, model.getGameMates().getMyself());
+        assertEquals(isMyself ? new FriendBuilder(profile).withGames(existing, added).build() : profile,
+                model.getGameMates().getMyself());
         assertEquals(List.of(hidden, isMyself ? original : updated), model.getGameMates().getFriendList());
         assertEquals(1, model.getFilteredFriendList().size());
         assertCommandFailure(parser.parseCommand("gameadd " + selector + " g/valorant u/other m/Role:Healer"),
-                model, "Alex already has valorant.");
+                model, name + " already has valorant.");
 
         JsonGameMatesStorage storage = new JsonGameMatesStorage(testFolder.resolve(selector + ".json"));
         storage.saveGameMates(model.getGameMates());

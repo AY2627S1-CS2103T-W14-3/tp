@@ -2,6 +2,7 @@ package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -47,6 +48,7 @@ class MainWindowTest {
             assertEquals("Friend details", getLabel(window, "#title").getText());
             assertEquals("Role: Support:Mid", getLabel(window, ".details-game-metadata").getText());
 
+            executeCommand(window, "edit myself n/Alex");
             executeCommand(window, "gameadd myself g/Minecraft u/player m/Mode:Creative");
             assertEquals("Your details", getLabel(window, "#title").getText());
             assertEquals("Mode: Creative", getLabel(window, ".details-game-metadata").getText());
@@ -129,6 +131,7 @@ class MainWindowTest {
             logic.setNextResult(new CommandResult("Listed friends"));
             executeCommand(mainWindow);
             assertEquals("Your details", getLabel(mainWindow, "#title").getText());
+            assertNull(getFriendList(mainWindow).getSelectionModel().getSelectedItem());
         });
     }
 
@@ -146,6 +149,7 @@ class MainWindowTest {
 
             executeCommand(window, "gamelist 1 g/valorant");
             assertEquals("Alice", getLabel(window, "#name").getText());
+            assertEquals(alice, getFriendList(window).getSelectionModel().getSelectedItem());
             assertEquals(1, getGames(window).getChildren().size());
             assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
             assertEquals(2, getFriendList(window).getItems().size());
@@ -158,6 +162,7 @@ class MainWindowTest {
             assertEquals("Stardew Valley", getLabel(window, ".details-game-name").getText());
 
             executeCommand(window, "gamelist 1 g/Unknown");
+            assertEquals(alice, getFriendList(window).getSelectionModel().getSelectedItem());
             assertEquals("No matching game: Unknown", ((Label) getGames(window).getChildren().getFirst()).getText());
             executeCommand(window, "find Alice");
             assertEquals(2, getGames(window).getChildren().size());
