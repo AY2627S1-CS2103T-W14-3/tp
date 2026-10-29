@@ -219,6 +219,9 @@ so `g/"PUBG n/Game"` gives `PUBG n/Game`.
 
 <img src="images/ModelClassDiagram.png" width="625" />
 
+This partial class diagram shows selected archive-related attributes; unrelated members are omitted.
+`ModelManager.friendListScope` uses the `FriendListScope` enumeration to identify the displayed view.
+
 **Stored data and views**
 
 The `Model` stores friends in `GameMates` through `UniqueFriendList`.
@@ -776,6 +779,11 @@ The logic layer exposes `getFriendListScope()` to the `UI`.
    In global search, the friend stays at the same displayed position with the new status.
    Neither command resets the predicate or scope.
 6. `LogicManager` saves the updated collection through the existing storage path.
+
+The sequence shows a successful `archive 1` in the active view after parsing. Helper calls and subsequent saving
+are omitted. In search results, the same update keeps the matching friend visible with its new archive status.
+
+![Archiving the first friend in the active view](images/ArchiveSequenceDiagram.png)
 
 `edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status in replacement friends.
 `gameedit` also retains the current scope and predicate.
