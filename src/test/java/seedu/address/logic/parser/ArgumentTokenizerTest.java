@@ -37,6 +37,8 @@ public class ArgumentTokenizerTest {
         // Only the backslash right before a quote is removed.
         assertArgumentPresent(ArgumentTokenizer.tokenize(" p/\"a\\\\\" b\"", pSlash), pSlash, "a\\\" b");
         assertArgumentPresent(ArgumentTokenizer.tokenize(" p/\"C:\\path\\q\"", pSlash), pSlash, "C:\\path\\q");
+        // A space lets a quoted value end with a backslash.
+        assertArgumentPresent(ArgumentTokenizer.tokenize(" p/\"a -tb\\ \"", pSlash, dashT), pSlash, "a -tb\\");
     }
 
     @Test
@@ -50,10 +52,16 @@ public class ArgumentTokenizerTest {
 
     @Test
     public void tokenize_malformedQuotedValues_throwsParseException() throws Exception {
-        for (String args : new String[]{" p/\"open", " p/\"open -tvalue", " p/\"done\"extra",
-            " p/\"done\" extra -tvalue", " p/\"escaped\\\"", " p/\"a\\\\\"", " p/end\"", " p/mid \"dle\" -tvalue"}) {
-            assertThrows(ParseException.class, ArgumentTokenizer.MESSAGE_INVALID_QUOTED_VALUE, ()
-                    -> ArgumentTokenizer.tokenize(args, pSlash, dashT));
+        assertTokenizeFailure(ArgumentTokenizer.MESSAGE_UNCLOSED_QUOTE,
+                " p/\"open", " p/\"open -tvalue", " p/\"escaped\\\"", " p/\"a\\\\\"");
+        assertTokenizeFailure(ArgumentTokenizer.MESSAGE_TEXT_AFTER_QUOTE,
+                " p/\"done\"extra", " p/\"done\" extra -tvalue");
+        assertTokenizeFailure(ArgumentTokenizer.MESSAGE_BARE_QUOTE, " p/end\"", " p/mid \"dle\" -tvalue");
+    }
+
+    private void assertTokenizeFailure(String expectedMessage, String... argsStrings) {
+        for (String args : argsStrings) {
+            assertThrows(ParseException.class, expectedMessage, () -> ArgumentTokenizer.tokenize(args, pSlash, dashT));
         }
     }
 

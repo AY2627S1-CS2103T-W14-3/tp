@@ -147,7 +147,12 @@ so `g/"PUBG n/Game"` gives `PUBG n/Game`.
 
 * A value is quoted when its first character after trimming is `"`. Its content is trimmed like any value.
 * In any value, `\"` is a literal `"`. Only the backslash right before a quote is removed, so `\\"` gives `\"`.
+* A quoted value cannot end with `\` right before the closing quote, since `\"` is read as a literal `"`.
+  Users add a space before the closing quote instead, which trimming removes.
 * A bare `"` in an unquoted value, a missing closing quote or text after the closing quote throws a `ParseException`.
+  Each case has its own message.
+* Only straight quotes `"` are supported. Other quotes such as curly quotes `“ ”` do not start or end a quoted value.
+  They are kept as normal text.
 * The preamble is not parsed for quotes.
 
 ### Model component

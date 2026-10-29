@@ -78,6 +78,10 @@ See [Your profile and game entries](#your-profile-and-game-entries) for adding g
   For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`. Spaces at the start and end of the quoted value are removed.
 * To include a double quote in a value, type it as `\"`. Other backslashes are kept as typed.
   For example, `g/\"Game` is the game name `"Game`.
+* To end a quoted value with `\`, add a space before the closing quote.
+  For example, `g/"PUBG u/Game\ "` is the game name `PUBG u/Game\`.
+* For metadata, wrap the whole `KEY:VALUE`. For example, use `m/"Rank:Gold u/1"`, not `m/Rank:"Gold u/1"`.
+* Quotes only applicable in values after a prefix. Friend indices, `myself` and `find` keywords read `"` as a normal character.
 * A bare `"` in the middle of a value, a missing closing quote or text after the closing quote is rejected.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
   Tags may be repeated. Identical tag values are applied once.
@@ -92,6 +96,11 @@ See [Your profile and game entries](#your-profile-and-game-entries) for adding g
 
 * Wide tables scroll horizontally on narrow screens. If you are using a PDF version, take care when copying
   commands across line breaks: spaces can be lost during copying.
+</div>
+
+<div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
+Use straight double quotes `"`, not other types such as curly quotes `“ ”`. The app reads curly quotes as normal text, so the value
+is not quoted. Text copied from a PDF or web page may contain curly quotes, so double check them before running a command.
 </div>
 
 ### Viewing friend details

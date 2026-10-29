@@ -19,8 +19,12 @@ import seedu.address.logic.parser.exceptions.ParseException;
  */
 public class ArgumentTokenizer {
 
-    public static final String MESSAGE_INVALID_QUOTED_VALUE = "Invalid double quote. Wrap the whole value in "
-            + "double quotes, and write any other double quote as \\\".";
+    public static final String MESSAGE_UNCLOSED_QUOTE = "Missing closing double quote. To end a quoted value "
+            + "with \\, add a space before the closing quote.";
+    public static final String MESSAGE_TEXT_AFTER_QUOTE = "Text after a closing double quote is not allowed. "
+            + "Wrap the whole value in double quotes, and add a space before the next prefix.";
+    public static final String MESSAGE_BARE_QUOTE = "Invalid double quote. Wrap the whole value in double quotes, "
+            + "or write the double quote as \\\".";
 
     private static final Pattern UNESCAPED_QUOTE = Pattern.compile("(?<!\\\\)\"");
 
@@ -76,7 +80,7 @@ public class ArgumentTokenizer {
         String trailingText = argsString.substring(quoted.endPosition(),
                 startOfPrefixOrEnd(argsString, positions, nextIndex));
         if (!trailingText.trim().isEmpty()) {
-            throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
+            throw new ParseException(MESSAGE_TEXT_AFTER_QUOTE);
         }
         return new ArgumentValue(quoted.value().trim(), nextIndex);
     }
@@ -98,7 +102,7 @@ public class ArgumentTokenizer {
             i++;
         }
         if (i == argsString.length()) {
-            throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
+            throw new ParseException(MESSAGE_UNCLOSED_QUOTE);
         }
         return new QuotedValue(value.toString(), i + 1);
     }
@@ -110,7 +114,7 @@ public class ArgumentTokenizer {
      */
     private static String unescapeQuotes(String value) throws ParseException {
         if (UNESCAPED_QUOTE.matcher(value).find()) {
-            throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
+            throw new ParseException(MESSAGE_BARE_QUOTE);
         }
         return value.replace("\\\"", "\"");
     }
