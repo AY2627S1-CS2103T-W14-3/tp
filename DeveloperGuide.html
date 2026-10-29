@@ -62,7 +62,7 @@
       <li><a href="#name-and-game-filtering" id="markdown-toc-name-and-game-filtering">Name and game filtering</a></li>
       <li><a href="#editing-an-existing-game" id="markdown-toc-editing-an-existing-game">Editing an existing game</a></li>
       <li><a href="#viewing-a-friends-games" id="markdown-toc-viewing-a-friends-games">Viewing a friend’s games</a></li>
-      <li><a href="#mvp-integration-and-specification-departures" id="markdown-toc-mvp-integration-and-specification-departures">MVP integration and specification departures</a></li>
+      <li><a href="#current-limitations" id="markdown-toc-current-limitations">Current limitations</a></li>
       <li>
 <a href="#game-metadata" id="markdown-toc-game-metadata">Game metadata</a>        <ul>
           <li><a href="#validation-and-equality" id="markdown-toc-validation-and-equality">Validation and equality</a></li>
@@ -125,8 +125,7 @@
 <a href="https://vavr.io/">Vavr</a> provides <code class="language-plaintext highlighter-rouge">Option</code>, <code class="language-plaintext highlighter-rouge">Try</code>, and checked-function adapters for parsing, edit descriptors, and storage.</li>
 </ul>
 
-<p>This guide distinguishes implemented behaviour from the <a href="#mvp-integration-and-specification-departures">pending MVP integration</a>.
-The requirements and explicitly proposed features below describe product goals, not a claim that every goal is implemented.</p>
+<p>This guide describes GameMates’ design, implementation and testing. Proposed features are labelled explicitly.</p>
 
 <hr>
 
@@ -750,83 +749,9 @@ They also verify that invalid input preserves the details view.</p>
 
 <p><img src="/tp/images/GameListSequenceDiagram.png" alt="Command-to-panel flow for a filtered game list"></p>
 
-<h3 id="mvp-integration-and-specification-departures">MVP integration and specification departures</h3>
+<h3 id="current-limitations">Current limitations</h3>
 
-<p>Baseline: the <em>GameMates – Feature Specification</em> section of the team’s
-<a href="https://docs.google.com/document/d/1UI16NkQ8w8hXb-8Jez8UDpGYkRc8wbs42XZntx9n_sI/edit">shared project document</a>,
-CS2103T-W14-3, 20 September 2026, pages 3–26 in the exported feature-spec PDF. Checked on 15 October 2026.
-The table records unresolved differences for team reconciliation; it does not change application behaviour or
-present pending PRs as merged features. Recheck this table and the User Guide against the integrated release
-before publishing a complete v1.3 MVP guide.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Area</th>
-      <th>Submitted specification</th>
-      <th>Current implementation / follow-up</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Own-profile editing</td>
-      <td>Omit <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> in <code class="language-plaintext highlighter-rouge">edit</code> (pp. 10–13); the later task list instead mentions special <code class="language-plaintext highlighter-rouge">myself</code> handling.</td>
-      <td>Use <code>edit FRIEND_INDEX|myself ...</code>. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ.</td>
-    </tr>
-    <tr>
-      <td>Game add/delete</td>
-      <td>Add or delete a friend’s game, with optional metadata on addition (pp. 17–23).</td>
-      <td>Use <code>gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code> and <code>gamedel FRIEND_INDEX|myself g/GAME_NAME</code>. See <a href="#myself-profile">Myself profile</a>.</td>
-    </tr>
-    <tr>
-      <td>Metadata</td>
-      <td>Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20).</td>
-      <td>Model, parser utilities, JSON persistence, command entry through <code class="language-plaintext highlighter-rouge">gameadd</code>, replacement/clearing through <code class="language-plaintext highlighter-rouge">gameedit</code> and game-card rendering are implemented. See <a href="#game-metadata">Game metadata</a> for the implemented API.</td>
-    </tr>
-    <tr>
-      <td>Tags</td>
-      <td>Supplied tags replace the full set (p. 11).</td>
-      <td>Supplied tags toggle individually. A single empty <code class="language-plaintext highlighter-rouge">t/</code> clears them. The team must choose whether to update the spec or implementation.</td>
-    </tr>
-    <tr>
-      <td>Friend names</td>
-      <td>1–50 characters (pp. 5–6).</td>
-      <td>1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec’s parenthesized-name workaround is rejected.</td>
-    </tr>
-    <tr>
-      <td>Phone/email</td>
-      <td>Phone: 1–40 characters from a broad punctuation set. Email: 1–255 characters containing <code class="language-plaintext highlighter-rouge">@</code> (pp. 5–6).</td>
-      <td>Phone: 3–15 ASCII digits, or <code class="language-plaintext highlighter-rouge">+</code> with 2–15, with constrained grouping and no extensions. Email: at most 254 characters, local part at most 64, ASCII dot-atom and valid domain labels.</td>
-    </tr>
-    <tr>
-      <td>Friend filtering</td>
-      <td>Combined <code class="language-plaintext highlighter-rouge">list [n/KEYWORDS] [g/GAME]</code>, with named empty-result feedback (pp. 14–15).</td>
-      <td>Separate <code class="language-plaintext highlighter-rouge">find KEYWORD...</code> and <code class="language-plaintext highlighter-rouge">list [g/GAME]</code>; a new command replaces the previous filter. Feedback is <code class="language-plaintext highlighter-rouge">Listed all active friends.</code> or <code class="language-plaintext highlighter-rouge">N friend(s) listed!</code>, including zero.</td>
-    </tr>
-    <tr>
-      <td>GUI</td>
-      <td>Feature-spec mockups replace the friend panel with a game’s list (pp. 15, 25); later v1.3 notes call for a split panel.</td>
-      <td>The adopted split layout matches those later notes: friends stay on the left and details/game cards appear on the right. <code class="language-plaintext highlighter-rouge">gamelist</code> filters cards only. Retire the earlier mockups.</td>
-    </tr>
-    <tr>
-      <td>Errors</td>
-      <td>Command-specific index and validation wording.</td>
-      <td>Messages differ across commands; use the verified wording in the User Guide instead of copying spec errors.</td>
-    </tr>
-    <tr>
-      <td>Game uniqueness</td>
-      <td>One or no username per game name within a friend (pp. 16–19).</td>
-      <td>
-<code class="language-plaintext highlighter-rouge">GameValidator</code> rejects duplicate names during addition/renaming. <code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> rejects duplicate game names in saved friends and profiles, even when usernames differ.</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Root-level JSON <code class="language-plaintext highlighter-rouge">null</code> now follows the load-error fallback. Null GUI settings also use default preferences.
-Game-text validation rejects the Unicode categories, blank characters and misleading spaces listed above.</p>
-
-<p>Deletion confirmation and undo are outside the product scope. Deletion takes effect immediately.
-Game creation/deletion, game username editing, metadata entry/display and own-profile editing are available.</p>
+<p>Deletion takes effect immediately. Deletion confirmation, undo and redo are outside the product scope.</p>
 
 <h3 id="game-metadata">Game metadata</h3>
 
@@ -1086,7 +1011,8 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
 
 <h3 id="user-stories">User stories</h3>
 
-<p>These are product requirements, including future work. Implemented availability is recorded in the integration table above.</p>
+<p>These user stories include future work. See <a href="#implementation">Implementation</a> for current features and
+<a href="#current-limitations">Current limitations</a> for unsupported behaviour.</p>
 
 <p>Priorities: High (must have) - <code class="language-plaintext highlighter-rouge">* * *</code>, Medium (nice to have) - <code class="language-plaintext highlighter-rouge">* *</code>, Low (unlikely to have) - <code class="language-plaintext highlighter-rouge">*</code></p>
 
