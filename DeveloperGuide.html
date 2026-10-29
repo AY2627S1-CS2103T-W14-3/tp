@@ -352,6 +352,9 @@ They are kept as normal text.</li>
 
 <p><img src="images/ModelClassDiagram.png" width="625"></p>
 
+<p>This partial class diagram shows selected archive-related attributes; unrelated members are omitted.
+<code class="language-plaintext highlighter-rouge">ModelManager.friendListScope</code> uses the <code class="language-plaintext highlighter-rouge">FriendListScope</code> enumeration to identify the displayed view.</p>
+
 <p><strong>Stored data and views</strong></p>
 
 <p>The <code class="language-plaintext highlighter-rouge">Model</code> stores friends in <code class="language-plaintext highlighter-rouge">GameMates</code> through <code class="language-plaintext highlighter-rouge">UniqueFriendList</code>.
@@ -958,6 +961,11 @@ Neither command resets the predicate or scope.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">LogicManager</code> saves the updated collection through the existing storage path.</li>
 </ol>
+
+<p>The sequence shows a successful <code class="language-plaintext highlighter-rouge">archive 1</code> in the active view after parsing. Helper calls and subsequent saving
+are omitted. In search results, the same update keeps the matching friend visible with its new archive status.</p>
+
+<p><img src="/tp/images/ArchiveSequenceDiagram.png" alt="Archiving the first friend in the active view"></p>
 
 <p><code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> preserve archive status in replacement friends.
 <code class="language-plaintext highlighter-rouge">gameedit</code> also retains the current scope and predicate.
