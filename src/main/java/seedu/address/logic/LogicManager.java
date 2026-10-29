@@ -21,10 +21,16 @@ import seedu.address.storage.Storage;
  * The main LogicManager of the app.
  */
 public class LogicManager implements Logic {
-    public static final String FILE_OPS_ERROR_FORMAT = "Could not save data due to the following error: %s";
+    public static final String FILE_OPS_UNSAVED_CHANGES_NOTE =
+            "\nThe change was applied but not saved, and will be lost on exit. "
+            + "Fix the issue, then run any command (e.g. `list`) to save again.";
+
+    public static final String FILE_OPS_ERROR_FORMAT = "Could not save data due to the following error: %s"
+            + FILE_OPS_UNSAVED_CHANGES_NOTE;
 
     public static final String FILE_OPS_PERMISSION_ERROR_FORMAT =
-            "Could not save data to file %s due to insufficient permissions to write to the file or the folder.";
+            "Could not save data to file %s due to insufficient permissions to write to the file or the folder."
+            + FILE_OPS_UNSAVED_CHANGES_NOTE;
 
     private final Logger logger = LogsCenter.getLogger(LogicManager.class);
 
