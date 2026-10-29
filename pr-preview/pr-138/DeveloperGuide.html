@@ -63,15 +63,6 @@
       <li><a href="#name-and-game-filtering" id="markdown-toc-name-and-game-filtering">Name and game filtering</a></li>
       <li><a href="#editing-an-existing-game" id="markdown-toc-editing-an-existing-game">Editing an existing game</a></li>
       <li><a href="#viewing-a-friends-games" id="markdown-toc-viewing-a-friends-games">Viewing a friend’s games</a></li>
-      <li>
-<a href="#friend-archiving" id="markdown-toc-friend-archiving">Friend archiving</a>        <ul>
-          <li><a href="#stored-status-and-identity" id="markdown-toc-stored-status-and-identity">Stored status and identity</a></li>
-          <li><a href="#display-scope-and-filtering" id="markdown-toc-display-scope-and-filtering">Display scope and filtering</a></li>
-          <li><a href="#archive-and-restore-execution" id="markdown-toc-archive-and-restore-execution">Archive and restore execution</a></li>
-          <li><a href="#persistence-and-design-considerations" id="markdown-toc-persistence-and-design-considerations">Persistence and design considerations</a></li>
-        </ul>
-      </li>
-      <li><a href="#proposed-undoredo-feature" id="markdown-toc-proposed-undoredo-feature">[Proposed] Undo/redo feature</a></li>
       <li><a href="#current-limitations" id="markdown-toc-current-limitations">Current limitations</a></li>
       <li>
 <a href="#game-metadata" id="markdown-toc-game-metadata">Game metadata</a>        <ul>
@@ -82,11 +73,11 @@
         </ul>
       </li>
       <li>
-<a href="#friend-archiving-1" id="markdown-toc-friend-archiving-1">Friend archiving</a>        <ul>
-          <li><a href="#stored-status-and-identity-1" id="markdown-toc-stored-status-and-identity-1">Stored status and identity</a></li>
-          <li><a href="#display-scope-and-filtering-1" id="markdown-toc-display-scope-and-filtering-1">Display scope and filtering</a></li>
-          <li><a href="#archive-and-restore-execution-1" id="markdown-toc-archive-and-restore-execution-1">Archive and restore execution</a></li>
-          <li><a href="#persistence-and-design-considerations-1" id="markdown-toc-persistence-and-design-considerations-1">Persistence and design considerations</a></li>
+<a href="#friend-archiving" id="markdown-toc-friend-archiving">Friend archiving</a>        <ul>
+          <li><a href="#stored-status-and-identity" id="markdown-toc-stored-status-and-identity">Stored status and identity</a></li>
+          <li><a href="#display-scope-and-filtering" id="markdown-toc-display-scope-and-filtering">Display scope and filtering</a></li>
+          <li><a href="#archive-and-restore-execution" id="markdown-toc-archive-and-restore-execution">Archive and restore execution</a></li>
+          <li><a href="#persistence-and-design-considerations" id="markdown-toc-persistence-and-design-considerations">Persistence and design considerations</a></li>
         </ul>
       </li>
     </ul>
@@ -719,112 +710,6 @@ The parser accepts one positional index or <code class="language-plaintext highl
 It uses the shared <code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code>, so all text after <code class="language-plaintext highlighter-rouge">g/</code> belongs to the name unless it is another ` g/<code class="language-plaintext highlighter-rouge">.
 Quoted values can include literal </code> g/<code class="language-plaintext highlighter-rouge"> text. Repeated </code>g/` tokens outside quotes are rejected.</p>
 
-<h3 id="friend-archiving">Friend archiving</h3>
-
-<p>Archiving hides a friend from the active list while preserving their contact details, tags, games, optional
-usernames and game metadata. <code class="language-plaintext highlighter-rouge">archive FRIEND_INDEX</code>, <code class="language-plaintext highlighter-rouge">unarchive FRIEND_INDEX</code> and
-<code class="language-plaintext highlighter-rouge">archivelist [g/GAME_NAME]</code> are implemented. This feature is separate from backing up the JSON data file;
-automatic backups, scheduled retention and undo are not implemented.</p>
-
-<h4 id="stored-status-and-identity">Stored status and identity</h4>
-
-<p><code class="language-plaintext highlighter-rouge">GameMates</code> keeps active and archived friends together in one <code class="language-plaintext highlighter-rouge">UniqueFriendList</code>. <code class="language-plaintext highlighter-rouge">Friend.isArchived()</code> exposes
-an immutable boolean; <code class="language-plaintext highlighter-rouge">withArchived(boolean)</code> returns a copy with all other fields preserved. <code class="language-plaintext highlighter-rouge">Friend.equals()</code>
-and <code class="language-plaintext highlighter-rouge">hashCode()</code> include archive status, while <code class="language-plaintext highlighter-rouge">isSameFriend()</code> continues to compare normalized names.</p>
-
-<p>Names must be unique across active and archived friends combined, and must differ from the separately stored
-Myself profile. An archived name stays reserved. <code class="language-plaintext highlighter-rouge">FriendValidator</code> rejects a conflicting add or rename and
-suggests <code class="language-plaintext highlighter-rouge">archivelist</code> and <code class="language-plaintext highlighter-rouge">unarchive</code> when the existing friend is archived. It uses <code class="language-plaintext highlighter-rouge">Model.findFriend()</code> to obtain
-that stored friend in one identity lookup across both statuses, independent of the current display filter. Editing the existing friend while
-retaining their own name is allowed. Myself cannot be archived or restored.</p>
-
-<h4 id="display-scope-and-filtering">Display scope and filtering</h4>
-
-<p><code class="language-plaintext highlighter-rouge">ModelManager</code> stores a <code class="language-plaintext highlighter-rouge">FriendListScope</code> independently of the displayed list contents:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Scope</th>
-      <th>Entered by</th>
-      <th>Predicate</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">ACTIVE</code></td>
-      <td>Startup, <code class="language-plaintext highlighter-rouge">list [g/GAME_NAME]</code>, adding a friend</td>
-      <td>Not archived, combined with an optional game predicate</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">ARCHIVED</code></td>
-      <td><code class="language-plaintext highlighter-rouge">archivelist [g/GAME_NAME]</code></td>
-      <td>Archived, combined with an optional game predicate</td>
-    </tr>
-    <tr>
-      <td><code class="language-plaintext highlighter-rouge">SEARCH</code></td>
-      <td><code class="language-plaintext highlighter-rouge">find KEYWORD [MORE_KEYWORDS]</code></td>
-      <td>Name keywords across both statuses</td>
-    </tr>
-  </tbody>
-</table>
-
-<p><code class="language-plaintext highlighter-rouge">ListCommandParser</code> and <code class="language-plaintext highlighter-rouge">ArchiveListCommandParser</code> share <code class="language-plaintext highlighter-rouge">ParserUtil.parseOptionalGameFilter()</code> and
-<code class="language-plaintext highlighter-rouge">GameNameMatchesPredicate</code>. Game matching is exact and case-insensitive, with the same validation rules for both
-commands. Name matching remains a global <code class="language-plaintext highlighter-rouge">find</code> operation. Each <code class="language-plaintext highlighter-rouge">list</code>, <code class="language-plaintext highlighter-rouge">archivelist</code> or <code class="language-plaintext highlighter-rouge">find</code> command replaces
-the previous predicate. <code class="language-plaintext highlighter-rouge">gamelist</code> preserves the friend-list filter.
-Unfiltered empty archives give guidance on archiving; filtered empty results report that no archived friends
-match the game filter.</p>
-
-<p>The logic layer exposes <code class="language-plaintext highlighter-rouge">getFriendListScope()</code> to the UI. <code class="language-plaintext highlighter-rouge">MainWindow</code> updates the heading to <strong>Active friends</strong>,
-<strong>Archived friends</strong> or <strong>Search results</strong>. <code class="language-plaintext highlighter-rouge">FriendCard</code> shows an <strong>Archived</strong> badge when applicable.</p>
-
-<h4 id="archive-and-restore-execution">Archive and restore execution</h4>
-
-<ol>
-  <li>The command parser accepts one positive displayed index; <code class="language-plaintext highlighter-rouge">myself</code> and extra arguments are rejected.</li>
-  <li>
-<code class="language-plaintext highlighter-rouge">ArchiveCommand</code> rejects the archive-only scope with guidance to run <code class="language-plaintext highlighter-rouge">list</code>. Active lists and global search
-results accept archiving. <code class="language-plaintext highlighter-rouge">UnarchiveCommand</code> accepts an archived target in archive or search results.</li>
-  <li>The command checks the index against the currently displayed list and rejects an invalid index or an
-already archived/non-archived target as appropriate. Failed commands preserve the data, scope and filter.</li>
-  <li>
-<code class="language-plaintext highlighter-rouge">Model.setFriend()</code> replaces the selected friend with a copy carrying the new archive status.</li>
-  <li>The observable filtered list updates automatically. Archiving removes a friend from an active-only list;
-restoring removes a friend from an archive-only list. In global search, the friend remains at the same
-displayed position with updated status. Neither command resets the predicate or scope.</li>
-  <li>
-<code class="language-plaintext highlighter-rouge">LogicManager</code> saves the updated collection through the existing storage path.</li>
-</ol>
-
-<p>The sequence shows a successful <code class="language-plaintext highlighter-rouge">archive 1</code> in the active view after parsing. Helper calls and subsequent saving
-are omitted. In search results, the same update keeps the matching friend visible with its new archive status.</p>
-
-<p><img src="/tp/pr-preview/pr-138/images/ArchiveSequenceDiagram.png" alt="Archiving the first friend in the active view"></p>
-
-<p><code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> preserve archive status when constructing replacement friends.
-<code class="language-plaintext highlighter-rouge">gameedit</code> retains the current scope and predicate. Friend edits clear
-filters within active/archive scopes, while global searches retain their name predicate. Renaming a search
-result can therefore remove it from the results. <code class="language-plaintext highlighter-rouge">delete</code> permanently removes the selected friend from either
-status; <code class="language-plaintext highlighter-rouge">clear</code> removes both statuses while preserving Myself.</p>
-
-<h4 id="persistence-and-design-considerations">Persistence and design considerations</h4>
-
-<p><code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> saves <code class="language-plaintext highlighter-rouge">archived</code> as a boolean on each friend. Missing status in older files defaults to
-<code class="language-plaintext highlighter-rouge">false</code>. Restarting restores every friend’s status and details, but starts in the unfiltered active scope.
-Display scope and predicates are not persisted.</p>
-
-<p>A single stored collection keeps identity validation, storage and archive/restore updates on the existing
-model path. The alternative is separate stored active and archive collections, requiring transfers, cross-list
-uniqueness checks and a different JSON representation. Rebuilding a filtered view scans the underlying
-collection; separate collections could reduce the scan for active-only views, but global name search would
-still examine both. The current design favours simpler state management; change it if measurements establish
-a performance need.</p>
-
-<p>Regression coverage includes mixed-status searches, filtered displayed indices, invalid targets, empty archive
-feedback, identity conflicts, editing archived friends and save/reload restoration of complete game data.</p>
-
-<h3 id="proposed-undoredo-feature">[Proposed] Undo/redo feature</h3>
 <p>The parser uses <code class="language-plaintext highlighter-rouge">ParserUtil.parseIndexOrMyself</code> for selectors and the existing <code class="language-plaintext highlighter-rouge">GameName</code> rules for game validation.
 Index, repeated-prefix and game-name errors use the same shared messages as other commands.</p>
 
@@ -982,7 +867,7 @@ These tests include filter preservation, duplicate-game rejection and JSON round
 <p><code class="language-plaintext highlighter-rouge">GameBuilder.addMeta("Role", "Support")</code> appends a pair. <code class="language-plaintext highlighter-rouge">withMetas(...)</code> replaces the collection.
 If the builder contains duplicate keys, <code class="language-plaintext highlighter-rouge">build()</code> rejects them.</p>
 
-<h3 id="friend-archiving-1">Friend archiving</h3>
+<h3 id="friend-archiving">Friend archiving</h3>
 
 <p>Archiving hides a friend from the active list.
 It preserves contact details, tags, games, optional usernames and game metadata.
@@ -991,7 +876,7 @@ The implemented commands are <code class="language-plaintext highlighter-rouge">
 <p>This feature is separate from JSON file backups.
 Automatic backups, scheduled retention and undo are not implemented.</p>
 
-<h4 id="stored-status-and-identity-1">Stored status and identity</h4>
+<h4 id="stored-status-and-identity">Stored status and identity</h4>
 
 <p><code class="language-plaintext highlighter-rouge">GameMates</code> keeps active and archived friends together in one <code class="language-plaintext highlighter-rouge">UniqueFriendList</code>.
 <code class="language-plaintext highlighter-rouge">Friend.isArchived()</code> returns an immutable boolean.
@@ -1011,7 +896,7 @@ The validator uses <code class="language-plaintext highlighter-rouge">Model.find
 <p>An existing friend can keep their own name during an edit.
 Myself cannot be archived or restored.</p>
 
-<h4 id="display-scope-and-filtering-1">Display scope and filtering</h4>
+<h4 id="display-scope-and-filtering">Display scope and filtering</h4>
 
 <p><code class="language-plaintext highlighter-rouge">ModelManager</code> stores a <code class="language-plaintext highlighter-rouge">FriendListScope</code> independently of the displayed list contents:</p>
 
@@ -1056,7 +941,7 @@ An empty filtered archive reports that no archived friends match the game filter
 <code class="language-plaintext highlighter-rouge">MainWindow</code> sets the heading to <strong>Active friends</strong>, <strong>Archived friends</strong> or <strong>Search results</strong>.
 <code class="language-plaintext highlighter-rouge">FriendCard</code> shows an <strong>Archived</strong> badge where applicable.</p>
 
-<h4 id="archive-and-restore-execution-1">Archive and restore execution</h4>
+<h4 id="archive-and-restore-execution">Archive and restore execution</h4>
 
 <ol>
   <li>The parser accepts one positive displayed index. It rejects <code class="language-plaintext highlighter-rouge">myself</code> and extra arguments.</li>
@@ -1077,6 +962,11 @@ Neither command resets the predicate or scope.</li>
 <code class="language-plaintext highlighter-rouge">LogicManager</code> saves the updated collection through the existing storage path.</li>
 </ol>
 
+<p>The sequence shows a successful <code class="language-plaintext highlighter-rouge">archive 1</code> in the active view after parsing. Helper calls and subsequent saving
+are omitted. In search results, the same update keeps the matching friend visible with its new archive status.</p>
+
+<p><img src="/tp/pr-preview/pr-138/images/ArchiveSequenceDiagram.png" alt="Archiving the first friend in the active view"></p>
+
 <p><code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> preserve archive status in replacement friends.
 <code class="language-plaintext highlighter-rouge">gameedit</code> also retains the current scope and predicate.
 Friend edits clear filters in active and archive scopes, but global searches keep their name predicate.
@@ -1085,7 +975,7 @@ Thus, a renamed search result can disappear from the results.</p>
 <p><code class="language-plaintext highlighter-rouge">delete</code> permanently removes the selected friend, whether active or archived.
 <code class="language-plaintext highlighter-rouge">clear</code> removes both statuses and preserves Myself.</p>
 
-<h4 id="persistence-and-design-considerations-1">Persistence and design considerations</h4>
+<h4 id="persistence-and-design-considerations">Persistence and design considerations</h4>
 
 <p><code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> saves <code class="language-plaintext highlighter-rouge">archived</code> as a boolean on each friend.
 If an older file omits the status, the value defaults to <code class="language-plaintext highlighter-rouge">false</code>.
