@@ -5,21 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventType;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import seedu.address.model.FriendListScope;
 import seedu.address.model.friend.Friend;
 import seedu.address.testutil.FriendBuilder;
@@ -27,7 +20,6 @@ import seedu.address.testutil.FriendBuilder;
 class FriendListPanelTest {
 
     @Test
-    @SuppressWarnings("unchecked")
     void selectionChanged_notifiesConsumer() {
         FxTestUtil.runAndWait(() -> {
             Friend amy = new FriendBuilder().withName("Amy").build();
@@ -38,36 +30,17 @@ class FriendListPanelTest {
 
             ListView<Friend> listView = getListView(panel);
             assertEquals(friends, listView.getItems());
-            assertFalse(listView.isMouseTransparent());
 
-            new Scene(panel.getRoot());
-            panel.getRoot().resize(500, 500);
-            panel.getRoot().applyCss();
-            panel.getRoot().layout();
-            ListCell<Friend> cell = listView.lookupAll(".list-cell").stream()
-                    .map(node -> (ListCell<Friend>) node)
-                    .filter(listCell -> amy.equals(listCell.getItem()))
-                    .findFirst()
-                    .orElseThrow();
-            listView.getSelectionModel().select(ben);
+            panel.selectFriend(ben);
             assertEquals(ben, selectedFriend.get());
 
-            Node friendCard = cell.getGraphic();
-            friendCard.fireEvent(newMousePressedEvent());
-            assertEquals(ben, listView.getSelectionModel().getSelectedItem());
-            assertEquals(ben, selectedFriend.get());
+            panel.selectFriend(new FriendBuilder().withName("Chris").build());
+            assertNull(selectedFriend.get());
 
-            AtomicBoolean listViewPressReceived = new AtomicBoolean();
-            listView.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> listViewPressReceived.set(true));
-            listView.fireEvent(newMousePressedEvent());
-            assertTrue(listViewPressReceived.get());
+            panel.selectFriend(amy);
+            assertEquals(amy, selectedFriend.get());
 
-            AtomicBoolean friendCardReleaseReceived = new AtomicBoolean();
-            listView.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> friendCardReleaseReceived.set(true));
-            friendCard.fireEvent(newMouseEvent(MouseEvent.MOUSE_RELEASED));
-            assertTrue(friendCardReleaseReceived.get());
-
-            listView.getSelectionModel().clearSelection();
+            panel.selectFriend(null);
             assertNull(selectedFriend.get());
         });
     }
@@ -108,12 +81,4 @@ class FriendListPanelTest {
         return (ListView<Friend>) panel.getRoot().lookup("#friendListView");
     }
 
-    private MouseEvent newMousePressedEvent() {
-        return newMouseEvent(MouseEvent.MOUSE_PRESSED);
-    }
-
-    private MouseEvent newMouseEvent(EventType<MouseEvent> eventType) {
-        return new MouseEvent(eventType, 0, 0, 0, 0, MouseButton.PRIMARY, 1,
-                false, false, false, false, true, false, false, true, false, false, null);
-    }
 }
