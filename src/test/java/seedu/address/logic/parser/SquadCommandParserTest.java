@@ -58,4 +58,10 @@ public class SquadCommandParserTest {
         assertParseFailure(parser, " g/Valorant n/3 n/3",
                 Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_NAME));
     }
+
+    @Test
+    public void parse_quotedGameNameWithPrefix_success() {
+        // Issue #122: game names such as "Version n/2" can be added with gameadd.
+        assertParseSuccess(parser, " g/\"Version n/2\" n/2", new SquadCommand(new GameName("Version n/2"), 2));
+    }
 }

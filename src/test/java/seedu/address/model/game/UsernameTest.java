@@ -27,6 +27,8 @@ public class UsernameTest {
     @Test
     public void constructor_invalidUsername_throwsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> new Username(""));
+        assertThrows(IllegalArgumentException.class, () -> new Username("Player\u200b"));
+        assertThrows(IllegalArgumentException.class, () -> new Username("Player\uD800"));
     }
 
     @Test

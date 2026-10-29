@@ -86,7 +86,11 @@ public class FriendDetailsPanel extends UiPart<Region> {
 
         tags.getChildren().setAll(friend.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
-                .map(tag -> createLabel(tag.tagName, "details-tag"))
+                .map(tag -> {
+                    Label label = new TagLabel(tag.tagName);
+                    label.getStyleClass().add("details-tag");
+                    return label;
+                })
                 .toList());
         if (tags.getChildren().isEmpty()) {
             tags.getChildren().add(createLabel("No tags added", "details-empty-value"));

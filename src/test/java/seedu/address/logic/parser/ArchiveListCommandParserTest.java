@@ -62,4 +62,10 @@ public class ArchiveListCommandParserTest {
     public void parse_invalidGameName_throwsParseException() {
         assertParseFailure(parser, " g/!!!", GameName.MESSAGE_CONSTRAINTS);
     }
+
+    @Test
+    public void parse_quotedGameNameWithPrefix_success() {
+        assertParseSuccess(parser, " g/\"Version g/2\"",
+                new ArchiveListCommand(new GameNameMatchesPredicate(new GameName("Version g/2"))));
+    }
 }

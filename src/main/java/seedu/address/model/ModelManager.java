@@ -3,6 +3,7 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -167,8 +168,7 @@ public class ModelManager implements Model {
     @Override
     public void sortFilteredFriendList(FriendSortCriterion sortCriterion, boolean isDescending) {
         requireNonNull(sortCriterion);
-        sortedFriends.setComparator(isDescending
-                ? sortCriterion.comparator().reversed() : sortCriterion.comparator());
+        sortedFriends.setComparator(sortCriterion.comparator(isDescending));
     }
 
     @Override
@@ -191,6 +191,11 @@ public class ModelManager implements Model {
                 && userPrefs.equals(otherModelManager.userPrefs)
                 && filteredFriends.equals(otherModelManager.filteredFriends)
                 && friendListScope == otherModelManager.friendListScope;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameMates, userPrefs, filteredFriends, friendListScope);
     }
 
 }

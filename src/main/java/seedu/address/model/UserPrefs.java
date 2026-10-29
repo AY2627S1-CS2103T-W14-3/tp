@@ -4,6 +4,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+
 import seedu.address.commons.core.GuiSettings;
 
 /**
@@ -30,6 +32,7 @@ public class UserPrefs implements ReadOnlyUserPrefs {
         return guiSettings;
     }
 
+    @JsonSetter("guiSettings")
     public void setGuiSettings(GuiSettings guiSettings) {
         requireNonNull(guiSettings);
         this.guiSettings = guiSettings;

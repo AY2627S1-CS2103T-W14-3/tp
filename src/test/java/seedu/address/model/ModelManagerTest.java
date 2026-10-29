@@ -191,6 +191,40 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void friendListSort_keepsPinnedFriendsBeforeUnpinnedFriends() {
+        Friend pinnedZoe = new FriendBuilder().withName("Pinned Zoe").withPinned(true).build();
+        Friend unpinnedAlex = new FriendBuilder().withName("Unpinned Alex").build();
+        Friend pinnedAlex = new FriendBuilder().withName("Pinned Alex").withPinned(true).build();
+        Friend unpinnedZoe = new FriendBuilder().withName("Unpinned Zoe").build();
+        modelManager.addFriend(pinnedZoe);
+        modelManager.addFriend(unpinnedAlex);
+        modelManager.addFriend(pinnedAlex);
+        modelManager.addFriend(unpinnedZoe);
+
+        modelManager.sortFilteredFriendList(FriendSortCriterion.NAME, false);
+
+        assertEquals(List.of(pinnedAlex, pinnedZoe, unpinnedAlex, unpinnedZoe),
+                modelManager.getFilteredFriendList());
+    }
+
+    @Test
+    public void friendListDescendingSort_keepsPinnedFriendsBeforeUnpinnedFriends() {
+        Friend pinnedZoe = new FriendBuilder().withName("Pinned Zoe").withPinned(true).build();
+        Friend unpinnedAlex = new FriendBuilder().withName("Unpinned Alex").build();
+        Friend pinnedAlex = new FriendBuilder().withName("Pinned Alex").withPinned(true).build();
+        Friend unpinnedZoe = new FriendBuilder().withName("Unpinned Zoe").build();
+        modelManager.addFriend(pinnedZoe);
+        modelManager.addFriend(unpinnedAlex);
+        modelManager.addFriend(pinnedAlex);
+        modelManager.addFriend(unpinnedZoe);
+
+        modelManager.sortFilteredFriendList(FriendSortCriterion.NAME, true);
+
+        assertEquals(List.of(pinnedZoe, pinnedAlex, unpinnedZoe, unpinnedAlex),
+                modelManager.getFilteredFriendList());
+    }
+
+    @Test
     public void equals() {
         GameMates gameMates = new GameMatesBuilder().withFriend(ALICE).withFriend(BENSON).build();
         GameMates differentGameMates = new GameMates();

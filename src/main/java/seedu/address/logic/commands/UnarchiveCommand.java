@@ -51,6 +51,11 @@ public class UnarchiveCommand extends Command {
     }
 
     @Override
+    public int hashCode() {
+        return targetIndex.hashCode();
+    }
+
+    @Override
     public String toString() {
         return new ToStringBuilder(this).add("targetIndex", targetIndex).toString();
     }
