@@ -1,0 +1,11 @@
+{
+  "friends": [ {
+    "name": " alice  TAN ",
+    "phone": "123",
+    "archived": true
+  } ],
+  "myself": {
+    "name": "Alice Tan",
+    "phone": "456"
+  }
+}

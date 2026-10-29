@@ -51,6 +51,21 @@ public class FriendTest {
     }
 
     @Test
+    public void withGames_preservesContactFieldsAndEveryPinAndArchiveStatus() {
+        Game originalGame = new GameBuilder().withGameName("Valorant").addMeta("Role", "Healer").build();
+        Game replacementGame = new GameBuilder(originalGame).withUsername("newPlayer").build();
+        for (boolean archived : new boolean[]{false, true}) {
+            for (boolean pinned : new boolean[]{false, true}) {
+                Friend original = new FriendBuilder(ALICE).withGames(originalGame)
+                        .withArchived(archived).withPinned(pinned).build();
+                Friend updated = original.withGames(Set.of(replacementGame));
+                assertEquals(new FriendBuilder(original).withGames(replacementGame).build(), updated);
+                assertEquals(Set.of(originalGame), original.getGames());
+            }
+        }
+    }
+
+    @Test
     public void pinnedFriend_hasDistinctEqualityButSameIdentity() {
         Friend pinnedAlice = new FriendBuilder(ALICE).withPinned(true).build();
         assertTrue(pinnedAlice.isPinned());

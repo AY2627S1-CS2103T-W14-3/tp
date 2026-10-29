@@ -18,23 +18,24 @@ public class JsonSerializableGameMatesTest {
     private static final Path TEST_DATA_FOLDER = Paths.get("src", "test", "data", "JsonSerializableGameMatesTest");
     private static final Path TYPICAL_FRIENDS_FILE = TEST_DATA_FOLDER.resolve("typicalFriendsGameMates.json");
     private static final Path INVALID_FRIEND_FILE = TEST_DATA_FOLDER.resolve("invalidFriendGameMates.json");
+    private static final Path INVALID_MYSELF_FILE = TEST_DATA_FOLDER.resolve("invalidMyselfGameMates.json");
     private static final Path DUPLICATE_FRIEND_FILE = TEST_DATA_FOLDER.resolve("duplicateFriendGameMates.json");
 
     @Test
-    public void roundTrip_myselfWithSameNameAsFriend_remainsSeparate() throws Exception {
+    public void roundTrip_myselfWithDistinctName_remainsSeparate() throws Exception {
         GameMates original = TypicalFriends.getTypicalGameMates();
-        original.setMyself(TypicalFriends.ALICE);
+        original.setMyself(TypicalFriends.HOON);
         String json = JsonUtil.toJsonString(new JsonSerializableGameMates(original));
         GameMates restored = JsonUtil.fromJsonString(json, JsonSerializableGameMates.class).toModelType();
         assertEquals(original, restored);
         assertEquals(original.getFriendList(), restored.getFriendList());
-        assertEquals(TypicalFriends.ALICE, restored.getMyself());
+        assertEquals(TypicalFriends.HOON, restored.getMyself());
     }
 
     @Test
     public void toModelType_invalidMyself_throwsIllegalValueException() throws Exception {
-        JsonSerializableGameMates data = JsonUtil.fromJsonString(
-                "{\"friends\": [], \"myself\": {\"name\": \"\"}}", JsonSerializableGameMates.class);
+        JsonSerializableGameMates data = JsonUtil.readJsonFile(INVALID_MYSELF_FILE,
+                JsonSerializableGameMates.class).get();
         assertThrows(IllegalValueException.class, data::toModelType);
     }
 

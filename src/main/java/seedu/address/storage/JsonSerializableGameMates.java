@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 
@@ -24,8 +25,11 @@ class JsonSerializableGameMates {
     public static final String MESSAGE_DUPLICATE_FRIEND = "Friends list contains duplicate friend(s).";
     public static final String MESSAGE_TOO_MANY_PINNED_FRIENDS = "Friends list contains more than "
             + UniqueFriendList.MAX_PINNED_FRIENDS + " pinned friends.";
+    public static final String MESSAGE_DUPLICATE_MYSELF =
+            "Friends list contains a friend with the same name as the Myself profile.";
 
     private final List<JsonAdaptedFriend> friends = new ArrayList<>();
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final JsonAdaptedFriend myself;
 
     /**
@@ -44,7 +48,7 @@ class JsonSerializableGameMates {
      * @param source future changes to this will not affect the created {@code JsonSerializableGameMates}.
      */
     public JsonSerializableGameMates(ReadOnlyGameMates source) {
-        myself = new JsonAdaptedFriend(source.getMyself());
+        myself = Friend.DEFAULT_MYSELF.equals(source.getMyself()) ? null : new JsonAdaptedFriend(source.getMyself());
         friends.addAll(source.getFriendList().stream().map(JsonAdaptedFriend::new).collect(Collectors.toList()));
     }
 
@@ -61,6 +65,9 @@ class JsonSerializableGameMates {
         List<Friend> modelFriends = new ArrayList<>();
         for (JsonAdaptedFriend jsonAdaptedFriend : friends) {
             Friend friend = jsonAdaptedFriend.toModelType();
+            if (gameMates.getMyself().isSameFriend(friend)) {
+                throw new IllegalValueException(MESSAGE_DUPLICATE_MYSELF);
+            }
             if (modelFriends.stream().anyMatch(friend::isSameFriend)) {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_FRIEND);
             }
