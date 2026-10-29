@@ -242,6 +242,8 @@ Format: `pin FRIEND_INDEX`
 
 * `FRIEND_INDEX` refers to the current displayed list. The command is unavailable for your separately stored Myself
   profile.
+* Pinning archived friends is rejected, including archived entries in search results. Restore them with
+  `unarchive FRIEND_INDEX` first.
 * At most five friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
   is rejected without changing the list.
 * Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
@@ -262,6 +264,8 @@ Removes a friend from the pinned group.
 Format: `unpin FRIEND_INDEX`
 
 * `FRIEND_INDEX` refers to the current displayed list.
+* Unpinning archived friends is rejected, including archived entries in search results. Restore them with
+  `unarchive FRIEND_INDEX` first.
 * Unpinning a friend who is not pinned is rejected without changing the list.
 * The friend is returned to the unpinned group, below all pinned friends.
 

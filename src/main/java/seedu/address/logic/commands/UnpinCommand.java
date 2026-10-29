@@ -21,6 +21,9 @@ public class UnpinCommand extends Command {
     public static final String MESSAGE_SUCCESS = "Unpinned %1$s.";
     public static final String MESSAGE_NOT_PINNED = "%1$s is not pinned.";
 
+    public static final String MESSAGE_ARCHIVED_FRIEND = "Cannot unpin an archived friend. "
+            + "Use unarchive FRIEND_INDEX to restore them first.";
+
     private final Index targetIndex;
 
     /** Creates a command to unpin the friend at the given displayed index. */
@@ -37,6 +40,9 @@ public class UnpinCommand extends Command {
         }
         Friend friendToUnpin = FriendTargetResolver.resolve(model, targetIndex, () -> String.format(
                 MESSAGE_INDEX_NOT_FOUND, targetIndex.getOneBased(), displayedFriendCount)).friend();
+        if (friendToUnpin.isArchived()) {
+            throw new CommandException(MESSAGE_ARCHIVED_FRIEND);
+        }
         if (!friendToUnpin.isPinned()) {
             throw new CommandException(String.format(MESSAGE_NOT_PINNED, friendToUnpin.getName()));
         }

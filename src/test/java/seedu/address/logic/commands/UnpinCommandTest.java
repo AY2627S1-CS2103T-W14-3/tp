@@ -65,6 +65,36 @@ public class UnpinCommandTest {
     }
 
     @Test
+    public void execute_archivedFriendInArchiveView_throwsCommandException() {
+        for (boolean pinned : new boolean[] {false, true}) {
+            Friend archivedFriend = new FriendBuilder(TypicalFriends.ALICE).withArchived(true)
+                    .withPinned(pinned).build();
+            GameMates gameMates = new GameMates();
+            gameMates.addFriend(archivedFriend);
+            Model model = new ModelManager(gameMates, new UserPrefs());
+            model.updateArchivedFriendList(friend -> true);
+
+            assertCommandFailure(new UnpinCommand(INDEX_FIRST_FRIEND), model,
+                    UnpinCommand.MESSAGE_ARCHIVED_FRIEND);
+        }
+    }
+
+    @Test
+    public void execute_archivedFriendInSearchResults_throwsCommandException() {
+        for (boolean pinned : new boolean[] {false, true}) {
+            Friend archivedFriend = new FriendBuilder(TypicalFriends.ALICE).withArchived(true)
+                    .withPinned(pinned).build();
+            GameMates gameMates = new GameMates();
+            gameMates.addFriend(archivedFriend);
+            Model model = new ModelManager(gameMates, new UserPrefs());
+            model.updateSearchFriendList(friend -> true);
+
+            assertCommandFailure(new UnpinCommand(INDEX_FIRST_FRIEND), model,
+                    UnpinCommand.MESSAGE_ARCHIVED_FRIEND);
+        }
+    }
+
+    @Test
     public void constructor_nullIndex_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new UnpinCommand(null));
     }
