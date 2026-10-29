@@ -32,190 +32,309 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 
 <img src="images/ArchitectureDiagram.png" width="280" />
 
-The ***Architecture Diagram*** given above explains the high-level design of the App.
+The ***Architecture Diagram*** shows the high-level design of GameMates.
+The following sections describe the main components and their interactions.
 
-The following provides a quick overview of the main components and their interactions.
+**Application startup and shutdown**
 
-**Main components of the architecture**
+The `Main` component controls application startup and shutdown. It consists of
+[`Main`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/Main.java) and
+[`MainApp`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/MainApp.java).
 
-**`Main`** (consisting of classes [`Main`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
-* At app launch, it initializes the other components in the correct sequence, and connects them up with each other.
-* At shut down, it shuts down the other components and invokes cleanup methods where necessary.
+* At startup, this component initializes the other components in the necessary sequence and connects them.
+* At shutdown, it stops the other components and calls cleanup methods where necessary.
 
-The bulk of the app's work is done by the following four components:
+**Main components**
 
-* [**`UI`**](#ui-component): The UI of the App.
-* [**`Logic`**](#logic-component): The command executor.
-* [**`Model`**](#model-component): Holds the data of the App in memory.
-* [**`Storage`**](#storage-component): Reads data from, and writes data to, the hard disk.
+Four components do most of the application's work:
 
-[**`Commons`**](#common-classes) represents a collection of classes used by multiple other components.
+* [**`UI`**](#ui-component) provides the user interface.
+* [**`Logic`**](#logic-component) executes commands.
+* [**`Model`**](#model-component) holds the application data in memory.
+* [**`Storage`**](#storage-component) reads data from the hard disk and writes data to it.
 
-**How the architecture components interact with each other**
+[**`Commons`**](#common-classes) contains classes that more than one component uses.
 
-The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1`.
+**Component interactions**
+
+The following sequence diagram shows how the components interact when the user enters `delete 1`.
 
 <img src="images/ArchitectureSequenceDiagram.png" width="574" />
 
-Each of the four main components (also shown in the diagram above),
+Each main component defines its API in an `interface` with the same name as the component.
+A concrete `{Component Name}Manager` class implements that interface and provides the component's behavior.
 
-* defines its *API* in an `interface` with the same name as the Component.
-* provides its functionality through a concrete `{Component Name}Manager` class that implements the corresponding API interface.
-
-For example, the `Logic` component defines its API in `Logic.java` and implements it in `LogicManager.java`. Other components interact with a component through its interface rather than its concrete class, preventing them from coupling to that component's implementation, as illustrated in the following partial class diagram.
+For example, `Logic.java` defines the `Logic` API, and `LogicManager.java` implements it.
+Other components use the interface instead of the concrete class.
+This prevents coupling to the concrete implementation.
+The following partial class diagram shows this relationship.
 
 <img src="images/ComponentManagers.png" width="300" />
 
-The sections below give more details of each component.
+The sections below describe each component in more detail.
 
 ### UI component
 
-The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/ui/Ui.java)
+The component API is defined in
+[`Ui.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/ui/Ui.java).
 
 ![Structure of the UI Component](images/UiClassDiagram.png)
 
-The UI consists of `MainWindow`, `CommandBox`, `ResultDisplay`, `FriendListPanel`, `FriendDetailsPanel`,
-`GameDetailsCard`, `HelpWindow` and `StatusBarFooter`. These inherit from `UiPart`, which loads matching FXML layouts.
-`MainWindow.fxml` keeps the observable friend list on the left of a `SplitPane` and the details panel on the right.
-`FriendDetailsPanel` renders contact details, tags and sorted game cards. It does not replace the friend list.
+**UI classes and layouts**
 
-The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+The `UI` consists of these classes, which inherit from `UiPart`:
 
-The `UI` component,
+* `MainWindow`
+* `CommandBox`
+* `ResultDisplay`
+* `FriendListPanel`
+* `FriendDetailsPanel`
+* `GameDetailsCard`
+* `HelpWindow`
+* `StatusBarFooter`
 
-* executes user commands using the `Logic` component.
-* listens for changes to `Model` data so that the UI can be updated with the modified data.
-* keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
-* depends on some classes in the `Model` component because it displays `Friend` objects from the model.
+`UiPart` loads the matching FXML layouts.
+`TagPane` and `TagLabel` wrap tags to the available width in friend cards and the details panel.
+`TagPane` measures wrapped labels before layout and constrains their width during layout.
+`TagLabel` adjusts its height to keep wrapped text visible.
 
-`FriendListPanel` sends selection changes to a consumer owned by `MainWindow`. Command-driven selection uses
-`CommandResult.friendToShow`, `showMyself` and `gameFilter`, described under [Viewing games](#viewing-games).
-Successful results without a friend payload show `Logic.getMyself()`. A single-result `find` selects that friend.
-Parse or command failures update feedback without explicitly refreshing details. A game filter is applied only
-while rendering cards, preserving both the model and the left-hand friend-list predicate.
+`MainWindow.fxml` uses a `SplitPane`. The observable friend list is on the left, and the details panel is on the right.
+`FriendDetailsPanel` shows contact details, tags and sorted game cards. It does not replace the friend list.
+
+The `UI` uses the JavaFX framework. Its `.fxml` layout files are in `src/main/resources/view`.
+For example,
+[`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/resources/view/MainWindow.fxml)
+defines the layout of
+[`MainWindow`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+
+**Component responsibilities**
+
+The `UI` component:
+
+* Executes user commands through `Logic` and keeps a reference to that component.
+* Listens for changes to `Model` data so that the display can show those changes.
+* Depends on model classes because it displays `Friend` objects.
+
+**Selection and command results**
+
+`FriendListPanel` sends selection changes to a consumer in `MainWindow`.
+Command-driven selection uses `CommandResult.friendToShow`, `showMyself` and `gameFilter`.
+See [Viewing games](#viewing-a-friends-games).
+
+If a successful result has no friend payload, the details panel shows `Logic.getMyself()`.
+If `find` returns one friend, the details panel shows that friend.
+Parse failures and command failures update feedback without an explicit details refresh.
+
+`MainWindow.refreshFriendDetails` calls `FriendListPanel.selectFriend()` before it sets the final details payload.
+Friend payloads select the matching displayed friend; profile payloads and results without a friend clear the selection.
+If the target is not displayed, `selectFriend()` also clears the selection.
+Mouse selection remains supported, and a previous friend can be selected again after a command shows the profile.
+
+A game filter changes only the cards that the panel renders.
+The filter does not change the model or the predicate for the left-hand friend list.
 
 ### Logic component
 
-**API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/logic/Logic.java)
+**API:** [`Logic.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/logic/Logic.java)
 
-Here's a (partial) class diagram of the `Logic` component:
+The following partial class diagram shows the `Logic` component.
 
 <img src="images/LogicClassDiagram.png" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
+The sequence diagram shows the interactions for the API call `execute("delete 1")`.
 
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
+<div markdown="span" class="alert alert-info">:information_source: **Note:**
+The `DeleteCommandParser` lifeline is intended to end at the destroy marker (X).
+A PlantUML limitation makes it continue to the end of the diagram.
 </div>
 
-How the `Logic` component works:
+**Command execution**
 
-1. When `Logic` is called upon to execute a command, the command is passed to a `GameMatesParser` object, which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
-1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteCommand`) which is executed by the `LogicManager`.
-1. The command can communicate with the `Model` when it is executed (e.g. to delete a friend).<br>
-   Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the `Model` to complete the operation.
-1. The command creates a `CommandResult`. `LogicManager` saves the complete `ReadOnlyGameMates` through `Storage`
-   before returning it to the UI. Saving applies to viewing commands too. Parse and execution failures skip saving;
-   an I/O error after execution is translated into a `CommandException` without rolling back the in-memory change.
+`LogicManager.execute(commandText)` follows this sequence:
 
-Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
+1. `LogicManager` passes the command text to a `GameMatesParser` object.
+   This object creates a matching parser instance, such as a `DeleteCommandParser`, and uses it to parse the command.
+2. The parser creates an instance of a `Command` subclass, such as `DeleteCommand`.
+   `LogicManager` executes that command object.
+3. The command communicates with `Model` as necessary, for example to delete a friend.
+   The diagram shows one interaction for simplicity. The code can use more than one interaction to complete the operation.
+4. The command creates a `CommandResult`.
+   `LogicManager` obtains the data through `Model.getGameMates()`.
+   Before it returns the result to the `UI`, `LogicManager` saves the complete `ReadOnlyGameMates` through `Storage`.
+
+Viewing commands also save data. Parse failures and execution failures skip the save.
+If an I/O error occurs after execution, `LogicManager` reports a `CommandException`.
+It does not roll back the change in memory.
+
+**Command parsing**
+
+The following diagram shows the parsing classes omitted from the class diagram above.
 
 <img src="images/ParserClasses.png" width="600"/>
 
-How the parsing works:
-* When called upon to parse a user command, the `GameMatesParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `GameMatesParser` returns that object as a `Command` object.
-* All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
+`GameMatesParser` creates an instance of an `XYZCommandParser`, where `XYZ` represents the command name.
+Each parser uses the shared parsing classes to create an instance of its `XYZCommand` class.
+For example, `AddCommandParser` creates an `AddCommand` object.
+`GameMatesParser` returns the result as a `Command` object.
+
+All command parsers implement the `Parser` interface, including `AddCommandParser` and `DeleteCommandParser`.
+This interface lets callers use the parsers in the same way, for example in tests.
 
 #### Optional values
 
-Command parsers and edit descriptors use Vavr `Option` to represent omitted values. A missing prefix
-is absent, while a supplied prefix with an empty value is present and subject to validation. Add
-commands default omitted contact details to `Phone.EMPTY` and `Email.EMPTY`. Edits preserve omitted
-fields; a single empty `t/` clears the tags. Descriptor tag getters expose an unmodifiable set, and
-setters retain defensive copies.
+Command parsers and edit descriptors use Vavr `Option` to represent omitted values.
+A missing prefix is absent. A prefix with an empty value is present and must pass validation.
 
-Parsing continues to report the first invalid value through `ParseException`. Vavr's checked-function
-adapters propagate the original exception, so invalid input is never treated as an omitted argument.
-`GameAddCommandParser` similarly defaults omitted `u/` to `Username.EMPTY`; a supplied blank `u/` is rejected.
+Add commands use `Phone.EMPTY` and `Email.EMPTY` for omitted contact details.
+Edits preserve omitted fields. A single empty `t/` clears the tags.
+Descriptor setters make defensive copies of tag sets, and their getters return unmodifiable sets.
+
+Parsing reports the first invalid value through `ParseException`.
+Vavr's checked-function adapters propagate the original exception.
+Thus, an invalid value is not treated as an omitted argument.
+
+`GameAddCommandParser` uses `Username.EMPTY` when `u/` is omitted.
+It rejects a supplied blank `u/`.
 
 ### Model component
-**API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java)
+
+**API:** [`Model.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java)
 
 <img src="images/ModelClassDiagram.png" width="625" />
 
+**Stored data and views**
 
-The `Model` component,
+The `Model` stores friends in `GameMates` through `UniqueFriendList`.
+It stores a separate `Friend myself` profile with a default value. The profile is not part of the friend list.
+Add and edit commands prevent a friend and the profile from sharing a name.
 
-* stores friends in `GameMates` through `UniqueFriendList`, plus a separate `Friend myself` profile with a default value.
-  The profile is not in the friend list. Add/edit commands separately prevent names shared between a friend and the profile.
-* exposes an observable `FilteredList<Friend>` backed by the stored friends. `FriendListScope` identifies active,
-  archived or global search results, including empty lists. The filter is a predicate over the full collection,
-  rather than a second collection of copied friends.
-* stores each friend's games as `Game` objects, including their game name, username if provided and optional metadata.
-* stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
-* does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
+A `FilteredList<Friend>` provides an observable view of the stored friends.
+Its predicate operates on the full collection; the filter does not create a second collection of copied friends.
+`FriendListScope` identifies active, archived and global search views, including empty results.
+`ModelManager` exposes a `SortedList` over this filtered list to apply the display order.
 
-`Friend` contains `Name`, optional contact values, a set of `Tag` objects, a set of `Game` objects and an immutable
-`archived` status and an immutable `pinned` state. See [Friend archiving](#friend-archiving) for scope, identity and
-persistence rules. `UniqueFriendList` stably partitions friends after additions and
-replacements so pinned friends are always before unpinned friends, while preserving the existing relative order
-within each group. The filtered friend list is backed by this ordering, so the invariant also holds for filters.
-`Game` contains `GameName`, `Username` and an immutable metadata set. Name equality ignores case and collapses repeated ASCII spaces;
-`GameName.equals` compares complete names using lower-case normalization with `Locale.ROOT`.
-`Username` preserves case and uses `Username.EMPTY` for omission, with `isEmpty()` to check it.
-`Game.isSameGame` compares game names, while full equality also compares usernames and metadata.
-`GameAddCommand` rejects an existing game name regardless of username. The set representation alone does not
-enforce this rule when games with different usernames are loaded from JSON.
+Each friend's games are `Game` objects. Each object contains a game name, an optional username and optional metadata.
+The `Model` also stores a `UserPrefs` object, which currently holds GUI settings.
+Other components read these preferences through `ReadOnlyUserPrefs`.
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The alternative, arguably more object-oriented, design below keeps a unique list of tags in `GameMates`, and each `Friend` references tags from that list. This lets `GameMates` maintain one `Tag` object per unique tag instead of each `Friend` holding its own `Tag` objects.<br>
+`Model` does not depend on `UI`, `Logic` or `Storage`.
+Its classes represent domain data and make sense without those other components.
+
+**Friend fields and pin order**
+
+`Friend` contains a `Name`, optional contact values, a set of `Tag` objects and a set of `Game` objects.
+It also contains immutable `archived` and `pinned` states.
+See [Friend archiving](#friend-archiving) for the scope, identity and persistence rules.
+
+`UniqueFriendList.MAX_PINNED_FRIENDS` limits the stored collection to five pins across active and archived friends.
+The list validates this invariant on addition, replacement and bulk replacement.
+A violation throws `PinnedFriendLimitExceededException` before the collection changes.
+Tag names contain 1–50 ASCII alphanumeric characters.
+
+After additions and replacements, `UniqueFriendList` stably partitions friends, with pinned friends before unpinned friends.
+It preserves the existing relative order within each group.
+Filters use that stored order, so filtering preserves this invariant.
+An explicit sort uses a separate display comparator and can override the pin order in the current implementation.
+
+**Game fields and identity**
+
+`Game` contains a `GameName`, a `Username` and an immutable metadata set.
+`Name` equality ignores case and treats repeated ASCII spaces as one space.
+`GameName.equals` compares complete names after lower-case normalization with `Locale.ROOT`.
+
+`Username` preserves case. An omitted username uses `Username.EMPTY`; `isEmpty()` identifies that value.
+`Game.isSameGame` compares game names. Full game equality also compares usernames and metadata.
+
+`GameValidator` rejects an existing game name during addition or renaming, regardless of its username.
+Full game equality alone does not enforce this rule, so `JsonAdaptedFriend` also validates game-name uniqueness during loading.
+Duplicate names reject the load even when usernames differ.
+
+<div markdown="block" class="alert alert-info">
+
+:information_source: **Alternative model design:**
+An alternative, arguably more object-oriented design keeps a unique tag list in `GameMates`.
+Each `Friend` references tags in that list.
+This lets `GameMates` keep one `Tag` object per unique tag, instead of separate tag objects in each friend.
+The diagram below shows this alternative.
 
 <img src="images/BetterModelClassDiagram.png" width="450" />
 
 </div>
 
-
 ### Storage component
 
-**API** : [`Storage.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/storage/Storage.java)
+**API:** [`Storage.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/storage/Storage.java)
 
 <img src="images/StorageClassDiagram.png" width="550" />
 
-The `Storage` component,
-* can save both GameMates data and user preference data in JSON format, and read them back into corresponding objects.
-* is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonGameMatesStorage` and `JsonUserPrefsStorage` (one class per data file).
-* converts game metadata through `JsonAdaptedGame` and `JsonAdaptedMeta`, validating fields and rejecting duplicate keys when loading.
-* depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
+**Storage classes**
 
-Storage reads return Vavr `Option`: missing files are absent, while malformed JSON or invalid stored
-friend data still causes `DataLoadingException`. Vavr `Try` captures JSON read and model conversion
-failures, translating captured failures into checked `DataLoadingException` instances with the original cause.
-Startup uses sample data for a missing GameMates file
-and an empty GameMates for a loading error. Missing or unreadable preferences use default preferences.
-JSON contact fields that are null or empty map to the corresponding empty contact value. Invalid
-nonempty contact values are rejected without trimming. Missing `games` or `tags` load as empty sets, and missing
-`myself` retains `Friend.DEFAULT_MYSELF`. Stored games require a valid `name`. Missing, null or empty usernames
-are mapped to `Username.EMPTY` and invalid non-empty values, including whitespace-only strings, are rejected.
-Duplicate friend names reject the whole data load, including a previously parsed profile. Startup uses a new empty
-`GameMates`.
-`JsonAdaptedFriend` persists a friend's `pinned` boolean. The field is optional when loading: missing or `null`
-values in save files created before pinning was introduced default to `false`.
+`Storage` saves GameMates data and user preferences in JSON files. It reads those files back into the corresponding objects.
+`StorageManager` delegates file access to `JsonGameMatesStorage` and `JsonUserPrefsStorage`, with one class per data file.
+`Storage` depends on model classes because it saves and restores model objects.
 
-`MainApp` resolves `data/gamemates.json` and `preferences.json` relative to the process working directory, not the
-JAR's location. `MainApp.initPrefs` writes initialized preferences at startup and `stop` writes them again at shutdown.
-`MainWindow.handleExit` first records the current window dimensions and position. The data model is saved by commands,
-not by `stop`. Selection and filter predicates are transient.
+`JsonAdaptedGame` and `JsonAdaptedMeta` convert game metadata.
+They validate fields and reject duplicate metadata keys during the load.
+`JsonSerializableGameMates` adapts `friends` and `myself`.
+`JsonAdaptedFriend` adapts games and tags. `JsonAdaptedGame` adapts `name`, `username` and `metas`.
 
-`JsonSerializableGameMates` adapts both `friends` and `myself`. `JsonAdaptedFriend` adapts games and tags, and
-`JsonAdaptedGame` adapts `name`, `username` and `metas`. Jackson ignores unknown properties, which
-disappear on the next serialization. Loading a damaged file does not repair or back it up:
-the next successful command can overwrite it with the fallback data. There is no automatic recovery or atomic
-transaction spanning command execution and file writing.
+**Read results and startup defaults**
 
-Known loading exception: a JSON file containing only the literal `null` reaches `JsonUtil.readJsonFile`'s
-`requireNonNull` outside its captured conversion, throwing `NullPointerException` rather than `DataLoadingException`.
-It bypasses the normal empty-data fallback and can prevent startup. This needs an application fix separately;
-the documentation change does not alter the loader.
+`Storage` reads return Vavr `Option`. A missing file produces an absent value.
+Malformed JSON or invalid stored friend data causes `DataLoadingException`.
+Vavr `Try` captures JSON read failures and model-conversion failures.
+It converts them to checked `DataLoadingException` instances and keeps the original cause.
+
+If the GameMates file is missing, startup uses sample data.
+If a load error occurs, startup uses an empty `GameMates`.
+Missing or unreadable preferences use the default preferences.
+
+**Defaults and validation in stored data**
+
+Null or empty contact fields become the corresponding empty contact values.
+Invalid non-empty contacts are rejected without trimming.
+Missing or null `games` and `tags` load as empty sets. Missing `myself` uses `Friend.DEFAULT_MYSELF`.
+
+Stored games must have a valid `name`.
+Missing, null or empty usernames become `Username.EMPTY`.
+Invalid non-empty usernames, including whitespace-only strings, are rejected.
+
+Duplicate friend names reject the entire load, including a profile parsed before the duplicate was found.
+Startup then uses a new empty `GameMates`.
+`JsonAdaptedFriend` saves the `pinned` boolean. Missing or null pin values in older files default to `false`.
+
+`JsonAdaptedFriend` rejects duplicate `GameName` values within either a friend or the profile.
+`JsonSerializableGameMates` rejects friend names that match the profile and converts excess pins to `IllegalValueException`.
+These failures reject the entire load, not only the invalid entry.
+The untouched `Friend.DEFAULT_MYSELF` uses `Name.EMPTY` and is omitted from saved JSON.
+Stored friend/profile entries still need valid non-empty names.
+
+**File paths and save timing**
+
+`MainApp` resolves `data/gamemates.json` and `preferences.json` relative to the process working directory, not the JAR location.
+`MainApp.initPrefs` writes initialized preferences at startup. `stop` writes them again at shutdown.
+Before shutdown, `MainWindow.handleExit` records the current window dimensions and position.
+
+Commands save the data model; `stop` does not save it.
+Selection, view scope, sorting and filter predicates are transient and are not saved.
+
+**Unknown fields and damaged files**
+
+Jackson ignores unknown JSON properties. Those properties disappear the next time the data is serialized.
+The loader does not repair or back up damaged files.
+The next successful command can overwrite a damaged file with fallback data.
+There is no automatic recovery or atomic transaction across command execution and file writing.
+
+**Null JSON and GUI preferences**
+
+`JsonUtil.readJsonFile` calls `requireNonNull` on the deserialized root inside `Try`.
+A null root causes a `NullPointerException` that is converted to `DataLoadingException`.
+A data file containing only `null` therefore uses the usual empty-data fallback.
+`UserPrefs.setGuiSettings()` has `@JsonSetter("guiSettings")` and rejects an explicit null value during deserialization.
+`MainApp.initPrefs` catches these preference-load failures and uses and saves default preferences.
+Null window coordinates remain valid; they do not mean that the entire `guiSettings` object is null.
 
 ### Common classes
 
@@ -229,31 +348,57 @@ This section describes some noteworthy details on how certain features are imple
 
 ### Friend creation, editing and deletion
 
-`AddCommandParser` requires `n/` and uses `Phone.EMPTY` and `Email.EMPTY` for omitted contact values.
-`ParserUtil` trims supplied values before calling their model validators. `ArgumentMultimap` rejects duplicate
-single-value name/contact prefixes and collects repeated tags into a set. `UniqueFriendList` rejects names equal
-under `Friend.isSameFriend`, so different phone/email values or tags do not distinguish duplicate names.
+**Adding a friend**
 
-`EditCommandParser` requires a numeric index or case-insensitive `myself`. An omitted selector is rejected.
-Target resolution and replacement use the [Myself profile mechanism](#myself-profile) described below.
-Add/edit commands reject names shared between a friend and the profile. `EditFriendDescriptor` uses
-optional values to distinguish omission from a supplied empty contact field. `EditCommand` constructs a new friend
-with the original games. Name/contact values replace
-existing values. Supplied tags are toggled by set membership. Duplicates in one command are deduplicated, and a
-single empty `t/` clears all tags. Empty and non-empty tag parameters together fail validation.
-After a successful add or friend edit, the model resets the friend-list predicate to show all friends.
-Editing Myself preserves that predicate, including an empty displayed list.
+`AddCommandParser` accepts a command only if `n/` is present.
+It uses `Phone.EMPTY` and `Email.EMPTY` for omitted contact values.
+`ParserUtil` trims supplied values before it calls the model validators.
 
-`DeleteCommand` uses the same displayed-list indexing but keeps the current predicate. It removes the entire friend
-and their games immediately; there is no confirmation state. Its out-of-range/empty-list error is the shared generic
-message, while `EditCommand` and `GameListCommand` distinguish empty lists and give a displayed range.
-`ClearCommand` replaces the friends with an empty `GameMates` while copying the existing profile.
+`ArgumentMultimap` rejects duplicate single-value name and contact prefixes. It collects repeated tags into a set.
+`UniqueFriendList` rejects names that are equal under `Friend.isSameFriend`.
+Different phone numbers, email addresses or tags do not distinguish duplicate names.
 
-The implemented contact rules differ from the submitted draft: names are 1–100 ASCII alphanumeric
-characters/spaces, phones validate digit counts and grouping, and emails validate ASCII dot-atom/domain syntax
-with length limits. The [User Guide](UserGuide.html#adding-a-friend-add) specifies the accepted input for users.
-No phone, email, game name or username is verified against an external service.
-`GameName` and `Username` values are trimmed with `String.strip()` and must contain a letter or digit.
+**Editing a friend or profile**
+
+`EditCommandParser` accepts a numeric index or the case-insensitive `myself` keyword.
+It rejects an omitted selector. Target resolution and replacement use the
+[Myself profile mechanism](#myself-profile).
+Add and edit commands reject names shared between a friend and the profile.
+
+`EditFriendDescriptor` uses optional values to distinguish an omitted field from an empty contact field.
+`EditCommand` creates a replacement friend and preserves the original games.
+Supplied name and contact values replace their existing values.
+An empty `p/` or `e/` clears that contact value during an edit.
+Add commands reject these empty prefixes.
+
+Supplied tags toggle according to set membership. A duplicate tag in one command applies only once.
+A single empty `t/` clears all tags. Empty and non-empty tag parameters together fail validation.
+
+**Effect on the displayed list**
+
+Adding a friend switches to the unfiltered active view.
+Editing a displayed friend clears the filter in active and archive views, but preserves a global name-search predicate.
+If a renamed friend no longer matches the name predicate, that friend can disappear from the results.
+Editing Myself preserves the current scope and predicate, including an empty displayed list.
+
+**Deletion and clearing**
+
+`DeleteCommand` uses the same displayed-list indexing and keeps the current predicate.
+It immediately removes the entire friend and their games. There is no confirmation state.
+
+An empty list or out-of-range index produces the shared generic deletion error.
+In contrast, `EditCommand` and `GameListCommand` distinguish empty lists and report a displayed range.
+`ClearCommand` replaces the friends with an empty `GameMates` and copies the existing profile.
+
+**Field validation**
+
+The contact rules differ from the submitted draft.
+Names accept 1–100 ASCII alphanumeric characters and spaces.
+Phone validation examines digit counts and grouping. Email validation uses ASCII dot-atom and domain syntax with length limits.
+The [User Guide](UserGuide.html#adding-a-friend-add) defines the accepted input.
+
+No phone number, email address, game name or username is verified against an external service.
+`GameName` and `Username` use `String.strip()` to trim values. The values must contain a letter or digit.
 Length is counted in UTF-16 units with `String.length()`. The shared text validator rejects:
 
 * Unicode category C: controls, format characters, unpaired surrogates, private-use and unassigned characters
@@ -263,181 +408,276 @@ Length is counted in UTF-16 units with `String.length()`. The shared text valida
 * no-break spaces U+00A0, U+2007 and U+202F, which look like regular spaces but do not match them
 
 Other Unicode is accepted, including combining marks, emoji and variation selectors.
+These rules define the application's accepted text characters; they do not test how every font renders each character.
 
 ### Myself profile
 
 `GameMates` stores the user's profile as a separate `Friend`, initially `Friend.DEFAULT_MYSELF`.
 `edit`, `gameadd` and `gamedel` accept `myself` independently of the displayed friend list and profile name.
+The default profile has `Name.EMPTY`, rather than reserving the friend name `Myself`.
+The first `edit myself` must supply a name, as in `edit myself n/NAME`. Later profile edits can omit it.
 
-Their syntax uses `FRIEND_INDEX|myself` for either a positive displayed friend index or the case-insensitive
-profile keyword:
+Their syntax uses `FRIEND_INDEX|myself`.
+This selector accepts either a positive displayed friend index or the case-insensitive profile keyword:
 
 ```text
 edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…
 gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…
 gamedel FRIEND_INDEX|myself g/GAME_NAME
+gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]…
+gamelist FRIEND_INDEX|myself [g/GAME_NAME]
 ```
 
-The sealed `FriendTarget` interface lets these commands update either the profile or a listed friend.
-Its nested `Myself` and `ListedFriend` records retain the selected `Friend` and identify where to apply the update,
-even if the friend-list filter changes.
-The class diagram omits unrelated members and shows records as ordinary classes.
+**Target resolution**
+
+The sealed `FriendTarget` interface lets these commands update the profile or a listed friend.
+Its nested `Myself` and `ListedFriend` records retain the selected `Friend` and identify the update destination.
+They keep that destination even if the friend-list filter changes.
+
+The class diagram omits unrelated members. It shows the records as ordinary classes.
 
 ![Classes involved in resolving and updating a friend target](images/MyselfTargetClassDiagram.png)
 
-1. The three command parsers use `ParserUtil.parseIndexOrMyself`: case-insensitive `Index.MYSELF_KEYWORD`
-   becomes `Index.myself()`. Numeric selectors remain displayed friend indices.
-2. At execution, `ModelManager.resolveFriend(index)` captures the profile or currently displayed friend in a target.
-3. After constructing a replacement `Friend` and completing validation, the command calls
-   `ModelManager.setFriend(target, updatedFriend)`. An exhaustive switch routes `Myself` to the profile and
-   `ListedFriend` to its captured friend.
+1. The three command parsers use `ParserUtil.parseIndexOrMyself`.
+   A case-insensitive `Index.MYSELF_KEYWORD` becomes `Index.myself()`; numeric selectors remain displayed friend indices.
+2. During execution, `ModelManager.resolveFriend(index)` captures the profile or currently displayed friend in a target.
+3. The command constructs and validates a replacement `Friend`, then calls `ModelManager.setFriend(target, updatedFriend)`.
+   An exhaustive switch routes `Myself` to the profile and `ListedFriend` to its captured friend.
 
-For profile edits, `EditCommand` constructs the replacement before `FriendValidator` checks for name conflicts
-with all stored friends, including those hidden by the current filter. Profile edits, `gameadd`, `gameedit`,
-`gamedel` and `gamelist` preserve the friend-list filter.
-`FriendValidator.checkFriendInitialized` rejects those four commands targeting `myself` until
-`edit myself n/NAME` sets the profile name.
+**Validation and saving**
 
-The sequence shows `gameadd myself g/Valorant u/player` after parsing. Helper calls and subsequent saving are omitted.
+For profile edits, `EditCommand` constructs the replacement before `FriendValidator` examines name conflicts.
+Validation uses all stored friends, including friends hidden by the current filter.
+Profile edits and both game commands preserve the friend-list filter.
+`FriendValidator.checkFriendInitialized()` rejects `gameadd`, `gameedit`, `gamedel` and `gamelist` for an unnamed profile.
+The feedback is `Set your profile name first using "edit myself n/NAME" command.`
+
+The following sequence shows `gameadd myself g/Valorant u/player` after parsing.
+It omits helper calls and the subsequent save.
 
 ![Successful game addition to the Myself profile](images/MyselfGameAddSequenceDiagram.png)
 
-After success, `LogicManager` saves both `friends` and `myself` through `JsonSerializableGameMates`, and
-`MainWindow` refreshes the profile via `Logic.getMyself()`. Missing `myself` in older JSON retains the default profile.
+After success, `LogicManager` saves `friends` and `myself` through `JsonSerializableGameMates`.
+`MainWindow` refreshes the profile through `Logic.getMyself()`.
+If older JSON omits `myself`, the application keeps the default profile.
 
 ### Name and game filtering
 
-`FindCommand` installs `NameContainsKeywordsPredicate`: any full name word matching any supplied keyword, ignoring
-case, is sufficient. `ListCommand` either installs `PREDICATE_SHOW_ALL_FRIENDS` or `GameNameMatchesPredicate`, which
-tests whether any of a friend's games has the exact `GameName`. Both operate over all stored friends and replace
-the previous predicate; they do not intersect filters. `list s/name` and `list s/game` set a `SortedList` comparator
-in `ModelManager` after filtering; `o/desc` reverses that comparator, while the default and `o/asc` are ascending.
-The default `list` clears the comparator and retains stored insertion order. Game sorting uses each friend's
-alphabetically first game name, with friends without games last and names as the tie-breaker. `find` does not parse
-prefixes and `list` does not parse `n/`. The `find` parser only requires a
-non-empty keyword list; there is no 255-character keyword validation. No-match queries return successful empty
-results. Filtering and sorting never include or edit the separate profile.
+**Filter predicates**
+
+`FindCommand` installs `NameContainsKeywordsPredicate`.
+A full name word matches if it equals any supplied keyword, ignoring case.
+
+`ListCommand` installs either `PREDICATE_SHOW_ALL_FRIENDS` or `GameNameMatchesPredicate`.
+The game predicate matches if any game belonging to a friend has the exact `GameName`.
+`find` searches all stored friends; `list` selects active friends from the stored collection.
+Both commands replace the previous predicate. Their filters do not intersect.
+
+**Display order**
+
+After filtering, `list s/name` and `list s/game` set a `SortedList` comparator in `ModelManager`.
+The default direction and `o/asc` use ascending order. `o/desc` reverses the comparator.
+The default `list` clears the comparator and keeps the stored insertion order.
+
+Game sorting uses each friend's alphabetically first game name. Friend names resolve ties.
+Ascending game order puts friends without games last.
+Reversing the comparator currently also reverses that placement.
+
+**Parser behavior and empty results**
+
+`find` does not parse prefixes, and `list` does not parse `n/`.
+The `find` parser accepts a non-empty keyword list; it does not enforce a 255-character keyword limit.
+Queries with no matches return successful empty results.
+Filtering and sorting never include or edit the separate profile.
 
 ### Editing an existing game
 
-`GameEditCommandParser` reuses `ArgumentTokenizer`, `ArgumentMultimap`, `ParserUtil.parseIndexOrMyself`,
-`parseGameName`, `parseUsername` and `parseMetas`. Its immutable `EditGameDescriptor` distinguishes omitted
-metadata (`null`) from a supplied empty replacement set. A single empty `m/` clears metadata. All other
-supplied pairs pass through the shared parser, including normalized duplicate-key checks and first-colon splitting.
-The model identity rules remain unchanged. The merged optional-username model provides `Username.EMPTY`. A supplied empty `u/` maps to that value.
-Omitting `u/` preserves the original username, including an absent username.
+**Parser and field values**
 
-The parser opts into `ArgumentTokenizer.tokenizeWithQuotedValues` so a whole field value can be double quoted.
-Recognized prefixes inside that value are literal text: `g/"PUBG n/Game"` selects that complete stored name.
-The tokenizer decodes `\"` and `\\`, rejects malformed quotes/escapes and trailing text, and then passes the
-decoded values through the same field validators and duplicate-prefix checks. Unquoted prefixes retain their
-existing command meaning. The ordinary tokenizer and other commands' syntax remain unchanged.
+`GameEditCommandParser` reuses `ArgumentTokenizer`, `ArgumentMultimap`, `ParserUtil.parseIndexOrMyself`,
+`parseGameName`, `parseUsername` and `parseMetas`.
+Its immutable `EditGameDescriptor` distinguishes omitted metadata (`null`) from an empty replacement set.
+The descriptor copies supplied metadata. At least one editable field must be supplied.
+
+A single empty `m/` clears metadata.
+All other supplied pairs pass through the shared parser, including normalized duplicate-key validation and first-colon splitting.
+The model identity rules do not change.
+
+The merged optional-username model provides `Username.EMPTY`.
+A supplied empty `u/` maps to that value.
+If `u/` is omitted, the command preserves the original username, including an absent username.
+
+**Quoted values**
+
+The parser uses `ArgumentTokenizer.tokenizeWithQuotedValues` to accept double quotes around a whole field value.
+Inside that value, recognized prefixes are literal text.
+For example, `g/"PUBG n/Game"` selects the complete stored name `PUBG n/Game`.
+
+The tokenizer decodes `\"` and `\\`. It rejects malformed quotes, invalid escapes and trailing text.
+The decoded values pass through the same field validators and duplicate-prefix validation.
+Unquoted prefixes keep their existing command meaning.
+The ordinary tokenizer and other commands' syntax are unchanged. Quoted-value parsing is specific to `gameedit` in this checkout.
+
+**Validation before mutation**
 
 `GameEditCommand` uses `FriendTargetResolver` and `Model.resolveFriend` for displayed indices or Myself.
-It requires exactly one matching existing game, constructs the complete replacement, then checks collisions
-against the other games before calling `Model.setFriend(target, updated)` once. Ambiguous duplicate names in
-externally edited JSON fail without mutation. `Friend.withGames` copies all current friend fields and defensively
-copies the replacement set, including the original archive and pin statuses. Tests cover pinned order, archived
-targets in archive and global search scopes, and save/reload preservation of both statuses. Its explicit copy
-constructor must also copy any new fields introduced by future integrations.
+`GameTargetResolver.resolve()` accepts exactly one matching existing game for `gameedit` and `gamedel`.
+The command constructs the complete replacement and examines name collisions against the other games.
+Only then does it call `Model.setFriend(target, updated)` once.
 
-The command retains the list predicate. A successful friend edit returns the updated friend through
-`CommandResult`, clearing any old game-card filter. A successful profile edit uses the existing profile refresh.
-Failures return no result and preserve the current details. `LogicManager` saves through the existing storage;
-there is no new persistence mechanism or transaction spanning model mutation and a failing disk write.
-Tests exercise command routing, atomic validation, displayed targets, metadata replacement, profile updates,
-case-only spelling, UI refresh and real JSON storage round trips.
+`GameAddCommand` delegates name-conflict validation to `GameValidator.checkCanAdd()`.
+`GameEditCommand` uses `GameValidator.checkCanEdit()` for the same validation during a rename.
+`checkCanEdit()` excludes the original game, so case-only renames remain valid.
+The resolver rejects missing games and defensively rejects ambiguous in-memory names without mutation.
+Externally edited JSON with duplicate game names is rejected during loading.
+`Friend.withGames` copies all current friend fields and makes a defensive copy of the replacement set.
+The copy preserves the original archive and pin statuses.
+Its explicit copy constructor must also copy new fields from future integrations.
+
+**View updates and persistence**
+
+The command retains the list predicate.
+A successful friend edit returns the updated friend through `CommandResult` and clears the previous game-card filter.
+A successful profile edit uses the existing profile refresh.
+Failures return no result and preserve the current details.
+
+`LogicManager` saves through the existing storage path; this feature adds no persistence mechanism.
+There is no transaction across model mutation and a disk-write failure.
+
+**Test coverage**
+
+Tests cover pinned order and archived targets in archive and global search scopes.
+Save/reload tests verify both archive and pin status.
+Other tests cover command routing, atomic validation, displayed targets, metadata replacement and profile updates.
+They also cover case-only spelling, `UI` refresh and real JSON storage round trips.
 
 The [game edit sequence diagram source](diagrams/GameEditSequenceDiagram.puml) shows validation before mutation.
 
 ### Viewing a friend's games
 
-`gamelist FRIEND_INDEX|myself [g/GAME_NAME]` selects a friend or the user profile for the right-hand details panel
-without changing the left-hand friend list. The flow is:
+`gamelist FRIEND_INDEX|myself [g/GAME_NAME]` selects a friend or profile for the right-hand details panel.
+It does not change the left-hand friend list.
 
-1. `GameMatesParser` routes `gamelist` to `GameListCommandParser`. The parser requires one positional index or
-   `myself` selector before at most one `g/` filter. It recognizes prefixes at whitespace boundaries so unknown prefixes and repeated
-   `g/` tokens cannot silently become part of a multiword game name. Other words after `g/` belong to the name.
-   Selector parsing uses `ParserUtil.parseIndexOrMyself`, and game validation uses the existing `GameName` rules.
-   Command-specific errors are translated locally, leaving other commands' validation and messages unchanged.
-2. `GameListCommand.execute` resolves the index against `Model.getFilteredFriendList()`, so indices remain correct
-   after both name searches and game-based friend filtering. It checks empty and out-of-range lists before
-   numeric lookup. `Model.resolveFriend` resolves the selected friend or the separate profile; `myself` works even with an empty displayed list.
-   It uses `GameName.equals` for exact, case-insensitive matching. No match and no games return successful results.
-3. `CommandResult` carries the original `Friend` in `friendToShow` and an optional `GameName` in `gameFilter`,
-   plus `showMyself` to distinguish the profile from a friend with identical details.
-   The filter requires a selected friend, participates in equality, hashing and diagnostic output, and defaults
-   to empty in the existing constructors. Feedback uses the stored game name on a match and the trimmed query
-   when there is no match.
-4. `MainWindow.refreshFriendDetails` forwards the selected friend, profile flag and game filter to
-   `FriendDetailsPanel.setFriend`.
-   The panel filters the stream used to construct `GameDetailsCard` instances and displays an explicit empty label
-   if the stream has no entries. It never constructs a replacement friend or modifies the original game set.
-   An unfiltered command clears the game filter. The existing two-argument `setFriend` also clears it, including
-   when `FriendListPanel` reports another selection. A single-result `find` continues selecting the whole friend.
-   Parse and execution failures do not refresh the panel, preserving the previous game display.
+**Parsing and target selection**
 
-The command does not update the model's friend-list predicate, friends, games, preferences or Myself profile.
-The profile fallback still shows all profile games; explicit profile selection supports game filtering.
+`GameMatesParser` routes `gamelist` to `GameListCommandParser`.
+The parser accepts one positional index or `myself` before at most one `g/` filter.
+It recognizes prefixes at whitespace boundaries and rejects unknown prefixes or repeated `g/` tokens.
+Thus, those tokens cannot silently become part of a multiword game name.
+Other words after `g/` belong to the game name.
+
+The parser uses `ParserUtil.parseIndexOrMyself` for selectors and the existing `GameName` rules for game validation.
+It translates command-specific errors locally. Other commands keep their existing validation and messages.
+
+`GameListCommand.execute` resolves numeric indices against `Model.getFilteredFriendList()`.
+This keeps indices consistent after name searches and game-based filtering.
+The command examines empty and out-of-range lists before numeric lookup.
+`Model.resolveFriend` resolves the selected friend or separate profile.
+`myself` works with an empty displayed list after profile setup; `FriendValidator.checkFriendInitialized()` rejects an unnamed profile.
+
+`GameName.equals` gives exact, case-insensitive matching.
+No match and no games both return successful results.
+
+**Command result and feedback**
+
+`CommandResult` carries the original `Friend` in `friendToShow` and an optional `GameName` in `gameFilter`.
+The `showMyself` flag distinguishes the profile from a friend with identical details.
+
+A filter must have a selected friend.
+The filter participates in equality, hashing and diagnostic output; existing constructors default to no filter.
+Matching feedback uses the stored game-name spelling.
+If no game matches, feedback uses the trimmed query.
+
+**Rendering and filter clearing**
+
+`MainWindow.refreshFriendDetails` passes the selected friend, profile flag and game filter to `FriendDetailsPanel.setFriend`.
+The panel filters the stream that constructs `GameDetailsCard` instances.
+If that stream has no entries, the panel shows an explicit empty label.
+It never constructs a replacement friend or modifies the original game set.
+
+An unfiltered command clears the game filter.
+The existing two-argument `setFriend` also clears it, including when `FriendListPanel` reports another selection.
+A single-result `find` continues to select the whole friend.
+Parse failures and execution failures preserve the previous game display without a panel refresh.
+`MainWindow` also selects the displayed friend or clears the list selection for a profile result.
+
+The command does not update the friend-list predicate, friends, games, preferences or Myself profile.
+The profile fallback still shows all profile games. Explicit profile selection supports game filtering after profile setup.
+
 `GameDetailsCard` renders `Game.getGameName()`, `Game.getUsername()` and `Game.getMetas()`.
 Metadata pairs appear below the username as wrapping `Key: Value` labels, sorted by key ignoring case.
 The command's original-friend payload retains metadata without copying or removing it.
 
-Parser and command tests cover errors, exact matching, empty results, displayed-list indexing and unchanged model
-data. JavaFX panel and window tests exercise filtered payloads, empty states, clearing by commands and selection,
-and preservation of the details view after invalid input.
+**Test coverage**
+
+Parser and command tests cover errors, exact matching, empty results, displayed-list indexing and unchanged model data.
+JavaFX panel and window tests cover filtered payloads, empty states, filter clearing through commands and selection.
+They also verify that invalid input preserves the details view.
 
 ![Command-to-panel flow for a filtered game list](images/GameListSequenceDiagram.png)
 
 ### Current limitations
 
-* Deletion takes effect immediately. The deletion-confirmation user story is a future requirement.
-* Undo and redo are proposed features. See the [proposed design](#proposed-undoredo-feature).
+Deletion takes effect immediately. Deletion confirmation, undo and redo are outside the product scope.
 
 ### Game metadata
 
-Metadata records game-specific details such as a friend's role or play style.
+Metadata records game-specific details, such as a friend's role or play style.
 `Meta`, `MetaKey` and `MetaValue` are immutable classes in `seedu.address.model.game.meta`.
-Each `Meta` contains one key and one value. `Game` copies the supplied metadata collection and
-exposes it as an unmodifiable set through `getMetas()`. The two-argument constructor defaults to an empty set.
+Each `Meta` contains one key and one value.
+
+`Game` copies the supplied metadata collection and returns an unmodifiable set through `getMetas()`.
+Its two-argument constructor uses an empty set.
 
 #### Validation and equality
 
-`String.strip()` removes leading and trailing whitespace before validation and storage.
-`StringUtil.isValidTextField()` requires at least one letter or digit. It rejects the characters listed in
+Before validation and storage, `String.strip()` removes leading and trailing whitespace.
+`StringUtil.isValidTextField()` accepts non-empty text with at least one letter or digit. It rejects the characters listed in
 [Friend creation, editing and deletion](#friend-creation-editing-and-deletion).
-Limits use `String.length()` (UTF-16 units), so supplementary characters count as two.
-`GameName` and `Username` also use this utility.
+Limits use `String.length()`, which counts UTF-16 units. Supplementary characters count as two units.
+
+The validation allows punctuation and permitted combining marks, emoji and variation selectors.
+It rejects Unicode format characters and the other categories listed in the shared rules above.
+`GameName` and `Username` use the same utility.
 
 | Field | Length after trimming | Colon handling | Equality |
 | --- | --- | --- | --- |
 | `MetaKey` | 1–50 | Colons rejected | Case-insensitive using `Locale.ROOT` |
 | `MetaValue` | 1–200 | Colons allowed | Case-sensitive |
 
-Keys must be unique within each game entry, including when repeated pairs have identical values.
-The same key can occur in other games or friends. `Game` enforces this invariant when constructed.
-`Meta.equals()` compares both fields; `Game.equals()` includes metadata, while `isSameGame()` compares only the game name.
+Keys must be unique within each game entry, even if repeated pairs have identical values.
+The same key can occur in other games or friends. `Game` enforces this invariant during construction.
+
+`Meta.equals()` compares both fields. `Game.equals()` includes metadata, but `isSameGame()` compares only the game name.
 
 #### Parsing
 
-`ParserUtil.parseMeta()` uses `StringUtil.splitAtFirstColon()` and delegates field parsing to
-`parseMetaKey()` and `parseMetaValue()`. For example, ` Role : Support:Mid ` becomes key `Role` and value `Support:Mid`.
+`ParserUtil.parseMeta()` uses `StringUtil.splitAtFirstColon()`.
+It delegates field parsing to `parseMetaKey()` and `parseMetaValue()`.
+For example, ` Role : Support:Mid ` becomes key `Role` and value `Support:Mid`.
 Missing separators and invalid fields cause `ParseException`.
 
-`parseMetas()` parses a collection of raw values and rejects duplicate normalized keys before returning a set.
-Callers must supply all raw values, without first deduplicating them, so identical repeated pairs are also rejected.
-`GameEditCommandParser` uses these utilities for metadata replacement and handles a single empty `m/` as clearing.
+`parseMetas()` parses a collection of raw values.
+Before it returns a set, it rejects duplicate normalized keys.
+Callers must pass all raw values without removing duplicates first. This lets the parser reject identical repeated pairs too.
+
+`GameEditCommandParser` uses these utilities for metadata replacement.
+It treats a single empty `m/` as a request to clear metadata.
 
 `GameAddCommandParser` tokenizes the optional, repeatable `CliSyntax.PREFIX_META` (`m/`) alongside `g/` and `u/`.
 It passes all raw metadata values to `parseMetas()` and constructs the `Game` with the validated set.
-Omitting `m/` produces an empty set. Duplicate `g/` or `u/` prefixes remain invalid; repeated `m/` prefixes
-are allowed only for distinct keys. Validation finishes before the command updates either a friend or the profile.
+If `m/` is omitted, the result is an empty set.
+
+Duplicate `g/` or `u/` prefixes remain invalid. Repeated `m/` prefixes are valid only for distinct keys.
+Validation finishes before the command updates either a friend or the profile.
 
 #### Display
 
-`GameDetailsCard` displays each metadata pair as a wrapping `Key: Value` label below the username.
-Pairs are sorted by key ignoring case, preserving the stored spelling and values. The metadata container
-is hidden and unmanaged when empty. Both friend and profile details use these cards, including filtered game views.
+`GameDetailsCard` shows each metadata pair as a wrapping `Key: Value` label below the username.
+Pairs are sorted by key ignoring case. Their stored spelling and values do not change.
+If the metadata container is empty, it is hidden and unmanaged.
+
+Friend details and profile details use these cards, including views with a game filter.
 
 #### Persistence and testing
 
@@ -451,116 +691,46 @@ is hidden and unmanaged when empty. Both friend and profile details use these ca
 }
 ```
 
-Missing or null `metas` fields load as an empty set, preserving compatibility with existing save files.
+Missing or null `metas` fields load as an empty set. This preserves compatibility with existing save files.
 Null array entries, invalid fields and duplicate keys cause `IllegalValueException` during model conversion.
 
-Tests cover trimmed length boundaries, Unicode, control characters, colons, case normalization,
-duplicate keys, immutability, JSON round-trips and metadata preservation during contact edits.
-Command tests also cover optional and interleaved metadata flags, malformed input, and addition with metadata
-to displayed friends and `myself`, including filter preservation, duplicate-game rejection and JSON round-trips.
-`GameBuilder.addMeta("Role", "Support")` appends a pair; `withMetas(...)` replaces the collection.
-Duplicate keys added through the builder are rejected by `build()`.
+Tests cover trimmed length boundaries, Unicode, control characters, colons and case normalization.
+They also cover duplicate keys, immutability, JSON round trips and metadata preservation during contact edits.
 
-### \[Proposed\] Undo/redo feature
+Command tests cover optional and interleaved metadata flags, malformed input, and metadata addition to displayed friends and `myself`.
+These tests include filter preservation, duplicate-game rejection and JSON round trips.
 
-#### Proposed Implementation
-
-The proposed undo/redo mechanism is facilitated by `VersionedGameMates`. It extends `GameMates` with an undo/redo history, stored internally as an `gameMatesStateList` and `currentStatePointer`. Additionally, it implements the following operations:
-
-* `VersionedGameMates#commit()` — Saves the current GameMates state in its history.
-* `VersionedGameMates#undo()` — Restores the previous GameMates state from its history.
-* `VersionedGameMates#redo()` — Restores a previously undone GameMates state from its history.
-
-These operations are exposed in the `Model` interface as `Model#commitGameMates()`, `Model#undoGameMates()` and `Model#redoGameMates()` respectively.
-
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
-
-Step 1. The user launches the application for the first time. The `VersionedGameMates` will be initialized with the initial GameMates state, and the `currentStatePointer` pointing to that single GameMates state.
-
-![UndoRedoState0](images/UndoRedoState0.png)
-
-Step 2. The user executes `delete 5` command to delete the 5th friend in the GameMates. The `delete` command calls `Model#commitGameMates()`, causing the modified state of the GameMates after the `delete 5` command executes to be saved in the `gameMatesStateList`, and the `currentStatePointer` is shifted to the newly inserted GameMates state.
-
-![UndoRedoState1](images/UndoRedoState1.png)
-
-Step 3. The user executes `add n/David …​` to add a new friend. The `add` command also calls `Model#commitGameMates()`, causing another modified GameMates state to be saved into the `gameMatesStateList`.
-
-![UndoRedoState2](images/UndoRedoState2.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If a command fails its execution, it will not call `Model#commitGameMates()`, so the GameMates state will not be saved into the `gameMatesStateList`.
-
-</div>
-
-Step 4. The user now decides that adding the friend was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoGameMates()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous GameMates state, and restores the GameMates to that state.
-
-![UndoRedoState3](images/UndoRedoState3.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index 0, pointing to the initial GameMates state, then there are no previous GameMates states to restore. The `undo` command uses `Model#canUndoGameMates()` to check if this is the case. If so, it will return an error to the user rather
-than attempting to perform the undo.
-
-</div>
-
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
-
-![UndoSequenceDiagram](images/UndoSequenceDiagram-Logic.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `UndoCommand` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
-
-</div>
-
-Similarly, how an undo operation goes through the `Model` component is shown below:
-
-![UndoSequenceDiagram](images/UndoSequenceDiagram-Model.png)
-
-The `redo` command does the opposite — it calls `Model#redoGameMates()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the GameMates to that state.
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index `gameMatesStateList.size() - 1`, pointing to the latest GameMates state, then there are no undone GameMates states to restore. The `redo` command uses `Model#canRedoGameMates()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-
-</div>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the GameMates, such as `list`, will usually not call `Model#commitGameMates()`, `Model#undoGameMates()` or `Model#redoGameMates()`. Thus, the `gameMatesStateList` remains unchanged.
-
-![UndoRedoState4](images/UndoRedoState4.png)
-
-Step 6. The user executes `clear`, which calls `Model#commitGameMates()`. Since the `currentStatePointer` is not pointing at the end of the `gameMatesStateList`, all GameMates states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …​` command. This is the behavior that most modern desktop applications follow.
-
-![UndoRedoState5](images/UndoRedoState5.png)
-
-The following activity diagram summarizes what happens when a user executes a new command:
-
-<img src="images/CommitActivityDiagram.png" width="250" />
-
-#### Design considerations:
-
-**Aspect: How undo & redo execute:**
-
-* **Alternative 1 (current choice):** Saves the entire GameMates.
-  * Pros: Easy to implement.
-  * Cons: May have performance issues in terms of memory usage.
-
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the friend being deleted).
-  * Cons: We must ensure that the implementation of each individual command is correct.
+`GameBuilder.addMeta("Role", "Support")` appends a pair. `withMetas(...)` replaces the collection.
+If the builder contains duplicate keys, `build()` rejects them.
 
 ### Friend archiving
 
-Archiving hides a friend from the active list while preserving their contact details, tags, games, optional
-usernames and game metadata. `archive FRIEND_INDEX`, `unarchive FRIEND_INDEX` and
-`archivelist [g/GAME_NAME]` are implemented. This feature is separate from backing up the JSON data file;
-automatic backups, scheduled retention and undo are not implemented.
+Archiving hides a friend from the active list.
+It preserves contact details, tags, games, optional usernames and game metadata.
+The implemented commands are `archive FRIEND_INDEX`, `unarchive FRIEND_INDEX` and `archivelist [g/GAME_NAME]`.
+
+This feature is separate from JSON file backups.
+Automatic backups, scheduled retention and undo are not implemented.
 
 #### Stored status and identity
 
-`GameMates` keeps active and archived friends together in one `UniqueFriendList`. `Friend.isArchived()` exposes
-an immutable boolean; `withArchived(boolean)` returns a copy with all other fields preserved. `Friend.equals()`
-and `hashCode()` include archive status, while `isSameFriend()` continues to compare normalized names.
+`GameMates` keeps active and archived friends together in one `UniqueFriendList`.
+`Friend.isArchived()` returns an immutable boolean.
+`withArchived(boolean)` returns a copy and preserves all other fields.
 
-Names must be unique across active and archived friends combined, and must differ from the separately stored
-Myself profile. An archived name stays reserved. `FriendValidator` rejects a conflicting add or rename and
-suggests `archivelist` and `unarchive` when the existing friend is archived. It uses `Model.findFriend()` to obtain
-that stored friend in one identity lookup across both statuses, independent of the current display filter. Editing the existing friend while
-retaining their own name is allowed. Myself cannot be archived or restored.
+`Friend.equals()` and `hashCode()` include archive status.
+`isSameFriend()` continues to compare normalized names.
+
+Names must be unique across active and archived friends together.
+They must also differ from the separately stored Myself profile.
+An archived friend's name stays reserved.
+
+`FriendValidator` rejects a conflicting add or rename.
+If the existing friend is archived, the feedback suggests `archivelist` and `unarchive`.
+The validator uses `Model.findFriend()` for one identity lookup across both statuses, independently of the display filter.
+
+An existing friend can keep their own name during an edit.
+Myself cannot be archived or restored.
 
 #### Display scope and filtering
 
@@ -572,51 +742,62 @@ retaining their own name is allowed. Myself cannot be archived or restored.
 | `ARCHIVED` | `archivelist [g/GAME_NAME]` | Archived, combined with an optional game predicate |
 | `SEARCH` | `find KEYWORD [MORE_KEYWORDS]` | Name keywords across both statuses |
 
-`ListCommandParser` and `ArchiveListCommandParser` share `ParserUtil.parseOptionalGameFilter()` and
-`GameNameMatchesPredicate`. Game matching is exact and case-insensitive, with the same validation rules for both
-commands. Name matching remains a global `find` operation. Each `list`, `archivelist` or `find` command replaces
-the previous predicate. `gamelist` preserves the friend-list filter.
-Unfiltered empty archives give guidance on archiving; filtered empty results report that no archived friends
-match the game filter.
+`ListCommandParser` and `ArchiveListCommandParser` use `GameNameMatchesPredicate` for exact, case-insensitive game matching.
+Both commands use the same game-name validation rules.
+`ArchiveListCommandParser` uses `ParserUtil.parseOptionalGameFilter()`; the active-list parser also handles sorting.
+Name matching remains a global `find` operation.
 
-The logic layer exposes `getFriendListScope()` to the UI. `MainWindow` updates the heading to **Active friends**,
-**Archived friends** or **Search results**. `FriendCard` shows an **Archived** badge when applicable.
+Each `list`, `archivelist` or `find` command replaces the previous predicate.
+`gamelist` preserves the friend-list filter.
+An unfiltered empty archive gives guidance on archiving.
+An empty filtered archive reports that no archived friends match the game filter.
+
+The logic layer exposes `getFriendListScope()` to the `UI`.
+`MainWindow` sets the heading to **Active friends**, **Archived friends** or **Search results**.
+`FriendCard` shows an **Archived** badge where applicable.
 
 #### Archive and restore execution
 
-1. The command parser accepts one positive displayed index; `myself` and extra arguments are rejected.
-1. `ArchiveCommand` rejects the archive-only scope with guidance to run `list`. Active lists and global search
-   results accept archiving. `UnarchiveCommand` accepts an archived target in archive or search results.
-1. The command checks the index against the currently displayed list and rejects an invalid index or an
-   already archived/non-archived target as appropriate. Failed commands preserve the data, scope and filter.
-1. `Model.setFriend()` replaces the selected friend with a copy carrying the new archive status.
-1. The observable filtered list updates automatically. Archiving removes a friend from an active-only list;
-   restoring removes a friend from an archive-only list. In global search, the friend remains at the same
-   displayed position with updated status. Neither command resets the predicate or scope.
-1. `LogicManager` saves the updated collection through the existing storage path.
+1. The parser accepts one positive displayed index. It rejects `myself` and extra arguments.
+2. `ArchiveCommand` rejects the archive-only scope and gives guidance to use `list`.
+   Active lists and global search results accept archiving.
+   `UnarchiveCommand` accepts an archived target in archive or search results.
+3. The command validates the index against the displayed list and examines the target's archive status.
+   It rejects an invalid index, an already archived archive target, or a non-archived restore target.
+   Failed commands preserve the data, scope and filter.
+4. `Model.setFriend()` replaces the selected friend with a copy that has the new archive status.
+5. The observable filtered list updates automatically.
+   Archiving removes the friend from an active-only list; restoring removes the friend from an archive-only list.
+   In global search, the friend stays at the same displayed position with the new status.
+   Neither command resets the predicate or scope.
+6. `LogicManager` saves the updated collection through the existing storage path.
 
-`edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status when constructing replacement friends.
-`gameedit` retains the current scope and predicate. Friend edits clear
-filters within active/archive scopes, while global searches retain their name predicate. Renaming a search
-result can therefore remove it from the results. `delete` permanently removes the selected friend from either
-status; `clear` removes both statuses while preserving Myself.
+`edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status in replacement friends.
+`gameedit` also retains the current scope and predicate.
+Friend edits clear filters in active and archive scopes, but global searches keep their name predicate.
+Thus, a renamed search result can disappear from the results.
+
+`delete` permanently removes the selected friend, whether active or archived.
+`clear` removes both statuses and preserves Myself.
 
 #### Persistence and design considerations
 
-`JsonAdaptedFriend` saves `archived` as a boolean on each friend. Missing status in older files defaults to
-`false`. Restarting restores every friend's status and details, but starts in the unfiltered active scope.
+`JsonAdaptedFriend` saves `archived` as a boolean on each friend.
+If an older file omits the status, the value defaults to `false`.
+A restart restores each friend's status and details, but starts in the unfiltered active scope.
 Display scope and predicates are not persisted.
 
-A single stored collection keeps identity validation, storage and archive/restore updates on the existing
-model path. The alternative is separate stored active and archive collections, requiring transfers, cross-list
-uniqueness checks and a different JSON representation. Rebuilding a filtered view scans the underlying
-collection; separate collections could reduce the scan for active-only views, but global name search would
-still examine both. The current design favours simpler state management; change it if measurements establish
-a performance need.
+A single stored collection keeps identity validation, storage and archive/restore updates on the existing model path.
+The alternative uses separate stored collections for active and archived friends.
+That approach needs transfers, cross-list uniqueness validation and a different JSON representation.
 
-Regression coverage includes mixed-status searches, filtered displayed indices, invalid targets, empty archive
-feedback, identity conflicts, editing archived friends and save/reload restoration of complete game data.
+Rebuilding a filtered view scans the underlying collection.
+Separate collections can reduce the scan for active-only views, but global name search must still examine both collections.
+The current design favors simpler state management.
+If measurements establish a performance need, change this design.
 
+Regression tests cover mixed-status searches, filtered displayed indices, invalid targets and empty archive feedback.
+They also cover identity conflicts, edits to archived friends, and save/reload restoration of complete game data.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -663,13 +844,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | gamer                            | add games to a friend's entry                          | remember what games they play                                    |
 | `* * *`  | gamer                            | remove games from a friend's entry                     | know which games they no longer play                             |
 | `* * *`  | gamer                            | add a friend's in-game username for a game or platform | know what name to search for when inviting them                  |
-| `* * *`  | gamer                            | edit a friend's platform handle                        | keep it up to date when they change their username               |
+| `* * *`  | gamer                            | edit a friend's in-game username                       | keep it up to date when they change their username               |
 | `* * *`  | gamer                            | search for a friend by name                            | find the people I want without scrolling through the whole list  |
 | `* * *`  | gamer                            | filter my friends by game or platform                  | quickly find friends relevant to what I am currently playing     |
 | `* * *`  | gamer                            | add my own details                                     | see how I fit into the context of my friends                     |
 | `* * *`  | gamer                            | edit my own details                                    | keep my profile accurate as my games and usernames change        |
 | `* * *`  | gamer                            | have my data saved automatically                       | keep my friend list after closing the App                        |
-| `* *`    | gamer                            | be asked to confirm before deleting a friend           | avoid deleting someone by accident                               |
 | `* *`    | gamer                            | be warned when adding a friend who already exists      | avoid duplicate entries                                          |
 | `* *`    | gamer                            | see which games my friends and I have in common        | decide what to play together                                     |
 | `* *`    | gamer who plays many games       | see all the games a friend plays                       | know which games I can invite them to                            |
@@ -682,7 +862,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `*`      | gamer with many friends          | sort friends by name                                   | locate a friend easily                                           |
 | `*`      | gamer                            | mark friends as favourites                             | find my regular teammates first                                  |
 | `*`      | gamer with friends abroad        | record a friend's time zone                            | know when they are likely to be online                           |
-| `*`      | gamer                            | undo my last command                                   | recover from mistakes quickly                                    |
 | `*`      | gamer                            | record when I last played with a friend                | reconnect with friends I have not played with in a while         |
 | `*`      | gamer                            | export my friend list                                  | back up my data or move it to another computer                   |
 
@@ -730,15 +909,16 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
   * 3a1. GameMates shows an error message.
 
     Use case resumes at step 2.
-**[Proposed] Use case: Edit a friend's platform handle**
 
-This is a future requirement; there is no working handle-editing command in this checkout.
+**Use case: Edit a friend's in-game username**
+
+Implemented by `gameedit FRIEND_INDEX g/GAME_NAME u/USERNAME`. The `myself` selector also supports profile games.
 
 **MSS**
 1. User requests to list friends.
 2. GameMates shows a list of friends.
-3. User requests to edit a specific friend's handle for a platform, providing the new handle.
-4. GameMates updates the handle and shows a confirmation.
+3. User selects a displayed friend and an existing game, providing the new username.
+4. GameMates updates that game's username and shows the updated friend details and command feedback.
 
    Use case ends.
 
@@ -751,11 +931,17 @@ This is a future requirement; there is no working handle-editing command in this
   * 3a1. GameMates shows an error message.
 
     Use case resumes at step 2.
-* 3b. The specified platform does not exist for that friend.
+* 3b. The specified game does not exist for that friend.
 
   * 3b1. GameMates shows an error message.
 
     Use case resumes at step 2.
+
+* 3c. The supplied username is invalid.
+
+  * 3c1. GameMates shows a validation error without changing the game or current details view.
+
+    Use case resumes at step 3.
 
 
 **Use case: Search for a friend**
@@ -829,24 +1015,32 @@ On a _modern computer_ running Java `25`, with up to 1000 friends in total acros
 
 ### Glossary
 
-* **Modern computer**: A computer running a mainstream OS with 16 GB of RAM, a 512 GB SSD, and a mid-range modern processor such as an Intel Core i5 or AMD Ryzen 5.
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Friend**: A person stored in GameMates, identified by a unique name and optionally associated with contact details and game entries.
-* **User profile**: The current user's separately stored details, edited using `edit myself ...` and preserved by friend-list commands.
-* **Game entry**: A record that a friend plays a game, containing a game name, in-game username and optional metadata.
-* **Role**: A job or duty a friend plays as in a particular game, for example a friend can play as a `Sniper` or a `Healer`.
-* **Game name**: The user-provided name used to identify a game within one friend’s game entries. Aliases such as “Val” and “Valorant” are treated as different game names.
-* **In-game username/Handle**: The name/alias a friend uses within a particular game. It may not refer to their real name and can be different for different games.
-* **Metadata**: Additional stored information for a game entry, such as a role, preferred weapon, server or play style; entered through `gameadd` using `m/KEY:VALUE`, replaced or cleared through `gameedit`, and displayed below the username in game cards.
+* **Modern computer**: A computer with a mainstream OS, 16 GB of RAM, a 512 GB SSD and a mid-range modern processor.
+  Examples of that processor class include Intel Core i5 and AMD Ryzen 5.
+* **Mainstream OS**: Windows, Linux, Unix or macOS.
+* **Friend**: A person stored in GameMates with a unique name. Contact details and game entries are optional.
+* **User profile**: The current user's separately stored details.
+  Use `edit myself ...` to edit the profile. Friend-list commands preserve it.
+* **Game entry**: A record that a friend plays a game. It contains a game name, an in-game username and optional metadata.
+* **Role**: A job or duty that a friend plays in a game. Examples include `Sniper` and `Healer`.
+* **Game name**: The user-provided name that identifies a game within one friend's game entries.
+  Aliases such as “Val” and “Valorant” are different game names.
+* **In-game username/Handle**: The name or alias a friend uses within a game.
+  It can differ from their real name and from their usernames in other games.
+* **Metadata**: Additional details in a game entry, such as role, preferred weapon, server or play style.
+  Enter metadata with `gameadd` and `m/KEY:VALUE`. Replace or clear it with `gameedit`.
+  Game cards show metadata below the username.
 * **Metadata key**: The label before the first colon in a metadata item. For example, `Role` in `Role:Sentinel`.
 * **Metadata value**: The information after the first colon in a metadata item. For example, `Sentinel` in `Role:Sentinel`.
-* **Friend index**: A positive number representing a friend’s position in the currently displayed friend list.
-* **Currently displayed list**: The friend list currently shown after any active filters have been applied. Friend indices refer to this list.
-* **Filter**: A condition used to narrow a displayed list, such as a name keyword or game name.
-* **Name keyword**: A full word matched against a friend's name, ignoring case. A substring such as `Dav` does not match `David`.
+* **Friend index**: A positive number that identifies a friend's position in the currently displayed friend list.
+* **Currently displayed list**: The friend list shown after the active filters have been applied.
+  Friend indices refer to this list.
+* **Filter**: A condition that narrows a displayed list, such as a name keyword or game name.
+* **Name keyword**: A full word matched against a friend's name, ignoring case.
+  A substring such as `Dav` does not match `David`.
 * **Case-insensitive comparison**: A comparison that treats uppercase and lowercase letters as equivalent.
-* **Trimmed value**: A value after its leading and trailing spaces have been removed.
-* **Duplicate**: Two entries considered the same according to the project’s matching rules, and therefore not both allowed.
+* **Trimmed value**: A value with its leading and trailing spaces removed.
+* **Duplicate**: Two entries that the project matching rules consider the same. Both entries are therefore not allowed together.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -854,11 +1048,17 @@ On a _modern computer_ running Java `25`, with up to 1000 friends in total acros
 
 ### Prerequisites and test isolation
 
-Use JDK 25 and a graphical desktop. Build with `./gradlew shadowJar`, then copy `build/libs/gamemates.jar` into
-an empty disposable folder. Open a terminal in that folder and run `java -jar gamemates.jar`.
-Never use a real user's data for deletion, corruption or write-failure tests. Use a new disposable folder for each
-scenario labelled **fresh sample data**; do not run two app instances against the same data file.
-Commands below are entered in the application's command box, not the terminal.
+Use JDK 25 and a graphical desktop.
+Build the application with `./gradlew shadowJar`.
+Copy `build/libs/gamemates.jar` into an empty disposable folder.
+Open a terminal in that folder.
+Start the application with `java -jar gamemates.jar`.
+
+Do not use a real user's data for deletion, corruption or write-failure tests.
+For each scenario labeled **fresh sample data**, use a new disposable folder.
+Do not start two application instances against the same data file.
+
+Enter the commands below in the application's command box, not in the terminal.
 
 ### Launch, help and window settings
 
@@ -879,7 +1079,7 @@ Prerequisite: fresh sample data. These steps deliberately add a disposable frien
 |------|--------------|-----------------|
 | 1 | `add n/Joash Test t/duo` | Seven friends. Feedback starts `Added Joash Test.` and shows `Not provided` for phone and email. |
 | 2 | `add n/joash   test t/other` | Duplicate-name error; still seven friends. A different tag does not bypass identity checks. |
-| 3 | `find Joash`, then `edit 1 p/+65 9123-4567 e/joash@example.com t/duo t/casual` | Edits Joash rather than full-list friend 1. All seven friends become visible. Games remain unchanged; `duo` is removed and `casual` added. |
+| 3 | `find Joash`, then `edit 1 p/+65 9123-4567 e/joash@example.com t/duo t/casual` | Edits Joash rather than full-list friend 1. The search remains filtered to Joash. Games remain unchanged; `duo` is removed and `casual` added. |
 | 4 | `find Joash`, then click the result | Right panel shows the formatted phone, email and only `casual`. |
 | 5 | `edit 1 p/ e/ t/casual t/casual` | Phone/email removed; `casual` toggled off once. Feedback lists removed details. |
 | 6 | `find Joash`, then `edit 1 t/duo t/casual`, then `find Joash`, then `edit 1 t/` | Both tags are added, then all are cleared. Omitted name/contact fields are preserved. |
@@ -902,7 +1102,7 @@ Prerequisite: fresh sample data.
 3. `list g/minecraft`: expected Bernice Yu and Roy Balakrishnan, replacing the David filter.
 4. `gamelist 1`: expected Bernice's Minecraft card, although Bernice was full-list index 2. Both Minecraft players
    remain on the left. `find Alex` now finds Alex from the full data, not from the two Minecraft results.
-5. `list g/Val`: expected zero results. `list` restores all six friends and returns `Listed all friends.`.
+5. `list g/Val`: expected zero results. `list` restores all six friends and returns `Listed all active friends.`.
 6. `list n/Alex g/Valorant`: expected invalid-format feedback; combined filtering is not supported.
 
 ### Game cards, empty states and display-filter clearing
@@ -920,10 +1120,11 @@ Prerequisite: fresh sample data.
    proving that selecting another friend clears the display filter. No stored game entry should be removed.
 6. `gamelist 3 g/Stardew Valley`: expected Charlotte's Stardew Valley card. `find David`, then `gamelist 1`,
    selects David rather than Alex. `list g/Unknown`, then `gamelist 1`, reports an empty displayed list.
-7. `gamelist myself`: expected `Your details` and all profile games. `gamelist myself g/Valorant` shows only
-   your Valorant card if present. `find Unknown`, then `gamelist MYSELF`, still selects your profile with the empty
-   friend list unchanged. `gamelist myself g/Unknown` reports no match. If no profile details exist, the panel
-   continues showing `No details added`.
+7. Before profile setup, `gamelist myself` reports `Set your profile name first using "edit myself n/NAME" command.`
+   Run `edit myself n/Own Profile`, then `gameadd myself g/Valorant u/own`.
+   `gamelist myself` now shows `Your details` and all profile games; `gamelist myself g/Valorant` shows only Valorant.
+   `find Unknown`, then `gamelist MYSELF`, still selects the profile with the empty friend list unchanged.
+   `gamelist myself g/Unknown` reports no match. A failed command before setup preserves the previous details display.
 
 ### Deletion and clearing
 
@@ -934,8 +1135,8 @@ Prerequisite: fresh sample data. These actions are destructive within the dispos
    reappear with `list`. Bernice's games are removed with her, while Roy's Minecraft entry remains.
 2. `delete`, `delete 0`, `delete -1`, `delete x`, `delete 2147483648`, `delete 1 2` and `delete 999`:
    expected errors without deleting anyone. Missing index reports `Please provide an index.`; malformed values
-   report `Index must be a positive integer.`; an out-of-range index reports `The friend index provided is invalid.`.
-3. `clear`: expected immediate empty list and `Friend list has been cleared!`. `delete 1` then reports the generic
+   report `Index must be a positive integer between 1 and 2147483647 (inclusive).`; an out-of-range index reports `The friend index provided is invalid.`.
+3. `clear`: expected immediate empty list and `All active and archived friends have been cleared!`. `delete 1` then reports the generic
    invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list. There is no undo.
 
 ### Saved profile and game round trip
@@ -983,9 +1184,12 @@ Prerequisite: independent disposable app folders and closed app instances before
 |------------------|-----------------|
 | Start in an empty folder without `data/gamemates.json`; enter `list`. | Six sample friends and a default profile; the successful command creates the data file. |
 | Save the fixture above, close the app, copy the data file to a backup, then replace its contents with `{broken`. Relaunch without entering commands. | Empty friends and default profile; the malformed file stays on disk. No automatic backup or recovery prompt. Close the app and restore the backup to recover. |
-| Repeat the invalid-file setup, then enter `list`. | `Listed all friends.` with an empty list; the file is overwritten with the empty fallback data. |
-| In a separate disposable folder, replace the data file with the literal `null`, then launch. | Known defect: startup can fail with an uncaught null-value error instead of the empty-data fallback. Restore a valid backup to continue. |
+| Repeat the invalid-file setup, then enter `list`. | `Listed all active friends.` with an empty list; the file is overwritten with the empty fallback data. |
+| In a separate disposable folder, replace the data file with the literal `null`, then launch. | Empty friends and default profile, without a startup crash. The invalid file stays unchanged until a successful command saves the fallback data. |
+| Replace `preferences.json` with `null`, or with `{"guiSettings":null}`, then launch. | Default GUI settings, without a startup crash. Startup saves valid default preferences. A null window-coordinate field remains valid. |
 | In a copy of the valid fixture, use an invalid phone such as `12`, or duplicate the friend with an equal name. Relaunch. | The whole data load fails; empty friends and default profile. Restore the backup before continuing. |
+| Duplicate a game name within a friend or profile, including a case variant with a different username. Relaunch. | The entire load fails; no duplicate game entries are accepted. Restore the valid backup before continuing. |
+| Set a stored friend's name equal to the profile name, or mark six distinct friends as pinned across both statuses. Relaunch. | The entire load fails. The profile conflict and pin limit apply to stored data as well as commands. |
 | Remove the `myself` and `games` properties from a valid copy, then relaunch. | Default profile and a friend with no games. Empty/missing phone and email are accepted; invalid non-empty contacts are not. |
 | Copy the same JAR to a second empty folder and launch there. | A separate sample dataset, not the first folder's saved friends. Restore a backup into the second folder to transfer data. |
 | With the app running, make its data file unwritable for that user (for example `chmod a-w data/gamemates.json` on Linux/macOS). Enter `add n/Unsaved Test`. | A `Could not save data` error. The friend may already be visible in memory; this is not a rolled-back transaction. |
@@ -993,7 +1197,7 @@ Prerequisite: independent disposable app folders and closed app instances before
 
 ### Documentation preview
 
-Use the repository's Jekyll workflow locally with Ruby 3.3 and Bundler:
+Use Ruby 3.3 and Bundler to execute the repository's local Jekyll workflow:
 
 ```sh
 cd docs
@@ -1001,36 +1205,92 @@ bundle install
 JEKYLL_ENV=production bundle exec jekyll build --baseurl /tp --destination /tmp/gamemates-docs-site
 ```
 
-Serve the generated directory under `/tp/` when checking links, or build with an empty base URL for a local root
-preview. Inspect the User Guide, Developer Guide and home page in a browser: tables, command brackets, code blocks,
-TOC anchors, screenshots, diagrams and mobile-width overflow. The existing `Build docs PR preview` workflow runs
-on open PRs labelled `type.Docs`; this task does not publish a preview or change workflows.
+**Local preview**
 
-Current screenshots must come from the application, not the specification mockups. `Ui.png` shows both panels,
-`findAlexDavidResult.png` shows name filtering, and `gamelistFiltered.png` / `gamelistNoMatch.png` show card filtering.
-Diagram sources live in `docs/diagrams`; regenerate their matching `docs/images/*.png` after changing a source.
+To examine links, serve the generated directory under `/tp/`.
+For a local root preview, build with an empty base URL instead.
+
+Open the User Guide, Developer Guide and home page in a browser.
+Examine tables, command brackets, code blocks, TOC anchors, screenshots and diagrams.
+Also examine overflow at a mobile screen width.
+
+The existing `Build docs PR preview` workflow operates on open PRs labeled `type.Docs`.
+This task does not publish a preview or change workflows.
+
+**Screenshots and diagrams**
+
+Get current screenshots from the application, not from specification mockups.
+`Ui.png` shows both panels, and `findAlexDavidResult.png` shows name filtering.
+`gamelistFiltered.png` and `gamelistNoMatch.png` show card filtering.
+
+Diagram sources are in `docs/diagrams`.
+If you change a source, regenerate its matching `docs/images/*.png` file.
 
 ### Manual game edit checks
 
-Use a disposable data directory. Add `add n/Tester`, `gameadd 1 g/Valorant u/tester` and
-`gameadd 1 g/Minecraft u/builder`. Edit with `gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Role:Healer`.
-Expect both games and preserved friend fields. Try `gameedit 1 g/Valorant n/Minecraft` and repeated
-normalized metadata keys; expect errors with unchanged data and details. Clear with `gameedit 1 g/Valorant m/`.
-Add `gameadd myself g/Valorant u/own`, run `find Nobody`, then `gameedit myself g/Valorant u/newOwn`;
-expect updated profile despite the empty list. Restart from the same directory and confirm all edits persist.
+**Basic game edits**
 
-To check literal prefixes, run `list`, then add both `gameadd 1 g/PUBG u/plain` and
-`gameadd 1 g/PUBG n/Game u/special`.
-Run `gameedit 1 g/"PUBG n/Game" u/updated`: only `PUBG n/Game` should change; the plain `PUBG` entry must
-retain username `plain`. Rename the quoted target using `n/"PUBG m/Edition"` and edit it again using
-`g/"PUBG m/Edition"`. An unclosed quoted selector must report an error without changing either game.
+Use a disposable data directory.
+Enter `add n/Tester`.
+Add the first game with `gameadd 1 g/Valorant u/tester`.
+Add the second game with `gameadd 1 g/Minecraft u/builder`.
 
-Run `list`, `archive 1`, then `archivelist`. Edit with `gameedit 1 g/Valorant u/archivePlayer`;
-expect the edited friend to remain archived, the heading to stay `Archived friends`, and other fields/games
-to remain unchanged. Run `find Tester` and edit the same game again: expect archived status and the
-`Search results` scope to remain. Restart and use `archivelist` to confirm the saved edit and archive status.
+Enter `gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Role:Healer`.
+Expect both games to remain and the other friend fields to stay unchanged.
 
-Run `unarchive 1`, `list`, then `pin 1`. Edit with `gameedit 1 g/Valorant m/Role:Tank`;
-expect the friend to keep its pinned badge and list position, and the details card to show `Role: Tank`.
-Archive the pinned friend, run `archivelist` and edit its username again. Restart and use `archivelist`;
-expect the edited game, pinned badge and archived status to persist.
+Try `gameedit 1 g/Valorant n/Minecraft`.
+Also try repeated normalized metadata keys.
+Expect errors with unchanged data and details.
+Clear metadata with `gameedit 1 g/Valorant m/`.
+
+Set up the profile with `edit myself n/Owner`.
+Add a profile game with `gameadd myself g/Valorant u/own`.
+Enter `find Nobody`.
+Then enter `gameedit myself g/Valorant u/newOwn`.
+Expect the profile to update despite the empty friend list.
+Restart from the same directory.
+Make sure that all edits persist.
+
+**Literal prefixes**
+
+Enter `list`.
+Add `gameadd 1 g/PUBG u/plain`.
+Then add `gameadd 1 g/PUBG n/Game u/special`.
+
+Enter `gameedit 1 g/"PUBG n/Game" u/updated`.
+Only `PUBG n/Game` must change. The plain `PUBG` entry must keep username `plain`.
+
+Rename the quoted target with `n/"PUBG m/Edition"`.
+Edit it again with `g/"PUBG m/Edition"`.
+Try an unclosed quoted selector.
+Expect an error without changes to either game.
+
+**Archived targets**
+
+Enter `list`.
+Enter `archive 1`.
+Enter `archivelist`.
+Edit the game with `gameedit 1 g/Valorant u/archivePlayer`.
+Expect the friend to stay archived and the heading to stay `Archived friends`.
+Other fields and games must stay unchanged.
+
+Enter `find Tester`.
+Edit the same game again.
+Expect the archive status and `Search results` scope to remain.
+Restart and use `archivelist`.
+Make sure that the edited game and archive status were saved.
+
+**Pinned targets**
+
+Enter `unarchive 1`.
+Enter `list`.
+Enter `pin 1`.
+Edit the game with `gameedit 1 g/Valorant m/Role:Tank`.
+Expect the friend to keep the pinned badge and list position.
+The details card must show `Role: Tank`.
+
+Archive the pinned friend.
+Enter `archivelist`.
+Edit the username again.
+Restart and use `archivelist`.
+Expect the edited game, pinned badge and archive status to persist.
