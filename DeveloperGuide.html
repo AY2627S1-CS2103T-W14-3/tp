@@ -208,7 +208,7 @@ The requirements and explicitly proposed features below describe product goals, 
 <p>The UI consists of <code class="language-plaintext highlighter-rouge">MainWindow</code>, <code class="language-plaintext highlighter-rouge">CommandBox</code>, <code class="language-plaintext highlighter-rouge">ResultDisplay</code>, <code class="language-plaintext highlighter-rouge">FriendListPanel</code>, <code class="language-plaintext highlighter-rouge">FriendDetailsPanel</code>,
 <code class="language-plaintext highlighter-rouge">GameDetailsCard</code>, <code class="language-plaintext highlighter-rouge">HelpWindow</code> and <code class="language-plaintext highlighter-rouge">StatusBarFooter</code>. These inherit from <code class="language-plaintext highlighter-rouge">UiPart</code>, which loads matching FXML layouts.
 <code class="language-plaintext highlighter-rouge">MainWindow.fxml</code> keeps the observable friend list on the left of a <code class="language-plaintext highlighter-rouge">SplitPane</code> and the details panel on the right.
-<code class="language-plaintext highlighter-rouge">FriendDetailsPanel</code> renders contact details, tags and sorted game cards; it does not replace the friend list.</p>
+<code class="language-plaintext highlighter-rouge">FriendDetailsPanel</code> renders contact details, tags and sorted game cards. It does not replace the friend list.</p>
 
 <p>The <code class="language-plaintext highlighter-rouge">UI</code> component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching <code class="language-plaintext highlighter-rouge">.fxml</code> files in <code class="language-plaintext highlighter-rouge">src/main/resources/view</code>. For example, <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/resources/view/MainWindow.fxml"><code class="language-plaintext highlighter-rouge">MainWindow.fxml</code></a> specifies the layout of <a href="https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java"><code class="language-plaintext highlighter-rouge">MainWindow</code></a>.</p>
 
@@ -223,7 +223,7 @@ The requirements and explicitly proposed features below describe product goals, 
 
 <p><code class="language-plaintext highlighter-rouge">FriendListPanel</code> sends selection changes to a consumer owned by <code class="language-plaintext highlighter-rouge">MainWindow</code>. Command-driven selection uses
 <code class="language-plaintext highlighter-rouge">CommandResult.friendToShow</code>, <code class="language-plaintext highlighter-rouge">showMyself</code> and <code class="language-plaintext highlighter-rouge">gameFilter</code>, described under <a href="#viewing-games">Viewing games</a>.
-Successful results without a friend payload show <code class="language-plaintext highlighter-rouge">Logic.getMyself()</code>; a single-result <code class="language-plaintext highlighter-rouge">find</code> selects that friend.
+Successful results without a friend payload show <code class="language-plaintext highlighter-rouge">Logic.getMyself()</code>. A single-result <code class="language-plaintext highlighter-rouge">find</code> selects that friend.
 Parse or command failures update feedback without explicitly refreshing details. A game filter is applied only
 while rendering cards, preserving both the model and the left-hand friend-list predicate.</p>
 
@@ -333,21 +333,21 @@ friend data still causes <code class="language-plaintext highlighter-rouge">Data
 failures, translating captured failures into checked <code class="language-plaintext highlighter-rouge">DataLoadingException</code> instances with the original cause.
 Startup uses sample data for a missing GameMates file
 and an empty GameMates for a loading error. Missing or unreadable preferences use default preferences.
-JSON contact fields that are null or empty map to the corresponding empty contact value; invalid
+JSON contact fields that are null or empty map to the corresponding empty contact value. Invalid
 nonempty contact values are rejected without trimming. Missing <code class="language-plaintext highlighter-rouge">games</code> or <code class="language-plaintext highlighter-rouge">tags</code> load as empty sets, and missing
 <code class="language-plaintext highlighter-rouge">myself</code> retains <code class="language-plaintext highlighter-rouge">Friend.DEFAULT_MYSELF</code>. Stored games require a valid <code class="language-plaintext highlighter-rouge">name</code>. Missing, null or empty usernames
 are mapped to <code class="language-plaintext highlighter-rouge">Username.EMPTY</code> and invalid non-empty values, including whitespace-only strings, are rejected.
-Duplicate friend names reject the whole data load, including a previously parsed profile; startup uses a new empty
+Duplicate friend names reject the whole data load, including a previously parsed profile. Startup uses a new empty
 <code class="language-plaintext highlighter-rouge">GameMates</code>.
 <code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> persists a friend’s <code class="language-plaintext highlighter-rouge">pinned</code> boolean. The field is optional when loading: missing or <code class="language-plaintext highlighter-rouge">null</code>
 values in save files created before pinning was introduced default to <code class="language-plaintext highlighter-rouge">false</code>.</p>
 
 <p><code class="language-plaintext highlighter-rouge">MainApp</code> resolves <code class="language-plaintext highlighter-rouge">data/gamemates.json</code> and <code class="language-plaintext highlighter-rouge">preferences.json</code> relative to the process working directory, not the
-JAR’s location. <code class="language-plaintext highlighter-rouge">MainApp.initPrefs</code> writes initialized preferences at startup and <code class="language-plaintext highlighter-rouge">stop</code> writes them again at shutdown;
+JAR’s location. <code class="language-plaintext highlighter-rouge">MainApp.initPrefs</code> writes initialized preferences at startup and <code class="language-plaintext highlighter-rouge">stop</code> writes them again at shutdown.
 <code class="language-plaintext highlighter-rouge">MainWindow.handleExit</code> first records the current window dimensions and position. The data model is saved by commands,
 not by <code class="language-plaintext highlighter-rouge">stop</code>. Selection and filter predicates are transient.</p>
 
-<p><code class="language-plaintext highlighter-rouge">JsonSerializableGameMates</code> adapts both <code class="language-plaintext highlighter-rouge">friends</code> and <code class="language-plaintext highlighter-rouge">myself</code>; <code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> adapts games and tags, and
+<p><code class="language-plaintext highlighter-rouge">JsonSerializableGameMates</code> adapts both <code class="language-plaintext highlighter-rouge">friends</code> and <code class="language-plaintext highlighter-rouge">myself</code>. <code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> adapts games and tags, and
 <code class="language-plaintext highlighter-rouge">JsonAdaptedGame</code> adapts <code class="language-plaintext highlighter-rouge">name</code>, <code class="language-plaintext highlighter-rouge">username</code> and <code class="language-plaintext highlighter-rouge">metas</code>. Jackson ignores unknown properties, which
 disappear on the next serialization. Loading a damaged file does not repair or back it up:
 the next successful command can overwrite it with the fallback data. There is no automatic recovery or atomic
@@ -375,12 +375,12 @@ the documentation change does not alter the loader.</p>
 single-value name/contact prefixes and collects repeated tags into a set. <code class="language-plaintext highlighter-rouge">UniqueFriendList</code> rejects names equal
 under <code class="language-plaintext highlighter-rouge">Friend.isSameFriend</code>, so different phone/email values or tags do not distinguish duplicate names.</p>
 
-<p><code class="language-plaintext highlighter-rouge">EditCommandParser</code> requires a numeric index or case-insensitive <code class="language-plaintext highlighter-rouge">myself</code>; an omitted selector is rejected.
+<p><code class="language-plaintext highlighter-rouge">EditCommandParser</code> requires a numeric index or case-insensitive <code class="language-plaintext highlighter-rouge">myself</code>. An omitted selector is rejected.
 Target resolution and replacement use the <a href="#myself-profile">Myself profile mechanism</a> described below.
 Add/edit commands reject names shared between a friend and the profile. <code class="language-plaintext highlighter-rouge">EditFriendDescriptor</code> uses
 optional values to distinguish omission from a supplied empty contact field. <code class="language-plaintext highlighter-rouge">EditCommand</code> constructs a new friend
 with the original games. Name/contact values replace
-existing values. Supplied tags are toggled by set membership; duplicates in one command are deduplicated, and a
+existing values. Supplied tags are toggled by set membership. Duplicates in one command are deduplicated, and a
 single empty <code class="language-plaintext highlighter-rouge">t/</code> clears all tags. Empty and non-empty tag parameters together fail validation.
 After a successful add or friend edit, the model resets the friend-list predicate to show all friends.
 Editing Myself preserves that predicate, including an empty displayed list.</p>
@@ -419,7 +419,7 @@ The class diagram omits unrelated members and shows records as ordinary classes.
 
 <ol>
   <li>The three command parsers use <code class="language-plaintext highlighter-rouge">ParserUtil.parseIndexOrMyself</code>: case-insensitive <code class="language-plaintext highlighter-rouge">Index.MYSELF_KEYWORD</code>
-becomes <code class="language-plaintext highlighter-rouge">Index.myself()</code>; numeric selectors remain displayed friend indices.</li>
+becomes <code class="language-plaintext highlighter-rouge">Index.myself()</code>. Numeric selectors remain displayed friend indices.</li>
   <li>At execution, <code class="language-plaintext highlighter-rouge">ModelManager.resolveFriend(index)</code> captures the profile or currently displayed friend in a target.</li>
   <li>After constructing a replacement <code class="language-plaintext highlighter-rouge">Friend</code> and completing validation, the command calls
 <code class="language-plaintext highlighter-rouge">ModelManager.setFriend(target, updatedFriend)</code>. An exhaustive switch routes <code class="language-plaintext highlighter-rouge">Myself</code> to the profile and
@@ -427,8 +427,10 @@ becomes <code class="language-plaintext highlighter-rouge">Index.myself()</code>
 </ol>
 
 <p>For profile edits, <code class="language-plaintext highlighter-rouge">EditCommand</code> constructs the replacement before <code class="language-plaintext highlighter-rouge">FriendValidator</code> checks for name conflicts
-with all stored friends, including those hidden by the current filter. Profile edits and both game commands
-preserve the friend-list filter.</p>
+with all stored friends, including those hidden by the current filter. Profile edits, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code>,
+<code class="language-plaintext highlighter-rouge">gamedel</code> and <code class="language-plaintext highlighter-rouge">gamelist</code> preserve the friend-list filter.
+<code class="language-plaintext highlighter-rouge">FriendValidator.checkFriendInitialized</code> rejects those four commands targeting <code class="language-plaintext highlighter-rouge">myself</code> until
+<code class="language-plaintext highlighter-rouge">edit myself n/NAME</code> sets the profile name.</p>
 
 <p>The sequence shows <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player</code> after parsing. Helper calls and subsequent saving are omitted.</p>
 
@@ -454,9 +456,9 @@ results. Filtering and sorting never include or edit the separate profile.</p>
 
 <p><code class="language-plaintext highlighter-rouge">GameEditCommandParser</code> reuses <code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code>, <code class="language-plaintext highlighter-rouge">ArgumentMultimap</code>, <code class="language-plaintext highlighter-rouge">ParserUtil.parseIndexOrMyself</code>,
 <code class="language-plaintext highlighter-rouge">parseGameName</code>, <code class="language-plaintext highlighter-rouge">parseUsername</code> and <code class="language-plaintext highlighter-rouge">parseMetas</code>. Its immutable <code class="language-plaintext highlighter-rouge">EditGameDescriptor</code> distinguishes omitted
-metadata (<code class="language-plaintext highlighter-rouge">null</code>) from a supplied empty replacement set. A single empty <code class="language-plaintext highlighter-rouge">m/</code> clears metadata; all other
+metadata (<code class="language-plaintext highlighter-rouge">null</code>) from a supplied empty replacement set. A single empty <code class="language-plaintext highlighter-rouge">m/</code> clears metadata. All other
 supplied pairs pass through the shared parser, including normalized duplicate-key checks and first-colon splitting.
-The model identity rules remain unchanged. The merged optional-username model provides <code class="language-plaintext highlighter-rouge">Username.EMPTY</code>; a supplied empty <code class="language-plaintext highlighter-rouge">u/</code> maps to that value.
+The model identity rules remain unchanged. The merged optional-username model provides <code class="language-plaintext highlighter-rouge">Username.EMPTY</code>. A supplied empty <code class="language-plaintext highlighter-rouge">u/</code> maps to that value.
 Omitting <code class="language-plaintext highlighter-rouge">u/</code> preserves the original username, including an absent username.</p>
 
 <p>The parser opts into <code class="language-plaintext highlighter-rouge">ArgumentTokenizer.tokenizeWithQuotedValues</code> so a whole field value can be double quoted.

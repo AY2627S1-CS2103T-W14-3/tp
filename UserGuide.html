@@ -40,10 +40,10 @@
   <div class="post-content">
     <p>GameMates helps gamers keep track of friends, their contact details, the games they play and their in-game usernames.
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
-Your data stays on your computer; browsing the online help and downloading releases require internet access.</p>
+Your data stays on your computer. Browsing the online help and downloading releases require internet access.</p>
 
 <p>This guide describes the commands available in this checkout. Use <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gamedel</code>, and <code class="language-plaintext highlighter-rouge">gameedit</code> to manage game
-entries; <code class="language-plaintext highlighter-rouge">gameedit</code> can also replace or clear metadata. Metadata appears on game cards below the username.
+entries. <code class="language-plaintext highlighter-rouge">gameedit</code> can also replace or clear metadata. Metadata appears on game cards below the username.
 See <a href="#your-profile-and-game-entries">Your profile and game entries</a> for adding games to your profile.</p>
 
 <ul id="markdown-toc">
@@ -166,12 +166,12 @@ For example, if the command specifies <code class="language-plaintext highlighte
     <li>Use spaces between parameters and lower-case command words and prefixes. Do not type square or angle brackets.
 Quotes are not needed around multiword names. Use only the prefixes documented for each command.</li>
     <li>Repeating a single-value <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> parameter in <code class="language-plaintext highlighter-rouge">add</code> or <code class="language-plaintext highlighter-rouge">edit</code> is rejected, even with identical values.
-Tags may be repeated; identical tag values are applied once.</li>
+Tags may be repeated. Identical tag values are applied once.</li>
     <li>Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run <code class="language-plaintext highlighter-rouge">list</code> to see all active friends
 again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.</li>
     <li>
       <p>For <code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> means either a displayed friend index or the
-case-insensitive keyword <code class="language-plaintext highlighter-rouge">myself</code> for your own profile. Do not type <code class="language-plaintext highlighter-rouge">|</code>. The selector must come before prefixes;
+case-insensitive keyword <code class="language-plaintext highlighter-rouge">myself</code> for your own profile. Do not type <code class="language-plaintext highlighter-rouge">|</code>. The selector must come before prefixes.
 <code class="language-plaintext highlighter-rouge">myself</code> also works when no friends are displayed.</p>
     </li>
     <li>
@@ -199,7 +199,7 @@ Clicking another friend shows all of that friend’s games.</li>
 Clicking a friend selects their details again. Invalid commands keep the existing details display.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> each replace the previous friend-list filter. They do not combine filters.
-Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.</li>
+Adding or editing a friend shows the full list again. Deleting a friend keeps the current friend-list filter.</li>
   <li>Pinned friends always appear above unpinned friends. The current ordering is retained within each group.</li>
 </ul>
 
@@ -209,15 +209,16 @@ Adding or editing a friend shows the full list again; deleting a friend keeps th
 If it contains no details, the right panel shows <code class="language-plaintext highlighter-rouge">No details added</code>. Filtering, deleting friends and <code class="language-plaintext highlighter-rouge">clear</code> do not
 change your stored profile.</p>
 
-<p>Use <code class="language-plaintext highlighter-rouge">edit myself n/Joash</code> to set your own name, or supply other supported edit fields to update your contact details
-and tags. The <code class="language-plaintext highlighter-rouge">myself</code> selector is case-insensitive and works even when the friend list is empty or filtered.
+<p>Set up your profile with <code class="language-plaintext highlighter-rouge">edit myself n/Joash</code> before using <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code>, <code class="language-plaintext highlighter-rouge">gamedel</code> or <code class="language-plaintext highlighter-rouge">gamelist</code> with <code class="language-plaintext highlighter-rouge">myself</code>.
+The first edit requires a valid, unique name. Later edits can omit it.
+The <code class="language-plaintext highlighter-rouge">myself</code> selector is case-insensitive and works even when the friend list is empty or filtered.
 Omitting the selector, as in <code class="language-plaintext highlighter-rouge">edit n/Joash</code>, is rejected. Profile edits preserve your games and the friend-list filter.</p>
 
 <p>New friends start with no games. Use <a href="#adding-a-game-gameadd"><code class="language-plaintext highlighter-rouge">gameadd</code></a> and
 <a href="#deleting-a-game-gamedel"><code class="language-plaintext highlighter-rouge">gamedel</code></a> to manage a friend’s games or your own games, and
 <a href="#viewing-games-gamelist"><code class="language-plaintext highlighter-rouge">gamelist</code></a> to view their entries or your own. Add metadata with optional <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code>
-arguments in <code class="language-plaintext highlighter-rouge">gameadd</code>; each game card shows its metadata below the username.
-Deleting a friend removes that friend’s complete entry, including their games; it does not remove games from
+arguments in <code class="language-plaintext highlighter-rouge">gameadd</code>. Each game card shows its metadata below the username.
+Deleting a friend removes that friend’s complete entry, including their games. It does not remove games from
 other friends. Back up your data before <a href="#editing-the-data-file">editing a saved file</a>.</p>
 
 <h3 id="viewing-help-help">Viewing help: <code class="language-plaintext highlighter-rouge">help</code>
@@ -240,7 +241,7 @@ You can also open Help using the menu or <code class="language-plaintext highlig
   <li>Supplied phone and email values must satisfy the validation rules. Empty <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> values are rejected.</li>
   <li>Leading and trailing spaces are removed. Names must be unique, ignoring case and repeated spaces:
 <code class="language-plaintext highlighter-rouge">John Doe</code> and <code class="language-plaintext highlighter-rouge">john   doe</code> identify the same friend.</li>
-  <li>A friend’s name must also differ from your Myself profile’s name under the same comparison rules.</li>
+  <li>Once you set your Myself profile’s name, a friend’s name must differ from it under the same comparison rules.</li>
   <li>Different friends may share a phone number or email address.</li>
 </ul>
 
@@ -416,20 +417,21 @@ friends.</li>
 <p>Format: <code class="language-plaintext highlighter-rouge">gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code></p>
 
 <ul>
-  <li>The game name is required. The username is optional; omit <code class="language-plaintext highlighter-rouge">u/</code> if you do not know it.</li>
+  <li>For <code class="language-plaintext highlighter-rouge">myself</code>, <a href="#your-profile-and-game-entries">set up your profile first</a>.</li>
+  <li>The game name is required. The username is optional. Omit <code class="language-plaintext highlighter-rouge">u/</code> if you do not know it.</li>
   <li>Game names and supplied usernames must contain 1–50 printable characters after trimming,
 including at least one letter or digit.</li>
   <li>Supplying <code class="language-plaintext highlighter-rouge">u/</code> without a value, or with only whitespace, is rejected. Omit the prefix instead.</li>
   <li>Repeated <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">u/</code> prefixes are rejected, even when the values are identical.</li>
-  <li>Each <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters;
-values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.</li>
+  <li>Each <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters.
+Values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.</li>
   <li>Repeat <code class="language-plaintext highlighter-rouge">m/</code> for distinct keys. Metadata keys are case-insensitive, so <code class="language-plaintext highlighter-rouge">Role</code> and <code class="language-plaintext highlighter-rouge">role</code> are duplicates.
 Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
 Omit <code class="language-plaintext highlighter-rouge">m/</code> entirely for no metadata.</li>
-  <li>A space followed by <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code> starts a new parameter, even inside quotes; avoid these in field values.</li>
+  <li>A space followed by <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code> starts a new parameter, even inside quotes. Avoid these in field values.</li>
   <li>A game name already present on the selected friend or profile is rejected, ignoring case.</li>
   <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
-  <li>Metadata appears below the username, sorted by key ignoring case. Long fields wrap; scroll for additional rows.</li>
+  <li>Metadata appears below the username, sorted by key ignoring case. Long fields wrap. Scroll for additional rows.</li>
   <li>The success message also lists supplied metadata below the username, sorted by key ignoring case.</li>
 </ul>
 
@@ -453,6 +455,7 @@ Omit <code class="language-plaintext highlighter-rouge">m/</code> entirely for n
 <p>Format: <code class="language-plaintext highlighter-rouge">gamedel FRIEND_INDEX|myself g/GAME_NAME</code></p>
 
 <ul>
+  <li>For <code class="language-plaintext highlighter-rouge">myself</code>, <a href="#your-profile-and-game-entries">set up your profile first</a>.</li>
   <li>The game name is required and matched case-insensitively. A missing game is rejected.</li>
   <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
 </ul>
@@ -474,6 +477,7 @@ Each game card shows the game name and in-game username if provided.</p>
 <p>Format: <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code></p>
 
 <ul>
+  <li>For <code class="language-plaintext highlighter-rouge">myself</code>, <a href="#your-profile-and-game-entries">set up your profile first</a>.</li>
   <li>Use a positive <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> from 1 to 2147483647 (inclusive) to select from the <strong>currently displayed friend list</strong>,
 including after <code class="language-plaintext highlighter-rouge">find</code> or <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code>, or use <code class="language-plaintext highlighter-rouge">myself</code> to select your own profile. The selector is required.</li>
   <li>
@@ -484,8 +488,8 @@ including after <code class="language-plaintext highlighter-rouge">find</code> o
   <li>Leading and trailing whitespace in the game name is removed. Game names may contain 1–50 printable characters
 and must include at least one letter or digit. Multiword names are accepted.</li>
   <li>Put the selector before the optional filter. Only one <code class="language-plaintext highlighter-rouge">g/</code> is allowed, even if repeated values are identical.
-Unknown prefixes and extra words before <code class="language-plaintext highlighter-rouge">g/</code> are rejected. All words after <code class="language-plaintext highlighter-rouge">g/</code> form the game name;
-whitespace-separated tokens such as <code class="language-plaintext highlighter-rouge">x/</code> are treated as parameter prefixes, not part of the name.</li>
+Unknown prefixes and extra words before <code class="language-plaintext highlighter-rouge">g/</code> are rejected. All words after <code class="language-plaintext highlighter-rouge">g/</code> form the game name.
+Whitespace-separated tokens such as <code class="language-plaintext highlighter-rouge">x/</code> are treated as parameter prefixes, not part of the name.</li>
   <li>An absent game is a successful empty result, including when the selected person has no games. Stored friend details,
 game entries and your Myself profile are unchanged. Invalid commands leave the previous details display unchanged.</li>
 </ul>
@@ -538,13 +542,13 @@ while the left panel continues showing only Minecraft players.</li>
     <tr>
       <td>No matching game</td>
       <td>
-<code class="language-plaintext highlighter-rouge">FRIEND_NAME does not have GAME_NAME.</code> (uses your trimmed filter); the panel shows <code class="language-plaintext highlighter-rouge">No matching game: GAME_NAME</code>
+<code class="language-plaintext highlighter-rouge">FRIEND_NAME does not have GAME_NAME.</code> (uses your trimmed filter). The panel shows <code class="language-plaintext highlighter-rouge">No matching game: GAME_NAME</code>
 </td>
     </tr>
     <tr>
       <td>No games, without a filter</td>
       <td>
-<code class="language-plaintext highlighter-rouge">FRIEND_NAME has no games added yet.</code>; the panel shows <code class="language-plaintext highlighter-rouge">No games added</code>
+<code class="language-plaintext highlighter-rouge">FRIEND_NAME has no games added yet.</code> The panel shows <code class="language-plaintext highlighter-rouge">No games added</code>
 </td>
     </tr>
   </tbody>
@@ -560,6 +564,11 @@ while the left panel continues showing only Minecraft players.</li>
     </tr>
   </thead>
   <tbody>
+    <tr>
+      <td>
+<code class="language-plaintext highlighter-rouge">myself</code> before profile setup</td>
+      <td><code class="language-plaintext highlighter-rouge">Set your profile name first using edit myself n/NAME.</code></td>
+    </tr>
     <tr>
       <td>Missing selector, unknown prefix or extra positional argument</td>
       <td><code>Invalid command format. Usage: gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code></td>
@@ -589,8 +598,7 @@ while the left panel continues showing only Minecraft players.</li>
   </tbody>
 </table>
 
-<p>For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
-showing <code class="language-plaintext highlighter-rouge">No details added</code>.</p>
+<p>For your own profile, feedback uses the name you set during setup.</p>
 
 <h3 id="editing-a-game-gameedit">Editing a game: <code class="language-plaintext highlighter-rouge">gameedit</code>
 </h3>
@@ -600,6 +608,7 @@ showing <code class="language-plaintext highlighter-rouge">No details added</cod
 <p>Format: <code>gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...</code></p>
 
 <ul>
+  <li>For <code class="language-plaintext highlighter-rouge">myself</code>, <a href="#your-profile-and-game-entries">set up your profile first</a>.</li>
   <li>Use the index from the <strong>currently displayed</strong> friend list, or case-insensitive <code class="language-plaintext highlighter-rouge">myself</code>. The profile can be edited even when the displayed list is empty.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">g/</code> selects a complete existing game name, ignoring case. Partial names do not match. Supply at least one of <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code>. Repeatable <code class="language-plaintext highlighter-rouge">m/</code> pairs can appear in any order with the other prefixes; <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">n/</code> and <code class="language-plaintext highlighter-rouge">u/</code> may each appear only once.</li>
@@ -607,13 +616,13 @@ showing <code class="language-plaintext highlighter-rouge">No details added</cod
 <code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> selects the literal name <code class="language-plaintext highlighter-rouge">PUBG n/Game</code>. Without quotes, these prefixes introduce command options.
 This also works for new names (<code class="language-plaintext highlighter-rouge">n/"PUBG m/Edition"</code>), usernames and metadata. Within quoted values, use <code class="language-plaintext highlighter-rouge">\"</code> for
 a literal double quote and <code class="language-plaintext highlighter-rouge">\\</code> for a backslash. Unclosed quotes, invalid escapes and extra text after a closing
-quote are rejected before any change. Quoting is specific to <code class="language-plaintext highlighter-rouge">gameedit</code>; other commands retain their existing syntax.</li>
+quote are rejected before any change. Quoting is specific to <code class="language-plaintext highlighter-rouge">gameedit</code>. Other commands retain their existing syntax.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">n/</code> renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.</li>
   <li>Omitted fields retain their values. Other games, contact details, tags, archive status and pin status are preserved.
-The current friend-list scope and filter are retained, including archived lists and search results;
-a renamed game can make its friend disappear from a game-filtered list.</li>
-  <li>Usernames use the current 1–50 character validation and must contain a letter or digit. A supplied empty <code class="language-plaintext highlighter-rouge">u/</code> clears the username; omitting <code class="language-plaintext highlighter-rouge">u/</code> preserves it.</li>
+The current friend-list scope and filter are retained, including archived lists and search results.
+A renamed game can make its friend disappear from a game-filtered list.</li>
+  <li>Usernames use the current 1–50 character validation and must contain a letter or digit. A supplied empty <code class="language-plaintext highlighter-rouge">u/</code> clears the username. Omitting <code class="language-plaintext highlighter-rouge">u/</code> preserves it.</li>
   <li>Supplying metadata <strong>replaces the entire metadata set</strong>. Omitting <code class="language-plaintext highlighter-rouge">m/</code> preserves it. A single empty <code class="language-plaintext highlighter-rouge">m/</code> clears all metadata. Do not mix an empty <code class="language-plaintext highlighter-rouge">m/</code> with pairs.</li>
   <li>Pairs split at the first colon: <code class="language-plaintext highlighter-rouge">m/Region:Asia:SG</code> means key <code class="language-plaintext highlighter-rouge">Region</code>, value <code class="language-plaintext highlighter-rouge">Asia:SG</code>. Keys and values are trimmed independently. Keys use 1–50 characters and cannot contain colons; values use 1–200 characters. Both require a letter or digit and reject control characters, using the existing game metadata validation.</li>
   <li>Keys are unique ignoring case: <code class="language-plaintext highlighter-rouge">m/Role:Healer m/role:Healer</code> is rejected even though the values agree. Values preserve case.</li>
@@ -716,6 +725,8 @@ If fewer than <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPL
 <ul>
   <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
   <li>Use <code class="language-plaintext highlighter-rouge">myself</code> instead of <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> to edit your own profile, for example <code class="language-plaintext highlighter-rouge">edit myself n/Alex Tan</code>. The selector is case-insensitive.</li>
+  <li>The first <code class="language-plaintext highlighter-rouge">edit myself</code> must include <code class="language-plaintext highlighter-rouge">n/NAME</code>. After setup, later edits can omit the name, and you can use
+<code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code>, <code class="language-plaintext highlighter-rouge">gamedel</code> and <code class="language-plaintext highlighter-rouge">gamelist</code> with <code class="language-plaintext highlighter-rouge">myself</code>.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">|</code> means “or”: enter either a friend index or <code class="language-plaintext highlighter-rouge">myself</code>. Do not type the <code class="language-plaintext highlighter-rouge">|</code> character.</li>
   <li>At least one of the optional fields must be provided.</li>
@@ -730,9 +741,9 @@ as <code class="language-plaintext highlighter-rouge">removed phone number</code
   <li>Omit <code class="language-plaintext highlighter-rouge">t/</code> to keep the friend’s existing tags. Each supplied <code class="language-plaintext highlighter-rouge">t/TAG</code> removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.</li>
   <li>Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.</li>
   <li>To remove all of a friend’s tags, enter <code class="language-plaintext highlighter-rouge">t/</code> without a tag after it.
-Use that empty prefix on its own; combining it with non-empty tags is rejected.</li>
+Use that empty prefix on its own. Combining it with non-empty tags is rejected.</li>
   <li>A successful friend edit shows all friends in the current active or archive view again. In <strong>Search results</strong>,
-it preserves the search filter; a renamed friend disappears if their new name no longer matches.
+it preserves the search filter. A renamed friend disappears if their new name no longer matches.
 Editing preserves the friend’s archive status, games and your profile. A successful
 <code class="language-plaintext highlighter-rouge">edit myself</code> shows your updated profile on the right and keeps the current friend-list filter.</li>
 </ul>
@@ -766,6 +777,8 @@ Editing preserves the friend’s archive status, games and your profile. A succe
   <li>Index outside the displayed list: <code class="language-plaintext highlighter-rouge">No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.</code>
 </li>
   <li>No fields provided: <code class="language-plaintext highlighter-rouge">No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.</code>
+</li>
+  <li>First profile edit without a name: <code class="language-plaintext highlighter-rouge">Set your profile name first using edit myself n/NAME.</code>
 </li>
   <li>Duplicate name: <code class="language-plaintext highlighter-rouge">This friend already exists in GameMates.</code>
 </li>
@@ -985,6 +998,7 @@ Copy <code class="language-plaintext highlighter-rouge">preferences.json</code> 
 required <code class="language-plaintext highlighter-rouge">name</code> and an optional <code class="language-plaintext highlighter-rouge">username</code>.
 An empty or missing <code class="language-plaintext highlighter-rouge">username</code> means no username has been provided; the game entry is still retained.
 Existing files that omit <code class="language-plaintext highlighter-rouge">games</code> load with no games; files that omit <code class="language-plaintext highlighter-rouge">myself</code> use the default empty profile.
+The untouched default profile is omitted when saving. Stored friends and profiles must have a valid non-empty name.
 Empty or missing contact fields mean
 <code class="language-plaintext highlighter-rouge">Not provided</code>. Use the same validation rules as command input. Stored game metadata is supported as an optional
 <code class="language-plaintext highlighter-rouge">metas</code> array, for example <code class="language-plaintext highlighter-rouge">"metas": [{"key": "Role", "value": "Support:Mid"}]</code>. Keys contain 1–50 characters
