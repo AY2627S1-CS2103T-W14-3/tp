@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,6 +76,11 @@ public class GameEditCommand extends Command {
         return other == this || other instanceof GameEditCommand command
                 && targetIndex.equals(command.targetIndex) && existingGame.equals(command.existingGame)
                 && changes.equals(command.changes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(targetIndex, existingGame, changes);
     }
 
     @Override
