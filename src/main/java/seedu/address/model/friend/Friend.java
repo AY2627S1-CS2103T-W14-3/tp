@@ -1,5 +1,6 @@
 package seedu.address.model.friend;
 
+import static seedu.address.commons.util.AppUtil.checkArgument;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Collections;
@@ -16,6 +17,8 @@ import seedu.address.model.tag.Tag;
  * Archived friends are always unpinned.
  */
 public class Friend {
+
+    public static final String MESSAGE_ARCHIVED_PINNED = "Archived friends cannot be pinned.";
 
     public static final Friend DEFAULT_MYSELF = new Friend(new Name("Myself"), Phone.EMPTY, Email.EMPTY, Set.of());
 
@@ -42,18 +45,19 @@ public class Friend {
         this(name, phone, email, games, tags, archived, false);
     }
 
-    /** Creates a friend with the given statuses, clearing the pin if archived. */
+    /** Creates a friend with the given statuses, rejecting archived and pinned together. */
     public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags, boolean archived,
             boolean pinned) {
         requireAllNonNull(name, phone, email, games, tags);
         games.forEach(Objects::requireNonNull);
+        checkArgument(!archived || !pinned, MESSAGE_ARCHIVED_PINNED);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.games = Collections.unmodifiableSet(games);
         this.tags = Collections.unmodifiableSet(tags);
         this.archived = archived;
-        this.pinned = pinned && !archived;
+        this.pinned = pinned;
     }
 
     /**
@@ -81,7 +85,7 @@ public class Friend {
 
     /** Returns a copy with the given archive status, clearing its pin when archiving. */
     public Friend withArchived(boolean archived) {
-        return new Friend(name, phone, email, games, tags, archived, pinned);
+        return new Friend(name, phone, email, games, tags, archived, pinned && !archived);
     }
 
     public Name getName() {
@@ -122,7 +126,7 @@ public class Friend {
         return pinned;
     }
 
-    /** Returns a copy with the given pin status; archived friends always remain unpinned. */
+    /** Returns a copy with the given pin status, rejecting attempts to pin archived friends. */
     public Friend withPinned(boolean pinned) {
         return new Friend(name, phone, email, games, tags, archived, pinned);
     }

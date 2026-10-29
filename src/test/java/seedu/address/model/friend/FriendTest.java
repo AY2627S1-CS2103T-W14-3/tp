@@ -55,7 +55,7 @@ public class FriendTest {
         Game originalGame = new GameBuilder().withGameName("Valorant").addMeta("Role", "Healer").build();
         Game replacementGame = new GameBuilder(originalGame).withUsername("newPlayer").build();
         for (boolean archived : new boolean[]{false, true}) {
-            for (boolean pinned : new boolean[]{false, true}) {
+            for (boolean pinned : archived ? new boolean[]{false} : new boolean[]{false, true}) {
                 Friend original = new FriendBuilder(ALICE).withGames(originalGame)
                         .withArchived(archived).withPinned(pinned).build();
                 Friend updated = original.withGames(Set.of(replacementGame));
@@ -66,10 +66,10 @@ public class FriendTest {
     }
 
     @Test
-    public void constructor_archivedAndPinned_clearsPin() {
-        Friend friend = new Friend(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(),
-                ALICE.getGames(), ALICE.getTags(), true, true);
-        assertEquals(ALICE.withArchived(true), friend);
+    public void constructor_archivedAndPinned_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, Friend.MESSAGE_ARCHIVED_PINNED, () ->
+                new Friend(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(),
+                        ALICE.getGames(), ALICE.getTags(), true, true));
     }
 
     @Test
@@ -82,11 +82,11 @@ public class FriendTest {
     }
 
     @Test
-    public void withPinned_archivedFriend_remainsUnpinnedThroughCopies() {
+    public void withPinned_archivedFriend_rejectsPinAndPreservesUnpinnedCopies() {
         Friend archived = ALICE.withArchived(true);
-        assertEquals(archived, archived.withPinned(true));
+        assertThrows(IllegalArgumentException.class, Friend.MESSAGE_ARCHIVED_PINNED, () -> archived.withPinned(true));
         assertEquals(archived, archived.withPinned(false));
-        Friend updated = archived.withPinned(true).withGames(Set.of(new GameBuilder().build()));
+        Friend updated = archived.withGames(Set.of(new GameBuilder().build()));
         assertTrue(updated.isArchived());
         assertFalse(updated.isPinned());
         assertFalse(updated.withArchived(false).isPinned());

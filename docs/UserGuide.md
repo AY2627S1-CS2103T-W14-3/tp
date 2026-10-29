@@ -671,8 +671,8 @@ If you edit JSON manually, close the app first and keep a backup. Friend entries
 `phone` and `email`, `tags`, `games`, and `archived` and `pinned` booleans. Missing `archived` defaults to `false`
 (active), while missing `pinned` defaults to `false` (unpinned); both statuses are saved across restarts. A game has a
 required `name` and an optional `username`.
-Archived friends are loaded as unpinned, even if their saved `pinned` field is `true`. This correction is
-written back on the next save; all other friend details are preserved.
+Archived friends must have `pinned` set to `false`. A saved entry with both `archived` and `pinned` set to
+`true` is invalid and causes loading to fail.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
 Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
 Empty or missing contact fields mean

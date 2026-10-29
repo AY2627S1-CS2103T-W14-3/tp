@@ -114,8 +114,10 @@ class JsonAdaptedFriend {
         })).getOrElse(Email.EMPTY);
 
         final Set<Tag> modelTags = new HashSet<>(friendTags);
-        // Older saves and manual edits may contain pins on archived friends.
-        return new Friend(modelName, modelPhone, modelEmail, modelGames, modelTags, archived, pinned && !archived);
+        if (archived && pinned) {
+            throw new IllegalValueException(Friend.MESSAGE_ARCHIVED_PINNED);
+        }
+        return new Friend(modelName, modelPhone, modelEmail, modelGames, modelTags, archived, pinned);
     }
 
 }

@@ -81,32 +81,28 @@ public class PinCommandTest {
 
     @Test
     public void execute_archivedFriendInArchiveView_throwsCommandException() {
-        for (boolean pinned : new boolean[] {false, true}) {
-            Friend archivedFriend = new FriendBuilder(TypicalFriends.ALICE).withArchived(true)
-                    .withPinned(pinned).build();
-            GameMates gameMates = new GameMates();
-            gameMates.addFriend(archivedFriend);
-            Model model = new ModelManager(gameMates, new UserPrefs());
-            model.updateArchivedFriendList(friend -> true);
+        Friend archivedFriend = new FriendBuilder(TypicalFriends.ALICE).withArchived(true)
+                .withPinned(false).build();
+        GameMates gameMates = new GameMates();
+        gameMates.addFriend(archivedFriend);
+        Model model = new ModelManager(gameMates, new UserPrefs());
+        model.updateArchivedFriendList(friend -> true);
 
-            assertCommandFailure(new PinCommand(INDEX_FIRST_FRIEND), model,
-                    PinCommand.MESSAGE_ARCHIVED_FRIEND);
-        }
+        assertCommandFailure(new PinCommand(INDEX_FIRST_FRIEND), model,
+                PinCommand.MESSAGE_ARCHIVED_FRIEND);
     }
 
     @Test
     public void execute_archivedFriendInSearchResults_throwsCommandException() {
-        for (boolean pinned : new boolean[] {false, true}) {
-            Friend archivedFriend = new FriendBuilder(TypicalFriends.ALICE).withArchived(true)
-                    .withPinned(pinned).build();
-            GameMates gameMates = new GameMates();
-            gameMates.addFriend(archivedFriend);
-            Model model = new ModelManager(gameMates, new UserPrefs());
-            model.updateSearchFriendList(friend -> true);
+        Friend archivedFriend = new FriendBuilder(TypicalFriends.ALICE).withArchived(true)
+                .withPinned(false).build();
+        GameMates gameMates = new GameMates();
+        gameMates.addFriend(archivedFriend);
+        Model model = new ModelManager(gameMates, new UserPrefs());
+        model.updateSearchFriendList(friend -> true);
 
-            assertCommandFailure(new PinCommand(INDEX_FIRST_FRIEND), model,
-                    PinCommand.MESSAGE_ARCHIVED_FRIEND);
-        }
+        assertCommandFailure(new PinCommand(INDEX_FIRST_FRIEND), model,
+                PinCommand.MESSAGE_ARCHIVED_FRIEND);
     }
 
     @Test

@@ -62,7 +62,7 @@ public class GameEditIntegrationTest {
         ModelManager model = new ModelManager();
         Friend friend = new FriendBuilder().withName("Player").withGames(
                 new GameBuilder().withGameName("Valorant").addMeta("Role", "Healer").build(),
-                new GameBuilder().build()).withArchived(true).withPinned(true).build();
+                new GameBuilder().build()).withArchived(true).build();
         model.addFriend(friend);
         model.setMyself(new FriendBuilder(friend).withName("Own Profile").build());
         LogicManager logic = new LogicManager(model,
