@@ -394,8 +394,18 @@ message, while <code class="language-plaintext highlighter-rouge">EditCommand</c
 characters/spaces, phones validate digit counts and grouping, and emails validate ASCII dot-atom/domain syntax
 with length limits. The <a href="UserGuide.html#adding-a-friend-add">User Guide</a> specifies the accepted input for users.
 No phone, email, game name or username is verified against an external service.
-Supplied <code class="language-plaintext highlighter-rouge">GameName</code> and <code class="language-plaintext highlighter-rouge">Username</code> values trim with <code class="language-plaintext highlighter-rouge">String.strip()</code>, count UTF-16 code units with <code class="language-plaintext highlighter-rouge">String.length()</code>,
-require a letter/digit code point and reject ISO control code points. This is not a general Unicode printability test.</p>
+<code class="language-plaintext highlighter-rouge">GameName</code> and <code class="language-plaintext highlighter-rouge">Username</code> values are trimmed with <code class="language-plaintext highlighter-rouge">String.strip()</code> and must contain a letter or digit.
+Length is counted in UTF-16 units with <code class="language-plaintext highlighter-rouge">String.length()</code>. The shared text validator rejects:</p>
+
+<ul>
+  <li>Unicode category C: controls, format characters, unpaired surrogates, private-use and unassigned characters</li>
+  <li>line (Zl) and paragraph (Zp) separators</li>
+  <li>characters that render blank: Hangul fillers U+115F, U+1160, U+3164 and U+FFA0, blank Braille U+2800
+and the combining grapheme joiner U+034F</li>
+  <li>no-break spaces U+00A0, U+2007 and U+202F, which look like regular spaces but do not match them</li>
+</ul>
+
+<p>Other Unicode is accepted, including combining marks, emoji and variation selectors.</p>
 
 <h3 id="myself-profile">Myself profile</h3>
 
@@ -601,9 +611,8 @@ before publishing a complete v1.3 MVP guide.</p>
   </tbody>
 </table>
 
-<p>Additional integration issues found during the audit: root-level JSON <code class="language-plaintext highlighter-rouge">null</code> bypasses the loading fallback, and
-game-text validation uses ISO-control rejection rather than a complete Unicode printability check. These are
-recorded limits; no application fix is included in this documentation change.</p>
+<p>The audit’s root-level JSON <code class="language-plaintext highlighter-rouge">null</code> loading issue remains unresolved. Game-text validation now rejects
+control characters and misleading spaces.</p>
 
 <p>Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
 not a current use-case step. Game creation/deletion, metadata entry/display and own-profile editing are available.</p>
@@ -613,14 +622,14 @@ not a current use-case step. Game creation/deletion, metadata entry/display and 
 <p>Metadata records game-specific details such as a friend’s role or play style.
 <code class="language-plaintext highlighter-rouge">Meta</code>, <code class="language-plaintext highlighter-rouge">MetaKey</code> and <code class="language-plaintext highlighter-rouge">MetaValue</code> are immutable classes in <code class="language-plaintext highlighter-rouge">seedu.address.model.game.meta</code>.
 Each <code class="language-plaintext highlighter-rouge">Meta</code> contains one key and one value. <code class="language-plaintext highlighter-rouge">Game</code> copies the supplied metadata collection and
-exposes it as an unmodifiable set through <code class="language-plaintext highlighter-rouge">getMetas()</code>; the two-argument constructor defaults to an empty set.</p>
+exposes it as an unmodifiable set through <code class="language-plaintext highlighter-rouge">getMetas()</code>. The two-argument constructor defaults to an empty set.</p>
 
 <h4 id="validation-and-equality">Validation and equality</h4>
 
-<p>Leading and trailing whitespace is removed with <code class="language-plaintext highlighter-rouge">String.strip()</code> before validation and storage.
-<code class="language-plaintext highlighter-rouge">StringUtil.isValidTextField()</code> requires non-empty text with at least one letter or digit and no ISO control characters.
+<p><code class="language-plaintext highlighter-rouge">String.strip()</code> removes leading and trailing whitespace before validation and storage.
+<code class="language-plaintext highlighter-rouge">StringUtil.isValidTextField()</code> requires at least one letter or digit. It rejects the characters listed in
+<a href="#friend-creation-editing-and-deletion">Friend creation, editing and deletion</a>.
 Limits use <code class="language-plaintext highlighter-rouge">String.length()</code> (UTF-16 units), so supplementary characters count as two.
-This check allows punctuation and does not exclude other Unicode categories, such as format characters.
 <code class="language-plaintext highlighter-rouge">GameName</code> and <code class="language-plaintext highlighter-rouge">Username</code> also use this utility.</p>
 
 <table>

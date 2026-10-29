@@ -419,12 +419,14 @@ friends.</li>
 <ul>
   <li>For <code class="language-plaintext highlighter-rouge">myself</code>, <a href="#your-profile-and-game-entries">set up your profile first</a>.</li>
   <li>The game name is required. The username is optional. Omit <code class="language-plaintext highlighter-rouge">u/</code> if you do not know it.</li>
-  <li>Game names and supplied usernames must contain 1–50 printable characters after trimming,
-including at least one letter or digit.</li>
+  <li>Game names and usernames must be 1–50 characters after trimming, with at least one letter or digit.</li>
+  <li>Control characters and line breaks are rejected. So are invisible characters, zero-width spaces, Hangul fillers
+and no-break spaces.</li>
   <li>Supplying <code class="language-plaintext highlighter-rouge">u/</code> without a value, or with only whitespace, is rejected. Omit the prefix instead.</li>
   <li>Repeated <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">u/</code> prefixes are rejected, even when the values are identical.</li>
-  <li>Each <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters.
-Values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.</li>
+  <li>Each <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> splits at the first colon and trims surrounding whitespace.
+Keys allow 1–50 characters and values allow 1–200. Both follow the game-name character rules.
+Only values may contain colons.</li>
   <li>Repeat <code class="language-plaintext highlighter-rouge">m/</code> for distinct keys. Metadata keys are case-insensitive, so <code class="language-plaintext highlighter-rouge">Role</code> and <code class="language-plaintext highlighter-rouge">role</code> are duplicates.
 Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
 Omit <code class="language-plaintext highlighter-rouge">m/</code> entirely for no metadata.</li>
@@ -434,6 +436,11 @@ Omit <code class="language-plaintext highlighter-rouge">m/</code> entirely for n
   <li>Metadata appears below the username, sorted by key ignoring case. Long fields wrap. Scroll for additional rows.</li>
   <li>The success message also lists supplied metadata below the username, sorted by key ignoring case.</li>
 </ul>
+
+<div class="alert alert-primary">
+<img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Tip:</strong>
+Text copied from websites or game apps can contain hidden characters. If an input is rejected or a search does not match, retype it by hand.
+</div>
 
 <p>Examples:</p>
 
@@ -485,8 +492,8 @@ including after <code class="language-plaintext highlighter-rouge">find</code> o
   <li>Without <code class="language-plaintext highlighter-rouge">g/</code>, all of the selected person’s games are shown. This also clears a previous game display filter.</li>
   <li>With <code class="language-plaintext highlighter-rouge">g/</code>, only a game with the complete matching name is shown. Matching is case-insensitive:
 <code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not. Usernames are not searched.</li>
-  <li>Leading and trailing whitespace in the game name is removed. Game names may contain 1–50 printable characters
-and must include at least one letter or digit. Multiword names are accepted.</li>
+  <li>Game names follow the same rules as in <code class="language-plaintext highlighter-rouge">gameadd</code>. Surrounding whitespace is removed.
+Multiword names are accepted.</li>
   <li>Put the selector before the optional filter. Only one <code class="language-plaintext highlighter-rouge">g/</code> is allowed, even if repeated values are identical.
 Unknown prefixes and extra words before <code class="language-plaintext highlighter-rouge">g/</code> are rejected. All words after <code class="language-plaintext highlighter-rouge">g/</code> form the game name.
 Whitespace-separated tokens such as <code class="language-plaintext highlighter-rouge">x/</code> are treated as parameter prefixes, not part of the name.</li>
@@ -653,9 +660,9 @@ Lists each member’s name, in-game username when available, and displayed frien
 <ul>
   <li>Both <code class="language-plaintext highlighter-rouge">g/</code> and <code class="language-plaintext highlighter-rouge">n/</code> are required and may appear in either order.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">GAME</code> uses the same game-name rules as <code class="language-plaintext highlighter-rouge">gamelist</code>: 1–50 printable characters after trimming,
-including at least one letter or digit. Multiword names are accepted. Matching uses the complete
-game name and is case-insensitive; <code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not.</li>
+<code class="language-plaintext highlighter-rouge">GAME</code> follows the same rules as in <code class="language-plaintext highlighter-rouge">gameadd</code>. Multiword names are accepted.</li>
+  <li>Matching uses the complete game name and is case-insensitive.
+<code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE</code> must be a whole number from 1 to 20, inclusive.</li>
   <li>The requested size includes you: <code class="language-plaintext highlighter-rouge">n/3</code> selects you and two friends; <code class="language-plaintext highlighter-rouge">n/1</code> returns only you.</li>
