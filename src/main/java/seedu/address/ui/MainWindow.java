@@ -156,6 +156,9 @@ public class MainWindow extends UiPart<Stage> {
     }
 
     private void refreshFriendDetails(CommandResult commandResult) {
+        if (commandResult.isPreserveDetails()) {
+            return;
+        }
         if (commandResult.getFriendToShow().isPresent()) {
             Friend friend = commandResult.getFriendToShow().get();
             friendListPanel.selectFriend(commandResult.isShowMyself() ? null : friend);
