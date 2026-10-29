@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
@@ -55,7 +56,7 @@ public class GameEditIntegrationTest {
     }
 
     @Test
-    public void execute_pinnedArchivedFriendAndMyself_roundTripAndFailuresDoNotSave() throws Exception {
+    public void execute_archivedFriendAndMyself_remainUnpinnedAndFailuresDoNotSave() throws Exception {
         Path file = directory.resolve("gamemates.json");
         JsonGameMatesStorage json = new JsonGameMatesStorage(file);
         ModelManager model = new ModelManager();
@@ -72,7 +73,7 @@ public class GameEditIntegrationTest {
         var restored = json.readGameMates().get();
         assertEquals(model.getGameMates(), restored);
         assertTrue(restored.getFriendList().getFirst().isArchived());
-        assertTrue(restored.getFriendList().getFirst().isPinned());
+        assertFalse(restored.getFriendList().getFirst().isPinned());
         assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
         Game edited = restored.getFriendList().getFirst().getGames().stream()
                 .filter(game -> game.getGameName().value.equals("VALORANT")).findFirst().orElseThrow();

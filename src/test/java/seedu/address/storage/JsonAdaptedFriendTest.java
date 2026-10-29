@@ -102,6 +102,18 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
+    public void toModelType_archivedPinnedJson_clearsPinAndPreservesDetails() throws Exception {
+        Friend archivedFriend = new FriendBuilder(BENSON).withArchived(true).build();
+        JsonAdaptedFriend invalidSavedFriend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                VALID_GAMES, VALID_TAGS, true, true);
+        String json = JsonUtil.toJsonString(invalidSavedFriend);
+        Friend restored = JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType();
+        assertEquals(archivedFriend.withPinned(false), restored);
+        String savedJson = JsonUtil.toJsonString(new JsonAdaptedFriend(restored));
+        assertEquals(restored, JsonUtil.fromJsonString(savedJson, JsonAdaptedFriend.class).toModelType());
+    }
+
+    @Test
     public void toModelType_missingPinnedField_defaultsToUnpinnedFriend() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
                 VALID_GAMES, VALID_TAGS);

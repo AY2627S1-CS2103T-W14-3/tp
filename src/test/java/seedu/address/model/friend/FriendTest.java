@@ -66,6 +66,33 @@ public class FriendTest {
     }
 
     @Test
+    public void constructor_archivedAndPinned_clearsPin() {
+        Friend friend = new Friend(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(),
+                ALICE.getGames(), ALICE.getTags(), true, true);
+        assertEquals(ALICE.withArchived(true), friend);
+    }
+
+    @Test
+    public void withArchived_pinnedFriend_clearsPinPermanently() {
+        Friend pinned = ALICE.withPinned(true);
+        Friend archived = pinned.withArchived(true);
+        assertEquals(ALICE.withArchived(true), archived);
+        assertEquals(ALICE, archived.withArchived(false));
+        assertTrue(pinned.isPinned());
+    }
+
+    @Test
+    public void withPinned_archivedFriend_remainsUnpinnedThroughCopies() {
+        Friend archived = ALICE.withArchived(true);
+        assertEquals(archived, archived.withPinned(true));
+        assertEquals(archived, archived.withPinned(false));
+        Friend updated = archived.withPinned(true).withGames(Set.of(new GameBuilder().build()));
+        assertTrue(updated.isArchived());
+        assertFalse(updated.isPinned());
+        assertFalse(updated.withArchived(false).isPinned());
+    }
+
+    @Test
     public void pinnedFriend_hasDistinctEqualityButSameIdentity() {
         Friend pinnedAlice = new FriendBuilder(ALICE).withPinned(true).build();
         assertTrue(pinnedAlice.isPinned());

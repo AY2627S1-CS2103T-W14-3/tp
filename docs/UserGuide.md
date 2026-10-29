@@ -244,7 +244,8 @@ Format: `pin FRIEND_INDEX`
   profile.
 * Pinning archived friends is rejected, including archived entries in search results. Restore them with
   `unarchive FRIEND_INDEX` first.
-* At most five friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
+* Archiving a pinned friend clears their pin. Restoring them does not restore the pin.
+* At most five active friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
   is rejected without changing the list.
 * Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
   filtering the list by game.
@@ -544,6 +545,7 @@ Format: `archive FRIEND_INDEX`
   whether the index exists. This also applies when that view is empty; data and view stay unchanged.
 * The friend disappears from the active view immediately. In **Search results**, the friend stays visible with
   an **Archived** badge. The current filter stays in place.
+* Archiving clears any pin on the friend, freeing a pin slot. Restoring the friend keeps them unpinned.
 * Feedback is `Archived FRIEND_NAME.`. Archiving an already archived friend is rejected.
 * Your Myself profile cannot be archived. `myself`, missing indices, extra arguments and invalid indices are rejected.
 * Missing indices report `Please provide an index.`. Invalid indices (such as `-1`, `0` or `abc`) report
@@ -669,6 +671,8 @@ If you edit JSON manually, close the app first and keep a backup. Friend entries
 `phone` and `email`, `tags`, `games`, and `archived` and `pinned` booleans. Missing `archived` defaults to `false`
 (active), while missing `pinned` defaults to `false` (unpinned); both statuses are saved across restarts. A game has a
 required `name` and an optional `username`.
+Archived friends are loaded as unpinned, even if their saved `pinned` field is `true`. This correction is
+written back on the next save; all other friend details are preserved.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
 Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
 Empty or missing contact fields mean

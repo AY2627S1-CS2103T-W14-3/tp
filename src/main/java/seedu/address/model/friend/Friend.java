@@ -13,6 +13,7 @@ import seedu.address.model.tag.Tag;
 /**
  * Represents a Friend in GameMates.
  * Guarantees: details are present and not null, field values are validated, immutable.
+ * Archived friends are always unpinned.
  */
 public class Friend {
 
@@ -41,7 +42,7 @@ public class Friend {
         this(name, phone, email, games, tags, archived, false);
     }
 
-    /** Creates a friend with the given archive and pin statuses. */
+    /** Creates a friend with the given statuses, clearing the pin if archived. */
     public Friend(Name name, Phone phone, Email email, Set<Game> games, Set<Tag> tags, boolean archived,
             boolean pinned) {
         requireAllNonNull(name, phone, email, games, tags);
@@ -52,7 +53,7 @@ public class Friend {
         this.games = Collections.unmodifiableSet(games);
         this.tags = Collections.unmodifiableSet(tags);
         this.archived = archived;
-        this.pinned = pinned;
+        this.pinned = pinned && !archived;
     }
 
     /**
@@ -78,7 +79,7 @@ public class Friend {
         return archived;
     }
 
-    /** Returns a copy with the given archive status, preserving all other fields. */
+    /** Returns a copy with the given archive status, clearing its pin when archiving. */
     public Friend withArchived(boolean archived) {
         return new Friend(name, phone, email, games, tags, archived, pinned);
     }
@@ -121,7 +122,7 @@ public class Friend {
         return pinned;
     }
 
-    /** Returns a copy with the given pin status, preserving all other fields. */
+    /** Returns a copy with the given pin status; archived friends always remain unpinned. */
     public Friend withPinned(boolean pinned) {
         return new Friend(name, phone, email, games, tags, archived, pinned);
     }

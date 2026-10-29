@@ -1,6 +1,8 @@
 package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.nio.file.Path;
@@ -29,6 +31,25 @@ public class JsonSerializableGameMatesTest {
         assertEquals(original, restored);
         assertEquals(original.getFriendList(), restored.getFriendList());
         assertEquals(TypicalFriends.ALICE, restored.getMyself());
+    }
+
+    @Test
+    public void toModelType_archivedPins_doNotCountTowardsActivePinLimit() throws Exception {
+        String json = """
+                {"friends": [
+                  {"name": "Active One", "pinned": true},
+                  {"name": "Active Two", "pinned": true},
+                  {"name": "Active Three", "pinned": true},
+                  {"name": "Active Four", "pinned": true},
+                  {"name": "Active Five", "pinned": true},
+                  {"name": "Archived Friend", "archived": true, "pinned": true}
+                ]}
+                """;
+        GameMates restored = JsonUtil.fromJsonString(json, JsonSerializableGameMates.class).toModelType();
+        assertEquals(6, restored.getFriendList().size());
+        assertEquals(5, restored.getFriendList().stream().filter(friend -> friend.isPinned()).count());
+        assertTrue(restored.getFriendList().getLast().isArchived());
+        assertFalse(restored.getFriendList().getLast().isPinned());
     }
 
     @Test
