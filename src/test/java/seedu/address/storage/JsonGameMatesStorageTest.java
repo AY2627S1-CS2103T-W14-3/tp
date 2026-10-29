@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.storage.JsonAdaptedFriend.MESSAGE_DUPLICATE_GAME_FORMAT;
 import static seedu.address.testutil.TypicalFriends.ALICE;
 import static seedu.address.testutil.TypicalFriends.HOON;
 import static seedu.address.testutil.TypicalFriends.IDA;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -81,6 +83,17 @@ public class JsonGameMatesStorageTest {
     @Test
     public void readGameMates_invalidAndValidFriendGameMates_throwDataLoadingException() {
         assertThrows(DataLoadingException.class, () -> readGameMates("invalidAndValidFriendGameMates.json"));
+    }
+
+    @Test
+    public void readGameMates_duplicateGameNames_throwDataLoadingException() {
+        for (String fileName : List.of("duplicateFriendGameNamesGameMates.json",
+                "duplicateMyselfGameNamesGameMates.json")) {
+            DataLoadingException exception = assertThrows(DataLoadingException.class, () -> readGameMates(fileName));
+            assertInstanceOf(IllegalValueException.class, exception.getCause());
+            assertEquals(String.format(MESSAGE_DUPLICATE_GAME_FORMAT, "Alice", "VALORANT"),
+                    exception.getCause().getMessage());
+        }
     }
 
     @Test
