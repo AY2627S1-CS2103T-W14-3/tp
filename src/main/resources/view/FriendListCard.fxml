@@ -3,11 +3,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import seedu.address.ui.TagPane?>
 
 <HBox id="cardPane" fx:id="cardPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
   <GridPane HBox.hgrow="ALWAYS">
@@ -29,7 +29,7 @@
         <Label fx:id="pinned" text="Pinned" styleClass="pinned-label" visible="false" managed="false" />
       </HBox>
       <Label fx:id="archivedBadge" text="Archived" styleClass="archived-badge" />
-      <FlowPane fx:id="tags" />
+      <TagPane fx:id="tags" minWidth="0" />
       <Label fx:id="phone" styleClass="cell_small_label" text="\$phone" />
       <Label fx:id="email" styleClass="cell_small_label" text="\$email" />
     </VBox>

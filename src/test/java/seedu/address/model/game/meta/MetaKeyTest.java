@@ -43,10 +43,11 @@ public class MetaKeyTest {
     }
 
     @Test
-    public void validation_nonControlUnicode_accepted() {
-        for (String input : new String[] {"a\u200bb", "a\u2028b", "a\u2029b", "a\ud800b", "a\u0378b"}) {
-            assertTrue(MetaKey.isValidMetaKey(input));
-        }
+    public void validation_nonPrintableUnicode_rejected() {
+        // Unicode partitions are tested in StringUtilTest; this checks field validation and construction.
+        String input = "a\u200bb";
+        assertFalse(MetaKey.isValidMetaKey(input));
+        assertThrows(IllegalArgumentException.class, () -> new MetaKey(input));
     }
 
     @Test
