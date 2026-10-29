@@ -498,6 +498,10 @@ Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG
 
 * Edits the friend at the specified `FRIEND_INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
 * Use `myself` instead of `FRIEND_INDEX` to edit your own profile, for example `edit myself n/Alex Tan`. The selector is case-insensitive.
+  If the name belongs to an active or archived friend, choose a different profile name; unarchiving that friend
+  does not resolve the name conflict.
+* Invalid indices include the rejected text in the feedback. For example, `edit 1 x/abc` reports
+  `Invalid index "1 x/abc".` followed by the allowed index range. Use the supported field prefixes shown above.
 * The first `edit myself` must include `n/NAME`. After setup, later edits can omit the name, and you can use
   `gameadd`, `gameedit`, `gamedel` and `gamelist` with `myself`.
 * `|` means "or": enter either a friend index or `myself`. Do not type the `|` character.

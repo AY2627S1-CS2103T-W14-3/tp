@@ -734,7 +734,9 @@ They must also differ from the separately stored Myself profile.
 An archived friend's name stays reserved.
 
 `FriendValidator` rejects a conflicting add or rename.
-If the existing friend is archived, the feedback suggests `archivelist` and `unarchive`.
+When adding or renaming a listed friend, an archived conflict suggests `archivelist` and `unarchive`.
+For a profile rename, any conflicting friend name instead asks the user to choose a different profile name;
+unarchiving a friend does not resolve that conflict.
 The validator uses `Model.findFriend()` for one identity lookup across both statuses, independently of the display filter.
 
 An existing friend can keep their own name during an edit.

@@ -42,9 +42,6 @@ public class EditCommandParserTest {
 
     private static final String TAG_EMPTY = " " + PREFIX_TAG;
 
-    private static final String MESSAGE_INVALID_FORMAT =
-            ParserUtil.MESSAGE_INVALID_INDEX;
-
     private EditCommandParser parser = new EditCommandParser();
 
     @Test
@@ -60,7 +57,8 @@ public class EditCommandParserTest {
     @Test
     public void parse_missingParts_failure() {
         // no index specified
-        assertParseFailure(parser, VALID_NAME_AMY, MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, VALID_NAME_AMY,
+                String.format(EditCommandParser.MESSAGE_INVALID_INDEX, VALID_NAME_AMY));
         assertParseFailure(parser, NAME_DESC_AMY, ParserUtil.MESSAGE_MISSING_INDEX);
 
         // no field specified
@@ -73,16 +71,30 @@ public class EditCommandParserTest {
     @Test
     public void parse_invalidPreamble_failure() {
         // negative index
-        assertParseFailure(parser, "-5" + NAME_DESC_AMY, MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, "-5" + NAME_DESC_AMY,
+                String.format(EditCommandParser.MESSAGE_INVALID_INDEX, "-5"));
 
         // zero index
-        assertParseFailure(parser, "0" + NAME_DESC_AMY, MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, "0" + NAME_DESC_AMY,
+                String.format(EditCommandParser.MESSAGE_INVALID_INDEX, "0"));
 
         // invalid arguments being parsed as preamble
-        assertParseFailure(parser, "1 some random string", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, "1 some random string",
+                String.format(EditCommandParser.MESSAGE_INVALID_INDEX, "1 some random string"));
 
         // invalid prefix being parsed as preamble
-        assertParseFailure(parser, "1 i/ string", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, "1 i/ string",
+                String.format(EditCommandParser.MESSAGE_INVALID_INDEX, "1 i/ string"));
+    }
+
+    @Test
+    public void parse_unknownPrefix_reportsEntireRejectedSelector() {
+        for (String target : new String[]{"1 x/abc", "myself x/abc", "2147483648", "-1", "0"}) {
+            assertParseFailure(parser, " " + target,
+                    String.format(EditCommandParser.MESSAGE_INVALID_INDEX, target));
+            assertParseFailure(parser, " " + target + PHONE_DESC_AMY,
+                    String.format(EditCommandParser.MESSAGE_INVALID_INDEX, target));
+        }
     }
 
     @Test

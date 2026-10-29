@@ -15,6 +15,8 @@ import static seedu.address.testutil.TypicalFriends.getTypicalGameMates;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_FRIEND;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_FRIEND;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
@@ -147,7 +149,18 @@ public class EditCommandTest {
         EditCommand command = new EditCommand(Index.myself(),
                 new EditFriendDescriptorBuilder().withName(friendName).build());
 
-        assertCommandFailure(command, model, Messages.MESSAGE_DUPLICATE_FRIEND);
+        assertCommandFailure(command, model, Messages.MESSAGE_PROFILE_NAME_CONFLICT);
+    }
+
+    @Test
+    public void execute_myselfNameConflictsWithArchivedFriend_explainsNameConflict() {
+        Friend friend = model.getFilteredFriendList().getFirst();
+        model.setFriend(friend, friend.withArchived(true));
+        model.updateFilteredFriendList(candidate -> false);
+        EditCommand command = new EditCommand(Index.myself(), new EditFriendDescriptorBuilder()
+                .withName(friend.getName().fullName.toUpperCase(Locale.ROOT)).build());
+
+        assertCommandFailure(command, model, Messages.MESSAGE_PROFILE_NAME_CONFLICT);
     }
 
     @Test

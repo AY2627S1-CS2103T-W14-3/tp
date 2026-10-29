@@ -20,6 +20,8 @@ public class Messages {
             "This friend is archived. Use archivelist to find them, then unarchive their displayed index.";
     public static final String MESSAGE_DUPLICATE_FRIEND = "This friend already exists in GameMates.";
     public static final String MESSAGE_DUPLICATE_MYSELF = "This name is already used by your Myself profile.";
+    public static final String MESSAGE_PROFILE_NAME_CONFLICT =
+            "This name is already used by a friend. Choose a different name for your profile.";
     public static final String MESSAGE_MYSELF_NOT_INITIALIZED =
             "Set your profile name first using \"edit myself n/NAME\" command.";
     public static final String MESSAGE_DUPLICATE_FIELDS =

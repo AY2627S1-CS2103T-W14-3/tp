@@ -147,9 +147,10 @@ public class GameMatesParserTest {
             for (String command : List.of("delete " + index, "edit " + index + " n/Alice",
                     "gameadd " + index + " g/Valorant u/Alice", "gamedel " + index + " g/Valorant",
                     "gamelist " + index, "gamelist " + index + " g/Valorant")) {
-                assertThrows(ParseException.class,
-                        "Index must be a positive integer between 1 and 2147483647 (inclusive).", ()
-                            -> parser.parseCommand(command));
+                String expected = command.startsWith("edit ")
+                        ? String.format(EditCommandParser.MESSAGE_INVALID_INDEX, index)
+                        : ParserUtil.MESSAGE_INVALID_INDEX;
+                assertThrows(ParseException.class, expected, () -> parser.parseCommand(command));
             }
         }
     }
