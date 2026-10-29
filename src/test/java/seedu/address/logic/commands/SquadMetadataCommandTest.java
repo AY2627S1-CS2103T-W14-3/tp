@@ -83,8 +83,8 @@ public class SquadMetadataCommandTest {
             GameMates before = new GameMates(scoped.getGameMates());
             List<Friend> displayed = List.copyOf(scoped.getFilteredFriendList());
             CommandResult result = command(3, "Role:Healer", "Region:Asia").execute(scoped);
-            assertEquals("Found squad of 3 people:\n1. Me\n2. Beta (username: Amy123, index: 2)"
-                    + "\n3. Alpha (username: Amy123, index: 3)", result.getFeedbackToUser());
+            assertEquals("Found squad of 3 people:\n1. Me\n2. Alpha (username: Amy123, index: 1)"
+                    + "\n3. Beta (username: Amy123, index: 3)", result.getFeedbackToUser());
             assertTrue(result.isPreserveDetails());
             assertThrows(CommandException.class, "Could not find a squad of 4 people.", () ->
                     command(4, "Role:Healer", "Region:Asia").execute(scoped));

@@ -35,7 +35,7 @@ public class SquadMetadataCommandParserTest {
                 ParserUtil.parseMetas(List.of("Note:Prefer n/3")), 2);
         assertParseSuccess(parser, " g/\"Version n/2\" n/2 m/\"Note:Prefer n/3\"", expected);
         assertParseFailure(parser, " g/Valorant n/2 m/\"Note:Prefer n/3",
-                ArgumentTokenizer.MESSAGE_INVALID_QUOTED_VALUE);
+                ArgumentTokenizer.MESSAGE_UNCLOSED_QUOTE);
         assertParseFailure(parser, " g/Valorant n/1 m/\"Note:Prefer n/3\" m/\"note:Prefer n/3\"",
                 Meta.MESSAGE_DUPLICATE_KEY);
     }

@@ -49,6 +49,14 @@ public class GameMatchesMetadataPredicateTest {
         assertNotEquals(first, predicate("Valorant", "Role:Healer"));
     }
 
+    @Test
+    public void toStringMethod() throws Exception {
+        GameMatchesMetadataPredicate predicate = predicate("Valorant", "Role:Healer");
+        String expected = GameMatchesMetadataPredicate.class.getCanonicalName()
+                + "{gameName=Valorant, conditions=[Role:Healer]}";
+        assertEquals(expected, predicate.toString());
+    }
+
     private GameMatchesMetadataPredicate predicate(String game, String... pairs) throws Exception {
         return new GameMatchesMetadataPredicate(new GameName(game), ParserUtil.parseMetas(Set.of(pairs)));
     }

@@ -46,14 +46,14 @@ public class SquadMetadataIntegrationTest {
         var displayed = new ArrayList<>(model.getFilteredFriendList());
         String saved = Files.readString(file);
         var result = logic.execute("squad g/valorant n/3 m/role:Healer m/region:Asia");
-        assertEquals("Found squad of 3 people:\n1. Me\n2. Beta (index: 2)\n3. Alpha (index: 3)",
+        assertEquals("Found squad of 3 people:\n1. Me\n2. Beta (index: 1)\n3. Alpha (index: 3)",
                 result.getFeedbackToUser());
         assertTrue(result.isPreserveDetails());
         assertEquals(FriendListScope.ACTIVE, model.getFriendListScope());
         assertEquals(before, model.getGameMates());
         assertEquals(displayed, model.getFilteredFriendList());
         assertEquals(saved, Files.readString(file));
-        logic.execute("archive 2");
+        logic.execute("archive 1");
         logic.execute("archivelist");
         before = new GameMates(model.getGameMates());
         saved = Files.readString(file);

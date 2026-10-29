@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.game.meta.Meta;
 
 /** Matches the exact game name and every required metadata pair on that same entry. */
@@ -37,5 +38,13 @@ public final class GameMatchesMetadataPredicate implements Predicate<Game> {
     @Override
     public int hashCode() {
         return Objects.hash(gameName, conditions);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("gameName", gameName)
+                .add("conditions", conditions)
+                .toString();
     }
 }
