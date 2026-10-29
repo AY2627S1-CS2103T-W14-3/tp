@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.storage.JsonAdaptedFriend.MESSAGE_DUPLICATE_GAME_FORMAT;
 import static seedu.address.testutil.TypicalFriends.ALICE;
 import static seedu.address.testutil.TypicalFriends.HOON;
 import static seedu.address.testutil.TypicalFriends.IDA;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -77,8 +79,7 @@ public class JsonGameMatesStorageTest {
         Files.writeString(filePath, " \n null \n ");
         JsonGameMatesStorage storage = new JsonGameMatesStorage(filePath);
 
-        DataLoadingException exception = assertThrows(DataLoadingException.class, storage::readGameMates);
-        assertInstanceOf(IOException.class, exception.getCause());
+        assertThrows(DataLoadingException.class, storage::readGameMates);
     }
 
     @Test
@@ -91,6 +92,41 @@ public class JsonGameMatesStorageTest {
     @Test
     public void readGameMates_invalidAndValidFriendGameMates_throwDataLoadingException() {
         assertThrows(DataLoadingException.class, () -> readGameMates("invalidAndValidFriendGameMates.json"));
+    }
+
+    @Test
+    public void readGameMates_duplicateGameNames_throwDataLoadingException() {
+        for (String fileName : List.of("duplicateFriendGameNamesGameMates.json",
+                "duplicateMyselfGameNamesGameMates.json")) {
+            DataLoadingException exception = assertThrows(DataLoadingException.class, () -> readGameMates(fileName));
+            assertInstanceOf(IllegalValueException.class, exception.getCause());
+            assertEquals(String.format(MESSAGE_DUPLICATE_GAME_FORMAT, "Alice", "VALORANT"),
+                    exception.getCause().getMessage());
+        }
+    }
+
+    @Test
+    public void readGameMates_friendNameConflictsWithMyself_throwDataLoadingException() {
+        DataLoadingException exception = assertThrows(
+                DataLoadingException.class, () -> readGameMates("duplicateCustomMyselfGameMates.json"));
+        assertInstanceOf(IllegalValueException.class, exception.getCause());
+        assertEquals(JsonSerializableGameMates.MESSAGE_DUPLICATE_MYSELF, exception.getCause().getMessage());
+    }
+
+    @Test
+    public void readAndSaveGameMates_unnamedProfile_allowsFriendNamedMyself() throws Exception {
+        Model model = new ModelManager(readGameMates("friendNamedMyselfGameMates.json").get(), new UserPrefs());
+        Path filePath = testFolder.resolve("unnamed-profile.json");
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(filePath);
+        storage.saveGameMates(model.getGameMates());
+        assertFalse(Files.readString(filePath).contains("\"myself\""));
+
+        GameMatesParser parser = new GameMatesParser();
+        parser.parseCommand("edit 1 p/123").execute(model);
+        assertEquals("123", model.getFilteredFriendList().getFirst().getPhone().value);
+
+        storage.saveGameMates(model.getGameMates());
+        assertEquals(model.getGameMates(), storage.readGameMates().get());
     }
 
     @Test

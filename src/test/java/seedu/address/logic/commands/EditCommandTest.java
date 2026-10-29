@@ -132,6 +132,7 @@ public class EditCommandTest {
 
     @Test
     public void execute_friendNameConflictsWithMyself_failure() {
+        model.setMyself(new FriendBuilder().withName("Myself").build());
         String profileName = model.getGameMates().getMyself().getName().fullName;
         EditCommand command = new EditCommand(INDEX_FIRST_FRIEND,
                 new EditFriendDescriptorBuilder().withName(profileName).build());
@@ -151,6 +152,7 @@ public class EditCommandTest {
 
     @Test
     public void execute_myselfRetainsIdentityWithNoDisplayedFriends_success() {
+        model.setMyself(new FriendBuilder().withName("Alex").build());
         Friend original = model.getGameMates().getMyself();
         Friend edited = new FriendBuilder(original).withPhone(VALID_PHONE_BOB).build();
         model.updateFilteredFriendList(friend -> false);

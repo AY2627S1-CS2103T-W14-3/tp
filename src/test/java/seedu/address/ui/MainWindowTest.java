@@ -47,6 +47,7 @@ class MainWindowTest {
             assertEquals("Friend details", getLabel(window, "#title").getText());
             assertEquals("Role: Support:Mid", getLabel(window, ".details-game-metadata").getText());
 
+            executeCommand(window, "edit myself n/Alex");
             executeCommand(window, "gameadd myself g/Minecraft u/player m/Mode:Creative");
             assertEquals("Your details", getLabel(window, "#title").getText());
             assertEquals("Mode: Creative", getLabel(window, ".details-game-metadata").getText());

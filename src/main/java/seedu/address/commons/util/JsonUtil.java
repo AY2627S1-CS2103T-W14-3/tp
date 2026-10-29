@@ -47,7 +47,7 @@ public class JsonUtil {
      *
      * @param filePath cannot be null.
      * @param classOfObjectToDeserialize JSON file has to correspond to the structure in the class given here.
-     * @throws DataLoadingException if loading of the JSON file failed or its contents deserialize to null.
+     * @throws DataLoadingException if loading of the JSON file failed.
      */
     public static <T> Option<T> readJsonFile(
             Path filePath, Class<T> classOfObjectToDeserialize) throws DataLoadingException {
@@ -58,15 +58,11 @@ public class JsonUtil {
         }
         logger.info("JSON file " + filePath + " found.");
 
-        T jsonFile = Try.of(() -> deserializeObjectFromJsonFile(filePath, classOfObjectToDeserialize))
+        T jsonFile = Try.of(() -> requireNonNull(
+                deserializeObjectFromJsonFile(filePath, classOfObjectToDeserialize)))
                 .onFailure(IOException.class,
                     e -> logger.warning("Error reading from jsonFile file " + filePath + ": " + e))
                 .getOrElseThrow(DataLoadingException::new);
-
-        if (jsonFile == null) {
-            throw new DataLoadingException(new IOException(
-                    "The top-level JSON value in " + filePath + " must not be null."));
-        }
 
         return Option.of(jsonFile);
     }

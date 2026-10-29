@@ -41,10 +41,11 @@ public class MetaValueTest {
     }
 
     @Test
-    public void validation_nonControlUnicode_accepted() {
-        for (String input : new String[] {"a\u200bb", "a\u2028b", "a\u2029b", "a\ud800b", "a\u0378b"}) {
-            assertTrue(MetaValue.isValidMetaValue(input));
-        }
+    public void validation_nonPrintableUnicode_rejected() {
+        // Unicode partitions are tested in StringUtilTest; this checks field validation and construction.
+        String input = "a\u200bb";
+        assertFalse(MetaValue.isValidMetaValue(input));
+        assertThrows(IllegalArgumentException.class, () -> new MetaValue(input));
     }
 
     @Test

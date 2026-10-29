@@ -420,6 +420,13 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseTag_tagNameLengthLimit() throws Exception {
+        String maximumLengthTag = "a".repeat(50);
+        assertEquals(new Tag(maximumLengthTag), ParserUtil.parseTag(maximumLengthTag));
+        assertThrows(ParseException.class, Tag.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseTag("a".repeat(51)));
+    }
+
+    @Test
     public void parseTag_validValueWithoutWhitespace_returnsTag() throws Exception {
         Tag expectedTag = new Tag(VALID_TAG_1);
         assertEquals(expectedTag, ParserUtil.parseTag(VALID_TAG_1));
