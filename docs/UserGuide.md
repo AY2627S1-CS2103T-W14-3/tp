@@ -685,9 +685,9 @@ The active friend-list filter, selection and game display filter are not saved; 
 your profile. Window size and position are stored separately in `preferences.json` when you close the main window
 or use `exit`.
 
-If saving fails, an error beginning `Could not save data` appears. A friend change may already be visible in the
-running application even though it was not written to disk. Restore write access to the data folder and run a
-successful command such as `list` to try saving again before closing the app.
+If saving fails, an error starting with `Could not save data` appears. The change still shows in the app, but it is
+not saved and will be lost on exit. Fix the issue (e.g. restore write access to the data folder), then run any
+command such as `list` to save again.
 
 ### Editing the data file
 
