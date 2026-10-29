@@ -73,10 +73,12 @@ public class GameListCommandTest {
     @Test
     public void execute_myselfWithNoGames_successfulEmptyResult() {
         Model emptyModel = new ModelManager();
+        emptyModel.setMyself(new FriendBuilder().withName("Alex").withGames().build());
         Friend profile = emptyModel.getGameMates().getMyself();
+        Model expectedEmptyModel = new ModelManager(emptyModel.getGameMates(), new UserPrefs());
         assertCommandSuccess(new GameListCommand(Index.myself()), emptyModel,
-                new CommandResult(String.format(GameListCommand.MESSAGE_NO_GAMES, profile.getName()),
-                        profile, null, true), new ModelManager());
+                new CommandResult("Alex has no games added yet.",
+                        profile, null, true), expectedEmptyModel);
     }
 
     @Test

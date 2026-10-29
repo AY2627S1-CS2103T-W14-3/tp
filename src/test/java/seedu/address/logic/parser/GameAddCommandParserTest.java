@@ -77,7 +77,8 @@ public class GameAddCommandParserTest {
     @Test
     public void parse_invalidIndex_failure() {
         for (String index : new String[]{"zero", "0", "-1", "1.5", "2147483648", "1 extra", "myself 1"}) {
-            assertParseFailure(parser, " " + index + " g/Valorant u/player", ParserUtil.MESSAGE_INVALID_INDEX);
+            assertParseFailure(parser, " " + index + " g/Valorant u/player",
+                    String.format(ParserUtil.MESSAGE_INVALID_INDEX, index));
         }
     }
 
@@ -181,5 +182,11 @@ public class GameAddCommandParserTest {
                 .addMeta("Play style", "Casual").addMeta("Play  style", "Competitive").build();
         assertParseSuccess(parser, " 1 g/Valorant u/player m/Role:Support m/Style:Support"
                 + " m/Play style:Casual m/Play  style:Competitive", new GameAddCommand(Index.fromOneBased(1), game));
+    }
+
+    @Test
+    public void parse_quotedValuesWithPrefix_success() {
+        assertParseSuccess(parser, " 1 g/\"Version u/2\" u/player", new GameAddCommand(Index.fromOneBased(1),
+                new Game(new GameName("Version u/2"), new Username("player"))));
     }
 }

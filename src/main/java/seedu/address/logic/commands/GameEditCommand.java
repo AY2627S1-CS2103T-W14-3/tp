@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import java.util.HashSet;
-import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,12 +31,9 @@ public class GameEditCommand extends Command {
             + " Keys are unique ignoring case; values preserve case and may contain colons."
             + " An empty u/ clears the username.\n"
             + "Quote whole values containing prefix-like text: g/\"PUBG n/Game\"."
-            + " Inside quotes, escape double quotes and backslashes with a backslash.\n"
+            + " Write any other double quote as \\\".\n"
             + "Example: gameedit myself g/Valorant u/newPlayer m/Role:Healer";
     public static final String MESSAGE_NOT_EDITED = "Provide at least one of n/, u/ or m/ to edit a game.";
-    public static final String MESSAGE_GAME_NOT_FOUND = "%1$s does not have %2$s.";
-    public static final String MESSAGE_DUPLICATE_GAME = "%1$s already has %2$s.";
-    public static final String MESSAGE_AMBIGUOUS_GAME = "More than one entry matches %s. Check the stored game data.";
     public static final String MESSAGE_SUCCESS = "Edited %1$s's game: %2$s\nUsername: %3$s\nMetadata: %4$s";
 
     private final Index targetIndex;
@@ -55,23 +52,13 @@ public class GameEditCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
+        FriendValidator.checkFriendInitialized(target);
         Friend friend = target.friend();
-        List<Game> matches = friend.getGames().stream()
-                .filter(game -> game.getGameName().equals(existingGame)).toList();
-        if (matches.isEmpty()) {
-            throw new CommandException(String.format(MESSAGE_GAME_NOT_FOUND, friend.getName(), existingGame));
-        }
-        if (matches.size() > 1) {
-            throw new CommandException(String.format(MESSAGE_AMBIGUOUS_GAME, existingGame));
-        }
-        Game original = matches.getFirst();
+        Game original = GameTargetResolver.resolve(friend, existingGame);
         Game replacement = new Game(changes.gameName() == null ? original.getGameName() : changes.gameName(),
                 changes.username() == null ? original.getUsername() : changes.username(),
                 changes.metas() == null ? original.getMetas() : changes.metas());
-        if (friend.getGames().stream().anyMatch(game -> game != original && game.isSameGame(replacement))) {
-            throw new CommandException(String.format(MESSAGE_DUPLICATE_GAME, friend.getName(),
-                    replacement.getGameName()));
-        }
+        GameValidator.checkCanEdit(friend, original, replacement);
         Set<Game> games = new HashSet<>(friend.getGames());
         games.remove(original);
         games.add(replacement);
@@ -89,6 +76,11 @@ public class GameEditCommand extends Command {
         return other == this || other instanceof GameEditCommand command
                 && targetIndex.equals(command.targetIndex) && existingGame.equals(command.existingGame)
                 && changes.equals(command.changes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(targetIndex, existingGame, changes);
     }
 
     @Override

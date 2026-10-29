@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_META;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 
 import seedu.address.commons.util.StringUtil;
@@ -14,7 +15,7 @@ public class SquadCommandParser implements Parser<SquadCommand> {
     @Override
     public SquadCommand parse(String args) throws ParseException {
         requireNonNull(args);
-        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_GAME, PREFIX_NAME);
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_GAME, PREFIX_NAME, PREFIX_META);
         if (!argMultimap.arePrefixesPresent(PREFIX_GAME, PREFIX_NAME)
                 || !argMultimap.getPreamble().isEmpty()) {
             throw new ParseException(SquadCommand.MESSAGE_USAGE);
@@ -35,6 +36,7 @@ public class SquadCommandParser implements Parser<SquadCommand> {
         if (size > SquadCommand.MAX_SIZE) {
             throw new ParseException(SquadCommand.MESSAGE_INVALID_SIZE);
         }
-        return new SquadCommand(ParserUtil.parseGameName(gameValue), size);
+        return new SquadCommand(ParserUtil.parseGameName(gameValue),
+                ParserUtil.parseMetas(argMultimap.getAllValues(PREFIX_META)), size);
     }
 }

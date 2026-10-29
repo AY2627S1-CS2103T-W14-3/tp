@@ -279,7 +279,7 @@ public class ArchiveCommandsTest {
             assertThrows(ParseException.class, ParserUtil.MESSAGE_MISSING_INDEX, ()
                     -> parser.parseCommand(word + "   "));
             for (String value : List.of("-1", "0", "abc", "2147483648", "myself", "1 2")) {
-                assertThrows(ParseException.class, ParserUtil.MESSAGE_INVALID_INDEX, ()
+                assertThrows(ParseException.class, String.format(ParserUtil.MESSAGE_INVALID_INDEX, value), ()
                         -> parser.parseCommand(word + " " + value));
             }
         }

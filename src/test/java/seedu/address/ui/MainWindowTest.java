@@ -2,6 +2,7 @@ package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -47,6 +48,7 @@ class MainWindowTest {
             assertEquals("Friend details", getLabel(window, "#title").getText());
             assertEquals("Role: Support:Mid", getLabel(window, ".details-game-metadata").getText());
 
+            executeCommand(window, "edit myself n/Alex");
             executeCommand(window, "gameadd myself g/Minecraft u/player m/Mode:Creative");
             assertEquals("Your details", getLabel(window, "#title").getText());
             assertEquals("Mode: Creative", getLabel(window, ".details-game-metadata").getText());
@@ -129,6 +131,7 @@ class MainWindowTest {
             logic.setNextResult(new CommandResult("Listed friends"));
             executeCommand(mainWindow);
             assertEquals("Your details", getLabel(mainWindow, "#title").getText());
+            assertNull(getFriendList(mainWindow).getSelectionModel().getSelectedItem());
         });
     }
 
@@ -146,6 +149,7 @@ class MainWindowTest {
 
             executeCommand(window, "gamelist 1 g/valorant");
             assertEquals("Alice", getLabel(window, "#name").getText());
+            assertEquals(alice, getFriendList(window).getSelectionModel().getSelectedItem());
             assertEquals(1, getGames(window).getChildren().size());
             assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
             assertEquals(2, getFriendList(window).getItems().size());
@@ -158,6 +162,7 @@ class MainWindowTest {
             assertEquals("Stardew Valley", getLabel(window, ".details-game-name").getText());
 
             executeCommand(window, "gamelist 1 g/Unknown");
+            assertEquals(alice, getFriendList(window).getSelectionModel().getSelectedItem());
             assertEquals("No matching game: Unknown", ((Label) getGames(window).getChildren().getFirst()).getText());
             executeCommand(window, "find Alice");
             assertEquals(2, getGames(window).getChildren().size());
@@ -214,6 +219,38 @@ class MainWindowTest {
                 assertEquals(1, getGames(window).getChildren().size());
                 assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
             }
+        });
+    }
+
+    @Test
+    void squad_keepsSelectedDetailsAndGameFilterOnSuccessAndInsufficientCandidates() {
+        FxTestUtil.runAndWait(() -> {
+            Friend friend = new FriendBuilder().withName("Alice").withGames(
+                    new GameBuilder().withGameName("Valorant").addMeta("Role", "Healer").build(),
+                    new GameBuilder().build()).build();
+            MainWindow window = new MainWindow(new Stage(), new StubLogic(friend), Path.of("test-data.json"));
+            window.fillInnerParts();
+            window.getRoot().getScene().getRoot().applyCss();
+            executeCommand(window, "gamelist 1 g/Valorant");
+            for (String input : new String[]{"squad g/Valorant n/2 m/Role:Healer",
+                "squad g/Valorant n/1", "squad g/Valorant n/2"}) {
+                executeCommand(window, input);
+                assertEquals("Friend details", getLabel(window, "#title").getText());
+                assertEquals("Alice", getLabel(window, "#name").getText());
+                assertEquals(1, getGames(window).getChildren().size());
+                assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
+            }
+            InvocationTargetException failure = assertThrows(InvocationTargetException.class, () ->
+                    invokeCommand(window, "squad g/Valorant n/2 m/Role:Tank"));
+            assertInstanceOf(CommandException.class, failure.getCause());
+            assertEquals("Could not find a squad of 2 people.", failure.getCause().getMessage());
+            assertEquals("Friend details", getLabel(window, "#title").getText());
+            assertEquals("Alice", getLabel(window, "#name").getText());
+            assertEquals(1, getGames(window).getChildren().size());
+            assertEquals("Valorant", getLabel(window, ".details-game-name").getText());
+            assertThrows(InvocationTargetException.class, () ->
+                    invokeCommand(window, "squad g/Valorant n/1 m/"));
+            assertEquals("Alice", getLabel(window, "#name").getText());
         });
     }
 

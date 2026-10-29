@@ -3,6 +3,7 @@ package seedu.address.logic.parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -14,89 +15,132 @@ import seedu.address.logic.parser.exceptions.ParseException;
  * 2. Leading and trailing whitespaces of an argument value will be discarded.<br>
  * 3. An argument may be repeated and all its values will be accumulated e.g. the value of {@code t/}
  *    in the above example.<br>
+ * 4. An argument value may be enclosed in double quotes e.g. {@code t/"11.00 k/"}, where {@code k/} is literal.<br>
  */
 public class ArgumentTokenizer {
 
-    public static final String MESSAGE_INVALID_QUOTED_VALUE = "Invalid quoted value. Enclose the entire value in "
-            + "double quotes; escape double quotes and backslashes with a backslash.";
+    public static final String MESSAGE_UNCLOSED_QUOTE = "Missing closing double quote. To end a quoted value "
+            + "with \\, add a space before the closing quote.";
+    public static final String MESSAGE_TEXT_AFTER_QUOTE = "Text after a closing double quote is not allowed. "
+            + "Wrap the whole value in double quotes, and add a space before the next prefix.";
+    public static final String MESSAGE_BARE_QUOTE = "Invalid double quote. Wrap the whole value in double quotes, "
+            + "or write the double quote as \\\".";
 
-    /**
-     * Tokenizes with optional double quotes around complete values. Prefixes inside quotes are literal text.
-     * Only callers opting into this method interpret quotes and backslash escapes; ordinary tokenization is unchanged.
-     *
-     * @throws ParseException if a quoted value is unterminated, has an invalid escape,
-     *     or has text after its closing quote.
-     */
-    public static ArgumentMultimap tokenizeWithQuotedValues(String argsString, Prefix... prefixes)
-            throws ParseException {
-        List<PrefixPosition> positions = findAllPrefixPositions(argsString, prefixes);
-        positions.sort((first, second) -> first.getStartPosition() - second.getStartPosition());
-        ArgumentMultimap arguments = new ArgumentMultimap();
-        int preambleEnd = positions.isEmpty() ? argsString.length() : positions.getFirst().getStartPosition();
-        arguments.put(new Prefix(""), argsString.substring(0, preambleEnd).trim());
-        for (int i = 0; i < positions.size();) {
-            PrefixPosition current = positions.get(i);
-            int valueStart = current.getStartPosition() + current.getPrefix().getPrefix().length();
-            while (valueStart < argsString.length() && argsString.charAt(valueStart) <= ' ') {
-                valueStart++;
-            }
-            int next = i + 1;
-            String value;
-            if (valueStart < argsString.length() && argsString.charAt(valueStart) == '"') {
-                QuotedValue quoted = readQuotedValue(argsString, valueStart);
-                while (next < positions.size() && positions.get(next).getStartPosition() < quoted.endPosition()) {
-                    next++;
-                }
-                int valueEnd = next < positions.size() ? positions.get(next).getStartPosition() : argsString.length();
-                if (!argsString.substring(quoted.endPosition(), valueEnd).trim().isEmpty()) {
-                    throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
-                }
-                value = quoted.value().trim();
-            } else {
-                // Use the original prefix boundary even when the current value contains only whitespace.
-                int valueEnd = next < positions.size() ? positions.get(next).getStartPosition() : argsString.length();
-                int rawStart = current.getStartPosition() + current.getPrefix().getPrefix().length();
-                value = argsString.substring(rawStart, valueEnd).trim();
-            }
-            arguments.put(current.getPrefix(), value);
-            i = next;
-        }
-        return arguments;
-    }
-
-    private static QuotedValue readQuotedValue(String argsString, int start) throws ParseException {
-        StringBuilder value = new StringBuilder();
-        for (int i = start + 1; i < argsString.length(); i++) {
-            char character = argsString.charAt(i);
-            if (character == '"') {
-                return new QuotedValue(value.toString(), i + 1);
-            }
-            if (character == '\\') {
-                i++;
-                if (i == argsString.length() || (argsString.charAt(i) != '"' && argsString.charAt(i) != '\\')) {
-                    throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
-                }
-                character = argsString.charAt(i);
-            }
-            value.append(character);
-        }
-        throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
-    }
-
-    private record QuotedValue(String value, int endPosition) {
-    }
+    private static final Pattern UNESCAPED_QUOTE = Pattern.compile("(?<!\\\\)\"");
 
     /**
      * Tokenizes an arguments string and returns an {@code ArgumentMultimap} object that maps prefixes to their
      * respective argument values. Only the given prefixes will be recognized in the arguments string.
+     * A value whose first character after trimming is {@code "} is a quoted value, and prefixes inside it are
+     * literal text. Any other double quote must be written as {@code \"}. Other backslashes are kept as is.
      *
      * @param argsString Arguments string of the form: {@code preamble <prefix>value <prefix>value ...}
      * @param prefixes   Prefixes to tokenize the arguments string with
      * @return           ArgumentMultimap object that maps prefixes to their arguments
+     * @throws ParseException if a quoted value is unterminated or has text after its closing quote,
+     *     or an unquoted value has an unescaped double quote.
      */
-    public static ArgumentMultimap tokenize(String argsString, Prefix... prefixes) {
+    public static ArgumentMultimap tokenize(String argsString, Prefix... prefixes) throws ParseException {
         List<PrefixPosition> positions = findAllPrefixPositions(argsString, prefixes);
-        return extractArguments(argsString, positions);
+        positions.sort((first, second) -> first.getStartPosition() - second.getStartPosition());
+
+        ArgumentMultimap arguments = new ArgumentMultimap();
+        arguments.put(new Prefix(""), argsString.substring(0, startOfPrefixOrEnd(argsString, positions, 0)).trim());
+        int index = 0;
+        while (index < positions.size()) {
+            ArgumentValue argument = extractArgumentValue(argsString, positions, index);
+            arguments.put(positions.get(index).getPrefix(), argument.value());
+            index = argument.nextIndex();
+        }
+        return arguments;
+    }
+
+    /**
+     * Returns the trimmed value of the prefix at {@code index}, and the index of the next prefix outside that value.
+     */
+    private static ArgumentValue extractArgumentValue(String argsString, List<PrefixPosition> positions, int index)
+            throws ParseException {
+        int valueStart = positions.get(index).getValueStartPosition();
+        String value = argsString.substring(valueStart, startOfPrefixOrEnd(argsString, positions, index + 1)).trim();
+        if (!value.startsWith("\"")) {
+            return new ArgumentValue(unescapeQuotes(value), index + 1);
+        }
+        return extractQuotedValue(argsString, positions, argsString.indexOf('"', valueStart));
+    }
+
+    /**
+     * Returns the trimmed quoted value opening at {@code quoteStart}, and the index of the first prefix after it.
+     *
+     * @throws ParseException if the closing quote is missing or followed by text other than whitespace.
+     */
+    private static ArgumentValue extractQuotedValue(String argsString, List<PrefixPosition> positions,
+            int quoteStart) throws ParseException {
+        QuotedValue quoted = readQuotedValue(argsString, quoteStart);
+        int nextIndex = indexOfFirstPrefixFrom(positions, quoted.endPosition());
+        String trailingText = argsString.substring(quoted.endPosition(),
+                startOfPrefixOrEnd(argsString, positions, nextIndex));
+        if (!trailingText.trim().isEmpty()) {
+            throw new ParseException(MESSAGE_TEXT_AFTER_QUOTE);
+        }
+        return new ArgumentValue(quoted.value().trim(), nextIndex);
+    }
+
+    /**
+     * Reads the quoted value opening at {@code quoteStart}. Only a backslash right before a double quote
+     * is removed, so {@code \\"} is read as {@code \"}.
+     *
+     * @throws ParseException if the closing quote is missing.
+     */
+    private static QuotedValue readQuotedValue(String argsString, int quoteStart) throws ParseException {
+        StringBuilder value = new StringBuilder();
+        int i = quoteStart + 1;
+        while (i < argsString.length() && argsString.charAt(i) != '"') {
+            if (argsString.startsWith("\\\"", i)) {
+                i++; // Skip the backslash so the quote is kept as text.
+            }
+            value.append(argsString.charAt(i));
+            i++;
+        }
+        if (i == argsString.length()) {
+            throw new ParseException(MESSAGE_UNCLOSED_QUOTE);
+        }
+        return new QuotedValue(value.toString(), i + 1);
+    }
+
+    /**
+     * Returns {@code value} with the backslash removed from each {@code \"}.
+     *
+     * @throws ParseException if {@code value} has a double quote without a backslash right before it.
+     */
+    private static String unescapeQuotes(String value) throws ParseException {
+        if (UNESCAPED_QUOTE.matcher(value).find()) {
+            throw new ParseException(MESSAGE_BARE_QUOTE);
+        }
+        return value.replace("\\\"", "\"");
+    }
+
+    /**
+     * Returns the index of the first prefix starting at or after {@code position}.
+     */
+    private static int indexOfFirstPrefixFrom(List<PrefixPosition> positions, int position) {
+        int index = 0;
+        while (index < positions.size() && positions.get(index).getStartPosition() < position) {
+            index++;
+        }
+        return index;
+    }
+
+    /**
+     * Returns the start position of the prefix at {@code index}, or the end of {@code argsString} if there is none.
+     */
+    private static int startOfPrefixOrEnd(String argsString, List<PrefixPosition> positions, int index) {
+        return index < positions.size() ? positions.get(index).getStartPosition() : argsString.length();
+    }
+
+    private record ArgumentValue(String value, int nextIndex) {
+    }
+
+    private record QuotedValue(String value, int endPosition) {
     }
 
     /**
@@ -147,55 +191,6 @@ public class ArgumentTokenizer {
     }
 
     /**
-     * Extracts prefixes and their argument values, and returns an {@code ArgumentMultimap} object that maps the
-     * extracted prefixes to their respective arguments. Prefixes are extracted based on their zero-based positions in
-     * {@code argsString}.
-     *
-     * @param argsString      Arguments string of the form: {@code preamble <prefix>value <prefix>value ...}
-     * @param prefixPositions Zero-based positions of all prefixes in {@code argsString}
-     * @return                ArgumentMultimap object that maps prefixes to their arguments
-     */
-    private static ArgumentMultimap extractArguments(String argsString, List<PrefixPosition> prefixPositions) {
-
-        // Sort by start position
-        prefixPositions.sort((prefix1, prefix2) -> prefix1.getStartPosition() - prefix2.getStartPosition());
-
-        // Insert a PrefixPosition to represent the preamble
-        PrefixPosition preambleMarker = new PrefixPosition(new Prefix(""), 0);
-        prefixPositions.addFirst(preambleMarker);
-
-        // Add a dummy PrefixPosition to represent the end of the string
-        PrefixPosition endPositionMarker = new PrefixPosition(new Prefix(""), argsString.length());
-        prefixPositions.add(endPositionMarker);
-
-        // Map prefixes to their argument values (if any)
-        ArgumentMultimap argMultimap = new ArgumentMultimap();
-        for (int i = 0; i < prefixPositions.size() - 1; i++) {
-            // Extract and store prefixes and their arguments
-            Prefix argPrefix = prefixPositions.get(i).getPrefix();
-            String argValue = extractArgumentValue(argsString, prefixPositions.get(i), prefixPositions.get(i + 1));
-            argMultimap.put(argPrefix, argValue);
-        }
-
-        return argMultimap;
-    }
-
-    /**
-     * Returns the trimmed value of the argument in the arguments string specified by {@code currentPrefixPosition}.
-     * The end position of the value is determined by {@code nextPrefixPosition}.
-     */
-    private static String extractArgumentValue(String argsString,
-                                        PrefixPosition currentPrefixPosition,
-                                        PrefixPosition nextPrefixPosition) {
-        Prefix prefix = currentPrefixPosition.getPrefix();
-
-        int valueStartPos = currentPrefixPosition.getStartPosition() + prefix.getPrefix().length();
-        String value = argsString.substring(valueStartPos, nextPrefixPosition.getStartPosition());
-
-        return value.trim();
-    }
-
-    /**
      * Represents a prefix's position in an arguments string.
      */
     private static class PrefixPosition {
@@ -209,6 +204,10 @@ public class ArgumentTokenizer {
 
         int getStartPosition() {
             return startPosition;
+        }
+
+        int getValueStartPosition() {
+            return startPosition + prefix.getPrefix().length();
         }
 
         Prefix getPrefix() {

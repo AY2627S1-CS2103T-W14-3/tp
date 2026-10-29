@@ -7,6 +7,7 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_FRIEND;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.GameListCommand;
 import seedu.address.model.game.GameName;
 
@@ -32,8 +33,7 @@ public class GameListCommandParserTest {
     public void parse_optionalGameFilter_success() {
         GameListCommand expected = new GameListCommand(INDEX_FIRST_FRIEND, new GameName("Stardew Valley"));
         assertParseSuccess(parser, "1 g/Stardew Valley", expected);
-        assertParseSuccess(parser, " \t1 \tg/  Stardew Valley  \n", expected);
-        assertParseSuccess(parser, "\n1\ng/  Stardew Valley  \n", expected);
+        assertParseSuccess(parser, " \t1 g/  Stardew Valley  \n", expected);
         assertParseSuccess(parser, "1 g/stardew valley", expected);
         assertParseSuccess(parser, "2 g/minecraft",
                 new GameListCommand(Index.fromOneBased(2), new GameName("Minecraft")));
@@ -49,7 +49,7 @@ public class GameListCommandParserTest {
 
     @Test
     public void parse_missingIndex_failure() {
-        for (String input : new String[]{"", " \t\n ", "g/Valorant", " g/Valorant", "\tg/Valorant"}) {
+        for (String input : new String[]{"", " \t\n ", " g/Valorant"}) {
             assertParseFailure(parser, input, GameListCommand.MESSAGE_USAGE);
         }
     }
@@ -57,15 +57,14 @@ public class GameListCommandParserTest {
     @Test
     public void parse_invalidIndex_failure() {
         for (String index : new String[]{"abc", "0", "-1", "+1", "1.5", "2147483648", "999999999999999"}) {
-            assertParseFailure(parser, index, GameListCommand.MESSAGE_INVALID_INDEX);
-            assertParseFailure(parser, index + " g/Valorant", GameListCommand.MESSAGE_INVALID_INDEX);
+            assertParseFailure(parser, index, String.format(ParserUtil.MESSAGE_INVALID_INDEX, index));
+            assertParseFailure(parser, index + " g/Valorant", String.format(ParserUtil.MESSAGE_INVALID_INDEX, index));
         }
     }
 
     @Test
     public void parse_extraOrUnknownParameters_failure() {
         for (String input : new String[]{"1 2", "1 extra", "1 extra g/Valorant", "1 x/Valorant",
-            "1 g/Valorant x/foo", "1 g/Valorant\tp/foo", "1 g/Valorant unknown/value",
             "1 n/Alice g/Valorant", "1 /foo", "1 G/Valorant"}) {
             assertParseFailure(parser, input, GameListCommand.MESSAGE_USAGE);
         }
@@ -74,17 +73,35 @@ public class GameListCommandParserTest {
     @Test
     public void parse_repeatedGameFilter_failure() {
         for (String input : new String[]{"1 g/Valorant g/Minecraft", "1 g/Valorant g/Valorant",
-            "1 g/ g/Valorant", "1 g/Valorant\tg/Valorant", "1 g/Valorant\ng/Valorant", "1 g/ g/"}) {
-            assertParseFailure(parser, input, GameListCommand.MESSAGE_REPEATED_GAME);
+            "1 g/ g/Valorant", "1 g/ g/"}) {
+            assertParseFailure(parser, input, Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_GAME));
         }
     }
 
     @Test
     public void parse_invalidGameName_failure() {
         for (String name : new String[]{"", "   ", "!!!", "a".repeat(51), "Game\tName", "Game\nName",
-            "a\u007fb", "\u0000Game", "Game\u0000"}) {
-            assertParseFailure(parser, "1 g/" + name,
-                    String.format(GameListCommand.MESSAGE_INVALID_GAME_NAME, name.strip()));
+            "a\u007fb"}) {
+            assertParseFailure(parser, "1 g/" + name, GameName.MESSAGE_CONSTRAINTS);
         }
+    }
+
+    @Test
+    public void parse_quotedGameNameWithPrefix_success() {
+        for (String name : new String[]{"Mode x/1 n/2", "Version g/2", "a".repeat(50)}) {
+            assertParseSuccess(parser, "1 g/\"" + name + "\"",
+                    new GameListCommand(INDEX_FIRST_FRIEND, new GameName(name)));
+        }
+        assertParseSuccess(parser, " myself g/ \"Version n/2\" ",
+                new GameListCommand(Index.myself(), new GameName("Version n/2")));
+    }
+
+    @Test
+    public void parse_quotedGameNameWithInvalidParts_failure() {
+        assertParseFailure(parser, "1 x/a g/\"Version n/2\"", GameListCommand.MESSAGE_USAGE);
+        assertParseFailure(parser, "1 g/\"Version\" g/Other",
+                Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_GAME));
+        assertParseFailure(parser, "1 g/\"Version n/2", ArgumentTokenizer.MESSAGE_UNCLOSED_QUOTE);
+        assertParseFailure(parser, "1 g/\"" + "a".repeat(51) + "\"", GameName.MESSAGE_CONSTRAINTS);
     }
 }

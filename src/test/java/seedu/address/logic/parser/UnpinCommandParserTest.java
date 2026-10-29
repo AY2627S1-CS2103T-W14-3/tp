@@ -27,7 +27,7 @@ public class UnpinCommandParserTest {
     public void parse_invalidArgs_throwsParseException() {
         for (String args : new String[] {"", " ", "myself", "0", "-1", "+1", "1.5", "1 2", "2147483648"}) {
             String expectedMessage = args.trim().isEmpty()
-                    ? ParserUtil.MESSAGE_MISSING_INDEX : ParserUtil.MESSAGE_INVALID_INDEX;
+                    ? ParserUtil.MESSAGE_MISSING_INDEX : String.format(ParserUtil.MESSAGE_INVALID_INDEX, args.trim());
             assertParseFailure(parser, args, expectedMessage);
         }
     }

@@ -48,7 +48,7 @@ public class GameDeleteCommandParserTest {
     @Test
     public void parse_invalidIndex_failure() {
         for (String index : new String[]{"zero", "0", "-1", "1.5", "2147483648", "1 extra", "myself 1"}) {
-            assertParseFailure(parser, index + " g/Minecraft", ParserUtil.MESSAGE_INVALID_INDEX);
+            assertParseFailure(parser, index + " g/Minecraft", String.format(ParserUtil.MESSAGE_INVALID_INDEX, index));
         }
     }
 
@@ -63,5 +63,11 @@ public class GameDeleteCommandParserTest {
     public void parse_duplicateGamePrefix_failure() {
         assertParseFailure(parser, "myself g/Minecraft g/Valorant",
                 Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_GAME_NAME));
+    }
+
+    @Test
+    public void parse_quotedGameNameWithPrefix_success() {
+        assertParseSuccess(parser, " 1 g/\"Version g/2\"",
+                new GameDeleteCommand(Index.fromOneBased(1), new GameName("Version g/2")));
     }
 }

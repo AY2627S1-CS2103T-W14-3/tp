@@ -18,6 +18,8 @@ public class GameNameTest {
     @Test
     public void constructor_invalidGameName_throwsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> new GameName(""));
+        assertThrows(IllegalArgumentException.class, () -> new GameName("Player\u200b"));
+        assertThrows(IllegalArgumentException.class, () -> new GameName("Player\uD800"));
     }
 
     @Test

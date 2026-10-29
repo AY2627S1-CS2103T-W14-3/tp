@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import seedu.address.logic.Messages;
 import seedu.address.logic.parser.GameMatesParser;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -56,12 +57,17 @@ public class GameMyselfIntegrationTest {
     }
 
     @Test
-    public void execute_myselfWithSameNameAsFriend_preservesFriendsAndFilter() throws Exception {
+    public void execute_unnamedProfile_requiresInitializationAndPreservesFriendsAndFilter() throws Exception {
         Friend sameName = new FriendBuilder().withName("Myself").withGames(valorant).build();
         Friend displayed = new FriendBuilder().withName("Melody").build();
         model.addFriend(sameName);
         model.addFriend(displayed);
         model.updateFilteredFriendList(friend -> friend.equals(displayed));
+        for (String command : List.of("gamelist myself", "gameadd myself g/Valorant",
+                "gameedit myself g/Valorant u/player", "gamedel myself g/Valorant")) {
+            assertCommandFailure(parser.parseCommand(command), model, Messages.MESSAGE_MYSELF_NOT_INITIALIZED);
+        }
+        parser.parseCommand("edit myself n/Alex").execute(model);
         Friend original = model.getGameMates().getMyself();
 
         parser.parseCommand("gameadd myself g/Valorant u/player").execute(model);

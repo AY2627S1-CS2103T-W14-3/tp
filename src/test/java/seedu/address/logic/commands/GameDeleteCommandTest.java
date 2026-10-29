@@ -38,7 +38,19 @@ public class GameDeleteCommandTest {
     public void execute_missingGame_failure() {
         Friend friend = model.getFilteredFriendList().getFirst();
         assertCommandFailure(new GameDeleteCommand(Index.fromOneBased(1), new GameName("Minecraft")), model,
-                String.format(GameDeleteCommand.MESSAGE_GAME_NOT_FOUND, friend.getName(), "Minecraft"));
+                String.format(GameTargetResolver.MESSAGE_GAME_NOT_FOUND, friend.getName(), "Minecraft"));
+    }
+
+    @Test
+    public void execute_ambiguousStoredGame_failureWithoutMutation() {
+        Friend original = model.getFilteredFriendList().getFirst();
+        Game first = new Game(new GameName("Minecraft"), new Username("builder"));
+        Game second = new Game(new GameName("MINECRAFT"), new Username("anotherBuilder"));
+        Friend ambiguous = new FriendBuilder(original).withGames(first, second).build();
+        model.setFriend(original, ambiguous);
+
+        assertCommandFailure(new GameDeleteCommand(Index.fromOneBased(1), new GameName("minecraft")), model,
+                String.format(GameTargetResolver.MESSAGE_AMBIGUOUS_GAME, "minecraft"));
     }
 
     @Test
