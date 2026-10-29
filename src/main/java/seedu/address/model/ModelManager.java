@@ -3,7 +3,6 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
-import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -23,8 +22,6 @@ import seedu.address.model.friend.FriendTarget;
  */
 public class ModelManager implements Model {
     private static final Logger logger = LogsCenter.getLogger(ModelManager.class);
-    private static final Comparator<Friend> PINNED_FRIENDS_FIRST = Comparator.comparing(Friend::isPinned)
-            .reversed();
 
     private final GameMates gameMates;
     private final UserPrefs userPrefs;
@@ -170,7 +167,7 @@ public class ModelManager implements Model {
     @Override
     public void sortFilteredFriendList(FriendSortCriterion sortCriterion, boolean isDescending) {
         requireNonNull(sortCriterion);
-        sortedFriends.setComparator(PINNED_FRIENDS_FIRST.thenComparing(sortCriterion.comparator(isDescending)));
+        sortedFriends.setComparator(sortCriterion.comparator(isDescending));
     }
 
     @Override
