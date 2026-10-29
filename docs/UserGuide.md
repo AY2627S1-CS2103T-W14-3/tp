@@ -88,6 +88,7 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
   Tags may be repeated. Identical tag values are applied once.
 * Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all active friends
   again before choosing an index. Zero, negative numbers, decimals, a leading `+` and larger integers are rejected.
+  Invalid-index feedback quotes the rejected input. In error examples below, `INPUT` stands for that text.
 * For `edit`, `gameadd`, `gameedit` and `gamedel`, `FRIEND_INDEX|myself` means either a displayed friend index or the
   case-insensitive keyword `myself` for your own profile. Do not type `|`. The selector must come before prefixes.
   `myself` also works when no friends are displayed.
@@ -406,7 +407,7 @@ Errors:
 |---------------|----------|
 | `myself` before profile setup | `Set your profile name first using "edit myself n/NAME" command.` |
 | Missing selector or extra words before `g/` | <code>Invalid command format. Usage: gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code> |
-| Malformed, zero, negative or overflowing index | `Index must be a positive integer between 1 and 2147483647 (inclusive).` |
+| Malformed, zero, negative or overflowing index | `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).` |
 | Positive index outside the displayed list | `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.` |
 | Numeric index with an empty displayed list | `No friends are currently displayed. Use list to show all friends.` |
 | Invalid game name, including empty `g/` | `Game names must contain 1 to 50 printable characters and include at least one letter or digit.` |
@@ -573,7 +574,7 @@ Examples:
 Errors:
 
 * Missing index: `Please provide an index.`
-* Invalid index (including a value above 2147483647): `Index must be a positive integer between 1 and 2147483647 (inclusive).`
+* Invalid index (including a value above 2147483647): `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`
 * Empty displayed list: `No friends are currently displayed. Use list to show all friends.`
 * Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
@@ -623,9 +624,9 @@ Format: `archive FRIEND_INDEX`
 * Feedback is `Archived FRIEND_NAME.`. Archiving an already archived friend is rejected.
 * Your Myself profile cannot be archived. `myself`, missing indices, extra arguments and invalid indices are rejected.
 * Missing indices report `Please provide an index.`. Invalid indices (such as `-1`, `0` or `abc`) report
-  `Index must be a positive integer between 1 and 2147483647 (inclusive).`.
+  `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`.
 * Archived friends keep their names reserved. Adding or renaming another friend to the same name is rejected
-  with a suggestion to use `archivelist` and `unarchive`.
+  with `This name is already used by an archived friend. Choose a different name.` This also applies to profile edits.
 * `list` and `list g/GAME_NAME` show active friends only. `find` searches both active and archived friends.
 
 Example: `list`, then `archive 1` archives the first displayed active friend.
@@ -673,7 +674,7 @@ Format: `unarchive FRIEND_INDEX`
 * Feedback is `Restored FRIEND_NAME.`. Selecting an active friend is rejected with a suggestion to use `archivelist`.
 * `myself`, missing indices, extra arguments and invalid indices are rejected. Missing indices report
   `Please provide an index.`; invalid indices report
-  `Index must be a positive integer between 1 and 2147483647 (inclusive).`.
+  `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`.
 * Out-of-range indices, including
   empty lists, report `The friend index provided is invalid.` without changing data or the current view.
 
@@ -702,7 +703,7 @@ Errors:
 
 * Missing index: `Please provide an index.`
 * Invalid index (such as `0`, `-1`, or `abc`), extra arguments, or a value above 2147483647:
-  `Index must be a positive integer between 1 and 2147483647 (inclusive).`
+  `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`
 * Index outside the displayed list, including an empty list: `The friend index provided is invalid.`
 
 ### Clearing the friend list: `clear`

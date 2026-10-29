@@ -25,8 +25,6 @@ import seedu.address.model.tag.Tag;
  */
 public class EditCommandParser implements Parser<EditCommand> {
 
-    public static final String MESSAGE_INVALID_INDEX = "Invalid index \"%1$s\". " + ParserUtil.MESSAGE_INVALID_INDEX;
-
     /**
      * Parses the given {@code String} of arguments in the context of the EditCommand
      * and returns an EditCommand object for execution.
@@ -38,16 +36,7 @@ public class EditCommandParser implements Parser<EditCommand> {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_TAG);
 
-        String target = argMultimap.getPreamble();
-        Index index;
-        try {
-            index = ParserUtil.parseIndexOrMyself(target);
-        } catch (ParseException exception) {
-            if (target.isEmpty()) {
-                throw exception;
-            }
-            throw new ParseException(String.format(MESSAGE_INVALID_INDEX, target), exception);
-        }
+        Index index = ParserUtil.parseIndexOrMyself(argMultimap.getPreamble());
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL);
 

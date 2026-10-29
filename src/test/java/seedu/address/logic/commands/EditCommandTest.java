@@ -149,7 +149,7 @@ public class EditCommandTest {
         EditCommand command = new EditCommand(Index.myself(),
                 new EditFriendDescriptorBuilder().withName(friendName).build());
 
-        assertCommandFailure(command, model, Messages.MESSAGE_PROFILE_NAME_CONFLICT);
+        assertCommandFailure(command, model, Messages.MESSAGE_DUPLICATE_FRIEND);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class EditCommandTest {
         EditCommand command = new EditCommand(Index.myself(), new EditFriendDescriptorBuilder()
                 .withName(friend.getName().fullName.toUpperCase(Locale.ROOT)).build());
 
-        assertCommandFailure(command, model, Messages.MESSAGE_PROFILE_NAME_CONFLICT);
+        assertCommandFailure(command, model, Messages.MESSAGE_DUPLICATE_ARCHIVED_FRIEND);
     }
 
     @Test

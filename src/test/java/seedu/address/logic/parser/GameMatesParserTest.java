@@ -147,9 +147,7 @@ public class GameMatesParserTest {
             for (String command : List.of("delete " + index, "edit " + index + " n/Alice",
                     "gameadd " + index + " g/Valorant u/Alice", "gamedel " + index + " g/Valorant",
                     "gamelist " + index, "gamelist " + index + " g/Valorant")) {
-                String expected = command.startsWith("edit ")
-                        ? String.format(EditCommandParser.MESSAGE_INVALID_INDEX, index)
-                        : ParserUtil.MESSAGE_INVALID_INDEX;
+                String expected = String.format(ParserUtil.MESSAGE_INVALID_INDEX, index);
                 assertThrows(ParseException.class, expected, () -> parser.parseCommand(command));
             }
         }

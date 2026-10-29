@@ -56,8 +56,17 @@ public class ParserUtilTest {
         assertThrows(ParseException.class, ParserUtil.MESSAGE_MISSING_INDEX, ()
                 -> ParserUtil.parseIndexOrMyself(WHITESPACE));
         for (String target : List.of("0", "myself 1", "my self")) {
-            assertThrows(ParseException.class, MESSAGE_INVALID_INDEX, () -> ParserUtil.parseIndexOrMyself(target));
+            assertThrows(ParseException.class, String.format(MESSAGE_INVALID_INDEX, target), ()
+                    -> ParserUtil.parseIndexOrMyself(target));
         }
+    }
+
+    @Test
+    public void parseIndex_invalidSelector_quotesEntireTrimmedInput() {
+        String expected = "Invalid index \"1 x/abc\". Index must be a positive integer between 1 and "
+                + "2147483647 (inclusive).";
+        assertThrows(ParseException.class, expected, () -> ParserUtil.parseIndex(" 1 x/abc "));
+        assertThrows(ParseException.class, expected, () -> ParserUtil.parseIndexOrMyself(" 1 x/abc "));
     }
 
     @Test
@@ -215,7 +224,8 @@ public class ParserUtilTest {
     @Test
     public void parseIndex_outOfRangeInput_throwsParseException() {
         for (String index : List.of("2147483648", "9223372036854775808", "9".repeat(1000))) {
-            assertThrows(ParseException.class, MESSAGE_INVALID_INDEX, () -> ParserUtil.parseIndex(index));
+            assertThrows(ParseException.class, String.format(MESSAGE_INVALID_INDEX, index), ()
+                    -> ParserUtil.parseIndex(index));
         }
     }
 

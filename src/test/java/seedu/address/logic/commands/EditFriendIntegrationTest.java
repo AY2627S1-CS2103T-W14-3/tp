@@ -70,7 +70,7 @@ public class EditFriendIntegrationTest {
         GameMates before = new GameMates(model.getGameMates());
 
         for (String name : List.of("Melody Tan", "MELODY TAN", "melody   tan")) {
-            assertThrows(CommandException.class, Messages.MESSAGE_PROFILE_NAME_CONFLICT, ()
+            assertThrows(CommandException.class, Messages.MESSAGE_DUPLICATE_FRIEND, ()
                     -> parser.parseCommand("edit myself n/" + name + " p/").execute(model));
             assertEquals(before, model.getGameMates());
             assertEquals(List.of(displayed), model.getFilteredFriendList());

@@ -29,9 +29,7 @@ final class FriendValidator {
             if (candidate.getName().isEmpty()) {
                 throw new CommandException(Messages.MESSAGE_MYSELF_NOT_INITIALIZED);
             }
-            if (model.findFriend(candidate).isDefined()) {
-                throw new CommandException(Messages.MESSAGE_PROFILE_NAME_CONFLICT);
-            }
+            checkForDuplicateFriend(model, candidate);
         } else {
             checkForDuplicateMyself(model, candidate);
             if (!target.friend().isSameFriend(candidate)) {

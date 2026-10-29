@@ -758,9 +758,8 @@ They must also differ from the separately stored Myself profile.
 An archived friend's name stays reserved.
 
 `FriendValidator` rejects a conflicting add or rename.
-When adding or renaming a listed friend, an archived conflict suggests `archivelist` and `unarchive`.
-For a profile rename, any conflicting friend name instead asks the user to choose a different profile name;
-unarchiving a friend does not resolve that conflict.
+For any add or rename, including profile edits, an archived conflict explains that the name is already used by
+an archived friend and asks for a different name. Unarchiving the friend does not resolve the name conflict.
 The validator uses `Model.findFriend()` for one identity lookup across both statuses, independently of the display filter.
 
 An existing friend can keep their own name during an edit.
@@ -1174,7 +1173,8 @@ Prerequisite: fresh sample data. These actions are destructive within the dispos
    reappear with `list`. Bernice's games are removed with her, while Roy's Minecraft entry remains.
 2. `delete`, `delete 0`, `delete -1`, `delete x`, `delete 2147483648`, `delete 1 2` and `delete 999`:
    expected errors without deleting anyone. Missing index reports `Please provide an index.`; malformed values
-   report `Index must be a positive integer between 1 and 2147483647 (inclusive).`; an out-of-range index reports `The friend index provided is invalid.`.
+   report `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`,
+   where `INPUT` is the rejected text. An out-of-range index reports `The friend index provided is invalid.`.
 3. `clear`: expected immediate empty list and `All active and archived friends have been cleared!`. `delete 1` then reports the generic
    invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list. There is no undo.
 
