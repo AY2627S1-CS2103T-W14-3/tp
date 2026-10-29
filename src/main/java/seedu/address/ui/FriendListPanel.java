@@ -38,6 +38,15 @@ public class FriendListPanel extends UiPart<Region> {
                 onFriendSelected.accept(newValue));
     }
 
+    /** Selects the displayed friend, or clears the selection when it is not displayed. */
+    public void selectFriend(Friend friend) {
+        if (friend == null || !friendListView.getItems().contains(friend)) {
+            friendListView.getSelectionModel().clearSelection();
+            return;
+        }
+        friendListView.getSelectionModel().select(friend);
+    }
+
     /** Updates the heading even when the current list is empty. */
     public void setFriendListScope(FriendListScope scope) {
         listHeading.setText(switch (scope) {

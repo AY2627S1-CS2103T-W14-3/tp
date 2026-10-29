@@ -31,10 +31,16 @@ class FriendListPanelTest {
             ListView<Friend> listView = getListView(panel);
             assertEquals(friends, listView.getItems());
 
-            listView.getSelectionModel().select(ben);
+            panel.selectFriend(ben);
             assertEquals(ben, selectedFriend.get());
 
-            listView.getSelectionModel().clearSelection();
+            panel.selectFriend(new FriendBuilder().withName("Chris").build());
+            assertNull(selectedFriend.get());
+
+            panel.selectFriend(amy);
+            assertEquals(amy, selectedFriend.get());
+
+            panel.selectFriend(null);
             assertNull(selectedFriend.get());
         });
     }
@@ -74,4 +80,5 @@ class FriendListPanelTest {
     private ListView<Friend> getListView(FriendListPanel panel) {
         return (ListView<Friend>) panel.getRoot().lookup("#friendListView");
     }
+
 }
