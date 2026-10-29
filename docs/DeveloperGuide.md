@@ -251,10 +251,10 @@ The list validates this invariant on addition, replacement and bulk replacement.
 A violation throws `PinnedFriendLimitExceededException` before the collection changes.
 Tag names contain 1–50 ASCII alphanumeric characters.
 
-After additions and replacements, `UniqueFriendList` stably partitions friends, with pinned friends before unpinned friends.
-It preserves the existing relative order within each group.
-Filters use that stored order, so filtering preserves this invariant.
-An explicit sort uses a separate display comparator and can override the pin order in the current implementation.
+`UniqueFriendList` retains insertion order, including when pin or archive status changes.
+`ModelManager` applies `PINNED_FRIENDS_FIRST` to its `SortedList`, placing pinned friends above unpinned friends
+without rearranging the stored collection. With no explicit sort, each group follows insertion order.
+Explicit name/game comparators also put pinned friends first. JSON saves the original insertion order and pin status.
 
 **Game fields and identity**
 
@@ -494,12 +494,11 @@ Both commands replace the previous predicate. Their filters do not intersect.
 **Display order**
 
 After filtering, `list s/name` and `list s/game` set a `SortedList` comparator in `ModelManager`.
-The default direction and `o/asc` use ascending order. `o/desc` reverses the comparator.
-The default `list` clears the comparator and keeps the stored insertion order.
+The default direction and `o/asc` use ascending order. `o/desc` reverses the order within each pin group.
+The default `list` restores the pin-only comparator, keeping stored insertion order within each group.
 
 Game sorting uses each friend's alphabetically first game name. Friend names resolve ties.
-Ascending game order puts friends without games last.
-Reversing the comparator currently also reverses that placement.
+Friends without games appear last within each pin group in both directions.
 
 **Parser behavior and empty results**
 

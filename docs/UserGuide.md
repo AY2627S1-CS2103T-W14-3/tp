@@ -226,15 +226,16 @@ Format: `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`
 * `list` shows all active friends and clears any previous friend-list filter. Feedback is `Listed all active friends.`,
   including when the list is empty.
 * `list g/GAME_NAME` shows active friends who have a game with that exact name. The match is case-insensitive, so `list g/valorant` matches `Valorant`.
+* Pinned friends remain above unpinned friends. Sorting applies within each group.
 * `list s/name` orders the displayed friends alphabetically by name, ignoring case.
 * `list s/game` orders friends by the alphabetically first game in each friend's game list, ignoring case.
-  Friends without games appear last in ascending order and first in descending order; name breaks ties.
+  Friends without games appear last within each group in either direction; name breaks ties.
 * `o/asc` explicitly selects ascending order; this is the default. `o/desc` reverses the selected name or game
   order. An order may only be supplied with `s/`.
 * `list g/GAME_NAME s/NAME|GAME` first filters by game, then sorts the matching friends. Prefixes may be supplied in
   either order.
 * Running `find` changes only the friend-list filter and retains a sort applied by an earlier `list` command.
-  Running `list` without `s/` clears that sort and returns to the stored insertion order.
+  Running `list` without `s/` clears that sort and returns to the stored insertion order within each pin group.
 * Leading and trailing spaces in `GAME_NAME` are ignored, but partial names do not match. For example, `list g/Val` does not match `Valorant`.
 * Only game names are matched; a friend's in-game username is not matched.
 * Multi-word game names are accepted. Only one `g/` prefix may be supplied, and the game name must not be empty.
@@ -258,8 +259,9 @@ Examples:
 
 ### Pinning a friend: `pin`
 
-Keeps a friend in the pinned group at the top of the stored friend order.
-Explicit sorting can override the displayed position, as described under [`list`](#listing-filtering-and-sorting-friends-list).
+Keeps a friend in the pinned group at the top of the displayed friend list.
+Pinned friends stay above unpinned friends, including when using the sorting options under
+[`list`](#listing-filtering-and-sorting-friends-list).
 
 Format: `pin FRIEND_INDEX`
 
@@ -270,8 +272,8 @@ Format: `pin FRIEND_INDEX`
   The limit counts active and archived friends together and also applies when loading saved data.
 * Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
   filtering the list by game.
-* A newly pinned friend is placed after friends already in the pinned group, while remaining above all unpinned
-  friends.
+* Without an explicit sort, friends within each group follow their stored insertion order. Pinning changes
+  the displayed group without changing the stored order.
 * Pinned friend cards display a `Pinned` badge, making the boundary between pinned and unpinned friends visible.
 
 Examples:
@@ -287,7 +289,8 @@ Format: `unpin FRIEND_INDEX`
 
 * `FRIEND_INDEX` refers to the current displayed list.
 * Unpinning a friend who is not pinned is rejected without changing the list.
-* The friend is returned to the unpinned group, below all pinned friends.
+* The friend is returned to the unpinned group, below all pinned friends. Without an explicit sort, they
+  return to their position in the stored insertion order.
 
 Examples:
 
