@@ -590,7 +590,8 @@ Example: `list`, then `archive 1` archives the first displayed active friend.
 
 ### Listing and filtering archived friends: `archivelist`
 
-Shows archived friends, optionally filtered by game. It follows the same syntax and game-matching rules as `list`.
+Shows archived friends, optionally filtered by game. Game names use the same exact, case-insensitive matching as
+`list g/GAME_NAME`. The sorting options `s/` and `o/` are not supported by `archivelist`.
 
 Format: `archivelist [g/GAME_NAME]`
 
