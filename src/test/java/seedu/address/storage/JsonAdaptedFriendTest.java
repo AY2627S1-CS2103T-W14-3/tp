@@ -2,6 +2,7 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static seedu.address.storage.JsonAdaptedFriend.MESSAGE_DUPLICATE_GAME_FORMAT;
 import static seedu.address.storage.JsonAdaptedFriend.MISSING_FIELD_MESSAGE_FORMAT;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalFriends.BENSON;
@@ -86,6 +87,23 @@ public class JsonAdaptedFriendTest {
             JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
                     List.of(game), VALID_TAGS);
             assertThrows(IllegalValueException.class, friend::toModelType);
+        }
+    }
+
+    @Test
+    public void toModelType_duplicateGameNames_throwsIllegalValueException() throws Exception {
+        JsonAdaptedGame original = new JsonAdaptedGame("Valorant", "player");
+        // Two partitions: identical entries, and the same normalized name with different details.
+        for (JsonAdaptedGame duplicate : List.of(
+                new JsonAdaptedGame("Valorant", "player"),
+                new JsonAdaptedGame(" VALORANT ", "anotherPlayer",
+                        List.of(new JsonAdaptedMeta("Role", "Support"))))) {
+            JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                    List.of(original, duplicate), VALID_TAGS);
+            String expectedMessage = String.format(MESSAGE_DUPLICATE_GAME_FORMAT,
+                    VALID_NAME, duplicate.toModelType().getGameName());
+            assertThrows(IllegalValueException.class, expectedMessage,
+                    friend::toModelType);
         }
     }
 

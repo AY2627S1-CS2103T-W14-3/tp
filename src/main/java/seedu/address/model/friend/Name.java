@@ -7,9 +7,12 @@ import java.util.Locale;
 
 /**
  * Represents a Friend's name in GameMates.
- * Guarantees: immutable; is valid as declared in {@link #isValidName(String)}
+ * Guarantees: immutable; is empty for an unnamed profile or valid as declared in {@link #isValidName(String)}
  */
 public class Name {
+
+    /** An unset profile name. Blank names remain invalid for ordinary friend input. */
+    public static final Name EMPTY = new Name();
 
     public static final int MAX_LENGTH = 100;
     public static final String MESSAGE_CONSTRAINTS =
@@ -33,6 +36,15 @@ public class Name {
         requireNonNull(name);
         checkArgument(isValidName(name), MESSAGE_CONSTRAINTS);
         fullName = name.trim();
+    }
+
+    private Name() {
+        fullName = "";
+    }
+
+    /** Returns whether the profile has no name yet. */
+    public boolean isEmpty() {
+        return fullName.isEmpty();
     }
 
     /**
@@ -69,7 +81,7 @@ public class Name {
 
     @Override
     public int hashCode() {
-        return fullName.toLowerCase(Locale.ROOT).hashCode();
+        return normalisedName().toLowerCase(Locale.ROOT).hashCode();
     }
 
 }

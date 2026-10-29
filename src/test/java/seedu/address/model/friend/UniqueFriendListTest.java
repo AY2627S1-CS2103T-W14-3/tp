@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.model.friend.exceptions.DuplicateFriendException;
 import seedu.address.model.friend.exceptions.FriendNotFoundException;
+import seedu.address.model.friend.exceptions.PinnedFriendLimitExceededException;
 import seedu.address.testutil.FriendBuilder;
 
 public class UniqueFriendListTest {
@@ -64,6 +65,16 @@ public class UniqueFriendListTest {
     public void add_duplicateFriend_throwsDuplicateFriendException() {
         uniqueFriendList.add(ALICE);
         assertThrows(DuplicateFriendException.class, () -> uniqueFriendList.add(ALICE));
+    }
+
+    @Test
+    public void add_sixthPinnedFriend_throwsPinnedFriendLimitExceededException() {
+        for (int i = 1; i <= UniqueFriendList.MAX_PINNED_FRIENDS; i++) {
+            uniqueFriendList.add(createPinnedFriend(i));
+        }
+
+        assertThrows(PinnedFriendLimitExceededException.class, () -> uniqueFriendList.add(createPinnedFriend(6)));
+        assertEquals(UniqueFriendList.MAX_PINNED_FRIENDS, uniqueFriendList.asUnmodifiableObservableList().size());
     }
 
     @Test
@@ -121,6 +132,30 @@ public class UniqueFriendListTest {
     }
 
     @Test
+    public void setFriend_sixthPinnedFriend_throwsPinnedFriendLimitExceededException() {
+        for (int i = 1; i <= UniqueFriendList.MAX_PINNED_FRIENDS; i++) {
+            uniqueFriendList.add(createPinnedFriend(i));
+        }
+        Friend unpinnedFriend = new FriendBuilder().withName("Unpinned Friend").build();
+        Friend sixthPinnedFriend = unpinnedFriend.withPinned(true);
+        uniqueFriendList.add(unpinnedFriend);
+
+        assertThrows(PinnedFriendLimitExceededException.class, () -> uniqueFriendList.setFriend(unpinnedFriend,
+                sixthPinnedFriend));
+        assertFalse(uniqueFriendList.asUnmodifiableObservableList().getLast().isPinned());
+    }
+
+    @Test
+    public void setFriend_unpinsFriend_success() {
+        Friend pinnedFriend = createPinnedFriend(1);
+        uniqueFriendList.add(pinnedFriend);
+
+        uniqueFriendList.setFriend(pinnedFriend, pinnedFriend.withPinned(false));
+
+        assertFalse(uniqueFriendList.asUnmodifiableObservableList().getFirst().isPinned());
+    }
+
+    @Test
     public void setFriends_pinnedFriendAppearsBeforeUnpinnedFriend() {
         Friend pinnedBob = new FriendBuilder(BOB).withPinned(true).build();
         uniqueFriendList.setFriends(List.of(ALICE, pinnedBob));
@@ -139,6 +174,20 @@ public class UniqueFriendListTest {
 
         assertEquals(List.of(firstPinnedFriend, secondPinnedFriend, firstUnpinnedFriend, secondUnpinnedFriend),
                 uniqueFriendList.asUnmodifiableObservableList());
+    }
+
+    @Test
+    public void setFriends_moreThanMaximumPinnedFriends_throwsPinnedFriendLimitExceededException() {
+        List<Friend> pinnedFriends = List.of(
+                new FriendBuilder().withName("Pinned Friend 1").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 2").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 3").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 4").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 5").withPinned(true).build(),
+                new FriendBuilder().withName("Pinned Friend 6").withPinned(true).build());
+
+        assertThrows(PinnedFriendLimitExceededException.class, () -> uniqueFriendList.setFriends(pinnedFriends));
+        assertTrue(uniqueFriendList.asUnmodifiableObservableList().isEmpty());
     }
 
     @Test
@@ -210,5 +259,9 @@ public class UniqueFriendListTest {
     @Test
     public void toStringMethod() {
         assertEquals(uniqueFriendList.asUnmodifiableObservableList().toString(), uniqueFriendList.toString());
+    }
+
+    private static Friend createPinnedFriend(int index) {
+        return new FriendBuilder().withName("Pinned Friend " + index).withPinned(true).build();
     }
 }

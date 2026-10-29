@@ -2,8 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.VBox?>
+<?import seedu.address.ui.TagPane?>
 
 <!--suppress XmlUnboundNsPrefix -->
 <VBox spacing="12" styleClass="friend-details-panel" xmlns="http://javafx.com/javafx/17"
@@ -19,7 +19,7 @@
     <Label fx:id="email" styleClass="details-value" wrapText="true" />
     <VBox spacing="4">
       <Label text="Tags" styleClass="details-section-title" />
-      <FlowPane fx:id="tags" hgap="7" vgap="5" />
+      <TagPane fx:id="tags" minWidth="0" hgap="7" vgap="5" />
     </VBox>
     <VBox spacing="4">
       <Label text="Games" styleClass="details-section-title" />

@@ -179,7 +179,7 @@ public class ParserUtilTest {
     }
 
     @Test
-    public void parseMetas_repeatedFlags_throwsParseException() {
+    public void parseMetas_repeatedFlags_throwsParseException() throws Exception {
         Prefix metaPrefix = new Prefix("m/");
         ArgumentMultimap arguments = ArgumentTokenizer.tokenize(" m/Role:Support m/role:Mid", metaPrefix);
         assertThrows(ParseException.class, Meta.MESSAGE_DUPLICATE_KEY, ()
@@ -417,6 +417,13 @@ public class ParserUtilTest {
     @Test
     public void parseTag_invalidValue_throwsParseException() {
         assertThrows(ParseException.class, () -> ParserUtil.parseTag(INVALID_TAG));
+    }
+
+    @Test
+    public void parseTag_tagNameLengthLimit() throws Exception {
+        String maximumLengthTag = "a".repeat(50);
+        assertEquals(new Tag(maximumLengthTag), ParserUtil.parseTag(maximumLengthTag));
+        assertThrows(ParseException.class, Tag.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseTag("a".repeat(51)));
     }
 
     @Test

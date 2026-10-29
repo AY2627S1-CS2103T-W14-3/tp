@@ -3,7 +3,6 @@ package seedu.address.model.friend;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,10 +16,9 @@ import seedu.address.model.tag.Tag;
  * Archived friends are always unpinned.
  */
 public class Friend {
-
     public static final String MESSAGE_ARCHIVED_PINNED = "Archived friends cannot be pinned.";
 
-    public static final Friend DEFAULT_MYSELF = new Friend(new Name("Myself"), Phone.EMPTY, Email.EMPTY, Set.of());
+    public static final Friend DEFAULT_MYSELF = new Friend(Name.EMPTY, Phone.EMPTY, Email.EMPTY, Set.of());
 
     // Identity fields
     private final Name name;
@@ -54,8 +52,8 @@ public class Friend {
         this.name = name;
         this.phone = phone;
         this.email = email;
-        this.games = Collections.unmodifiableSet(games);
-        this.tags = Collections.unmodifiableSet(tags);
+        this.games = Set.copyOf(games);
+        this.tags = Set.copyOf(tags);
         this.archived = archived;
         this.pinned = pinned;
     }
@@ -64,7 +62,7 @@ public class Friend {
      * Every field must be present and not null.
      */
     public Friend(Name name, Phone phone, Email email, Set<Tag> tags) {
-        this(name, phone, email, Collections.emptySet(), tags);
+        this(name, phone, email, Set.of(), tags);
     }
 
     private Friend(Friend original, Set<Game> replacementGames) {

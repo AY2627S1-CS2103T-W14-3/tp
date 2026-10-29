@@ -22,6 +22,12 @@ public class TagTest {
     }
 
     @Test
+    public void constructor_tagNameLengthLimit() {
+        assertEquals("a".repeat(50), new Tag("a".repeat(50)).tagName);
+        assertThrows(IllegalArgumentException.class, Tag.MESSAGE_CONSTRAINTS, () -> new Tag("a".repeat(51)));
+    }
+
+    @Test
     public void isValidTagName() {
         // null tag name
         assertThrows(NullPointerException.class, () -> Tag.isValidTagName(null));
@@ -29,7 +35,7 @@ public class TagTest {
         // invalid tag names
         String[] invalidTagNames = {
             "", " ", "best friend", " friend", "friend ", "friend\n", "#friend", "best-friend", "best_friend",
-            "friend!", "caf\u00e9", "\u670b\u53cb", "\uff11\uff12\uff13"
+            "friend!", "caf\u00e9", "\u670b\u53cb", "\uff11\uff12\uff13", "a".repeat(51)
         };
         for (String tagName : invalidTagNames) {
             assertFalse(Tag.isValidTagName(tagName), tagName);
@@ -41,6 +47,7 @@ public class TagTest {
         assertTrue(Tag.isValidTagName("FRIEND")); // upper case
         assertTrue(Tag.isValidTagName("123")); // digits only
         assertTrue(Tag.isValidTagName("team7")); // letters and digits
+        assertTrue(Tag.isValidTagName("a".repeat(50))); // maximum length
     }
 
     @Test

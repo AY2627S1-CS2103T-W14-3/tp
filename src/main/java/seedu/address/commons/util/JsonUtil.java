@@ -58,12 +58,13 @@ public class JsonUtil {
         }
         logger.info("JSON file " + filePath + " found.");
 
-        T jsonFile = Try.of(() -> deserializeObjectFromJsonFile(filePath, classOfObjectToDeserialize))
+        T jsonFile = Try.of(() -> requireNonNull(
+                deserializeObjectFromJsonFile(filePath, classOfObjectToDeserialize)))
                 .onFailure(IOException.class,
                     e -> logger.warning("Error reading from jsonFile file " + filePath + ": " + e))
                 .getOrElseThrow(DataLoadingException::new);
 
-        return Option.of(requireNonNull(jsonFile));
+        return Option.of(jsonFile);
     }
 
     /**

@@ -12,16 +12,58 @@ import static seedu.address.testutil.TypicalFriends.ALICE;
 import static seedu.address.testutil.TypicalFriends.BOB;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.model.game.Game;
+import seedu.address.model.tag.Tag;
 import seedu.address.testutil.FriendBuilder;
 import seedu.address.testutil.GameBuilder;
 
 public class FriendTest {
+
+    @Test
+    public void constructor_mutatingInputSets_doesNotChangeFriendOrDerivedCopies() {
+        Game game = new GameBuilder().withGameName("Valorant").build();
+        Tag tag = new Tag("duo");
+        Set<Game> games = new HashSet<>(Set.of(game));
+        Set<Tag> tags = new HashSet<>(Set.of(tag));
+        Friend friend = new Friend(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(), games, tags);
+        List<Friend> copies = List.of(friend, friend.withArchived(true), friend.withPinned(true),
+                friend.withGames(Set.of(game)));
+        int originalHash = friend.hashCode();
+
+        games.clear();
+        tags.clear();
+
+        for (Friend copy : copies) {
+            assertEquals(Set.of(game), copy.getGames());
+            assertEquals(Set.of(tag), copy.getTags());
+            assertThrows(UnsupportedOperationException.class, () -> copy.getGames().clear());
+            assertThrows(UnsupportedOperationException.class, () -> copy.getTags().clear());
+        }
+        assertEquals(originalHash, friend.hashCode());
+    }
+
+    @Test
+    public void withGames_mutatingReplacementSet_doesNotChangeFriend() {
+        Game game = new GameBuilder().build();
+        Set<Game> games = new HashSet<>(Set.of(game));
+        Friend updated = ALICE.withGames(games);
+        games.clear();
+        assertEquals(Set.of(game), updated.getGames());
+    }
+
+    @Test
+    public void constructor_nullTagEntry_throwsNullPointerException() {
+        Set<Tag> tags = new HashSet<>();
+        tags.add(null);
+        assertThrows(NullPointerException.class, () -> new Friend(ALICE.getName(), ALICE.getPhone(),
+                ALICE.getEmail(), tags));
+    }
 
     @Test
     public void constructor_nullGamesOrEntries_throwsNullPointerException() {

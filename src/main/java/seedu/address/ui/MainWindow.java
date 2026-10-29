@@ -148,11 +148,24 @@ public class MainWindow extends UiPart<Stage> {
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
     }
 
+    /**
+     * Displays feedback in the result display after the inner parts have been initialized.
+     */
+    void showFeedbackToUser(String feedback) {
+        resultDisplay.setFeedbackToUser(feedback);
+    }
+
     private void refreshFriendDetails(CommandResult commandResult) {
+        if (commandResult.isPreserveDetails()) {
+            return;
+        }
         if (commandResult.getFriendToShow().isPresent()) {
-            friendDetailsPanel.setFriend(commandResult.getFriendToShow().get(), commandResult.isShowMyself(),
+            Friend friend = commandResult.getFriendToShow().get();
+            friendListPanel.selectFriend(commandResult.isShowMyself() ? null : friend);
+            friendDetailsPanel.setFriend(friend, commandResult.isShowMyself(),
                     commandResult.getGameFilter().orElse(null));
         } else {
+            friendListPanel.selectFriend(null);
             showFriendDetails(null);
         }
     }
