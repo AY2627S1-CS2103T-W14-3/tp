@@ -62,6 +62,21 @@ public class ArchiveCommandsTest {
     }
 
     @Test
+    public void archive_pinnedFriend_clearsPinAndDoesNotRestoreItAfterRestart() throws Exception {
+        model.addFriend(alice.withPinned(true));
+        execute("archive 1");
+        assertEquals(List.of(alice.withArchived(true)), model.getGameMates().getFriendList());
+
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(tempDir.resolve("pinned.json"));
+        storage.saveGameMates(model.getGameMates());
+        ModelManager restarted = new ModelManager(storage.readGameMates().get(), new UserPrefs());
+        parser.parseCommand("archivelist").execute(restarted);
+        assertEquals(List.of(alice.withArchived(true)), restarted.getFilteredFriendList());
+        parser.parseCommand("unarchive 1").execute(restarted);
+        assertEquals(List.of(alice), restarted.getGameMates().getFriendList());
+    }
+
+    @Test
     public void archiveAndUnarchive_useFilteredDisplayedIndices() throws Exception {
         model.addFriend(bob);
         model.addFriend(alice);

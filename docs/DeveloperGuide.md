@@ -244,9 +244,12 @@ Its classes represent domain data and make sense without those other components.
 
 `Friend` contains a `Name`, optional contact values, a set of `Tag` objects and a set of `Game` objects.
 It also contains immutable `archived` and `pinned` states.
+The constructor rejects `archived && pinned` with `IllegalArgumentException` and
+`Friend.MESSAGE_ARCHIVED_PINNED`. `withPinned(true)` also rejects archived friends.
 See [Friend archiving](#friend-archiving) for the scope, identity and persistence rules.
 
-`UniqueFriendList.MAX_PINNED_FRIENDS` limits the stored collection to five pins across active and archived friends.
+`UniqueFriendList.MAX_PINNED_FRIENDS` limits the stored collection to five pinned active friends.
+Archived friends cannot be pinned.
 The list validates this invariant on addition, replacement and bulk replacement.
 A violation throws `PinnedFriendLimitExceededException` before the collection changes.
 Tag names contain 1–50 ASCII alphanumeric characters.
@@ -321,7 +324,9 @@ Invalid non-empty usernames, including whitespace-only strings, are rejected.
 
 Duplicate friend names reject the entire load, including a profile parsed before the duplicate was found.
 Startup then uses a new empty `GameMates`.
-`JsonAdaptedFriend` saves the `pinned` boolean. Missing or null pin values in older files default to `false`.
+`JsonAdaptedFriend` saves the `pinned` boolean. Missing or null pin values default to `false`.
+An entry with both `archived` and `pinned` set to `true` throws `IllegalValueException` and rejects the entire load.
+Invalid archived pins are not silently cleared.
 
 `JsonAdaptedFriend` rejects duplicate `GameName` values within either a friend or the profile.
 `JsonSerializableGameMates` rejects friend names that match the profile and converts excess pins to `IllegalValueException`.
@@ -748,7 +753,9 @@ Automatic backups, scheduled retention and undo are not implemented.
 
 `GameMates` keeps active and archived friends together in one `UniqueFriendList`.
 `Friend.isArchived()` returns an immutable boolean.
-`withArchived(boolean)` returns a copy and preserves all other fields.
+`withArchived(boolean)` returns a copy, clearing the pin when archiving and preserving the other fields.
+Restoring an archived friend keeps them unpinned.
+`pin` and `unpin` reject archived targets in both archive lists and global search results.
 
 `Friend.equals()` and `hashCode()` include archive status.
 `isSameFriend()` continues to compare normalized names.
@@ -799,9 +806,10 @@ The logic layer exposes `getFriendListScope()` to the `UI`.
    It rejects an invalid index, an already archived archive target, or a non-archived restore target.
    Failed commands preserve the data, scope and filter.
 4. `Model.setFriend()` replaces the selected friend with a copy that has the new archive status.
+   Archiving clears any existing pin; restoring does not restore the pin.
 5. The observable filtered list updates automatically.
    Archiving removes the friend from an active-only list; restoring removes the friend from an archive-only list.
-   In global search, the friend stays at the same displayed position with the new status.
+   In global search, the friend remains visible with the new status. Clearing a pin can change its displayed position.
    Neither command resets the predicate or scope.
 6. `LogicManager` saves the updated collection through the existing storage path.
 
@@ -1228,7 +1236,8 @@ Prerequisite: independent disposable app folders and closed app instances before
 | Replace `preferences.json` with `null`, or with `{"guiSettings":null}`, then launch. | Default GUI settings, without a startup crash. Startup saves valid default preferences. A null window-coordinate field remains valid. |
 | In a copy of the valid fixture, use an invalid phone such as `12`, or duplicate the friend with an equal name. Relaunch. | The whole data load fails; empty friends and default profile. Restore the backup before continuing. |
 | Duplicate a game name within a friend or profile, including a case variant with a different username. Relaunch. | The entire load fails; no duplicate game entries are accepted. Restore the valid backup before continuing. |
-| Set a stored friend's name equal to the profile name, or mark six distinct friends as pinned across both statuses. Relaunch. | The entire load fails. The profile conflict and pin limit apply to stored data as well as commands. |
+| Set a stored friend's name equal to the profile name, or mark six distinct active friends as pinned. Relaunch. | The entire load fails. The profile conflict and pin limit apply to stored data as well as commands. |
+| Set both `archived` and `pinned` to `true` on one stored friend. Relaunch. | The entire load fails; archived friends cannot be pinned. The invalid entry is not silently repaired. Restore the valid backup before continuing. |
 | Remove the `myself` and `games` properties from a valid copy, then relaunch. | Default profile and a friend with no games. Empty/missing phone and email are accepted; invalid non-empty contacts are not. |
 | Copy the same JAR to a second empty folder and launch there. | A separate sample dataset, not the first folder's saved friends. Restore a backup into the second folder to transfer data. |
 | With the app running, make its data file unwritable for that user (for example `chmod a-w data/gamemates.json` on Linux/macOS). Enter `add n/Unsaved Test`. | A `Could not save data` error saying the change was applied but not saved. The friend still shows. The change is not rolled back. |
@@ -1357,4 +1366,8 @@ Archive the pinned friend.
 Enter `archivelist`.
 Edit the username again.
 Restart and use `archivelist`.
-Expect the edited game, pinned badge and archive status to persist.
+Expect the edited game and archive status to persist, with no pinned badge.
+Enter `pin 1` and `unpin 1`; both must reject the archived target without changing data.
+Enter `find Tester` and repeat both commands on the archived result; both must still be rejected.
+Enter `unarchive 1`, then `list`.
+Expect the restored friend to remain unpinned; pinning must be requested explicitly again.

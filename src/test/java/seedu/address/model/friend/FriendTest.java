@@ -97,7 +97,7 @@ public class FriendTest {
         Game originalGame = new GameBuilder().withGameName("Valorant").addMeta("Role", "Healer").build();
         Game replacementGame = new GameBuilder(originalGame).withUsername("newPlayer").build();
         for (boolean archived : new boolean[]{false, true}) {
-            for (boolean pinned : new boolean[]{false, true}) {
+            for (boolean pinned : archived ? new boolean[]{false} : new boolean[]{false, true}) {
                 Friend original = new FriendBuilder(ALICE).withGames(originalGame)
                         .withArchived(archived).withPinned(pinned).build();
                 Friend updated = original.withGames(Set.of(replacementGame));
@@ -105,6 +105,33 @@ public class FriendTest {
                 assertEquals(Set.of(originalGame), original.getGames());
             }
         }
+    }
+
+    @Test
+    public void constructor_archivedAndPinned_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, Friend.MESSAGE_ARCHIVED_PINNED, () ->
+                new Friend(ALICE.getName(), ALICE.getPhone(), ALICE.getEmail(),
+                        ALICE.getGames(), ALICE.getTags(), true, true));
+    }
+
+    @Test
+    public void withArchived_pinnedFriend_clearsPinPermanently() {
+        Friend pinned = ALICE.withPinned(true);
+        Friend archived = pinned.withArchived(true);
+        assertEquals(ALICE.withArchived(true), archived);
+        assertEquals(ALICE, archived.withArchived(false));
+        assertTrue(pinned.isPinned());
+    }
+
+    @Test
+    public void withPinned_archivedFriend_rejectsPinAndPreservesUnpinnedCopies() {
+        Friend archived = ALICE.withArchived(true);
+        assertThrows(IllegalArgumentException.class, Friend.MESSAGE_ARCHIVED_PINNED, () -> archived.withPinned(true));
+        assertEquals(archived, archived.withPinned(false));
+        Friend updated = archived.withGames(Set.of(new GameBuilder().build()));
+        assertTrue(updated.isArchived());
+        assertFalse(updated.isPinned());
+        assertFalse(updated.withArchived(false).isPinned());
     }
 
     @Test

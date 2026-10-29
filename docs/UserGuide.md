@@ -269,9 +269,12 @@ Format: `pin FRIEND_INDEX`
 
 * `FRIEND_INDEX` refers to the current displayed list. The command is unavailable for your separately stored Myself
   profile.
-* At most five friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
+* Pinning archived friends is rejected, including archived entries in search results. Restore them with
+  `unarchive FRIEND_INDEX` first.
+* Archiving a pinned friend clears their pin. Restoring them does not restore the pin.
+* At most five active friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
   is rejected without changing the list.
-  The limit counts active and archived friends together and also applies when loading saved data.
+  The limit also applies when loading saved data. Archived friends cannot be pinned.
 * Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
   filtering the list by game.
 * Without an explicit sort, friends within each group follow their stored insertion order. Pinning changes
@@ -290,6 +293,8 @@ Removes a friend from the pinned group.
 Format: `unpin FRIEND_INDEX`
 
 * `FRIEND_INDEX` refers to the current displayed list.
+* Unpinning archived friends is rejected, including archived entries in search results. Restore them with
+  `unarchive FRIEND_INDEX` first.
 * Unpinning a friend who is not pinned is rejected without changing the list.
 * The friend is returned to the unpinned group, below all pinned friends. Without an explicit sort, they
   return to their position in the stored insertion order.
@@ -621,6 +626,7 @@ Format: `archive FRIEND_INDEX`
   whether the index exists. This also applies when that view is empty; data and view stay unchanged.
 * The friend disappears from the active view immediately. In **Search results**, the friend stays visible with
   an **Archived** badge. The current filter stays in place.
+* Archiving clears any pin on the friend, freeing a pin slot. Restoring the friend keeps them unpinned.
 * Feedback is `Archived FRIEND_NAME.`. Archiving an already archived friend is rejected.
 * Your Myself profile cannot be archived. `myself`, missing indices, extra arguments and invalid indices are rejected.
 * Missing indices report `Please provide an index.`. Invalid indices (such as `-1`, `0` or `abc`) report
@@ -748,12 +754,14 @@ If you edit JSON manually, close the app first and keep a backup. Friend entries
 `phone` and `email`, `tags`, `games`, and `archived` and `pinned` booleans. Missing `archived` defaults to `false`
 (active), while missing `pinned` defaults to `false` (unpinned); both statuses are saved across restarts. A game has a
 required `name` and an optional `username`.
+Archived friends must have `pinned` set to `false`. A saved entry with both `archived` and `pinned` set to
+`true` is invalid and causes loading to fail.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
 Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
 The untouched default profile is omitted when saving. Stored friends and profiles must have a valid non-empty name.
 Friend names must be unique and must differ from the stored profile name.
 Each person can have only one entry for a game name, ignoring case, even if the usernames differ.
-At most five friends across active and archived entries can have `pinned: true`.
+At most five active friends can have `pinned: true`. Archived entries must have `pinned: false`.
 Violating any of these rules rejects the entire data file.
 Empty or missing contact fields mean
 `Not provided`. Use the same validation rules as command input. Stored game metadata is supported as an optional
