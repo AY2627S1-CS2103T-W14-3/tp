@@ -167,7 +167,7 @@ For example, if the command specifies <code class="language-plaintext highlighte
 Quotes are not needed around multiword names. Use only the prefixes documented for each command.</li>
     <li>To use prefix text such as ` n/<code class="language-plaintext highlighter-rouge"> in a value, wrap the whole value in double quotes.
 For example, </code>g/”PUBG u/Game”<code class="language-plaintext highlighter-rouge"> is the game name </code>PUBG u/Game`. Spaces at the start and end of the quoted value are removed.</li>
-    <li>Write every other double quote as <code class="language-plaintext highlighter-rouge">\"</code>, to use them as a string literal. Other backslashes are kept as typed.
+    <li>To include a double quote in a value, type it as <code class="language-plaintext highlighter-rouge">\"</code>. Other backslashes are kept as typed.
 For example, <code class="language-plaintext highlighter-rouge">g/\"Game</code> is the game name <code class="language-plaintext highlighter-rouge">"Game</code>.</li>
     <li>A bare <code class="language-plaintext highlighter-rouge">"</code> in the middle of a value, a missing closing quote or text after the closing quote is rejected.</li>
     <li>Repeating a single-value <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> parameter in <code class="language-plaintext highlighter-rouge">add</code> or <code class="language-plaintext highlighter-rouge">edit</code> is rejected, even with identical values.
