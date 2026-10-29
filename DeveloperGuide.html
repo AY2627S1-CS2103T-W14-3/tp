@@ -61,6 +61,7 @@
       <li><a href="#friend-creation-editing-and-deletion" id="markdown-toc-friend-creation-editing-and-deletion">Friend creation, editing and deletion</a></li>
       <li><a href="#myself-profile" id="markdown-toc-myself-profile">Myself profile</a></li>
       <li><a href="#name-and-game-filtering" id="markdown-toc-name-and-game-filtering">Name and game filtering</a></li>
+      <li><a href="#squad-metadata-conditions" id="markdown-toc-squad-metadata-conditions">Squad metadata conditions</a></li>
       <li><a href="#editing-an-existing-game" id="markdown-toc-editing-an-existing-game">Editing an existing game</a></li>
       <li><a href="#viewing-a-friends-games" id="markdown-toc-viewing-a-friends-games">Viewing a friend’s games</a></li>
       <li><a href="#current-limitations" id="markdown-toc-current-limitations">Current limitations</a></li>
@@ -112,6 +113,7 @@
       <li><a href="#saved-profile-and-game-round-trip" id="markdown-toc-saved-profile-and-game-round-trip">Saved profile and game round trip</a></li>
       <li><a href="#missing-invalid-and-unwritable-files" id="markdown-toc-missing-invalid-and-unwritable-files">Missing, invalid and unwritable files</a></li>
       <li><a href="#documentation-preview" id="markdown-toc-documentation-preview">Documentation preview</a></li>
+      <li><a href="#manual-squad-metadata-checks" id="markdown-toc-manual-squad-metadata-checks">Manual squad metadata checks</a></li>
       <li><a href="#manual-game-edit-checks" id="markdown-toc-manual-game-edit-checks">Manual game edit checks</a></li>
     </ul>
   </li>
@@ -643,6 +645,31 @@ Reversing the comparator currently also reverses that placement.</p>
 The <code class="language-plaintext highlighter-rouge">find</code> parser accepts a non-empty keyword list; it does not enforce a 255-character keyword limit.
 Queries with no matches return successful empty results.
 Filtering and sorting never include or edit the separate profile.</p>
+
+<h3 id="squad-metadata-conditions">Squad metadata conditions</h3>
+
+<p>This extension builds on the existing squad command, adding optional conditions to select eligible
+friends by metadata on the requested game. The User Guide documents the combined syntax and feedback.</p>
+
+<p><code class="language-plaintext highlighter-rouge">SquadCommandParser</code> tokenizes repeated <code class="language-plaintext highlighter-rouge">m/</code> values and calls the existing <code class="language-plaintext highlighter-rouge">ParserUtil.parseMetas</code>.
+That parser rejects empty/malformed pairs and normalized duplicate keys, even for size one.
+<code class="language-plaintext highlighter-rouge">GameMatchesMetadataPredicate</code> tests <code class="language-plaintext highlighter-rouge">GameName.equals</code> and <code class="language-plaintext highlighter-rouge">game.getMetas().containsAll(conditions)</code>
+on one entry. <code class="language-plaintext highlighter-rouge">Meta</code> equality gives case-insensitive keys and case-sensitive values; no identity semantics change.</p>
+
+<p><code class="language-plaintext highlighter-rouge">SquadCommand</code> snapshots displayed friends, filters their game entries, checks availability, then reuses
+its existing random sampling without replacement and displayed-index sort. Me bypasses the metadata
+predicate and counts towards the requested size. An empty condition set preserves base matching and feedback.
+No predicates, friends, games or preferences are updated. The displayed scope and sort comparator are
+retained, including pinned, archived and global search results. Seeded randomness controls sampling in tests.</p>
+
+<p><code class="language-plaintext highlighter-rouge">CommandResult.preservingDetails</code> carries an explicit UI instruction for squad success.
+<code class="language-plaintext highlighter-rouge">MainWindow.refreshFriendDetails</code> returns early for that instruction so existing details and game-card filters
+remain visible. Insufficient candidates throw <code class="language-plaintext highlighter-rouge">CommandException</code> with the base squad error text before sampling;
+the existing exception path also preserves the details. Size one uses the base singular <code class="language-plaintext highlighter-rouge">Found squad of 1 person:</code>
+heading. Other result constructors retain their previous behavior. <code class="language-plaintext highlighter-rouge">LogicManager</code> continues using its existing
+save path for success even though squad makes no data changes; a command error does not reach the save call.</p>
+
+<p><img src="/tp/images/SquadMetadataSequenceDiagram.png" alt="Squad metadata filtering before availability checks and sampling"></p>
 
 <h3 id="editing-an-existing-game">Editing an existing game</h3>
 
@@ -1797,6 +1824,63 @@ This task does not publish a preview or change workflows.</p>
 
 <p>Diagram sources are in <code class="language-plaintext highlighter-rouge">docs/diagrams</code>.
 If you change a source, regenerate its matching <code class="language-plaintext highlighter-rouge">docs/images/*.png</code> file.</p>
+
+<h3 id="manual-squad-metadata-checks">Manual squad metadata checks</h3>
+
+<p>In disposable data, run:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>clear
+add n/Alpha
+add n/Beta
+gameadd 1 g/Valorant m/Role:Healer m/"Note:Prefer n/3"
+gameadd 2 g/Valorant m/Role:Tank
+gamelist 1 g/Valorant
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Command</th>
+      <th>Expected</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">squad g/Valorant n/3</code></td>
+      <td>Me, Alpha and Beta.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">squad g/Valorant n/2 m/role:Healer</code></td>
+      <td>Me and Alpha.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">squad g/Valorant n/2 m/"Note:Prefer n/3"</code></td>
+      <td>Me and Alpha; the embedded <code class="language-plaintext highlighter-rouge">n/</code> is literal.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">squad g/Valorant n/2 m/Role:healer</code></td>
+      <td>Insufficient candidates; values are case-sensitive.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">squad g/Valorant n/1 m/Role:Missing</code></td>
+      <td>Only Me.</td>
+    </tr>
+    <tr>
+      <td>
+<code class="language-plaintext highlighter-rouge">squad g/Valorant n/2 m/Role:Healer m/role:Healer</code>, then <code class="language-plaintext highlighter-rouge">squad g/Valorant n/2 m/</code>
+</td>
+      <td>Duplicate-key and malformed-metadata errors.</td>
+    </tr>
+    <tr>
+      <td>
+<code class="language-plaintext highlighter-rouge">find Beta</code>, then <code class="language-plaintext highlighter-rouge">squad g/Valorant n/2 m/Role:Healer</code>
+</td>
+      <td>Insufficient displayed candidates.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>After each squad command, confirm unchanged data, list order/filter and selected game details.</p>
 
 <h3 id="manual-game-edit-checks">Manual game edit checks</h3>
 

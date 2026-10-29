@@ -44,7 +44,8 @@ Your data stays on your computer. Browsing the online help and downloading relea
 
 <p>This guide describes the commands available in this checkout. Use <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gamedel</code>, and <code class="language-plaintext highlighter-rouge">gameedit</code> to manage game
 entries. <code class="language-plaintext highlighter-rouge">gameedit</code> can also replace or clear metadata. Metadata appears on game cards below the username.
-See <a href="#your-profile-and-game-entries">Your profile and game entries</a> for adding games to your profile.</p>
+See <a href="#your-profile-and-game-entries">Your profile and game entries</a> for adding games to your profile.
+Optional metadata conditions on <code class="language-plaintext highlighter-rouge">squad</code> filter candidates by their entries for the requested game.</p>
 
 <ul id="markdown-toc">
   <li><a href="#quick-start" id="markdown-toc-quick-start">Quick start</a></li>
@@ -61,7 +62,11 @@ See <a href="#your-profile-and-game-entries">Your profile and game entries</a> f
       <li><a href="#deleting-a-game-gamedel" id="markdown-toc-deleting-a-game-gamedel">Deleting a game: <code class="language-plaintext highlighter-rouge">gamedel</code></a></li>
       <li><a href="#viewing-games-gamelist" id="markdown-toc-viewing-games-gamelist">Viewing games: <code class="language-plaintext highlighter-rouge">gamelist</code></a></li>
       <li><a href="#editing-a-game-gameedit" id="markdown-toc-editing-a-game-gameedit">Editing a game: <code class="language-plaintext highlighter-rouge">gameedit</code></a></li>
-      <li><a href="#finding-a-random-squad-squad" id="markdown-toc-finding-a-random-squad-squad">Finding a random squad: <code class="language-plaintext highlighter-rouge">squad</code></a></li>
+      <li>
+<a href="#finding-a-random-squad-squad" id="markdown-toc-finding-a-random-squad-squad">Finding a random squad: <code class="language-plaintext highlighter-rouge">squad</code></a>        <ul>
+          <li><a href="#filtering-squad-candidates-by-metadata" id="markdown-toc-filtering-squad-candidates-by-metadata">Filtering squad candidates by metadata</a></li>
+        </ul>
+      </li>
       <li><a href="#editing-a-friend-or-your-own-profile-edit" id="markdown-toc-editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code></a></li>
       <li><a href="#locating-friends-by-name-find" id="markdown-toc-locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code></a></li>
       <li><a href="#archiving-a-friend-archive" id="markdown-toc-archiving-a-friend-archive">Archiving a friend: <code class="language-plaintext highlighter-rouge">archive</code></a></li>
@@ -213,7 +218,7 @@ clear the friend selection, so you can click that same friend again to reopen th
   <li>Use <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code> to select a friend or your own profile and optionally
 show only one game.
 Clicking another friend shows all of that friend’s games.</li>
-  <li>Successful commands other than <code class="language-plaintext highlighter-rouge">gamelist</code>, a friend-targeted <code class="language-plaintext highlighter-rouge">gameedit</code> or a single-result <code class="language-plaintext highlighter-rouge">find</code> return the right panel to your profile.
+  <li>Successful commands other than <code class="language-plaintext highlighter-rouge">gamelist</code>, <code class="language-plaintext highlighter-rouge">squad</code>, a friend-targeted <code class="language-plaintext highlighter-rouge">gameedit</code> or a single-result <code class="language-plaintext highlighter-rouge">find</code> return the right panel to your profile. Squad preserves the current details and game-card filter.
 Clicking a friend selects their details again. Invalid commands keep the existing details display.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> each replace the previous friend-list filter. They do not combine filters.
@@ -682,28 +687,63 @@ Failed commands preserve the stored data and previous details view.</p>
 <p>Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
 Lists each member’s name, in-game username when available, and displayed friend index where applicable.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">squad g/GAME n/NUMBER_OF_PEOPLE</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">squad g/GAME_NAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...</code></p>
 
 <ul>
   <li>Both <code class="language-plaintext highlighter-rouge">g/</code> and <code class="language-plaintext highlighter-rouge">n/</code> are required and may appear in either order.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">GAME</code> follows the same rules as in <code class="language-plaintext highlighter-rouge">gameadd</code>. Multiword names are accepted.</li>
+<code class="language-plaintext highlighter-rouge">GAME_NAME</code> follows the same rules as in <code class="language-plaintext highlighter-rouge">gameadd</code>. Multiword names are accepted.</li>
   <li>Matching uses the complete game name and is case-insensitive.
 <code class="language-plaintext highlighter-rouge">valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>, but <code class="language-plaintext highlighter-rouge">Val</code> does not.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE</code> must be a whole number from 1 to 20, inclusive.</li>
   <li>The requested size includes you: <code class="language-plaintext highlighter-rouge">n/3</code> selects you and two friends; <code class="language-plaintext highlighter-rouge">n/1</code> returns only you.</li>
-  <li>You are always included as the first member, labelled <code class="language-plaintext highlighter-rouge">Me</code>, even if your profile does not contain <code class="language-plaintext highlighter-rouge">GAME</code>.</li>
-  <li>The other <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> members are selected from the <strong>currently displayed friend list</strong>. To include your entire friend list, run <code class="language-plaintext highlighter-rouge">list</code> first.
-Each must play <code class="language-plaintext highlighter-rouge">GAME</code>. A person cannot appear more than once in a squad.</li>
+  <li>You are always included as the first member, labelled <code class="language-plaintext highlighter-rouge">Me</code>, even if your profile does not contain <code class="language-plaintext highlighter-rouge">GAME_NAME</code>.</li>
+  <li>The other <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> members are selected from the <strong>currently displayed friend list</strong>. To select from all active friends, run <code class="language-plaintext highlighter-rouge">list</code> first.
+Each must play <code class="language-plaintext highlighter-rouge">GAME_NAME</code>. A person cannot appear more than once in a squad.
+Archived friends are eligible when displayed through <code class="language-plaintext highlighter-rouge">archivelist</code> or <code class="language-plaintext highlighter-rouge">find</code>.</li>
   <li>Selection is random. Repeating the command may return a different squad, but may also return the same one.</li>
+  <li>Success preserves the current details and game-card filter. Errors also keep the existing details visible.
+Stored data and the friend list’s filter and order remain unchanged.</li>
 </ul>
+
+<h4 id="filtering-squad-candidates-by-metadata">Filtering squad candidates by metadata</h4>
+
+<ul>
+  <li>Add one or more <code class="language-plaintext highlighter-rouge">m/KEY:VALUE</code> conditions to filter eligible friends before checking availability and sampling.
+Without <code class="language-plaintext highlighter-rouge">m/</code>, eligibility, success feedback and errors follow the base squad behavior.</li>
+  <li>All conditions must match (<strong>AND</strong>) on the <strong>same game entry</strong> matched by <code class="language-plaintext highlighter-rouge">g/</code>. Missing keys fail;
+metadata on another game cannot satisfy a condition. Extra stored metadata is allowed.</li>
+  <li>Keys match ignoring case. Values match exactly and are <strong>case-sensitive</strong>: <code class="language-plaintext highlighter-rouge">m/role:Healer</code> matches
+<code class="language-plaintext highlighter-rouge">Role:Healer</code>, while <code class="language-plaintext highlighter-rouge">m/role:healer</code> does not. There are no numeric comparisons, role quotas or OR expressions.</li>
+  <li>Quote the whole value when it contains a command prefix. For example, <code class="language-plaintext highlighter-rouge">m/"Note:Prefer n/3"</code>
+matches the stored pair <code class="language-plaintext highlighter-rouge">Note:Prefer n/3</code>; <code class="language-plaintext highlighter-rouge">g/"Version n/2"</code> selects that complete game name.</li>
+  <li>Pairs split at the first colon: <code class="language-plaintext highlighter-rouge">m/Region:Asia:SG</code> matches the value <code class="language-plaintext highlighter-rouge">Asia:SG</code>. Keys and values are trimmed.
+Keys use 1–50 characters without colons; values use 1–200 characters. Each requires a letter or digit and
+rejects control characters, following existing metadata validation.</li>
+  <li>Empty/malformed metadata and repeated keys ignoring case are rejected, even for identical repeated pairs.
+These checks apply to <code class="language-plaintext highlighter-rouge">n/1</code> too. <code class="language-plaintext highlighter-rouge">g/</code> and <code class="language-plaintext highlighter-rouge">n/</code> must each appear exactly once; prefixes may be supplied in any order.</li>
+  <li>Me is exempt from the metadata conditions and remains first, counting towards the size. <code class="language-plaintext highlighter-rouge">n/1</code> returns only
+Me with the heading <code class="language-plaintext highlighter-rouge">Found squad of 1 person:</code>. Selected friends retain their original displayed indices
+and appear in displayed-list order. If fewer than <code class="language-plaintext highlighter-rouge">n - 1</code> displayed friends meet all conditions, the command
+reports the error <code class="language-plaintext highlighter-rouge">Could not find a squad of N people.</code>
+</li>
+</ul>
+
+<p>Add metadata to a game using <code class="language-plaintext highlighter-rouge">gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...</code>.
+Each game card displays the stored pairs below its username.</p>
 
 <p>Examples:</p>
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">squad g/Valorant n/3</code></li>
   <li><code class="language-plaintext highlighter-rouge">squad g/Stardew Valley n/4</code></li>
+  <li>
+<code class="language-plaintext highlighter-rouge">squad g/Valorant n/3 m/Role:Healer m/Region:Asia</code> selects Me and two displayed friends matching both pairs.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">squad g/Valorant n/2 m/Level:30</code> matches the text <code class="language-plaintext highlighter-rouge">30</code>; it does not mean level 30 or above.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">squad g/Valorant n/1 m/Role:Healer</code> returns only Me, regardless of the profile’s metadata.</li>
 </ul>
 
 <p>Assuming Benedict and Melody are at indices 1 and 2 in the currently displayed friend list.
@@ -716,7 +756,8 @@ Example success feedback for <code class="language-plaintext highlighter-rouge">
 </code></pre></div></div>
 
 <p>If your profile has no entry for the requested game, the first row is simply <code class="language-plaintext highlighter-rouge">1. Me</code>.
-If fewer than <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> displayed friends play the requested game, feedback is:</p>
+If fewer than <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPLE - 1</code> displayed friends play the requested game and meet all supplied metadata
+conditions, the command reports an error:</p>
 
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Could not find a squad of &lt;n&gt; people.
 </code></pre></div></div>
@@ -735,7 +776,8 @@ If fewer than <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPL
   <tbody>
     <tr>
       <td>Missing <code class="language-plaintext highlighter-rouge">g/</code> or <code class="language-plaintext highlighter-rouge">n/</code>, or a missing parameter value</td>
-      <td><code class="language-plaintext highlighter-rouge">Invalid command format. Usage: squad g/GAME n/NUMBER_OF_PEOPLE</code></td>
+      <td>Usage starts with <code class="language-plaintext highlighter-rouge">Invalid command format. Usage: squad g/GAME_NAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...</code>
+</td>
     </tr>
     <tr>
       <td>Invalid squad size, such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">21</code>, <code class="language-plaintext highlighter-rouge">-1</code>, <code class="language-plaintext highlighter-rouge">2.5</code> or <code class="language-plaintext highlighter-rouge">abc</code>
@@ -746,8 +788,18 @@ If fewer than <code class="language-plaintext highlighter-rouge">NUMBER_OF_PEOPL
       <td>Invalid game name</td>
       <td><code class="language-plaintext highlighter-rouge">Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.</code></td>
     </tr>
+    <tr>
+      <td>Empty or malformed metadata</td>
+      <td><code class="language-plaintext highlighter-rouge">Metadata must be in the format Key:Value.</code></td>
+    </tr>
+    <tr>
+      <td>Repeated metadata keys, ignoring case</td>
+      <td><code class="language-plaintext highlighter-rouge">Metadata keys must be unique within a game entry.</code></td>
+    </tr>
   </tbody>
 </table>
+
+<p>Empty keys/values and invalid lengths report the existing metadata field constraints.</p>
 
 <h3 id="editing-a-friend-or-your-own-profile-edit">Editing a friend or your own profile: <code class="language-plaintext highlighter-rouge">edit</code>
 </h3>
@@ -1187,7 +1239,7 @@ show the <code class="language-plaintext highlighter-rouge">Could not save data<
     <tr>
       <td><strong>Squad create</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">squad g/GAME_NAME n/NUMBER_OF_PEOPLE</code><br> e.g., <code class="language-plaintext highlighter-rouge">squad g/Valorant n/5</code>
+<code class="language-plaintext highlighter-rouge">squad g/GAME_NAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...</code><br> e.g., <code class="language-plaintext highlighter-rouge">squad g/Valorant n/3 m/Role:Healer</code>
 </td>
     </tr>
     <tr>
