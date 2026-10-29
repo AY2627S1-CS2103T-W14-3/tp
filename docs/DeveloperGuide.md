@@ -328,11 +328,12 @@ supplied pairs pass through the shared parser, including normalized duplicate-ke
 The model identity rules remain unchanged. The merged optional-username model provides `Username.EMPTY`. A supplied empty `u/` maps to that value.
 Omitting `u/` preserves the original username, including an absent username.
 
-The parser opts into `ArgumentTokenizer.tokenizeWithQuotedValues` so a whole field value can be double quoted.
-Recognized prefixes inside that value are literal text: `g/"PUBG n/Game"` selects that complete stored name.
-The tokenizer decodes `\"` and `\\`, rejects malformed quotes/escapes and trailing text, and then passes the
-decoded values through the same field validators and duplicate-prefix checks. Unquoted prefixes retain their
-existing command meaning. The ordinary tokenizer and other commands' syntax remain unchanged.
+`ArgumentTokenizer.tokenize` lets any command double quote a whole field value. A value is quoted when its
+first character after trimming is `"`. Recognized prefixes inside the quotes are literal text, so
+`g/"PUBG n/Game"` selects that complete stored name. In any value, only a backslash right before `"` is removed,
+so `\\"` becomes `\"`. A value starting with `\"` is therefore unquoted. Quoted values are trimmed like
+unquoted ones. A missing closing quote or text after it
+throws a `ParseException`. The decoded values then pass through the same field validators and duplicate-prefix checks.
 
 `GameEditCommand` uses `FriendTargetResolver` and `Model.resolveFriend` for displayed indices or Myself.
 It requires exactly one matching existing game, constructs the complete replacement, then checks collisions
@@ -357,10 +358,10 @@ The [game edit sequence diagram source](diagrams/GameEditSequenceDiagram.puml) s
 without changing the left-hand friend list. The flow is:
 
 1. `GameMatesParser` routes `gamelist` to `GameListCommandParser`. The parser requires one positional index or
-   `myself` selector before at most one `g/` filter. It recognizes prefixes at whitespace boundaries so unknown prefixes and repeated
-   `g/` tokens cannot silently become part of a multiword game name. Other words after `g/` belong to the name.
+   `myself` selector before at most one `g/` filter. Like other parsers, it uses `ArgumentTokenizer`, so all text
+   after `g/` belongs to the name unless it is another ` g/`.
    Selector parsing uses `ParserUtil.parseIndexOrMyself`, and game validation uses the existing `GameName` rules.
-   Command-specific errors are translated locally, leaving other commands' validation and messages unchanged.
+   Index, repeated-prefix and game-name errors use the same shared messages as other commands.
 2. `GameListCommand.execute` resolves the index against `Model.getFilteredFriendList()`, so indices remain correct
    after both name searches and game-based friend filtering. It checks empty and out-of-range lists before
    numeric lookup. `Model.resolveFriend` resolves the selected friend or the separate profile; `myself` works even with an empty displayed list.
