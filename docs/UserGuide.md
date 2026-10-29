@@ -688,6 +688,7 @@ or use `exit`.
 If saving fails, an error beginning `Could not save data` appears. A friend change may already be visible in the
 running application even though it was not written to disk. Restore write access to the data folder and run a
 successful command such as `list` to try saving again before closing the app.
+While saving fails, the `help` and `exit` commands also fail. See [Known limitations](#known-limitations) for the workaround.
 
 ### Editing the data file
 
@@ -751,6 +752,12 @@ while copying the file, then launch the destination app from its usual data fold
    Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.
 3. **Some characters count as more than one toward length limits.** Lengths are counted in UTF-16 code units, so
    `😀` counts as 2 and `👨‍👩‍👧` (built from 3 emoji and 2 joiners) counts as 8.
+4. **The `help` and `exit` commands fail while saving fails.** GameMates saves after every command, so these commands
+   show the `Could not save data` error instead. Use these instead:
+   * To open help, use the **Help** menu or press `F1`.
+   * To close the app, use **File** > **Exit** or the window's close button.
+
+   Closing the app this way discards any changes that were not saved. To keep them, fix the save issue first.
 
 --------------------------------------------------------------------------------------------------------------------
 
