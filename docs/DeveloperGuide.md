@@ -78,7 +78,7 @@ The **API** of this component is specified in [`Ui.java`](https://github.com/AY2
 The UI consists of `MainWindow`, `CommandBox`, `ResultDisplay`, `FriendListPanel`, `FriendDetailsPanel`,
 `GameDetailsCard`, `HelpWindow` and `StatusBarFooter`. These inherit from `UiPart`, which loads matching FXML layouts.
 `MainWindow.fxml` keeps the observable friend list on the left of a `SplitPane` and the details panel on the right.
-`FriendDetailsPanel` renders contact details, tags and sorted game cards; it does not replace the friend list.
+`FriendDetailsPanel` renders contact details, tags and sorted game cards. It does not replace the friend list.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
 
@@ -91,7 +91,7 @@ The `UI` component,
 
 `FriendListPanel` sends selection changes to a consumer owned by `MainWindow`. Command-driven selection uses
 `CommandResult.friendToShow`, `showMyself` and `gameFilter`, described under [Viewing games](#viewing-games).
-Successful results without a friend payload show `Logic.getMyself()`; a single-result `find` selects that friend.
+Successful results without a friend payload show `Logic.getMyself()`. A single-result `find` selects that friend.
 Parse or command failures update feedback without explicitly refreshing details. A game filter is applied only
 while rendering cards, preserving both the model and the left-hand friend-list predicate.
 
@@ -193,21 +193,21 @@ friend data still causes `DataLoadingException`. Vavr `Try` captures JSON read a
 failures, translating captured failures into checked `DataLoadingException` instances with the original cause.
 Startup uses sample data for a missing GameMates file
 and an empty GameMates for a loading error. Missing or unreadable preferences use default preferences.
-JSON contact fields that are null or empty map to the corresponding empty contact value; invalid
+JSON contact fields that are null or empty map to the corresponding empty contact value. Invalid
 nonempty contact values are rejected without trimming. Missing `games` or `tags` load as empty sets, and missing
 `myself` retains `Friend.DEFAULT_MYSELF`. Stored games require a valid `name`. Missing, null or empty usernames
 are mapped to `Username.EMPTY` and invalid non-empty values, including whitespace-only strings, are rejected.
-Duplicate friend names reject the whole data load, including a previously parsed profile; startup uses a new empty
+Duplicate friend names reject the whole data load, including a previously parsed profile. Startup uses a new empty
 `GameMates`.
 `JsonAdaptedFriend` persists a friend's `pinned` boolean. The field is optional when loading: missing or `null`
 values in save files created before pinning was introduced default to `false`.
 
 `MainApp` resolves `data/gamemates.json` and `preferences.json` relative to the process working directory, not the
-JAR's location. `MainApp.initPrefs` writes initialized preferences at startup and `stop` writes them again at shutdown;
+JAR's location. `MainApp.initPrefs` writes initialized preferences at startup and `stop` writes them again at shutdown.
 `MainWindow.handleExit` first records the current window dimensions and position. The data model is saved by commands,
 not by `stop`. Selection and filter predicates are transient.
 
-`JsonSerializableGameMates` adapts both `friends` and `myself`; `JsonAdaptedFriend` adapts games and tags, and
+`JsonSerializableGameMates` adapts both `friends` and `myself`. `JsonAdaptedFriend` adapts games and tags, and
 `JsonAdaptedGame` adapts `name`, `username` and `metas`. Jackson ignores unknown properties, which
 disappear on the next serialization. Loading a damaged file does not repair or back it up:
 the next successful command can overwrite it with the fallback data. There is no automatic recovery or atomic
@@ -235,12 +235,12 @@ This section describes some noteworthy details on how certain features are imple
 single-value name/contact prefixes and collects repeated tags into a set. `UniqueFriendList` rejects names equal
 under `Friend.isSameFriend`, so different phone/email values or tags do not distinguish duplicate names.
 
-`EditCommandParser` requires a numeric index or case-insensitive `myself`; an omitted selector is rejected.
+`EditCommandParser` requires a numeric index or case-insensitive `myself`. An omitted selector is rejected.
 Target resolution and replacement use the [Myself profile mechanism](#myself-profile) described below.
 Add/edit commands reject names shared between a friend and the profile. `EditFriendDescriptor` uses
 optional values to distinguish omission from a supplied empty contact field. `EditCommand` constructs a new friend
 with the original games. Name/contact values replace
-existing values. Supplied tags are toggled by set membership; duplicates in one command are deduplicated, and a
+existing values. Supplied tags are toggled by set membership. Duplicates in one command are deduplicated, and a
 single empty `t/` clears all tags. Empty and non-empty tag parameters together fail validation.
 After a successful add or friend edit, the model resets the friend-list predicate to show all friends.
 Editing Myself preserves that predicate, including an empty displayed list.
@@ -287,15 +287,17 @@ The class diagram omits unrelated members and shows records as ordinary classes.
 ![Classes involved in resolving and updating a friend target](images/MyselfTargetClassDiagram.png)
 
 1. The three command parsers use `ParserUtil.parseIndexOrMyself`: case-insensitive `Index.MYSELF_KEYWORD`
-   becomes `Index.myself()`; numeric selectors remain displayed friend indices.
+   becomes `Index.myself()`. Numeric selectors remain displayed friend indices.
 2. At execution, `ModelManager.resolveFriend(index)` captures the profile or currently displayed friend in a target.
 3. After constructing a replacement `Friend` and completing validation, the command calls
    `ModelManager.setFriend(target, updatedFriend)`. An exhaustive switch routes `Myself` to the profile and
    `ListedFriend` to its captured friend.
 
 For profile edits, `EditCommand` constructs the replacement before `FriendValidator` checks for name conflicts
-with all stored friends, including those hidden by the current filter. Profile edits and both game commands
-preserve the friend-list filter.
+with all stored friends, including those hidden by the current filter. Profile edits, `gameadd`, `gameedit`,
+`gamedel` and `gamelist` preserve the friend-list filter.
+`FriendValidator.checkFriendInitialized` rejects those four commands targeting `myself` until
+`edit myself n/NAME` sets the profile name.
 
 The sequence shows `gameadd myself g/Valorant u/player` after parsing. Helper calls and subsequent saving are omitted.
 
@@ -321,9 +323,9 @@ results. Filtering and sorting never include or edit the separate profile.
 
 `GameEditCommandParser` reuses `ArgumentTokenizer`, `ArgumentMultimap`, `ParserUtil.parseIndexOrMyself`,
 `parseGameName`, `parseUsername` and `parseMetas`. Its immutable `EditGameDescriptor` distinguishes omitted
-metadata (`null`) from a supplied empty replacement set. A single empty `m/` clears metadata; all other
+metadata (`null`) from a supplied empty replacement set. A single empty `m/` clears metadata. All other
 supplied pairs pass through the shared parser, including normalized duplicate-key checks and first-colon splitting.
-The model identity rules remain unchanged. The merged optional-username model provides `Username.EMPTY`; a supplied empty `u/` maps to that value.
+The model identity rules remain unchanged. The merged optional-username model provides `Username.EMPTY`. A supplied empty `u/` maps to that value.
 Omitting `u/` preserves the original username, including an absent username.
 
 The parser opts into `ArgumentTokenizer.tokenizeWithQuotedValues` so a whole field value can be double quoted.

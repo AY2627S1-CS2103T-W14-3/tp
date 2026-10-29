@@ -36,7 +36,6 @@ public class GameAddCommand extends Command {
             + PREFIX_META + "Role:Support "
             + PREFIX_META + "Level:20";
     public static final String MESSAGE_SUCCESS = "Added %1$s to %2$s's games.\nUsername: %3$s";
-    public static final String MESSAGE_DUPLICATE_GAME = "%1$s already has %2$s.";
 
     private final Index targetIndex;
     private final Game toAdd;
@@ -56,25 +55,18 @@ public class GameAddCommand extends Command {
         requireNonNull(model);
 
         FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
+        FriendValidator.checkFriendInitialized(target);
         Friend friend = target.friend();
-        checkForDuplicateGame(friend);
+        GameValidator.checkCanAdd(friend, toAdd);
         model.setFriend(target, createFriendWithAddedGame(friend));
         return new CommandResult(formatSuccessMessage(friend));
-    }
-
-    /** Rejects adding a game that the selected friend or profile already has. */
-    private void checkForDuplicateGame(Friend friend) throws CommandException {
-        if (friend.getGames().stream().anyMatch(existing -> existing.isSameGame(toAdd))) {
-            throw new CommandException(String.format(MESSAGE_DUPLICATE_GAME, friend.getName(), toAdd.getGameName()));
-        }
     }
 
     /** Creates a friend with the added game, preserving their other details and games. */
     private Friend createFriendWithAddedGame(Friend friend) {
         Set<Game> games = new HashSet<>(friend.getGames());
         games.add(toAdd);
-        return new Friend(friend.getName(), friend.getPhone(), friend.getEmail(),
-                games, friend.getTags(), friend.isArchived(), friend.isPinned());
+        return friend.withGames(games);
     }
 
     /** Formats success feedback with the username and any metadata sorted by key ignoring case. */
