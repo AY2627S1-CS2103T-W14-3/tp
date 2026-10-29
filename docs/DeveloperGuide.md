@@ -145,7 +145,7 @@ adapters propagate the original exception, so invalid input is never treated as 
 
 <img src="images/ModelClassDiagram.png" width="625" />
 
-This partial class diagram shows selected archive-related attributes and operations; unrelated members are omitted.
+This partial class diagram shows selected archive-related attributes; unrelated members are omitted.
 `ModelManager.friendListScope` uses the `FriendListScope` enumeration to identify the displayed view.
 
 The `Model` component,
@@ -478,6 +478,85 @@ to displayed friends and `myself`, including filter preservation, duplicate-game
 `GameBuilder.addMeta("Role", "Support")` appends a pair; `withMetas(...)` replaces the collection.
 Duplicate keys added through the builder are rejected by `build()`.
 
+### Friend archiving
+
+Archiving hides a friend from the active list while preserving their contact details, tags, games, optional
+usernames and game metadata. `archive FRIEND_INDEX`, `unarchive FRIEND_INDEX` and
+`archivelist [g/GAME_NAME]` are implemented. This feature is separate from backing up the JSON data file;
+automatic backups, scheduled retention and undo are not implemented.
+
+#### Stored status and identity
+
+`GameMates` keeps active and archived friends together in one `UniqueFriendList`. `Friend.isArchived()` exposes
+an immutable boolean; `withArchived(boolean)` returns a copy with all other fields preserved. `Friend.equals()`
+and `hashCode()` include archive status, while `isSameFriend()` continues to compare normalized names.
+
+Names must be unique across active and archived friends combined, and must differ from the separately stored
+Myself profile. An archived name stays reserved. `FriendValidator` rejects a conflicting add or rename and
+suggests `archivelist` and `unarchive` when the existing friend is archived. It uses `Model.findFriend()` to obtain
+that stored friend in one identity lookup across both statuses, independent of the current display filter. Editing the existing friend while
+retaining their own name is allowed. Myself cannot be archived or restored.
+
+#### Display scope and filtering
+
+`ModelManager` stores a `FriendListScope` independently of the displayed list contents:
+
+| Scope | Entered by | Predicate |
+| --- | --- | --- |
+| `ACTIVE` | Startup, `list [g/GAME_NAME]`, adding a friend | Not archived, combined with an optional game predicate |
+| `ARCHIVED` | `archivelist [g/GAME_NAME]` | Archived, combined with an optional game predicate |
+| `SEARCH` | `find KEYWORD [MORE_KEYWORDS]` | Name keywords across both statuses |
+
+`ListCommandParser` and `ArchiveListCommandParser` share `ParserUtil.parseOptionalGameFilter()` and
+`GameNameMatchesPredicate`. Game matching is exact and case-insensitive, with the same validation rules for both
+commands. Name matching remains a global `find` operation. Each `list`, `archivelist` or `find` command replaces
+the previous predicate. `gamelist` preserves the friend-list filter.
+Unfiltered empty archives give guidance on archiving; filtered empty results report that no archived friends
+match the game filter.
+
+The logic layer exposes `getFriendListScope()` to the UI. `MainWindow` updates the heading to **Active friends**,
+**Archived friends** or **Search results**. `FriendCard` shows an **Archived** badge when applicable.
+
+#### Archive and restore execution
+
+1. The command parser accepts one positive displayed index; `myself` and extra arguments are rejected.
+1. `ArchiveCommand` rejects the archive-only scope with guidance to run `list`. Active lists and global search
+   results accept archiving. `UnarchiveCommand` accepts an archived target in archive or search results.
+1. The command checks the index against the currently displayed list and rejects an invalid index or an
+   already archived/non-archived target as appropriate. Failed commands preserve the data, scope and filter.
+1. `Model.setFriend()` replaces the selected friend with a copy carrying the new archive status.
+1. The observable filtered list updates automatically. Archiving removes a friend from an active-only list;
+   restoring removes a friend from an archive-only list. In global search, the friend remains at the same
+   displayed position with updated status. Neither command resets the predicate or scope.
+1. `LogicManager` saves the updated collection through the existing storage path.
+
+The sequence shows a successful `archive 1` in the active view after parsing. Helper calls and subsequent saving
+are omitted. In search results, the same update keeps the matching friend visible with its new archive status.
+
+![Archiving the first friend in the active view](images/ArchiveSequenceDiagram.png)
+
+`edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status when constructing replacement friends.
+`gameedit` retains the current scope and predicate. Friend edits clear
+filters within active/archive scopes, while global searches retain their name predicate. Renaming a search
+result can therefore remove it from the results. `delete` permanently removes the selected friend from either
+status; `clear` removes both statuses while preserving Myself.
+
+#### Persistence and design considerations
+
+`JsonAdaptedFriend` saves `archived` as a boolean on each friend. Missing status in older files defaults to
+`false`. Restarting restores every friend's status and details, but starts in the unfiltered active scope.
+Display scope and predicates are not persisted.
+
+A single stored collection keeps identity validation, storage and archive/restore updates on the existing
+model path. The alternative is separate stored active and archive collections, requiring transfers, cross-list
+uniqueness checks and a different JSON representation. Rebuilding a filtered view scans the underlying
+collection; separate collections could reduce the scan for active-only views, but global name search would
+still examine both. The current design favours simpler state management; change it if measurements establish
+a performance need.
+
+Regression coverage includes mixed-status searches, filtered displayed indices, invalid targets, empty archive
+feedback, identity conflicts, editing archived friends and save/reload restoration of complete game data.
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
@@ -559,90 +638,6 @@ The following activity diagram summarizes what happens when a user executes a ne
   itself.
   * Pros: Will use less memory (e.g. for `delete`, just save the friend being deleted).
   * Cons: We must ensure that the implementation of each individual command is correct.
-
-### Friend archiving
-
-Archiving hides a friend from the active list while preserving their contact details, tags, games, optional
-usernames and game metadata. `archive FRIEND_INDEX`, `unarchive FRIEND_INDEX` and
-`archivelist [g/GAME_NAME]` are implemented. This feature is separate from backing up the JSON data file;
-automatic backups, scheduled retention and undo are not implemented.
-
-#### Stored status and identity
-
-`GameMates` keeps active and archived friends together in one `UniqueFriendList`. `Friend.isArchived()` exposes
-an immutable boolean; `withArchived(boolean)` returns a copy with all other fields preserved. `Friend.equals()`
-and `hashCode()` include archive status, while `isSameFriend()` continues to compare normalized names.
-
-Names must be unique across active and archived friends combined, and must differ from the separately stored
-Myself profile. An archived name stays reserved. `FriendValidator` rejects a conflicting add or rename and
-suggests `archivelist` and `unarchive` when the existing friend is archived. It uses `Model.findFriend()` to obtain
-that stored friend in one identity lookup across both statuses, independent of the current display filter. Editing the existing friend while
-retaining their own name is allowed. Myself cannot be archived or restored.
-
-#### Display scope and filtering
-
-`ModelManager` stores a `FriendListScope` independently of the displayed list contents:
-
-| Scope | Entered by | Predicate |
-| --- | --- | --- |
-| `ACTIVE` | Startup, `list [g/GAME_NAME]`, adding a friend | Not archived, combined with an optional game predicate |
-| `ARCHIVED` | `archivelist [g/GAME_NAME]` | Archived, combined with an optional game predicate |
-| `SEARCH` | `find KEYWORD [MORE_KEYWORDS]` | Name keywords across both statuses |
-
-`ListCommandParser` and `ArchiveListCommandParser` share `ParserUtil.parseOptionalGameFilter()` and
-`GameNameMatchesPredicate`. Game matching is exact and case-insensitive, with the same validation rules for both
-commands. Name matching remains a global `find` operation. Each `list`, `archivelist` or `find` command replaces
-the previous predicate. `gamelist` preserves the friend-list filter.
-Unfiltered empty archives give guidance on archiving; filtered empty results report that no archived friends
-match the game filter.
-
-The logic layer exposes `getFriendListScope()` to the UI. `MainWindow` updates the heading to **Active friends**,
-**Archived friends** or **Search results**. `FriendCard` shows an **Archived** badge when applicable.
-
-#### Archive and restore execution
-
-1. The command parser accepts one positive displayed index; `myself` and extra arguments are rejected.
-1. `ArchiveCommand` rejects the archive-only scope with guidance to run `list`. Active lists and global search
-   results accept archiving. `UnarchiveCommand` accepts an archived target in archive or search results.
-1. The command checks the index against the currently displayed list and rejects an invalid index or an
-   already archived/non-archived target as appropriate. Failed commands preserve the data, scope and filter.
-1. `Model.setFriend()` replaces the selected friend with a copy carrying the new archive status.
-1. The observable filtered list updates automatically. Archiving removes a friend from an active-only list;
-   restoring removes a friend from an archive-only list. In global search, the friend remains at the same
-   displayed position with updated status. Neither command resets the predicate or scope.
-1. `LogicManager` saves the updated collection through the existing storage path.
-
-The sequence diagram below shows a successful `archive 1` in the active or search view, with an active friend
-at displayed index 1 and a successful save. Index parsing details, repeated collection access, result construction,
-model internals and UI callbacks are omitted. The parser and command lifelines start at their creation messages.
-
-![Successful archive command from parsing through persistence](images/ArchiveSequenceDiagram.png)
-
-Validation failures stop before replacing the friend and skip saving. A storage failure occurs after the model
-update and does not roll it back, as described under [Logic component](#logic-component).
-
-`edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status when constructing replacement friends.
-`gameedit` retains the current scope and predicate. Friend edits clear
-filters within active/archive scopes, while global searches retain their name predicate. Renaming a search
-result can therefore remove it from the results. `delete` permanently removes the selected friend from either
-status; `clear` removes both statuses while preserving Myself.
-
-#### Persistence and design considerations
-
-`JsonAdaptedFriend` saves `archived` as a boolean on each friend. Missing status in older files defaults to
-`false`. Restarting restores every friend's status and details, but starts in the unfiltered active scope.
-Display scope and predicates are not persisted.
-
-A single stored collection keeps identity validation, storage and archive/restore updates on the existing
-model path. The alternative is separate stored active and archive collections, requiring transfers, cross-list
-uniqueness checks and a different JSON representation. Rebuilding a filtered view scans the underlying
-collection; separate collections could reduce the scan for active-only views, but global name search would
-still examine both. The current design favours simpler state management; change it if measurements establish
-a performance need.
-
-Regression coverage includes mixed-status searches, filtered displayed indices, invalid targets, empty archive
-feedback, identity conflicts, editing archived friends and save/reload restoration of complete game data.
-
 
 --------------------------------------------------------------------------------------------------------------------
 
