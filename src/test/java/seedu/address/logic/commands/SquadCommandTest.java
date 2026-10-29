@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
-import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.ArrayList;
@@ -28,8 +27,9 @@ public class SquadCommandTest {
 
     @Test
     public void execute_sizeOne_alwaysIncludesMe() throws CommandException {
-        assertCommandSuccess(new SquadCommand(VALORANT, 1), model, "Found squad of 1 person:\n1. Me",
-                new ModelManager());
+        assertEquals(CommandResult.preservingDetails("Found squad of 1 person:\n1. Me"),
+                new SquadCommand(VALORANT, 1).execute(model));
+        assertEquals(new ModelManager(), model);
         model.setMyself(player("Own Profile", "Minecraft", "builder"));
         assertEquals("Found squad of 1 person:\n1. Me",
                 new SquadCommand(VALORANT, 1).execute(model).getFeedbackToUser());

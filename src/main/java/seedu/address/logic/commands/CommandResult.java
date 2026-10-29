@@ -31,11 +31,14 @@ public class CommandResult {
     /** An optional filter applied only to the selected friend's game cards. */
     private final GameName gameFilter;
 
+    /** Whether the current details, including any game filter, should remain visible. */
+    private final boolean preserveDetails;
+
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
     public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
-        this(feedbackToUser, showHelp, exit, null, null, false);
+        this(feedbackToUser, showHelp, exit, null, null, false, false);
     }
 
     /**
@@ -58,11 +61,11 @@ public class CommandResult {
      * Selecting the profile requires a non-null friend payload.
      */
     public CommandResult(String feedbackToUser, Friend friendToShow, GameName gameFilter, boolean showMyself) {
-        this(feedbackToUser, false, false, friendToShow, gameFilter, showMyself);
+        this(feedbackToUser, false, false, friendToShow, gameFilter, showMyself, false);
     }
 
     private CommandResult(String feedbackToUser, boolean showHelp, boolean exit,
-            Friend friendToShow, GameName gameFilter, boolean showMyself) {
+            Friend friendToShow, GameName gameFilter, boolean showMyself, boolean preserveDetails) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
@@ -71,6 +74,7 @@ public class CommandResult {
             requireNonNull(friendToShow);
         }
         this.gameFilter = gameFilter;
+        this.preserveDetails = preserveDetails;
         this.showMyself = showMyself;
     }
 
@@ -80,6 +84,15 @@ public class CommandResult {
      */
     public CommandResult(String feedbackToUser) {
         this(feedbackToUser, false, false);
+    }
+
+    /** Constructs feedback that leaves the current details view intact. */
+    public static CommandResult preservingDetails(String feedbackToUser) {
+        return new CommandResult(feedbackToUser, false, false, null, null, false, true);
+    }
+
+    public boolean isPreserveDetails() {
+        return preserveDetails;
     }
 
     public String getFeedbackToUser() {
@@ -125,6 +138,7 @@ public class CommandResult {
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
                 && exit == otherCommandResult.exit
+                && preserveDetails == otherCommandResult.preserveDetails
                 && showMyself == otherCommandResult.showMyself
                 && Objects.equals(friendToShow, otherCommandResult.friendToShow)
                 && Objects.equals(gameFilter, otherCommandResult.gameFilter);
@@ -132,7 +146,7 @@ public class CommandResult {
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit, friendToShow, gameFilter, showMyself);
+        return Objects.hash(feedbackToUser, showHelp, exit, friendToShow, gameFilter, showMyself, preserveDetails);
     }
 
     @Override
@@ -144,6 +158,7 @@ public class CommandResult {
                 .add("friendToShow", getFriendToShow())
                 .add("gameFilter", getGameFilter())
                 .add("showMyself", showMyself)
+                .add("preserveDetails", preserveDetails)
                 .toString();
     }
 

@@ -219,6 +219,9 @@ so `g/"PUBG n/Game"` gives `PUBG n/Game`.
 
 <img src="images/ModelClassDiagram.png" width="625" />
 
+This partial class diagram shows selected archive-related attributes; unrelated members are omitted.
+`ModelManager.friendListScope` uses the `FriendListScope` enumeration to identify the displayed view.
+
 **Stored data and views**
 
 The `Model` stores friends in `GameMates` through `UniqueFriendList`.
@@ -505,6 +508,31 @@ The `find` parser accepts a non-empty keyword list; it does not enforce a 255-ch
 Queries with no matches return successful empty results.
 Filtering and sorting never include or edit the separate profile.
 
+### Squad metadata conditions
+
+This extension builds on the existing squad command, adding optional conditions to select eligible
+friends by metadata on the requested game. The User Guide documents the combined syntax and feedback.
+
+`SquadCommandParser` tokenizes repeated `m/` values and calls the existing `ParserUtil.parseMetas`.
+That parser rejects empty/malformed pairs and normalized duplicate keys, even for size one.
+`GameMatchesMetadataPredicate` tests `GameName.equals` and `game.getMetas().containsAll(conditions)`
+on one entry. `Meta` equality gives case-insensitive keys and case-sensitive values; no identity semantics change.
+
+`SquadCommand` snapshots displayed friends, filters their game entries, checks availability, then reuses
+its existing random sampling without replacement and displayed-index sort. Me bypasses the metadata
+predicate and counts towards the requested size. An empty condition set preserves base matching and feedback.
+No predicates, friends, games or preferences are updated. The displayed scope and sort comparator are
+retained, including pinned, archived and global search results. Seeded randomness controls sampling in tests.
+
+`CommandResult.preservingDetails` carries an explicit UI instruction for squad success.
+`MainWindow.refreshFriendDetails` returns early for that instruction so existing details and game-card filters
+remain visible. Insufficient candidates throw `CommandException` with the base squad error text before sampling;
+the existing exception path also preserves the details. Size one uses the base singular `Found squad of 1 person:`
+heading. Other result constructors retain their previous behavior. `LogicManager` continues using its existing
+save path for success even though squad makes no data changes; a command error does not reach the save call.
+
+![Squad metadata filtering before availability checks and sampling](images/SquadMetadataSequenceDiagram.png)
+
 ### Editing an existing game
 
 **Parser and field values**
@@ -776,6 +804,11 @@ The logic layer exposes `getFriendListScope()` to the `UI`.
    In global search, the friend stays at the same displayed position with the new status.
    Neither command resets the predicate or scope.
 6. `LogicManager` saves the updated collection through the existing storage path.
+
+The sequence shows a successful `archive 1` in the active view after parsing. Helper calls and subsequent saving
+are omitted. In search results, the same update keeps the matching friend visible with its new archive status.
+
+![Archiving the first friend in the active view](images/ArchiveSequenceDiagram.png)
 
 `edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status in replacement friends.
 `gameedit` also retains the current scope and predicate.
@@ -1230,6 +1263,31 @@ Get current screenshots from the application, not from specification mockups.
 
 Diagram sources are in `docs/diagrams`.
 If you change a source, regenerate its matching `docs/images/*.png` file.
+
+### Manual squad metadata checks
+
+In disposable data, run:
+
+```text
+clear
+add n/Alpha
+add n/Beta
+gameadd 1 g/Valorant m/Role:Healer m/"Note:Prefer n/3"
+gameadd 2 g/Valorant m/Role:Tank
+gamelist 1 g/Valorant
+```
+
+| Command | Expected |
+|---------|----------|
+| `squad g/Valorant n/3` | Me, Alpha and Beta. |
+| `squad g/Valorant n/2 m/role:Healer` | Me and Alpha. |
+| `squad g/Valorant n/2 m/"Note:Prefer n/3"` | Me and Alpha; the embedded `n/` is literal. |
+| `squad g/Valorant n/2 m/Role:healer` | Insufficient candidates; values are case-sensitive. |
+| `squad g/Valorant n/1 m/Role:Missing` | Only Me. |
+| `squad g/Valorant n/2 m/Role:Healer m/role:Healer`, then `squad g/Valorant n/2 m/` | Duplicate-key and malformed-metadata errors. |
+| `find Beta`, then `squad g/Valorant n/2 m/Role:Healer` | Insufficient displayed candidates. |
+
+After each squad command, confirm unchanged data, list order/filter and selected game details.
 
 ### Manual game edit checks
 

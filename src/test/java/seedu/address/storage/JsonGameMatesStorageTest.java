@@ -74,6 +74,15 @@ public class JsonGameMatesStorageTest {
     }
 
     @Test
+    public void readGameMates_nullJson_throwsDataLoadingException() throws IOException {
+        Path filePath = testFolder.resolve("gamemates.json");
+        Files.writeString(filePath, " \n null \n ");
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(filePath);
+
+        assertThrows(DataLoadingException.class, storage::readGameMates);
+    }
+
+    @Test
     public void readGameMates_invalidFriendGameMates_throwDataLoadingException() {
         DataLoadingException exception = assertThrows(
                 DataLoadingException.class, () -> readGameMates("invalidFriendGameMates.json"));
