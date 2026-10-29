@@ -76,7 +76,7 @@ See [Your profile and game entries](#your-profile-and-game-entries) for adding g
   Quotes are not needed around multiword names. Use only the prefixes documented for each command.
 * To use prefix text such as ` n/` in a value, wrap the whole value in double quotes.
   For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`. Spaces at the start and end of the quoted value are removed.
-* Write every other double quote as `\"`, to use them as a string literal. Other backslashes are kept as typed.
+* To include a double quote in a value, type it as `\"`. Other backslashes are kept as typed.
   For example, `g/\"Game` is the game name `"Game`.
 * A bare `"` in the middle of a value, a missing closing quote or text after the closing quote is rejected.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
