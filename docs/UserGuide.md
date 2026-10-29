@@ -161,7 +161,7 @@ so `john doe` and `John Doe` are the same friend.
 To distinguish two people with the same name, use names such as `John Doe School` and `John Doe Work`.
 Adding a different tag alone does not make a duplicate name unique; parentheses are not valid in names.
 
-Tag names must be non-empty and contain only ASCII letters and digits (no spaces or symbols).
+Tag names must contain 1–50 characters and use only ASCII letters and digits (no spaces or symbols).
 
 Phone numbers accept formats such as `91234567`, `+6591234567`, `+65 9123-4567` and `(123) 456-7890`.
 
