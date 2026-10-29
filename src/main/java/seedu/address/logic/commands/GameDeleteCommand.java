@@ -24,7 +24,6 @@ public class GameDeleteCommand extends Command {
             + PREFIX_GAME_NAME + "GAME_NAME\n"
             + "Example: " + COMMAND_WORD + " 1 " + PREFIX_GAME_NAME + "Valorant";
     public static final String MESSAGE_SUCCESS = "Deleted game %1$s from %2$s.";
-    public static final String MESSAGE_GAME_NOT_FOUND = "%1$s does not have %2$s.";
 
     private final Index targetIndex;
     private final GameName gameName;
@@ -42,22 +41,11 @@ public class GameDeleteCommand extends Command {
         requireNonNull(model);
         FriendTarget target = FriendTargetResolver.resolve(model, targetIndex);
         Friend friend = target.friend();
-        Game toDelete = parseTargetGame(friend);
+        Game toDelete = GameTargetResolver.resolve(friend, gameName);
         Set<Game> games = new HashSet<>(friend.getGames());
         games.remove(toDelete);
-        Friend updatedFriend = new Friend(friend.getName(), friend.getPhone(), friend.getEmail(),
-                games, friend.getTags(), friend.isArchived(), friend.isPinned());
-        model.setFriend(target, updatedFriend);
+        model.setFriend(target, friend.withGames(games));
         return new CommandResult(String.format(MESSAGE_SUCCESS, gameName, friend.getName()));
-    }
-
-    /** Finds the game to delete, reporting when the selected friend or profile does not have it. */
-    private Game parseTargetGame(Friend friend) throws CommandException {
-        return friend.getGames().stream()
-                .filter(game -> game.getGameName().equals(gameName))
-                .findFirst()
-                .orElseThrow(() -> new CommandException(
-                        String.format(MESSAGE_GAME_NOT_FOUND, friend.getName(), gameName)));
     }
 
     @Override
