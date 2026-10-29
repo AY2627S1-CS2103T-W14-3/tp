@@ -140,6 +140,16 @@ Parsing continues to report the first invalid value through `ParseException`. Va
 adapters propagate the original exception, so invalid input is never treated as an omitted argument.
 `GameAddCommandParser` similarly defaults omitted `u/` to `Username.EMPTY`; a supplied blank `u/` is rejected.
 
+#### Quoted values
+
+`ArgumentTokenizer` lets users wrap a whole value in double quotes. Prefixes inside the quotes are literal text,
+so `g/"PUBG n/Game"` gives `PUBG n/Game`.
+
+* A value is quoted when its first character after trimming is `"`. Its content is trimmed like any value.
+* In any value, `\"` is a literal `"`. Only the backslash right before a quote is removed, so `\\"` gives `\"`.
+* A bare `"` in an unquoted value, a missing closing quote or text after the closing quote throws a `ParseException`.
+* The preamble is not parsed for quotes.
+
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java)
 
@@ -327,13 +337,6 @@ metadata (`null`) from a supplied empty replacement set. A single empty `m/` cle
 supplied pairs pass through the shared parser, including normalized duplicate-key checks and first-colon splitting.
 The model identity rules remain unchanged. The merged optional-username model provides `Username.EMPTY`. A supplied empty `u/` maps to that value.
 Omitting `u/` preserves the original username, including an absent username.
-
-`ArgumentTokenizer.tokenize` lets any command double quote a whole field value. A value is quoted when its
-first character after trimming is `"`. Recognized prefixes inside the quotes are literal text, so
-`g/"PUBG n/Game"` selects that complete stored name. In any value, only a backslash right before `"` is removed,
-so `\\"` becomes `\"`. A value starting with `\"` is therefore unquoted. Quoted values are trimmed like
-unquoted ones. A missing closing quote or text after it
-throws a `ParseException`. The decoded values then pass through the same field validators and duplicate-prefix checks.
 
 `GameEditCommand` uses `FriendTargetResolver` and `Model.resolveFriend` for displayed indices or Myself.
 It requires exactly one matching existing game, constructs the complete replacement, then checks collisions

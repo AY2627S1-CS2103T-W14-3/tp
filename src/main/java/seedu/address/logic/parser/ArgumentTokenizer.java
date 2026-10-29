@@ -3,6 +3,7 @@ package seedu.address.logic.parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -18,19 +19,22 @@ import seedu.address.logic.parser.exceptions.ParseException;
  */
 public class ArgumentTokenizer {
 
-    public static final String MESSAGE_INVALID_QUOTED_VALUE = "Invalid quoted value. Enclose the entire value in "
-            + "double quotes and use \\\" for a literal double quote.";
+    public static final String MESSAGE_INVALID_QUOTED_VALUE = "Invalid double quote. Wrap the whole value in "
+            + "double quotes, and write any other double quote as \\\".";
+
+    private static final Pattern UNESCAPED_QUOTE = Pattern.compile("(?<!\\\\)\"");
 
     /**
      * Tokenizes an arguments string and returns an {@code ArgumentMultimap} object that maps prefixes to their
      * respective argument values. Only the given prefixes will be recognized in the arguments string.
      * A value whose first character after trimming is {@code "} is a quoted value, and prefixes inside it are
-     * literal text. In any value, {@code \"} is a literal double quote. Other backslashes are kept as is.
+     * literal text. Any other double quote must be written as {@code \"}. Other backslashes are kept as is.
      *
      * @param argsString Arguments string of the form: {@code preamble <prefix>value <prefix>value ...}
      * @param prefixes   Prefixes to tokenize the arguments string with
      * @return           ArgumentMultimap object that maps prefixes to their arguments
-     * @throws ParseException if a quoted value is unterminated or has text after its closing quote.
+     * @throws ParseException if a quoted value is unterminated or has text after its closing quote,
+     *     or an unquoted value has an unescaped double quote.
      */
     public static ArgumentMultimap tokenize(String argsString, Prefix... prefixes) throws ParseException {
         List<PrefixPosition> positions = findAllPrefixPositions(argsString, prefixes);
@@ -101,8 +105,13 @@ public class ArgumentTokenizer {
 
     /**
      * Returns {@code value} with the backslash removed from each {@code \"}.
+     *
+     * @throws ParseException if {@code value} has a double quote without a backslash right before it.
      */
-    private static String unescapeQuotes(String value) {
+    private static String unescapeQuotes(String value) throws ParseException {
+        if (UNESCAPED_QUOTE.matcher(value).find()) {
+            throw new ParseException(MESSAGE_INVALID_QUOTED_VALUE);
+        }
         return value.replace("\\\"", "\"");
     }
 

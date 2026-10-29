@@ -74,12 +74,11 @@ See [Your profile and game entries](#your-profile-and-game-entries) for adding g
 
 * Use spaces between parameters and lower-case command words and prefixes. Do not type square or angle brackets.
   Quotes are not needed around multiword names. Use only the prefixes documented for each command.
-* A space followed by a prefix such as `n/` starts a new parameter. To use such text in a value, wrap the whole
-  value in double quotes. For example, `g/"PUBG n/Game"` is the game name `PUBG n/Game`.
-* A value is quoted when it starts with `"`. Spaces at the start and end inside the quotes are removed.
-  A missing closing quote or text after the closing quote is rejected.
-* In any value, use `\"` for a literal double quote. Other backslashes are kept as typed.
-  For example, `g/\"Game u/player` is the game name `"Game`, and `g/"\"Game u/2"` is `"Game u/2`.
+* To use prefix text such as ` n/` in a value, wrap the whole value in double quotes.
+  For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`. Spaces at the start and end of the quoted value are removed.
+* Write every other double quote as `\"`, to use them as a string literal. Other backslashes are kept as typed.
+  For example, `g/\"Game` is the game name `"Game`.
+* A bare `"` in the middle of a value, a missing closing quote or text after the closing quote is rejected.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
   Tags may be repeated. Identical tag values are applied once.
 * Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all active friends
@@ -295,7 +294,7 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 * Repeat `m/` for distinct keys. Metadata keys are case-insensitive, so `Role` and `role` are duplicates.
   Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
   Omit `m/` entirely for no metadata.
-* A space followed by `g/`, `u/` or `m/` starts a new parameter. Quote the whole value to use these in field values.
+* A space followed by `g/`, `u/` or `m/` starts a new parameter. Quote the whole value to include such text.
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
 * Metadata appears below the username, sorted by key ignoring case. Long fields wrap. Scroll for additional rows.
@@ -398,9 +397,7 @@ Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME
 * For `myself`, [set up your profile first](#your-profile-and-game-entries).
 * Use the index from the **currently displayed** friend list, or case-insensitive `myself`. The profile can be edited even when the displayed list is empty.
 * `g/` selects a complete existing game name, ignoring case. Partial names do not match. Supply at least one of `n/`, `u/` or `m/`. Repeatable `m/` pairs can appear in any order with the other prefixes; `g/`, `n/` and `u/` may each appear only once.
-* Wrap the **whole value** in double quotes if it contains a space followed by `g/`, `n/`, `u/` or `m/`.
-  For example, `g/"PUBG n/Game"` selects the literal name `PUBG n/Game`. This also works for new names,
-  usernames and metadata. Malformed quoted values are rejected before any change.
+* Quote the whole value to include text such as ` n/`. For example, `g/"PUBG n/Game"` selects `PUBG n/Game`.
 * `n/` renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.
 * Omitted fields retain their values. Other games, contact details, tags, archive status and pin status are preserved.
   The current friend-list scope and filter are retained, including archived lists and search results.

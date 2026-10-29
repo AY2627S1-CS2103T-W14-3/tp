@@ -40,8 +40,9 @@ public class ArgumentTokenizerTest {
     }
 
     @Test
-    public void tokenize_unquotedValues_onlyUnescapeQuotes() throws Exception {
-        ArgumentMultimap result = ArgumentTokenizer.tokenize(" p/say \"hi\" -t\\\"it\\\\\"s C:\\path", pSlash, dashT);
+    public void tokenize_unquotedValues_unescapeQuotes() throws Exception {
+        ArgumentMultimap result = ArgumentTokenizer.tokenize(
+                " p/say \\\"hi\\\" -t\\\"it\\\\\"s C:\\path", pSlash, dashT);
         assertArgumentPresent(result, pSlash, "say \"hi\"");
         assertArgumentPresent(result, dashT, "\"it\\\"s C:\\path");
         assertPreamblePresent(ArgumentTokenizer.tokenize(" \"pre p/\" -tvalue", dashT), "\"pre p/\"");
@@ -50,7 +51,7 @@ public class ArgumentTokenizerTest {
     @Test
     public void tokenize_malformedQuotedValues_throwsParseException() throws Exception {
         for (String args : new String[]{" p/\"open", " p/\"open -tvalue", " p/\"done\"extra",
-            " p/\"done\" extra -tvalue", " p/\"escaped\\\"", " p/\"a\\\\\""}) {
+            " p/\"done\" extra -tvalue", " p/\"escaped\\\"", " p/\"a\\\\\"", " p/end\"", " p/mid \"dle\" -tvalue"}) {
             assertThrows(ParseException.class, ArgumentTokenizer.MESSAGE_INVALID_QUOTED_VALUE, ()
                     -> ArgumentTokenizer.tokenize(args, pSlash, dashT));
         }
