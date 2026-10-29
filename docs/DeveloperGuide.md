@@ -251,10 +251,10 @@ The list validates this invariant on addition, replacement and bulk replacement.
 A violation throws `PinnedFriendLimitExceededException` before the collection changes.
 Tag names contain 1–50 ASCII alphanumeric characters.
 
-After additions and replacements, `UniqueFriendList` stably partitions friends, with pinned friends before unpinned friends.
-It preserves the existing relative order within each group.
-Filters use that stored order, so filtering preserves this invariant.
-An explicit sort uses a separate display comparator and can override the pin order in the current implementation.
+`UniqueFriendList` retains insertion order, including when pin or archive status changes.
+`ModelManager` applies `PINNED_FRIENDS_FIRST` to its `SortedList`, placing pinned friends above unpinned friends
+without rearranging the stored collection. With no explicit sort, each group follows insertion order.
+Explicit name/game comparators also put pinned friends first. JSON saves the original insertion order and pin status.
 
 **Game fields and identity**
 
@@ -494,12 +494,11 @@ Both commands replace the previous predicate. Their filters do not intersect.
 **Display order**
 
 After filtering, `list s/name` and `list s/game` set a `SortedList` comparator in `ModelManager`.
-The default direction and `o/asc` use ascending order. `o/desc` reverses the comparator.
-The default `list` clears the comparator and keeps the stored insertion order.
+The default direction and `o/asc` use ascending order. `o/desc` reverses the order within each pin group.
+The default `list` restores the pin-only comparator, keeping stored insertion order within each group.
 
 Game sorting uses each friend's alphabetically first game name. Friend names resolve ties.
-Ascending game order puts friends without games last.
-Reversing the comparator currently also reverses that placement.
+Friends without games appear last within each pin group in both directions.
 
 **Parser behavior and empty results**
 
@@ -759,7 +758,8 @@ They must also differ from the separately stored Myself profile.
 An archived friend's name stays reserved.
 
 `FriendValidator` rejects a conflicting add or rename.
-If the existing friend is archived, the feedback suggests `archivelist` and `unarchive`.
+For any add or rename, including profile edits, an archived conflict explains that the name is already used by
+an archived friend and asks for a different name. Unarchiving the friend does not resolve the name conflict.
 The validator uses `Model.findFriend()` for one identity lookup across both statuses, independently of the display filter.
 
 An existing friend can keep their own name during an edit.
@@ -1173,7 +1173,8 @@ Prerequisite: fresh sample data. These actions are destructive within the dispos
    reappear with `list`. Bernice's games are removed with her, while Roy's Minecraft entry remains.
 2. `delete`, `delete 0`, `delete -1`, `delete x`, `delete 2147483648`, `delete 1 2` and `delete 999`:
    expected errors without deleting anyone. Missing index reports `Please provide an index.`; malformed values
-   report `Index must be a positive integer between 1 and 2147483647 (inclusive).`; an out-of-range index reports `The friend index provided is invalid.`.
+   report `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`,
+   where `INPUT` is the rejected text. An out-of-range index reports `The friend index provided is invalid.`.
 3. `clear`: expected immediate empty list and `All active and archived friends have been cleared!`. `delete 1` then reports the generic
    invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list. There is no undo.
 

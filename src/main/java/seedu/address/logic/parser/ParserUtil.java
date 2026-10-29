@@ -30,7 +30,8 @@ public class ParserUtil {
 
     public static final String MESSAGE_MISSING_INDEX = "Please provide an index.";
     public static final String MESSAGE_INVALID_INDEX =
-            "Index must be a positive integer between 1 and " + Integer.MAX_VALUE + " (inclusive).";
+            "Invalid index \"%1$s\". Index must be a positive integer between 1 and "
+                    + Integer.MAX_VALUE + " (inclusive).";
 
     /**
      * Parses the optional game filter shared by active and archived list commands.
@@ -67,7 +68,7 @@ public class ParserUtil {
             throw new ParseException(MESSAGE_MISSING_INDEX);
         }
         if (!StringUtil.isNonZeroUnsignedInteger(trimmedIndex)) {
-            throw new ParseException(MESSAGE_INVALID_INDEX);
+            throw new ParseException(String.format(MESSAGE_INVALID_INDEX, trimmedIndex));
         }
         return Index.fromOneBased(Integer.parseInt(trimmedIndex));
     }

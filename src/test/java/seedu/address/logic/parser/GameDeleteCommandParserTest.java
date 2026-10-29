@@ -48,7 +48,7 @@ public class GameDeleteCommandParserTest {
     @Test
     public void parse_invalidIndex_failure() {
         for (String index : new String[]{"zero", "0", "-1", "1.5", "2147483648", "1 extra", "myself 1"}) {
-            assertParseFailure(parser, index + " g/Minecraft", ParserUtil.MESSAGE_INVALID_INDEX);
+            assertParseFailure(parser, index + " g/Minecraft", String.format(ParserUtil.MESSAGE_INVALID_INDEX, index));
         }
     }
 

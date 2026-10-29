@@ -2,7 +2,6 @@ package seedu.address.model.friend;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
-import static seedu.address.model.friend.FriendSortCriterion.PINNED_FRIENDS_FIRST;
 
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +56,6 @@ public class UniqueFriendList implements Iterable<Friend> {
         }
         verifyPinnedFriendLimitAfterAddition(toAdd);
         internalList.add(toAdd);
-        movePinnedFriendsToTop();
     }
 
     /**
@@ -80,7 +78,6 @@ public class UniqueFriendList implements Iterable<Friend> {
         verifyPinnedFriendLimitAfterReplacement(target, editedFriend);
 
         internalList.set(index, editedFriend);
-        movePinnedFriendsToTop();
     }
 
     /**
@@ -98,7 +95,6 @@ public class UniqueFriendList implements Iterable<Friend> {
         requireNonNull(replacement);
         verifyPinnedFriendLimit(replacement.internalList);
         internalList.setAll(replacement.internalList);
-        movePinnedFriendsToTop();
     }
 
     /**
@@ -113,7 +109,6 @@ public class UniqueFriendList implements Iterable<Friend> {
         verifyPinnedFriendLimit(friends);
 
         internalList.setAll(friends);
-        movePinnedFriendsToTop();
     }
 
     /**
@@ -191,12 +186,5 @@ public class UniqueFriendList implements Iterable<Friend> {
         if (pinnedFriendCount > MAX_PINNED_FRIENDS) {
             throw new PinnedFriendLimitExceededException();
         }
-    }
-
-    /**
-     * Keeps pinned friends before unpinned friends while retaining their existing relative order.
-     */
-    private void movePinnedFriendsToTop() {
-        FXCollections.sort(internalList, PINNED_FRIENDS_FIRST);
     }
 }

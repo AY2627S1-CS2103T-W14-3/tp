@@ -57,8 +57,8 @@ public class GameListCommandParserTest {
     @Test
     public void parse_invalidIndex_failure() {
         for (String index : new String[]{"abc", "0", "-1", "+1", "1.5", "2147483648", "999999999999999"}) {
-            assertParseFailure(parser, index, ParserUtil.MESSAGE_INVALID_INDEX);
-            assertParseFailure(parser, index + " g/Valorant", ParserUtil.MESSAGE_INVALID_INDEX);
+            assertParseFailure(parser, index, String.format(ParserUtil.MESSAGE_INVALID_INDEX, index));
+            assertParseFailure(parser, index + " g/Valorant", String.format(ParserUtil.MESSAGE_INVALID_INDEX, index));
         }
     }
 
