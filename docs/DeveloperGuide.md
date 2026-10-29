@@ -254,10 +254,16 @@ The implemented contact rules differ from the submitted draft: names are 1–100
 characters/spaces, phones validate digit counts and grouping, and emails validate ASCII dot-atom/domain syntax
 with length limits. The [User Guide](UserGuide.html#adding-a-friend-add) specifies the accepted input for users.
 No phone, email, game name or username is verified against an external service.
-Supplied `GameName` and `Username` values trim with `String.strip()`, count UTF-16 code units with `String.length()`,
-require a letter/digit code point and reject non-printable Unicode after trimming. The shared text validator rejects
-Unicode categories C (controls, format characters, unpaired surrogates, private use and unassigned characters),
-Zl (line separators) and Zp (paragraph separators). Printable Unicode, combining marks and emoji remain accepted.
+`GameName` and `Username` values are trimmed with `String.strip()` and must contain a letter or digit.
+Length is counted in UTF-16 units with `String.length()`. The shared text validator rejects:
+
+* Unicode category C: controls, format characters, unpaired surrogates, private-use and unassigned characters
+* line (Zl) and paragraph (Zp) separators
+* characters that render blank: Hangul fillers U+115F, U+1160, U+3164 and U+FFA0, blank Braille U+2800
+  and the combining grapheme joiner U+034F
+* no-break spaces U+00A0, U+2007 and U+202F, which look like regular spaces but do not match them
+
+Other Unicode is accepted, including combining marks, emoji and variation selectors.
 
 ### Myself profile
 
@@ -405,7 +411,7 @@ before publishing a complete v1.3 MVP guide.
 | Game uniqueness | One or no username per game name within a friend (pp. 16–19). | `gameadd` rejects duplicate game names through `Game.isSameGame`. Stored sets use full equality, so JSON can still contain the same game name with different usernames. |
 
 The audit's root-level JSON `null` loading issue remains unresolved. Game-text validation now rejects
-non-printable Unicode through the shared text validator described above.
+control characters and misleading spaces.
 
 Deletion confirmation and undo are not implemented. The confirmation user story below is a future requirement,
 not a current use-case step. Game creation/deletion, metadata entry/display and own-profile editing are available.
@@ -415,14 +421,14 @@ not a current use-case step. Game creation/deletion, metadata entry/display and 
 Metadata records game-specific details such as a friend's role or play style.
 `Meta`, `MetaKey` and `MetaValue` are immutable classes in `seedu.address.model.game.meta`.
 Each `Meta` contains one key and one value. `Game` copies the supplied metadata collection and
-exposes it as an unmodifiable set through `getMetas()`; the two-argument constructor defaults to an empty set.
+exposes it as an unmodifiable set through `getMetas()`. The two-argument constructor defaults to an empty set.
 
 #### Validation and equality
 
-Leading and trailing whitespace is removed with `String.strip()` before validation and storage.
-`StringUtil.isValidTextField()` requires non-empty text with at least one letter or digit and only printable Unicode.
+`String.strip()` removes leading and trailing whitespace before validation and storage.
+`StringUtil.isValidTextField()` requires at least one letter or digit. It rejects the characters listed in
+[Friend creation, editing and deletion](#friend-creation-editing-and-deletion).
 Limits use `String.length()` (UTF-16 units), so supplementary characters count as two.
-Surrounding whitespace is trimmed as before; non-printable characters remaining inside the value are rejected.
 `GameName` and `Username` also use this utility.
 
 | Field | Length after trimming | Colon handling | Equality |

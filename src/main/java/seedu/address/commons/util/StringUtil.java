@@ -14,13 +14,17 @@ import java.util.regex.Pattern;
 public class StringUtil {
 
     // Unicode Other categories (C), plus line and paragraph separators, are non-printable.
-    private static final Pattern NON_PRINTABLE_PATTERN = Pattern.compile("[\\p{C}\\p{Zl}\\p{Zp}]");
+    // Hangul fillers, the blank Braille pattern and the combining grapheme joiner render blank
+    // despite being letters, symbols or marks. No-break spaces look like regular spaces but do not match them.
+    private static final Pattern NON_PRINTABLE_PATTERN = Pattern.compile(
+            "[\\p{C}\\p{Zl}\\p{Zp}\\u115F\\u1160\\u3164\\uFFA0\\u2800\\u034F\\u00A0\\u2007\\u202F]");
 
     /**
      * Returns whether a text field is non-empty after stripping whitespace, within {@code maxLength},
      * contains at least one letter or digit, and contains only printable Unicode characters.
-     * Controls, format characters, unpaired surrogates, private-use/unassigned characters and
-     * line/paragraph separators are rejected after stripping. Length uses {@link String#length()}.
+     * Controls, format characters, unpaired surrogates, private-use/unassigned characters,
+     * line/paragraph separators, blank-rendering fillers and no-break spaces are rejected after stripping.
+     * Length uses {@link String#length()}.
      * Null input and non-positive length limits return false.
      */
     public static boolean isValidTextField(String text, int maxLength) {
