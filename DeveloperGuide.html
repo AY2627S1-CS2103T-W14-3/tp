@@ -379,9 +379,12 @@ Its classes represent domain data and make sense without those other components.
 
 <p><code class="language-plaintext highlighter-rouge">Friend</code> contains a <code class="language-plaintext highlighter-rouge">Name</code>, optional contact values, a set of <code class="language-plaintext highlighter-rouge">Tag</code> objects and a set of <code class="language-plaintext highlighter-rouge">Game</code> objects.
 It also contains immutable <code class="language-plaintext highlighter-rouge">archived</code> and <code class="language-plaintext highlighter-rouge">pinned</code> states.
+The constructor rejects <code class="language-plaintext highlighter-rouge">archived &amp;&amp; pinned</code> with <code class="language-plaintext highlighter-rouge">IllegalArgumentException</code> and
+<code class="language-plaintext highlighter-rouge">Friend.MESSAGE_ARCHIVED_PINNED</code>. <code class="language-plaintext highlighter-rouge">withPinned(true)</code> also rejects archived friends.
 See <a href="#friend-archiving">Friend archiving</a> for the scope, identity and persistence rules.</p>
 
-<p><code class="language-plaintext highlighter-rouge">UniqueFriendList.MAX_PINNED_FRIENDS</code> limits the stored collection to five pins across active and archived friends.
+<p><code class="language-plaintext highlighter-rouge">UniqueFriendList.MAX_PINNED_FRIENDS</code> limits the stored collection to five pinned active friends.
+Archived friends cannot be pinned.
 The list validates this invariant on addition, replacement and bulk replacement.
 A violation throws <code class="language-plaintext highlighter-rouge">PinnedFriendLimitExceededException</code> before the collection changes.
 Tag names contain 1–50 ASCII alphanumeric characters.</p>
@@ -456,7 +459,9 @@ Invalid non-empty usernames, including whitespace-only strings, are rejected.</p
 
 <p>Duplicate friend names reject the entire load, including a profile parsed before the duplicate was found.
 Startup then uses a new empty <code class="language-plaintext highlighter-rouge">GameMates</code>.
-<code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> saves the <code class="language-plaintext highlighter-rouge">pinned</code> boolean. Missing or null pin values in older files default to <code class="language-plaintext highlighter-rouge">false</code>.</p>
+<code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> saves the <code class="language-plaintext highlighter-rouge">pinned</code> boolean. Missing or null pin values default to <code class="language-plaintext highlighter-rouge">false</code>.
+An entry with both <code class="language-plaintext highlighter-rouge">archived</code> and <code class="language-plaintext highlighter-rouge">pinned</code> set to <code class="language-plaintext highlighter-rouge">true</code> throws <code class="language-plaintext highlighter-rouge">IllegalValueException</code> and rejects the entire load.
+Invalid archived pins are not silently cleared.</p>
 
 <p><code class="language-plaintext highlighter-rouge">JsonAdaptedFriend</code> rejects duplicate <code class="language-plaintext highlighter-rouge">GameName</code> values within either a friend or the profile.
 <code class="language-plaintext highlighter-rouge">JsonSerializableGameMates</code> rejects friend names that match the profile and converts excess pins to <code class="language-plaintext highlighter-rouge">IllegalValueException</code>.
@@ -906,7 +911,9 @@ Automatic backups, scheduled retention and undo are not implemented.</p>
 
 <p><code class="language-plaintext highlighter-rouge">GameMates</code> keeps active and archived friends together in one <code class="language-plaintext highlighter-rouge">UniqueFriendList</code>.
 <code class="language-plaintext highlighter-rouge">Friend.isArchived()</code> returns an immutable boolean.
-<code class="language-plaintext highlighter-rouge">withArchived(boolean)</code> returns a copy and preserves all other fields.</p>
+<code class="language-plaintext highlighter-rouge">withArchived(boolean)</code> returns a copy, clearing the pin when archiving and preserving the other fields.
+Restoring an archived friend keeps them unpinned.
+<code class="language-plaintext highlighter-rouge">pin</code> and <code class="language-plaintext highlighter-rouge">unpin</code> reject archived targets in both archive lists and global search results.</p>
 
 <p><code class="language-plaintext highlighter-rouge">Friend.equals()</code> and <code class="language-plaintext highlighter-rouge">hashCode()</code> include archive status.
 <code class="language-plaintext highlighter-rouge">isSameFriend()</code> continues to compare normalized names.</p>
@@ -980,10 +987,11 @@ Active lists and global search results accept archiving.
 It rejects an invalid index, an already archived archive target, or a non-archived restore target.
 Failed commands preserve the data, scope and filter.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">Model.setFriend()</code> replaces the selected friend with a copy that has the new archive status.</li>
+<code class="language-plaintext highlighter-rouge">Model.setFriend()</code> replaces the selected friend with a copy that has the new archive status.
+Archiving clears any existing pin; restoring does not restore the pin.</li>
   <li>The observable filtered list updates automatically.
 Archiving removes the friend from an active-only list; restoring removes the friend from an archive-only list.
-In global search, the friend stays at the same displayed position with the new status.
+In global search, the friend remains visible with the new status. Clearing a pin can change its displayed position.
 Neither command resets the predicate or scope.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">LogicManager</code> saves the updated collection through the existing storage path.</li>
@@ -1774,8 +1782,12 @@ and its phone still removed. Filters are reset.</li>
       <td>The entire load fails; no duplicate game entries are accepted. Restore the valid backup before continuing.</td>
     </tr>
     <tr>
-      <td>Set a stored friend’s name equal to the profile name, or mark six distinct friends as pinned across both statuses. Relaunch.</td>
+      <td>Set a stored friend’s name equal to the profile name, or mark six distinct active friends as pinned. Relaunch.</td>
       <td>The entire load fails. The profile conflict and pin limit apply to stored data as well as commands.</td>
+    </tr>
+    <tr>
+      <td>Set both <code class="language-plaintext highlighter-rouge">archived</code> and <code class="language-plaintext highlighter-rouge">pinned</code> to <code class="language-plaintext highlighter-rouge">true</code> on one stored friend. Relaunch.</td>
+      <td>The entire load fails; archived friends cannot be pinned. The invalid entry is not silently repaired. Restore the valid backup before continuing.</td>
     </tr>
     <tr>
       <td>Remove the <code class="language-plaintext highlighter-rouge">myself</code> and <code class="language-plaintext highlighter-rouge">games</code> properties from a valid copy, then relaunch.</td>
@@ -1950,7 +1962,11 @@ The details card must show <code class="language-plaintext highlighter-rouge">Ro
 Enter <code class="language-plaintext highlighter-rouge">archivelist</code>.
 Edit the username again.
 Restart and use <code class="language-plaintext highlighter-rouge">archivelist</code>.
-Expect the edited game, pinned badge and archive status to persist.</p>
+Expect the edited game and archive status to persist, with no pinned badge.
+Enter <code class="language-plaintext highlighter-rouge">pin 1</code> and <code class="language-plaintext highlighter-rouge">unpin 1</code>; both must reject the archived target without changing data.
+Enter <code class="language-plaintext highlighter-rouge">find Tester</code> and repeat both commands on the archived result; both must still be rejected.
+Enter <code class="language-plaintext highlighter-rouge">unarchive 1</code>, then <code class="language-plaintext highlighter-rouge">list</code>.
+Expect the restored friend to remain unpinned; pinning must be requested explicitly again.</p>
 
   </div>
 

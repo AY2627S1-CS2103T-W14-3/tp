@@ -402,9 +402,12 @@ Pinned friends stay above unpinned friends, including when using the sorting opt
   <li>
 <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> refers to the current displayed list. The command is unavailable for your separately stored Myself
 profile.</li>
-  <li>At most five friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
+  <li>Pinning archived friends is rejected, including archived entries in search results. Restore them with
+<code class="language-plaintext highlighter-rouge">unarchive FRIEND_INDEX</code> first.</li>
+  <li>Archiving a pinned friend clears their pin. Restoring them does not restore the pin.</li>
+  <li>At most five active friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
 is rejected without changing the list.
-The limit counts active and archived friends together and also applies when loading saved data.</li>
+The limit also applies when loading saved data. Archived friends cannot be pinned.</li>
   <li>Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
 filtering the list by game.</li>
   <li>Without an explicit sort, friends within each group follow their stored insertion order. Pinning changes
@@ -431,6 +434,8 @@ the displayed group without changing the stored order.</li>
 <ul>
   <li>
 <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> refers to the current displayed list.</li>
+  <li>Unpinning archived friends is rejected, including archived entries in search results. Restore them with
+<code class="language-plaintext highlighter-rouge">unarchive FRIEND_INDEX</code> first.</li>
   <li>Unpinning a friend who is not pinned is rejected without changing the list.</li>
   <li>The friend is returned to the unpinned group, below all pinned friends. Without an explicit sort, they
 return to their position in the stored insertion order.</li>
@@ -931,6 +936,7 @@ active lists. It must be a positive integer.</li>
 whether the index exists. This also applies when that view is empty; data and view stay unchanged.</li>
   <li>The friend disappears from the active view immediately. In <strong>Search results</strong>, the friend stays visible with
 an <strong>Archived</strong> badge. The current filter stays in place.</li>
+  <li>Archiving clears any pin on the friend, freeing a pin slot. Restoring the friend keeps them unpinned.</li>
   <li>Feedback is <code class="language-plaintext highlighter-rouge">Archived FRIEND_NAME.</code>. Archiving an already archived friend is rejected.</li>
   <li>Your Myself profile cannot be archived. <code class="language-plaintext highlighter-rouge">myself</code>, missing indices, extra arguments and invalid indices are rejected.</li>
   <li>Missing indices report <code class="language-plaintext highlighter-rouge">Please provide an index.</code>. Invalid indices (such as <code class="language-plaintext highlighter-rouge">-1</code>, <code class="language-plaintext highlighter-rouge">0</code> or <code class="language-plaintext highlighter-rouge">abc</code>) report
@@ -1092,12 +1098,14 @@ Copy <code class="language-plaintext highlighter-rouge">preferences.json</code> 
 <code class="language-plaintext highlighter-rouge">phone</code> and <code class="language-plaintext highlighter-rouge">email</code>, <code class="language-plaintext highlighter-rouge">tags</code>, <code class="language-plaintext highlighter-rouge">games</code>, and <code class="language-plaintext highlighter-rouge">archived</code> and <code class="language-plaintext highlighter-rouge">pinned</code> booleans. Missing <code class="language-plaintext highlighter-rouge">archived</code> defaults to <code class="language-plaintext highlighter-rouge">false</code>
 (active), while missing <code class="language-plaintext highlighter-rouge">pinned</code> defaults to <code class="language-plaintext highlighter-rouge">false</code> (unpinned); both statuses are saved across restarts. A game has a
 required <code class="language-plaintext highlighter-rouge">name</code> and an optional <code class="language-plaintext highlighter-rouge">username</code>.
+Archived friends must have <code class="language-plaintext highlighter-rouge">pinned</code> set to <code class="language-plaintext highlighter-rouge">false</code>. A saved entry with both <code class="language-plaintext highlighter-rouge">archived</code> and <code class="language-plaintext highlighter-rouge">pinned</code> set to
+<code class="language-plaintext highlighter-rouge">true</code> is invalid and causes loading to fail.
 An empty or missing <code class="language-plaintext highlighter-rouge">username</code> means no username has been provided; the game entry is still retained.
 Existing files that omit <code class="language-plaintext highlighter-rouge">games</code> load with no games; files that omit <code class="language-plaintext highlighter-rouge">myself</code> use the default empty profile.
 The untouched default profile is omitted when saving. Stored friends and profiles must have a valid non-empty name.
 Friend names must be unique and must differ from the stored profile name.
 Each person can have only one entry for a game name, ignoring case, even if the usernames differ.
-At most five friends across active and archived entries can have <code class="language-plaintext highlighter-rouge">pinned: true</code>.
+At most five active friends can have <code class="language-plaintext highlighter-rouge">pinned: true</code>. Archived entries must have <code class="language-plaintext highlighter-rouge">pinned: false</code>.
 Violating any of these rules rejects the entire data file.
 Empty or missing contact fields mean
 <code class="language-plaintext highlighter-rouge">Not provided</code>. Use the same validation rules as command input. Stored game metadata is supported as an optional
