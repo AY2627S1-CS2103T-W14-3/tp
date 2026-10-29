@@ -11,8 +11,7 @@ title: Developer Guide
 
 * [Vavr](https://vavr.io/) provides `Option`, `Try`, and checked-function adapters for parsing, edit descriptors, and storage.
 
-This guide distinguishes implemented behaviour from the [pending MVP integration](#mvp-integration-and-specification-departures).
-The requirements and explicitly proposed features below describe product goals, not a claim that every goal is implemented.
+This guide describes GameMates' design, implementation and testing. Proposed features are labelled explicitly.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -617,33 +616,9 @@ They also verify that invalid input preserves the details view.
 
 ![Command-to-panel flow for a filtered game list](images/GameListSequenceDiagram.png)
 
-### MVP integration and specification departures
+### Current limitations
 
-Baseline: the *GameMates – Feature Specification* section of the team's
-[shared project document](https://docs.google.com/document/d/1UI16NkQ8w8hXb-8Jez8UDpGYkRc8wbs42XZntx9n_sI/edit),
-CS2103T-W14-3, 20 September 2026, pages 3–26 in the exported feature-spec PDF. Checked on 15 October 2026.
-The table records unresolved differences for team reconciliation; it does not change application behaviour or
-present pending PRs as merged features. Recheck this table and the User Guide against the integrated release
-before publishing a complete v1.3 MVP guide.
-
-| Area | Submitted specification | Current implementation / follow-up |
-|------|-------------------------|------------------------------------|
-| Own-profile editing | Omit `FRIEND_INDEX` in `edit` (pp. 10–13); the later task list instead mentions special `myself` handling. | Use <code>edit FRIEND_INDEX&#124;myself ...</code>. Omitting the selector is rejected. Update the earlier spec syntax to match this implementation. Profile and friend names must also differ. |
-| Game add/delete | Add or delete a friend's game, with optional metadata on addition (pp. 17–23). | Use <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code> and <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code>. See [Myself profile](#myself-profile). |
-| Metadata | Case-insensitive unique keys, split at the first colon, trimmed key/value lengths of 1–50/1–200, each containing a letter or digit (pp. 19–20). | Model, parser utilities, JSON persistence, command entry through `gameadd`, replacement/clearing through `gameedit` and game-card rendering are implemented. See [Game metadata](#game-metadata) for the implemented API. |
-| Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
-| Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
-| Phone/email | Phone: 1–40 characters from a broad punctuation set. Email: 1–255 characters containing `@` (pp. 5–6). | Phone: 3–15 ASCII digits, or `+` with 2–15, with constrained grouping and no extensions. Email: at most 254 characters, local part at most 64, ASCII dot-atom and valid domain labels. |
-| Friend filtering | Combined `list [n/KEYWORDS] [g/GAME]`, with named empty-result feedback (pp. 14–15). | Separate `find KEYWORD...` and `list [g/GAME]`; a new command replaces the previous filter. Feedback is `Listed all active friends.` or `N friend(s) listed!`, including zero. |
-| GUI | Feature-spec mockups replace the friend panel with a game's list (pp. 15, 25); later v1.3 notes call for a split panel. | The adopted split layout matches those later notes: friends stay on the left and details/game cards appear on the right. `gamelist` filters cards only. Retire the earlier mockups. |
-| Errors | Command-specific index and validation wording. | Messages differ across commands; use the verified wording in the User Guide instead of copying spec errors. |
-| Game uniqueness | One or no username per game name within a friend (pp. 16–19). | `GameValidator` rejects duplicate names during addition/renaming. `JsonAdaptedFriend` rejects duplicate game names in saved friends and profiles, even when usernames differ. |
-
-Root-level JSON `null` now follows the load-error fallback. Null GUI settings also use default preferences.
-Game-text validation rejects the Unicode categories, blank characters and misleading spaces listed above.
-
-Deletion confirmation and undo are outside the product scope. Deletion takes effect immediately.
-Game creation/deletion, game username editing, metadata entry/display and own-profile editing are available.
+Deletion takes effect immediately. Deletion confirmation, undo and redo are outside the product scope.
 
 ### Game metadata
 
@@ -854,7 +829,8 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
 
 ### User stories
 
-These are product requirements, including future work. Implemented availability is recorded in the integration table above.
+These user stories include future work. See [Implementation](#implementation) for current features and
+[Current limitations](#current-limitations) for unsupported behaviour.
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
