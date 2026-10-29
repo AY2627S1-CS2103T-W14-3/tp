@@ -1311,51 +1311,51 @@ feedback, identity conflicts, editing archived friends and save/reload restorati
 
 <h3 id="non-functional-requirements">Non-Functional Requirements</h3>
 
-<p>The following are targets, not measured guarantees. Startup/performance and large-data capacity need separate measurement.</p>
+<p>These requirements are targets, not measured guarantees. Capacity and performance require separate validation.</p>
 
 <h4 id="environment">Environment</h4>
 
 <ol>
-  <li>Should work on any <em>mainstream OS</em> as long as it has Java <code class="language-plaintext highlighter-rouge">25</code> or above installed.</li>
-  <li>Should work offline on a single user’s personal laptop, without requiring an internet connection or any installed software other than Java <code class="language-plaintext highlighter-rouge">25</code> or above.</li>
-  <li>Should work on screens with a resolution of <code class="language-plaintext highlighter-rouge">1280 x 720</code> or higher, with all panels and the command box visible without scrolling the window at its default size.</li>
+  <li>Should run offline on a single user’s personal laptop running a <em>mainstream OS</em>, requiring only Java <code class="language-plaintext highlighter-rouge">25</code> or above.</li>
+  <li>Should display all panels and the command box without scrolling at the default window size on screens with a resolution of <code class="language-plaintext highlighter-rouge">1280 x 720</code> or higher.</li>
 </ol>
 
 <h4 id="data">Data</h4>
 
 <ol>
-  <li>All data should be stored locally in a human-editable JSON file. GameMates should not send any data over the network.</li>
-  <li>Successfully saved data should be restored on the next launch from the same working directory. Current data saves
-occur after successful commands; window preferences save on shutdown. Metadata persistence is implemented in the JSON adapters.</li>
-  <li>If the data file is missing, GameMates should start with the sample data without crashing. If the data file is corrupted, GameMates should start with an empty list without crashing.</li>
+  <li>Should store all data locally in human-editable JSON files and send no data over the network.</li>
+  <li>Should save data after successful commands and window preferences on shutdown, restoring saved data on the next launch from the same working directory.</li>
+  <li>Should start without crashing, using sample data if the data file is missing or an empty list if it is corrupted.</li>
 </ol>
 
 <h4 id="capacity">Capacity</h4>
 
 <ol>
-  <li>Should be able to hold up to 1000 friends, each with up to 100 game entries.</li>
+  <li>Should support up to 1000 friends in total across the active and archived lists, excluding the user profile, each with up to 100 game entries.</li>
 </ol>
 
 <h4 id="performance">Performance</h4>
 
+<p>On a <em>modern computer</em> running Java <code class="language-plaintext highlighter-rouge">25</code>, with up to 1000 friends in total across the active and archived lists, excluding the user profile, and 100 game entries per friend:</p>
+
 <ol>
-  <li>GameMates should be ready to accept commands within 3 seconds of starting the application on a <em>modern computer</em> running Java <code class="language-plaintext highlighter-rouge">25</code>, with up to 1000 friends and 100 game entries per friend.</li>
-  <li>GameMates should display the results of each friend listing or filtering command within 2 seconds of submission on a <em>modern computer</em> running Java <code class="language-plaintext highlighter-rouge">25</code>, with up to 1000 friends and 100 game entries per friend.</li>
+  <li>Should be ready to accept commands within 3 seconds of launch.</li>
+  <li>Should display friend listing or filtering results within 2 seconds of command submission.</li>
 </ol>
 
 <h4 id="usability">Usability</h4>
 
 <ol>
-  <li>A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to add, edit, delete, list and filter friends, and add, delete and list game entries, faster using commands than using the mouse.</li>
-  <li>A first-time user should be able to add a friend and add a game entry to that friend within 5 minutes of first launching GameMates, using only the in-app help and the sample data as a reference.</li>
-  <li>Every invalid command should produce an error message that states what was wrong and shows the correct usage or allowed input range, and should not modify any data.</li>
-  <li>Every command described in the User Guide should be usable through the command box alone, without needing the mouse.</li>
+  <li>Users with above-average typing speed for regular English text should be able to add, edit, delete, list and filter friends, and add, delete and list game entries, faster using commands than the mouse.</li>
+  <li>First-time users should be able to add a friend and a game entry for that friend within 5 minutes of launch, using only the in-app help and sample data.</li>
+  <li>Invalid commands should explain the error and show the correct usage or allowed input range, without modifying data.</li>
+  <li>All commands in the User Guide should be usable through the command box alone.</li>
 </ol>
 
 <h4 id="constraints">Constraints</h4>
 
 <ol>
-  <li>GameMates does not verify friend names, game names, usernames or metadata against any online gaming platform. All such data is whatever the user enters.</li>
+  <li>Friend names, game names, usernames and metadata are user-provided and are not verified against online gaming platforms.</li>
 </ol>
 
 <h3 id="glossary">Glossary</h3>
