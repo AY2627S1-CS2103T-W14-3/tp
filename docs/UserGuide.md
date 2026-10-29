@@ -274,7 +274,7 @@ Format: `pin FRIEND_INDEX`
 * Archiving a pinned friend clears their pin. Restoring them does not restore the pin.
 * At most five active friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
   is rejected without changing the list.
-  The limit counts active and archived friends together and also applies when loading saved data.
+  The limit also applies when loading saved data. Archived friends cannot be pinned.
 * Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
   filtering the list by game.
 * Without an explicit sort, friends within each group follow their stored insertion order. Pinning changes
@@ -761,7 +761,7 @@ Existing files that omit `games` load with no games; files that omit `myself` us
 The untouched default profile is omitted when saving. Stored friends and profiles must have a valid non-empty name.
 Friend names must be unique and must differ from the stored profile name.
 Each person can have only one entry for a game name, ignoring case, even if the usernames differ.
-At most five friends across active and archived entries can have `pinned: true`.
+At most five active friends can have `pinned: true`. Archived entries must have `pinned: false`.
 Violating any of these rules rejects the entire data file.
 Empty or missing contact fields mean
 `Not provided`. Use the same validation rules as command input. Stored game metadata is supported as an optional
