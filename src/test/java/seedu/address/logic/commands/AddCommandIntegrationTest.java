@@ -49,9 +49,9 @@ public class AddCommandIntegrationTest {
     @Test
     public void execute_nameOnlyCommand_addsFriendAndShowsMissingDetails() throws Exception {
         model.updateFilteredFriendList(friend -> false);
-        new GameMatesParser().parseCommand("add n/  Melody  ").execute(model);
+        new GameMatesParser().parseCommand("add n/  Myself  ").execute(model);
         Friend added = model.getFilteredFriendList().getLast();
-        assertEquals(new Friend(new Name("Melody"), Phone.EMPTY, Email.EMPTY,
+        assertEquals(new Friend(new Name("Myself"), Phone.EMPTY, Email.EMPTY,
                 Set.of()), added);
         assertEquals(model.getGameMates().getFriendList().size(), model.getFilteredFriendList().size());
     }

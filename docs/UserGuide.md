@@ -5,10 +5,10 @@ title: User Guide
 
 GameMates helps gamers keep track of friends, their contact details, the games they play and their in-game usernames.
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
-Your data stays on your computer; browsing the online help and downloading releases require internet access.
+Your data stays on your computer. Browsing the online help and downloading releases require internet access.
 
 This guide describes the commands available in this checkout. Use `gameadd`, `gamedel`, and `gameedit` to manage game
-entries; `gameedit` can also replace or clear metadata. Metadata appears on game cards below the username.
+entries. `gameedit` can also replace or clear metadata. Metadata appears on game cards below the username.
 See [Your profile and game entries](#your-profile-and-game-entries) for adding games to your profile.
 
 * Table of Contents
@@ -75,11 +75,11 @@ See [Your profile and game entries](#your-profile-and-game-entries) for adding g
 * Use spaces between parameters and lower-case command words and prefixes. Do not type square or angle brackets.
   Quotes are not needed around multiword names. Use only the prefixes documented for each command.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
-  Tags may be repeated; identical tag values are applied once.
+  Tags may be repeated. Identical tag values are applied once.
 * Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all active friends
   again before choosing an index. Zero, negative numbers, decimals, a leading `+` and larger integers are rejected.
 * For `edit`, `gameadd`, `gameedit` and `gamedel`, `FRIEND_INDEX|myself` means either a displayed friend index or the
-  case-insensitive keyword `myself` for your own profile. Do not type `|`. The selector must come before prefixes;
+  case-insensitive keyword `myself` for your own profile. Do not type `|`. The selector must come before prefixes.
   `myself` also works when no friends are displayed.
 
 * Extraneous parameters for commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
@@ -103,7 +103,7 @@ The main window has two panels: the friend list on the left and a details panel 
 * Successful commands other than `gamelist`, a friend-targeted `gameedit` or a single-result `find` return the right panel to your profile.
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
-  Adding or editing a friend shows the full list again; deleting a friend keeps the current friend-list filter.
+  Adding or editing a friend shows the full list again. Deleting a friend keeps the current friend-list filter.
 * Pinned friends always appear above unpinned friends. The current ordering is retained within each group.
 
 ### Your profile and game entries
@@ -112,15 +112,16 @@ Your profile is stored separately from your friend list. It appears on startup a
 If it contains no details, the right panel shows `No details added`. Filtering, deleting friends and `clear` do not
 change your stored profile.
 
-Use `edit myself n/Joash` to set your own name, or supply other supported edit fields to update your contact details
-and tags. The `myself` selector is case-insensitive and works even when the friend list is empty or filtered.
+Set up your profile with `edit myself n/Joash` before using `gameadd`, `gameedit`, `gamedel` or `gamelist` with `myself`.
+The first edit requires a valid, unique name. Later edits can omit it.
+The `myself` selector is case-insensitive and works even when the friend list is empty or filtered.
 Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve your games and the friend-list filter.
 
 New friends start with no games. Use [`gameadd`](#adding-a-game-gameadd) and
 [`gamedel`](#deleting-a-game-gamedel) to manage a friend's games or your own games, and
 [`gamelist`](#viewing-games-gamelist) to view their entries or your own. Add metadata with optional `m/KEY:VALUE`
-arguments in `gameadd`; each game card shows its metadata below the username.
-Deleting a friend removes that friend's complete entry, including their games; it does not remove games from
+arguments in `gameadd`. Each game card shows its metadata below the username.
+Deleting a friend removes that friend's complete entry, including their games. It does not remove games from
 other friends. Back up your data before [editing a saved file](#editing-the-data-file).
 
 ### Viewing help: `help`
@@ -141,7 +142,7 @@ Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…`
 * Supplied phone and email values must satisfy the validation rules. Empty `p/` or `e/` values are rejected.
 * Leading and trailing spaces are removed. Names must be unique, ignoring case and repeated spaces:
   `John Doe` and `john   doe` identify the same friend.
-* A friend's name must also differ from your Myself profile's name under the same comparison rules.
+* Once you set your Myself profile's name, a friend's name must differ from it under the same comparison rules.
 * Different friends may share a phone number or email address.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
@@ -160,7 +161,7 @@ so `john doe` and `John Doe` are the same friend.
 To distinguish two people with the same name, use names such as `John Doe School` and `John Doe Work`.
 Adding a different tag alone does not make a duplicate name unique; parentheses are not valid in names.
 
-Tag names must be non-empty and contain only ASCII letters and digits (no spaces or symbols).
+Tag names must contain 1–50 characters and use only ASCII letters and digits (no spaces or symbols).
 
 Phone numbers accept formats such as `91234567`, `+6591234567`, `+65 9123-4567` and `(123) 456-7890`.
 
@@ -275,21 +276,28 @@ Adds a game with an optional in-game username and metadata (e.g. role or level) 
 
 Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 
-* The game name is required. The username is optional; omit `u/` if you do not know it.
-* Game names and supplied usernames must contain 1–50 printable characters after trimming,
-  including at least one letter or digit.
+* For `myself`, [set up your profile first](#your-profile-and-game-entries).
+* The game name is required. The username is optional. Omit `u/` if you do not know it.
+* Game names and usernames must be 1–50 characters after trimming, with at least one letter or digit.
+* Control characters and line breaks are rejected. So are invisible characters, zero-width spaces, Hangul fillers
+  and no-break spaces.
 * Supplying `u/` without a value, or with only whitespace, is rejected. Omit the prefix instead.
 * Repeated `g/` or `u/` prefixes are rejected, even when the values are identical.
-* Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace. Keys allow 1–50 characters;
-  values allow 1–200. Both need a letter or digit and no control characters. Only values may contain colons.
+* Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace.
+  Keys allow 1–50 characters and values allow 1–200. Both follow the game-name character rules.
+  Only values may contain colons.
 * Repeat `m/` for distinct keys. Metadata keys are case-insensitive, so `Role` and `role` are duplicates.
   Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
   Omit `m/` entirely for no metadata.
-* A space followed by `g/`, `u/` or `m/` starts a new parameter, even inside quotes; avoid these in field values.
+* A space followed by `g/`, `u/` or `m/` starts a new parameter, even inside quotes. Avoid these in field values.
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
-* Metadata appears below the username, sorted by key ignoring case. Long fields wrap; scroll for additional rows.
+* Metadata appears below the username, sorted by key ignoring case. Long fields wrap. Scroll for additional rows.
 * The success message also lists supplied metadata below the username, sorted by key ignoring case.
+
+<div markdown="span" class="alert alert-primary">:bulb: **Tip:**
+Text copied from websites or game apps can contain hidden characters. If an input is rejected or a search does not match, retype it by hand.
+</div>
 
 Examples:
 
@@ -305,6 +313,7 @@ Removes one game from a friend or your own profile.
 
 Format: `gamedel FRIEND_INDEX|myself g/GAME_NAME`
 
+* For `myself`, [set up your profile first](#your-profile-and-game-entries).
 * The game name is required and matched case-insensitively. A missing game is rejected.
 * Other details and games are preserved. The friend-list filter stays unchanged.
 
@@ -321,17 +330,18 @@ Each game card shows the game name and in-game username if provided.
 
 Format: `gamelist FRIEND_INDEX|myself [g/GAME_NAME]`
 
+* For `myself`, [set up your profile first](#your-profile-and-game-entries).
 * Use a positive `FRIEND_INDEX` from 1 to 2147483647 (inclusive) to select from the **currently displayed friend list**,
   including after `find` or `list g/GAME_NAME`, or use `myself` to select your own profile. The selector is required.
 * `myself` is case-insensitive and works even when the friend list is empty or filtered. The panel shows `Your details`.
 * Without `g/`, all of the selected person's games are shown. This also clears a previous game display filter.
 * With `g/`, only a game with the complete matching name is shown. Matching is case-insensitive:
   `valorant` matches `Valorant`, but `Val` does not. Usernames are not searched.
-* Leading and trailing whitespace in the game name is removed. Game names may contain 1–50 printable characters
-  and must include at least one letter or digit. Multiword names are accepted.
+* Game names follow the same rules as in `gameadd`. Surrounding whitespace is removed.
+  Multiword names are accepted.
 * Put the selector before the optional filter. Only one `g/` is allowed, even if repeated values are identical.
-  Unknown prefixes and extra words before `g/` are rejected. All words after `g/` form the game name;
-  whitespace-separated tokens such as `x/` are treated as parameter prefixes, not part of the name.
+  Unknown prefixes and extra words before `g/` are rejected. All words after `g/` form the game name.
+  Whitespace-separated tokens such as `x/` are treated as parameter prefixes, not part of the name.
 * An absent game is a successful empty result, including when the selected person has no games. Stored friend details,
   game entries and your Myself profile are unchanged. Invalid commands leave the previous details display unchanged.
 
@@ -357,13 +367,14 @@ Feedback (placeholders below are replaced with actual values):
 |--------|----------|
 | All games | `Listed GAME_COUNT game(s) that FRIEND_NAME plays:` |
 | Matching game | `Showing GAME_NAME for FRIEND_NAME:` (uses the stored game-name spelling) |
-| No matching game | `FRIEND_NAME does not have GAME_NAME.` (uses your trimmed filter); the panel shows `No matching game: GAME_NAME` |
-| No games, without a filter | `FRIEND_NAME has no games added yet.`; the panel shows `No games added` |
+| No matching game | `FRIEND_NAME does not have GAME_NAME.` (uses your trimmed filter). The panel shows `No matching game: GAME_NAME` |
+| No games, without a filter | `FRIEND_NAME has no games added yet.` The panel shows `No games added` |
 
 Errors:
 
 | Input problem | Feedback |
 |---------------|----------|
+| `myself` before profile setup | `Set your profile name first using edit myself n/NAME.` |
 | Missing selector, unknown prefix or extra positional argument | <code>Invalid command format. Usage: gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code> |
 | Malformed, zero, negative or overflowing index | `Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive), or myself.` |
 | Positive index outside the displayed list | `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.` |
@@ -371,8 +382,7 @@ Errors:
 | Invalid game name, including empty `g/` | `Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.` |
 | Repeated `g/` | `Only one game can be filtered per command. Run gamelist separately for each game.` |
 
-For your own profile, feedback uses your profile name. If no profile details have been added, the panel continues
-showing `No details added`.
+For your own profile, feedback uses the name you set during setup.
 
 ### Editing a game: `gameedit`
 
@@ -380,18 +390,19 @@ Edits one existing game for a displayed friend or your separately stored profile
 
 Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...</code>
 
+* For `myself`, [set up your profile first](#your-profile-and-game-entries).
 * Use the index from the **currently displayed** friend list, or case-insensitive `myself`. The profile can be edited even when the displayed list is empty.
 * `g/` selects a complete existing game name, ignoring case. Partial names do not match. Supply at least one of `n/`, `u/` or `m/`. Repeatable `m/` pairs can appear in any order with the other prefixes; `g/`, `n/` and `u/` may each appear only once.
 * Wrap the **whole value** in double quotes if it contains a space followed by `g/`, `n/`, `u/` or `m/`:
   `g/"PUBG n/Game"` selects the literal name `PUBG n/Game`. Without quotes, these prefixes introduce command options.
   This also works for new names (`n/"PUBG m/Edition"`), usernames and metadata. Within quoted values, use `\"` for
   a literal double quote and `\\` for a backslash. Unclosed quotes, invalid escapes and extra text after a closing
-  quote are rejected before any change. Quoting is specific to `gameedit`; other commands retain their existing syntax.
+  quote are rejected before any change. Quoting is specific to `gameedit`. Other commands retain their existing syntax.
 * `n/` renames the game. A name already used by another game of the same person is rejected. Changing only letter case is allowed and saves the new spelling.
 * Omitted fields retain their values. Other games, contact details, tags, archive status and pin status are preserved.
-  The current friend-list scope and filter are retained, including archived lists and search results;
-  a renamed game can make its friend disappear from a game-filtered list.
-* Usernames use the current 1–50 character validation and must contain a letter or digit. A supplied empty `u/` clears the username; omitting `u/` preserves it.
+  The current friend-list scope and filter are retained, including archived lists and search results.
+  A renamed game can make its friend disappear from a game-filtered list.
+* Usernames use the current 1–50 character validation and must contain a letter or digit. A supplied empty `u/` clears the username. Omitting `u/` preserves it.
 * Supplying metadata **replaces the entire metadata set**. Omitting `m/` preserves it. A single empty `m/` clears all metadata. Do not mix an empty `m/` with pairs.
 * Pairs split at the first colon: `m/Region:Asia:SG` means key `Region`, value `Asia:SG`. Keys and values are trimmed independently. Keys use 1–50 characters and cannot contain colons; values use 1–200 characters. Both require a letter or digit and reject control characters, using the existing game metadata validation.
 * Keys are unique ignoring case: `m/Role:Healer m/role:Healer` is rejected even though the values agree. Values preserve case.
@@ -413,9 +424,9 @@ Lists each member's name, in-game username when available, and displayed friend 
 Format: `squad g/GAME n/NUMBER_OF_PEOPLE`
 
 * Both `g/` and `n/` are required and may appear in either order.
-* `GAME` uses the same game-name rules as `gamelist`: 1–50 printable characters after trimming,
-  including at least one letter or digit. Multiword names are accepted. Matching uses the complete
-  game name and is case-insensitive; `valorant` matches `Valorant`, but `Val` does not.
+* `GAME` follows the same rules as in `gameadd`. Multiword names are accepted.
+* Matching uses the complete game name and is case-insensitive.
+  `valorant` matches `Valorant`, but `Val` does not.
 * `NUMBER_OF_PEOPLE` must be a whole number from 1 to 20, inclusive.
 * The requested size includes you: `n/3` selects you and two friends; `n/1` returns only you.
 * You are always included as the first member, labelled `Me`, even if your profile does not contain `GAME`.
@@ -463,6 +474,8 @@ Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG
 
 * Edits the friend at the specified `FRIEND_INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
 * Use `myself` instead of `FRIEND_INDEX` to edit your own profile, for example `edit myself n/Alex Tan`. The selector is case-insensitive.
+* The first `edit myself` must include `n/NAME`. After setup, later edits can omit the name, and you can use
+  `gameadd`, `gameedit`, `gamedel` and `gamelist` with `myself`.
 * `|` means "or": enter either a friend index or `myself`. Do not type the `|` character.
 * At least one of the optional fields must be provided.
 * Supplied values are trimmed and validated using the same rules as `add`.
@@ -476,9 +489,9 @@ Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG
 * Omit `t/` to keep the friend's existing tags. Each supplied `t/TAG` removes that tag if the friend already has it, or adds it if they do not. Other tags remain unchanged.
 * Tag matching is case-sensitive. Repeating the same tag in one command applies it only once.
 * To remove all of a friend's tags, enter `t/` without a tag after it.
-  Use that empty prefix on its own; combining it with non-empty tags is rejected.
+  Use that empty prefix on its own. Combining it with non-empty tags is rejected.
 * A successful friend edit shows all friends in the current active or archive view again. In **Search results**,
-  it preserves the search filter; a renamed friend disappears if their new name no longer matches.
+  it preserves the search filter. A renamed friend disappears if their new name no longer matches.
   Editing preserves the friend's archive status, games and your profile. A successful
   `edit myself` shows your updated profile on the right and keeps the current friend-list filter.
 
@@ -498,6 +511,7 @@ Errors:
 * Empty displayed list: `No friends are currently displayed. Use list to show all friends.`
 * Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
+* First profile edit without a name: `Set your profile name first using edit myself n/NAME.`
 * Duplicate name: `This friend already exists in GameMates.`
 * Adding or renaming a friend to your profile's name: `This name is already used by your Myself profile.`
 
@@ -667,6 +681,7 @@ If you edit JSON manually, close the app first and keep a backup. Friend entries
 required `name` and an optional `username`.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
 Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
+The untouched default profile is omitted when saving. Stored friends and profiles must have a valid non-empty name.
 Empty or missing contact fields mean
 `Not provided`. Use the same validation rules as command input. Stored game metadata is supported as an optional
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
