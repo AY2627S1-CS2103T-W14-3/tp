@@ -13,6 +13,8 @@ import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.GameMates;
 import seedu.address.model.ReadOnlyGameMates;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.UniqueFriendList;
+import seedu.address.model.friend.exceptions.PinnedFriendLimitExceededException;
 
 /**
  * An Immutable GameMates that is serializable to JSON format.
@@ -21,6 +23,8 @@ import seedu.address.model.friend.Friend;
 class JsonSerializableGameMates {
 
     public static final String MESSAGE_DUPLICATE_FRIEND = "Friends list contains duplicate friend(s).";
+    public static final String MESSAGE_TOO_MANY_PINNED_FRIENDS = "Friends list contains more than "
+            + UniqueFriendList.MAX_PINNED_FRIENDS + " pinned friends.";
     public static final String MESSAGE_DUPLICATE_MYSELF =
             "Friends list contains a friend with the same name as the Myself profile.";
 
@@ -69,7 +73,11 @@ class JsonSerializableGameMates {
             }
             modelFriends.add(friend);
         }
-        gameMates.setFriends(modelFriends);
+        try {
+            gameMates.setFriends(modelFriends);
+        } catch (PinnedFriendLimitExceededException e) {
+            throw new IllegalValueException(MESSAGE_TOO_MANY_PINNED_FRIENDS, e);
+        }
         return gameMates;
     }
 

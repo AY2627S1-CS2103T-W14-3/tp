@@ -64,4 +64,10 @@ public class GameDeleteCommandParserTest {
         assertParseFailure(parser, "myself g/Minecraft g/Valorant",
                 Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_GAME_NAME));
     }
+
+    @Test
+    public void parse_quotedGameNameWithPrefix_success() {
+        assertParseSuccess(parser, " 1 g/\"Version g/2\"",
+                new GameDeleteCommand(Index.fromOneBased(1), new GameName("Version g/2")));
+    }
 }

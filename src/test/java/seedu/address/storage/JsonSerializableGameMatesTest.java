@@ -63,4 +63,22 @@ public class JsonSerializableGameMatesTest {
                 dataFromFile::toModelType);
     }
 
+    @Test
+    public void toModelType_moreThanMaximumPinnedFriends_throwsIllegalValueException() throws Exception {
+        String json = """
+                {"friends": [
+                  {"name": "Pinned Friend 1", "pinned": true},
+                  {"name": "Pinned Friend 2", "pinned": true},
+                  {"name": "Pinned Friend 3", "pinned": true},
+                  {"name": "Pinned Friend 4", "pinned": true},
+                  {"name": "Pinned Friend 5", "pinned": true},
+                  {"name": "Pinned Friend 6", "pinned": true}
+                ]}
+                """;
+        JsonSerializableGameMates data = JsonUtil.fromJsonString(json, JsonSerializableGameMates.class);
+
+        assertThrows(IllegalValueException.class, JsonSerializableGameMates.MESSAGE_TOO_MANY_PINNED_FRIENDS,
+                data::toModelType);
+    }
+
 }
