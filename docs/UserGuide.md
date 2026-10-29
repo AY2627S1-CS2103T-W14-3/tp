@@ -97,14 +97,19 @@ The main window has two panels: the friend list on the left and a details panel 
   in the right panel.
 * On startup, the right panel shows your profile. If no profile details have been added, it shows `No details added`.
 * When a `find` command returns exactly one friend, that friend's details are shown automatically.
+* Commands keep the left-hand selection consistent with the details panel. Commands that show your profile
+  clear the friend selection, so you can click that same friend again to reopen their details.
 * Use `gamelist FRIEND_INDEX|myself [g/GAME_NAME]` to select a friend or your own profile and optionally
   show only one game.
   Clicking another friend shows all of that friend's games.
 * Successful commands other than `gamelist`, a friend-targeted `gameedit` or a single-result `find` return the right panel to your profile.
   Clicking a friend selects their details again. Invalid commands keep the existing details display.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
-  Adding or editing a friend shows the full list again. Deleting a friend keeps the current friend-list filter.
-* Pinned friends always appear above unpinned friends. The current ordering is retained within each group.
+  Adding a friend shows all active friends. Editing a friend clears filters in active/archive views, but keeps
+  the name filter in Search results. Deleting a friend keeps the current friend-list filter.
+* Without an explicit sort, pinned friends appear above unpinned friends, retaining the stored order within each group.
+  A `list s/name` or `list s/game` sort currently orders the whole displayed list and can override pin placement.
+  Run `list` without `s/` to return to the stored order.
 
 ### Your profile and game entries
 
@@ -114,6 +119,7 @@ change your stored profile.
 
 Set up your profile with `edit myself n/Joash` before using `gameadd`, `gameedit`, `gamedel` or `gamelist` with `myself`.
 The first edit requires a valid, unique name. Later edits can omit it.
+Before profile setup, `Myself` is not a reserved friend name. After setup, your profile name must differ from all friend names.
 The `myself` selector is case-insensitive and works even when the friend list is empty or filtered.
 Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve your games and the friend-list filter.
 
@@ -162,6 +168,7 @@ To distinguish two people with the same name, use names such as `John Doe School
 Adding a different tag alone does not make a duplicate name unique; parentheses are not valid in names.
 
 Tag names must contain 1–50 characters and use only ASCII letters and digits (no spaces or symbols).
+Tags wrap within friend cards and the details panel when the available width is too narrow.
 
 Phone numbers accept formats such as `91234567`, `+6591234567`, `+65 9123-4567` and `(123) 456-7890`.
 
@@ -206,8 +213,8 @@ Format: `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`
   including when the list is empty.
 * `list g/GAME_NAME` shows active friends who have a game with that exact name. The match is case-insensitive, so `list g/valorant` matches `Valorant`.
 * `list s/name` orders the displayed friends alphabetically by name, ignoring case.
-* `list s/game` orders friends by the alphabetically first game in each friend's game list, ignoring case. Friends
-  without games appear after friends with games; name breaks ties.
+* `list s/game` orders friends by the alphabetically first game in each friend's game list, ignoring case.
+  Friends without games appear last in ascending order and first in descending order; name breaks ties.
 * `o/asc` explicitly selects ascending order; this is the default. `o/desc` reverses the selected name or game
   order. An order may only be supplied with `s/`.
 * `list g/GAME_NAME s/NAME|GAME` first filters by game, then sorts the matching friends. Prefixes may be supplied in
@@ -237,7 +244,8 @@ Examples:
 
 ### Pinning a friend: `pin`
 
-Keeps a friend in the pinned group at the top of the friend list.
+Keeps a friend in the pinned group at the top of the stored friend order.
+Explicit sorting can override the displayed position, as described under [`list`](#listing-filtering-and-sorting-friends-list).
 
 Format: `pin FRIEND_INDEX`
 
@@ -245,6 +253,7 @@ Format: `pin FRIEND_INDEX`
   profile.
 * At most five friends may be pinned. Attempting to pin a sixth friend, or pinning a friend who is already pinned,
   is rejected without changing the list.
+  The limit counts active and archived friends together and also applies when loading saved data.
 * Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
   filtering the list by game.
 * A newly pinned friend is placed after friends already in the pinned group, while remaining above all unpinned
@@ -279,8 +288,12 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
 * For `myself`, [set up your profile first](#your-profile-and-game-entries).
 * The game name is required. The username is optional. Omit `u/` if you do not know it.
 * Game names and usernames must be 1–50 characters after trimming, with at least one letter or digit.
-* Control characters and line breaks are rejected. So are invisible characters, zero-width spaces, Hangul fillers
-  and no-break spaces.
+* Lengths use UTF-16 units. Supplementary Unicode characters count as two units.
+* The text rules reject Unicode category C: controls, format characters such as zero-width spaces,
+  unpaired surrogates, private-use characters and unassigned characters. Line and paragraph separators are also rejected.
+* Blank-rendering Hangul fillers, blank Braille U+2800, the combining grapheme joiner U+034F and no-break spaces
+  U+00A0, U+2007 and U+202F are rejected. Other combining marks, emoji and variation selectors are allowed
+  when the field also contains a letter or digit and satisfies the length limit.
 * Supplying `u/` without a value, or with only whitespace, is rejected. Omit the prefix instead.
 * Repeated `g/` or `u/` prefixes are rejected, even when the values are identical.
 * Each `m/KEY:VALUE` splits at the first colon and trims surrounding whitespace.
@@ -374,7 +387,7 @@ Errors:
 
 | Input problem | Feedback |
 |---------------|----------|
-| `myself` before profile setup | `Set your profile name first using edit myself n/NAME.` |
+| `myself` before profile setup | `Set your profile name first using "edit myself n/NAME" command.` |
 | Missing selector, unknown prefix or extra positional argument | <code>Invalid command format. Usage: gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code> |
 | Malformed, zero, negative or overflowing index | `Invalid friend index. Enter a positive integer between 1 and 2147483647 (inclusive), or myself.` |
 | Positive index outside the displayed list | `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.` |
@@ -415,7 +428,9 @@ Examples:
 * `gameedit myself g/Valorant n/VALORANT m/Role:Healer m/Region:Asia:SG` changes spelling and replaces metadata.
 * `gameedit 1 g/Valorant m/` clears metadata while preserving the game name and username.
 
-Errors include an invalid displayed index, missing selector, missing game, invalid field, repeated singleton prefix, repeated metadata key, and a rename collision. A game name that matches multiple entries in an externally edited save file is rejected as ambiguous. Failed commands preserve the stored data and previous details view.
+Errors include an invalid displayed index, missing selector, missing game, invalid field, repeated singleton prefix,
+repeated metadata key, and a rename collision. Saved files with duplicate game names are rejected during loading.
+Failed commands preserve the stored data and previous details view.
 ### Finding a random squad: `squad`
 
 Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
@@ -511,7 +526,7 @@ Errors:
 * Empty displayed list: `No friends are currently displayed. Use list to show all friends.`
 * Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
-* First profile edit without a name: `Set your profile name first using edit myself n/NAME.`
+* First profile edit without a name: `Set your profile name first using "edit myself n/NAME" command.`
 * Duplicate name: `This friend already exists in GameMates.`
 * Adding or renaming a friend to your profile's name: `This name is already used by your Myself profile.`
 
@@ -682,13 +697,20 @@ required `name` and an optional `username`.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
 Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
 The untouched default profile is omitted when saving. Stored friends and profiles must have a valid non-empty name.
+Friend names must be unique and must differ from the stored profile name.
+Each person can have only one entry for a game name, ignoring case, even if the usernames differ.
+At most five friends across active and archived entries can have `pinned: true`.
+Violating any of these rules rejects the entire data file.
 Empty or missing contact fields mean
 `Not provided`. Use the same validation rules as command input. Stored game metadata is supported as an optional
 `metas` array, for example `"metas": [{"key": "Role", "value": "Support:Mid"}]`. Keys contain 1–50 characters
 and values 1–200 after trimming, with at least one letter or digit and no control characters. Keys cannot contain
 colons and must be unique per game, ignoring case; values may contain colons. Missing `metas` loads as empty.
 Metadata can be entered with `gameadd` or replaced or cleared with `gameedit`; it is preserved when saving and
-displayed on game cards.
+displayed on game cards. The metadata text rules are the same as in [`gameadd`](#adding-a-game-gameadd).
+
+A data file containing only `null` is invalid and uses the empty-data fallback.
+If `preferences.json` contains only `null`, or has `"guiSettings": null`, startup uses and saves default preferences.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If the file is missing, the app starts with sample friends and the default profile. If it cannot load the file
@@ -727,8 +749,6 @@ while copying the file, then launch the destination app from its usual data fold
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
 2. **If you minimize the Help Window** and then run the `help` command (or use the `Help` menu, or the keyboard shortcut `F1`) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
-3. **A data file containing only `null` can prevent startup.** The usual empty-data fallback does not handle this
-   case. Close the app and restore a valid `data/gamemates.json` backup before relaunching.
 
 --------------------------------------------------------------------------------------------------------------------
 
