@@ -31,7 +31,7 @@ public class GameEditCommand extends Command {
             + " Keys are unique ignoring case; values preserve case and may contain colons."
             + " An empty u/ clears the username.\n"
             + "Quote whole values containing prefix-like text: g/\"PUBG n/Game\"."
-            + " Inside quotes, escape double quotes and backslashes with a backslash.\n"
+            + " Write any other double quote as \\\".\n"
             + "Example: gameedit myself g/Valorant u/newPlayer m/Role:Healer";
     public static final String MESSAGE_NOT_EDITED = "Provide at least one of n/, u/ or m/ to edit a game.";
     public static final String MESSAGE_SUCCESS = "Edited %1$s's game: %2$s\nUsername: %3$s\nMetadata: %4$s";

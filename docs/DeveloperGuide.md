@@ -198,6 +198,21 @@ Thus, an invalid value is not treated as an omitted argument.
 `GameAddCommandParser` uses `Username.EMPTY` when `u/` is omitted.
 It rejects a supplied blank `u/`.
 
+#### Quoted values
+
+`ArgumentTokenizer` lets users wrap a whole value in double quotes. Prefixes inside the quotes are literal text,
+so `g/"PUBG n/Game"` gives `PUBG n/Game`.
+
+* A value is quoted when its first character after trimming is `"`. Its content is trimmed like any value.
+* In any value, `\"` is a literal `"`. Only the backslash right before a quote is removed, so `\\"` gives `\"`.
+* A quoted value cannot end with `\` right before the closing quote, since `\"` is read as a literal `"`.
+  Users add a space before the closing quote instead, which trimming removes.
+* A bare `"` in an unquoted value, a missing closing quote or text after the closing quote throws a `ParseException`.
+  Each case has its own message.
+* Only straight quotes `"` are supported. Other quotes such as curly quotes `“ ”` do not start or end a quoted value.
+  They are kept as normal text.
+* The preamble is not parsed for quotes.
+
 ### Model component
 
 **API:** [`Model.java`](https://github.com/AY2627S1-CS2103T-W14-3/tp/tree/master/src/main/java/seedu/address/model/Model.java)
@@ -507,16 +522,7 @@ The merged optional-username model provides `Username.EMPTY`.
 A supplied empty `u/` maps to that value.
 If `u/` is omitted, the command preserves the original username, including an absent username.
 
-**Quoted values**
-
-The parser uses `ArgumentTokenizer.tokenizeWithQuotedValues` to accept double quotes around a whole field value.
-Inside that value, recognized prefixes are literal text.
-For example, `g/"PUBG n/Game"` selects the complete stored name `PUBG n/Game`.
-
-The tokenizer decodes `\"` and `\\`. It rejects malformed quotes, invalid escapes and trailing text.
-The decoded values pass through the same field validators and duplicate-prefix validation.
-Unquoted prefixes keep their existing command meaning.
-The ordinary tokenizer and other commands' syntax are unchanged. Quoted-value parsing is specific to `gameedit` in this checkout.
+Quoted field values use the shared `ArgumentTokenizer` behavior described in [Quoted values](#quoted-values).
 
 **Validation before mutation**
 
@@ -562,12 +568,11 @@ It does not change the left-hand friend list.
 
 `GameMatesParser` routes `gamelist` to `GameListCommandParser`.
 The parser accepts one positional index or `myself` before at most one `g/` filter.
-It recognizes prefixes at whitespace boundaries and rejects unknown prefixes or repeated `g/` tokens.
-Thus, those tokens cannot silently become part of a multiword game name.
-Other words after `g/` belong to the game name.
+It uses the shared `ArgumentTokenizer`, so all text after `g/` belongs to the name unless it is another ` g/`.
+Quoted values can include literal ` g/` text. Repeated `g/` tokens outside quotes are rejected.
 
 The parser uses `ParserUtil.parseIndexOrMyself` for selectors and the existing `GameName` rules for game validation.
-It translates command-specific errors locally. Other commands keep their existing validation and messages.
+Index, repeated-prefix and game-name errors use the same shared messages as other commands.
 
 `GameListCommand.execute` resolves numeric indices against `Model.getFilteredFriendList()`.
 This keeps indices consistent after name searches and game-based filtering.
