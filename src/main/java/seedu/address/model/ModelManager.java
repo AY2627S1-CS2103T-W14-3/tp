@@ -2,7 +2,9 @@ package seedu.address.model;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
+import static seedu.address.model.friend.FriendSortCriterion.PINNED_FRIENDS_FIRST;
 
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -29,6 +31,7 @@ public class ModelManager implements Model {
     private final FilteredList<Friend> filteredFriends;
     private FriendListScope friendListScope = FriendListScope.ACTIVE;
     private final SortedList<Friend> sortedFriends;
+    private final Comparator<Friend> defaultFriendOrder;
 
     /**
      * Initializes a ModelManager with the given gameMates and userPrefs.
@@ -41,7 +44,9 @@ public class ModelManager implements Model {
         this.gameMates = new GameMates(gameMates);
         this.userPrefs = new UserPrefs(userPrefs);
         filteredFriends = new FilteredList<>(this.gameMates.getFriendList(), friend -> !friend.isArchived());
-        sortedFriends = new SortedList<>(filteredFriends);
+        // Explicit source-position ties restore insertion order after sorting or changing a pin.
+        defaultFriendOrder = PINNED_FRIENDS_FIRST.thenComparingInt(this.gameMates.getFriendList()::indexOf);
+        sortedFriends = new SortedList<>(filteredFriends, defaultFriendOrder);
     }
 
     public ModelManager() {
@@ -173,7 +178,7 @@ public class ModelManager implements Model {
 
     @Override
     public void clearFriendListSort() {
-        sortedFriends.setComparator(null);
+        sortedFriends.setComparator(defaultFriendOrder);
     }
 
     @Override

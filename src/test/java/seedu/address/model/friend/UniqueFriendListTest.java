@@ -122,13 +122,13 @@ public class UniqueFriendListTest {
     }
 
     @Test
-    public void setFriend_pinnedFriend_movesPinnedFriendToTop() {
+    public void setFriend_pinnedFriend_preservesInsertionOrder() {
         uniqueFriendList.add(ALICE);
         uniqueFriendList.add(BOB);
         Friend pinnedBob = new FriendBuilder(BOB).withPinned(true).build();
         uniqueFriendList.setFriend(BOB, pinnedBob);
 
-        assertEquals(List.of(pinnedBob, ALICE), uniqueFriendList.asUnmodifiableObservableList());
+        assertEquals(List.of(ALICE, pinnedBob), uniqueFriendList.asUnmodifiableObservableList());
     }
 
     @Test
@@ -156,15 +156,15 @@ public class UniqueFriendListTest {
     }
 
     @Test
-    public void setFriends_pinnedFriendAppearsBeforeUnpinnedFriend() {
+    public void setFriends_pinnedFriend_preservesStoredInsertionOrder() {
         Friend pinnedBob = new FriendBuilder(BOB).withPinned(true).build();
         uniqueFriendList.setFriends(List.of(ALICE, pinnedBob));
 
-        assertEquals(List.of(pinnedBob, ALICE), uniqueFriendList.asUnmodifiableObservableList());
+        assertEquals(List.of(ALICE, pinnedBob), uniqueFriendList.asUnmodifiableObservableList());
     }
 
     @Test
-    public void setFriends_multiplePinnedFriends_retainsRelativeOrderWithinGroups() {
+    public void setFriends_multiplePinnedFriends_preservesStoredInsertionOrder() {
         Friend firstUnpinnedFriend = new FriendBuilder().withName("First Unpinned").build();
         Friend firstPinnedFriend = new FriendBuilder().withName("First Pinned").withPinned(true).build();
         Friend secondUnpinnedFriend = new FriendBuilder().withName("Second Unpinned").build();
@@ -172,7 +172,7 @@ public class UniqueFriendListTest {
         uniqueFriendList.setFriends(List.of(firstUnpinnedFriend, firstPinnedFriend,
                 secondUnpinnedFriend, secondPinnedFriend));
 
-        assertEquals(List.of(firstPinnedFriend, secondPinnedFriend, firstUnpinnedFriend, secondUnpinnedFriend),
+        assertEquals(List.of(firstUnpinnedFriend, firstPinnedFriend, secondUnpinnedFriend, secondPinnedFriend),
                 uniqueFriendList.asUnmodifiableObservableList());
     }
 

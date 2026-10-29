@@ -9,7 +9,7 @@ public enum FriendSortCriterion {
     NAME,
     GAME;
 
-    static final Comparator<Friend> PINNED_FRIENDS_FIRST = Comparator.comparing(Friend::isPinned)
+    public static final Comparator<Friend> PINNED_FRIENDS_FIRST = Comparator.comparing(Friend::isPinned)
             .reversed();
     private static final Comparator<Friend> NAME_COMPARATOR = Comparator.comparing(
             friend -> friend.getName().fullName, String.CASE_INSENSITIVE_ORDER);

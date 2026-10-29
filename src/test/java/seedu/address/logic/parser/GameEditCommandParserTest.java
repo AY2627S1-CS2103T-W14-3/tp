@@ -91,7 +91,8 @@ public class GameEditCommandParserTest {
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, GameEditCommand.MESSAGE_USAGE));
         }
         for (String target : new String[]{"0", "-1", "2147483648", "2 extra", "myself extra"}) {
-            assertParseFailure(parser, " " + target + " g/Valorant u/player", ParserUtil.MESSAGE_INVALID_INDEX);
+            assertParseFailure(parser, " " + target + " g/Valorant u/player",
+                    String.format(ParserUtil.MESSAGE_INVALID_INDEX, target));
         }
         assertParseFailure(parser, " 2 g/ u/player", GameName.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, " 2 g/Valorant", GameEditCommand.MESSAGE_NOT_EDITED);
