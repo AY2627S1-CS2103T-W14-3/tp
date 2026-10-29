@@ -77,7 +77,9 @@ public class MainApp extends Application {
                     .getOrElse(SampleDataUtil::getSampleGameMates);
         } catch (DataLoadingException e) {
             startupMessage = "Failed to load " + storage.getGameMatesFilePath() + " due to: "
-                    + e.getCause().getMessage() + "\nStarting with an empty GameMates.";
+                    + e.getCause().getMessage() + "\nStarting with an empty GameMates."
+                    + "\nClose the window without entering commands to preserve the original file."
+                    + " Back up or repair it before continuing.";
             logger.warning("Data file at " + storage.getGameMatesFilePath() + " could not be loaded."
                     + " Will be starting with an empty GameMates.");
             initialData = new GameMates();

@@ -53,7 +53,10 @@ public class StartupFeedbackTest {
                 assertEquals(app.getStartupMessage(), feedback);
                 assertTrue(feedback.contains("Failed to load " + dataFile));
                 assertTrue(feedback.contains("Unrecognized token"));
-                assertTrue(feedback.endsWith("Starting with an empty GameMates."));
+                assertTrue(feedback.contains("Starting with an empty GameMates."));
+                assertTrue(feedback.endsWith(
+                        "Close the window without entering commands to preserve the original file."
+                        + " Back up or repair it before continuing."));
             } finally {
                 stage.close();
             }

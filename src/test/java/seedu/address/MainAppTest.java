@@ -66,6 +66,9 @@ public class MainAppTest {
         assertTrue(app.startupMessage.contains("Failed to load " + dataFile));
         assertTrue(app.startupMessage.contains("Unrecognized token"));
         assertTrue(app.startupMessage.contains("Starting with an empty GameMates."));
+        assertTrue(app.startupMessage.endsWith(
+                "Close the window without entering commands to preserve the original file."
+                + " Back up or repair it before continuing."));
         assertEquals(invalidJson, Files.readString(dataFile));
     }
 
