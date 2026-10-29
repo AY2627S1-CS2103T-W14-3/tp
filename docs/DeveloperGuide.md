@@ -151,7 +151,7 @@ The `Model` component,
 * stores friends in `GameMates` through `UniqueFriendList`, plus a separate `Friend myself` profile with a default value.
   The profile is not in the friend list. Add/edit commands separately prevent names shared between a friend and the profile.
 * exposes an observable `FilteredList<Friend>` backed by the stored friends. `FriendListScope` identifies active,
-  archived or global search results, including empty lists. The filter is a predicate over the full collection,
+  archived or search results, including empty lists. The filter is a predicate over the full collection,
   rather than a second collection of copied friends.
 * stores each friend's games as `Game` objects, including their game name, username if provided and optional metadata.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
@@ -329,7 +329,7 @@ It requires exactly one matching existing game, constructs the complete replacem
 against the other games before calling `Model.setFriend(target, updated)` once. Ambiguous duplicate names in
 externally edited JSON fail without mutation. `Friend.withGames` copies all current friend fields and defensively
 copies the replacement set, including the original archive and pin statuses. Tests cover pinned order, archived
-targets in archive and global search scopes, and save/reload preservation of both statuses. Its explicit copy
+targets in archive and search scopes, and save/reload preservation of both statuses. Its explicit copy
 constructor must also copy any new fields introduced by future integrations.
 
 The command retains the list predicate. A successful friend edit returns the updated friend through
@@ -397,7 +397,7 @@ before publishing a complete v1.3 MVP guide.
 | Tags | Supplied tags replace the full set (p. 11). | Supplied tags toggle individually. A single empty `t/` clears them. The team must choose whether to update the spec or implementation. |
 | Friend names | 1–50 characters (pp. 5–6). | 1–100 ASCII alphanumeric characters/spaces. Duplicate comparison also collapses repeated spaces. A distinguishing tag does not make an equal name unique, and the spec's parenthesized-name workaround is rejected. |
 | Phone/email | Phone: 1–40 characters from a broad punctuation set. Email: 1–255 characters containing `@` (pp. 5–6). | Phone: 3–15 ASCII digits, or `+` with 2–15, with constrained grouping and no extensions. Email: at most 254 characters, local part at most 64, ASCII dot-atom and valid domain labels. |
-| Friend filtering | Combined `list [n/KEYWORDS] [g/GAME]`, with named empty-result feedback (pp. 14–15). | Separate `find KEYWORD...` and `list [g/GAME]`; a new command replaces the previous filter. Feedback is `Listed all friends.` or `N friend(s) listed!`, including zero. |
+| Friend filtering | Combined `list [n/KEYWORDS] [g/GAME]`, with named empty-result feedback (pp. 14–15). | Separate `find KEYWORD...` and `list [g/GAME]`; `find` narrows the displayed list, while `list` replaces the previous filter. Feedback is `Listed all friends.` or `N friend(s) listed!`, including zero. |
 | GUI | Feature-spec mockups replace the friend panel with a game's list (pp. 15, 25); later v1.3 notes call for a split panel. | The adopted split layout matches those later notes: friends stay on the left and details/game cards appear on the right. `gamelist` filters cards only. Retire the earlier mockups. |
 | Errors | Command-specific index and validation wording. | Messages differ across commands; use the verified wording in the User Guide instead of copying spec errors. |
 | Game uniqueness | One or no username per game name within a friend (pp. 16–19). | `gameadd` rejects duplicate game names through `Game.isSameGame`. Stored sets use full equality, so JSON can still contain the same game name with different usernames. |
@@ -585,12 +585,14 @@ retaining their own name is allowed. Myself cannot be archived or restored.
 | --- | --- | --- |
 | `ACTIVE` | Startup, `list [g/GAME_NAME]`, adding a friend | Not archived, combined with an optional game predicate |
 | `ARCHIVED` | `archivelist [g/GAME_NAME]` | Archived, combined with an optional game predicate |
-| `SEARCH` | `find KEYWORD [MORE_KEYWORDS]` | Name keywords across both statuses |
+| `SEARCH` | `find KEYWORD [MORE_KEYWORDS]` | Name keywords within the previously displayed friends |
 
 `ListCommandParser` and `ArchiveListCommandParser` share `ParserUtil.parseOptionalGameFilter()` and
 `GameNameMatchesPredicate`. Game matching is exact and case-insensitive, with the same validation rules for both
-commands. Name matching remains a global `find` operation. Each `list`, `archivelist` or `find` command replaces
-the previous predicate. `gamelist` preserves the friend-list filter.
+commands. `list` and `archivelist` replace the previous predicate. `find` snapshots the displayed friends and
+combines name matching with membership in that snapshot, using `isSameFriend()` so archive status and contact
+edits do not remove a matching friend. Repeated searches narrow the results, including empty results.
+`gamelist` preserves the friend-list filter.
 Unfiltered empty archives give guidance on archiving; filtered empty results report that no archived friends
 match the game filter.
 
@@ -600,19 +602,19 @@ The logic layer exposes `getFriendListScope()` to the UI. `MainWindow` updates t
 #### Archive and restore execution
 
 1. The command parser accepts one positive displayed index; `myself` and extra arguments are rejected.
-1. `ArchiveCommand` rejects the archive-only scope with guidance to run `list`. Active lists and global search
+1. `ArchiveCommand` rejects the archive-only scope with guidance to run `list`. Active lists and search
    results accept archiving. `UnarchiveCommand` accepts an archived target in archive or search results.
 1. The command checks the index against the currently displayed list and rejects an invalid index or an
    already archived/non-archived target as appropriate. Failed commands preserve the data, scope and filter.
 1. `Model.setFriend()` replaces the selected friend with a copy carrying the new archive status.
 1. The observable filtered list updates automatically. Archiving removes a friend from an active-only list;
-   restoring removes a friend from an archive-only list. In global search, the friend remains at the same
+   restoring removes a friend from an archive-only list. In search, the friend remains at the same
    displayed position with updated status. Neither command resets the predicate or scope.
 1. `LogicManager` saves the updated collection through the existing storage path.
 
 `edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status when constructing replacement friends.
 `gameedit` retains the current scope and predicate. Friend edits clear
-filters within active/archive scopes, while global searches retain their name predicate. Renaming a search
+filters within active/archive scopes, while searches retain their name predicate. Renaming a search
 result can therefore remove it from the results. `delete` permanently removes the selected friend from either
 status; `clear` removes both statuses while preserving Myself.
 
@@ -911,11 +913,11 @@ names or a disposable friend for each attempt. These are syntax checks, not onli
 Prerequisite: fresh sample data.
 
 1. `find alex david`: expected Alex Yeoh and David Li, with `2 friend(s) listed!`.
-2. `find Dav`: expected zero results; substring matching is not supported. `find david` returns David and opens
+2. `find Dav`: expected zero results; substring matching is not supported. `list`, then `find david`, returns David and opens
    his details automatically. `find` without keywords reports usage and preserves the current display.
 3. `list g/minecraft`: expected Bernice Yu and Roy Balakrishnan, replacing the David filter.
 4. `gamelist 1`: expected Bernice's Minecraft card, although Bernice was full-list index 2. Both Minecraft players
-   remain on the left. `find Alex` now finds Alex from the full data, not from the two Minecraft results.
+   remain on the left. `find Alex` returns no matches because Alex is not among the two displayed Minecraft players.
 5. `list g/Val`: expected zero results. `list` restores all six friends and returns `Listed all friends.`.
 6. `list n/Alex g/Valorant`: expected invalid-format feedback; combined filtering is not supported.
 

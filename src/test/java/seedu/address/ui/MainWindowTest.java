@@ -289,7 +289,7 @@ class MainWindowTest {
     }
 
     @Test
-    void globalSearch_preservesResultsWhenArchivingAndRestoring() {
+    void displayedSearch_preservesResultsWhenArchivingAndRestoring() {
         FxTestUtil.runAndWait(() -> {
             Friend alice = new FriendBuilder().withName("Alice").build();
             Friend bob = new FriendBuilder().withName("Bob").build().withArchived(true);
@@ -298,13 +298,13 @@ class MainWindowTest {
             window.getRoot().getScene().getRoot().applyCss();
             executeCommand(window, "find Alice Bob");
             assertEquals("Search results", getLabel(window, "#listHeading").getText());
-            assertEquals(2, getFriendList(window).getItems().size());
+            assertEquals(1, getFriendList(window).getItems().size());
             executeCommand(window, "archive 1");
             assertEquals(alice.withArchived(true), getFriendList(window).getItems().getFirst());
-            assertEquals(2, getFriendList(window).getItems().size());
+            assertEquals(1, getFriendList(window).getItems().size());
             assertEquals("Search results", getLabel(window, "#listHeading").getText());
-            executeCommand(window, "unarchive 2");
-            assertEquals(bob.withArchived(false), getFriendList(window).getItems().get(1));
+            executeCommand(window, "unarchive 1");
+            assertEquals(alice, getFriendList(window).getItems().getFirst());
             assertEquals("Search results", getLabel(window, "#listHeading").getText());
             executeCommand(window, "find Nobody");
             assertEquals(0, getFriendList(window).getItems().size());

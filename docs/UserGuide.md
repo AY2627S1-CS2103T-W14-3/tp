@@ -503,7 +503,7 @@ Errors:
 
 ### Locating friends by name: `find`
 
-Finds active and archived friends whose names contain any of the given keywords, regardless of the current view.
+Finds friends in the currently displayed list whose names contain any of the given keywords.
 
 Format: `find KEYWORD [MORE_KEYWORDS]`
 
@@ -512,7 +512,9 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * The search considers only names.
 * Only full words match; for example, `Han` does not match `Hans`.
 * Friends matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
-* Searching starts from all active and archived friends, replacing any previous name or game filter.
+* Searching narrows the currently displayed list, keeping any previous game filter or name search.
+  Repeated searches narrow the results further; searching an empty list returns no matches.
+  Run `list` first to search all active friends, or `archivelist` to search all archived friends.
   `find` does not accept `n/` or `g/` as filter syntax; such text is treated as literal name keywords.
 * Results appear under **Search results**, with an **Archived** badge on archived friends.
 * `archive FRIEND_INDEX` archives an active result; `unarchive FRIEND_INDEX` restores an archived result. The friend stays in
@@ -546,7 +548,7 @@ Format: `archive FRIEND_INDEX`
   `Index must be a positive integer between 1 and 2147483647 (inclusive).`.
 * Archived friends keep their names reserved. Adding or renaming another friend to the same name is rejected
   with a suggestion to use `archivelist` and `unarchive`.
-* `list` and `list g/GAME_NAME` show active friends only. `find` searches both active and archived friends.
+* `list` and `list g/GAME_NAME` show active friends only. `find` searches only the currently displayed friends.
 
 Example: `list`, then `archive 1` archives the first displayed active friend.
 

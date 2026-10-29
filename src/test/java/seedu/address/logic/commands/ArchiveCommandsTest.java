@@ -86,7 +86,7 @@ public class ArchiveCommandsTest {
         model.addFriend(bob);
         execute("archivelist");
         execute("find Alice Bob");
-        assertEquals(List.of(alice.withArchived(true), bob), model.getFilteredFriendList());
+        assertEquals(List.of(alice.withArchived(true)), model.getFilteredFriendList());
         assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
         execute("archivelist");
         execute("list g/Valorant");
@@ -100,6 +100,7 @@ public class ArchiveCommandsTest {
     public void mixedSearch_archiveAndUnarchive_keepResultsAndDisplayedIndices() throws Exception {
         model.addFriend(bob.withArchived(true));
         model.addFriend(alice);
+        model.updateSearchFriendList(friend -> true);
         execute("find Alice Bob");
         assertEquals(List.of(bob.withArchived(true), alice), model.getFilteredFriendList());
         execute("archive 2");
@@ -155,31 +156,35 @@ public class ArchiveCommandsTest {
     }
 
     @Test
-    public void globalSearch_replacesPreviousFiltersAndKeepsScopeForEmptyResults() throws Exception {
+    public void find_narrowsPreviousFiltersAndKeepsScopeForEmptyResults() throws Exception {
         model.addFriend(alice.withArchived(true));
         model.addFriend(bob);
         execute("archivelist g/Unknown");
+        execute("find ALICE");
+        assertTrue(model.getFilteredFriendList().isEmpty());
+        execute("archivelist");
         assertEquals(alice.withArchived(true), execute("find ALICE").getFriendToShow().get());
         execute("find Bo");
         assertTrue(model.getFilteredFriendList().isEmpty());
         assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
         execute("find Bob");
-        assertEquals(List.of(bob), model.getFilteredFriendList());
+        assertTrue(model.getFilteredFriendList().isEmpty());
         execute("list g/Valorant");
         execute("find Alice Bob");
-        assertEquals(List.of(alice.withArchived(true), bob), model.getFilteredFriendList());
+        assertTrue(model.getFilteredFriendList().isEmpty());
         assertThrows(ParseException.class, () -> execute("find"));
         assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
-        assertEquals(List.of(alice.withArchived(true), bob), model.getFilteredFriendList());
+        assertTrue(model.getFilteredFriendList().isEmpty());
         execute("archivelist g/Minecraft");
         assertTrue(model.getFilteredFriendList().isEmpty());
         assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
     }
 
     @Test
-    public void globalSearch_edit_preservesSearchScopeAndReevaluatesNames() throws Exception {
+    public void archivedSearch_edit_preservesSearchScopeAndReevaluatesNames() throws Exception {
         model.addFriend(alice.withArchived(true));
         model.addFriend(bob);
+        execute("archivelist");
         execute("find Alice");
         execute("edit 1 p/91234567");
         assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
@@ -188,6 +193,7 @@ public class ArchiveCommandsTest {
         execute("edit 1 n/Carol");
         assertTrue(model.getFilteredFriendList().isEmpty());
         assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
+        execute("archivelist");
         execute("find Carol");
         assertTrue(model.getFilteredFriendList().getFirst().isArchived());
     }

@@ -70,6 +70,37 @@ public class FindCommandTest {
     }
 
     @Test
+    public void execute_filteredDisplay_doesNotIncludeHiddenMatches() {
+        model.updateFilteredFriendList(friend -> friend.equals(CARL) || friend.equals(ELLE));
+
+        new FindCommand(preparePredicate("Kurz Elle Kunz")).execute(model);
+
+        assertEquals(List.of(CARL, ELLE), model.getFilteredFriendList());
+    }
+
+    @Test
+    public void execute_repeatedSearch_onlyNarrowsPreviousResults() {
+        new FindCommand(preparePredicate("Carl Elle")).execute(model);
+        new FindCommand(preparePredicate("Elle Kunz")).execute(model);
+        assertEquals(List.of(ELLE), model.getFilteredFriendList());
+
+        new FindCommand(preparePredicate("Nobody")).execute(model);
+        new FindCommand(preparePredicate("Carl")).execute(model);
+        assertEquals(List.of(), model.getFilteredFriendList());
+    }
+
+    @Test
+    public void execute_activeAndArchivedViews_searchesOnlyDisplayedStatus() {
+        model.setFriend(CARL, CARL.withArchived(true));
+        new FindCommand(preparePredicate("Carl Elle")).execute(model);
+        assertEquals(List.of(ELLE), model.getFilteredFriendList());
+
+        model.updateArchivedFriendList(friend -> true);
+        new FindCommand(preparePredicate("Carl Elle")).execute(model);
+        assertEquals(List.of(CARL.withArchived(true)), model.getFilteredFriendList());
+    }
+
+    @Test
     public void execute_oneFriendFound_returnsFriendToShow() {
         NameContainsKeywordsPredicate predicate = preparePredicate("Carl");
         FindCommand command = new FindCommand(predicate);
