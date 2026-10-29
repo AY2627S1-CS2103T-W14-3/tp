@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.GameMates;
+import seedu.address.model.friend.Friend;
 import seedu.address.testutil.TypicalFriends;
 
 public class JsonSerializableGameMatesTest {
@@ -30,6 +31,22 @@ public class JsonSerializableGameMatesTest {
         assertEquals(original, restored);
         assertEquals(original.getFriendList(), restored.getFriendList());
         assertEquals(TypicalFriends.HOON, restored.getMyself());
+    }
+
+    @Test
+    public void toModelType_archivedPinnedFriend_throwsIllegalValueException() throws Exception {
+        String json = """
+                {"friends": [
+                  {"name": "Active One", "pinned": true},
+                  {"name": "Active Two", "pinned": true},
+                  {"name": "Active Three", "pinned": true},
+                  {"name": "Active Four", "pinned": true},
+                  {"name": "Active Five", "pinned": true},
+                  {"name": "Archived Friend", "archived": true, "pinned": true}
+                ]}
+                """;
+        JsonSerializableGameMates data = JsonUtil.fromJsonString(json, JsonSerializableGameMates.class);
+        assertThrows(IllegalValueException.class, Friend.MESSAGE_ARCHIVED_PINNED, data::toModelType);
     }
 
     @Test

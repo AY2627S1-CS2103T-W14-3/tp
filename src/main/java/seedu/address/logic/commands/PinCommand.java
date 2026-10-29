@@ -24,6 +24,9 @@ public class PinCommand extends Command {
     public static final String MESSAGE_ALREADY_PINNED = "%1$s is already pinned.";
     public static final String MESSAGE_MAX_PINNED_FRIENDS = "You can pin at most " + MAX_PINNED_FRIENDS + " friends.";
 
+    public static final String MESSAGE_ARCHIVED_FRIEND = "Cannot pin an archived friend. "
+            + "Use unarchive FRIEND_INDEX to restore them first.";
+
     private final Index targetIndex;
 
     /** Creates a command to pin the friend at the given displayed index. */
@@ -40,6 +43,9 @@ public class PinCommand extends Command {
         }
         Friend friendToPin = FriendTargetResolver.resolve(model, targetIndex, () -> String.format(
                 MESSAGE_INDEX_NOT_FOUND, targetIndex.getOneBased(), displayedFriendCount)).friend();
+        if (friendToPin.isArchived()) {
+            throw new CommandException(MESSAGE_ARCHIVED_FRIEND);
+        }
         if (friendToPin.isPinned()) {
             throw new CommandException(String.format(MESSAGE_ALREADY_PINNED, friendToPin.getName()));
         }

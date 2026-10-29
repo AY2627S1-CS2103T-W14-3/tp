@@ -120,6 +120,15 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
+    public void toModelType_archivedPinnedJson_throwsIllegalValueException() throws Exception {
+        JsonAdaptedFriend invalidSavedFriend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                VALID_GAMES, VALID_TAGS, true, true);
+        String json = JsonUtil.toJsonString(invalidSavedFriend);
+        JsonAdaptedFriend restored = JsonUtil.fromJsonString(json, JsonAdaptedFriend.class);
+        assertThrows(IllegalValueException.class, Friend.MESSAGE_ARCHIVED_PINNED, restored::toModelType);
+    }
+
+    @Test
     public void toModelType_missingPinnedField_defaultsToUnpinnedFriend() throws Exception {
         JsonAdaptedFriend friend = new JsonAdaptedFriend(VALID_NAME, VALID_PHONE, VALID_EMAIL,
                 VALID_GAMES, VALID_TAGS);

@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
@@ -61,7 +62,7 @@ public class SquadMetadataIntegrationTest {
                 logic.execute("squad g/Valorant n/2 m/Role:Healer m/Region:Asia").getFeedbackToUser());
         assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
         assertEquals(before, model.getGameMates());
-        assertTrue(model.getFilteredFriendList().getFirst().isPinned());
+        assertFalse(model.getFilteredFriendList().getFirst().isPinned());
         assertTrue(model.getFilteredFriendList().getFirst().isArchived());
         assertEquals(saved, Files.readString(file));
         assertEquals(before, json.readGameMates().get());

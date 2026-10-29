@@ -1,7 +1,9 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.testutil.Assert.assertThrows;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -9,6 +11,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import seedu.address.logic.commands.PinCommand;
+import seedu.address.logic.commands.UnpinCommand;
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.friend.Friend;
@@ -65,7 +70,9 @@ class PinOrderIntegrationTest {
         assertNames(List.of("A", "C"), model.getFilteredFriendList());
         logic.execute("archivelist");
         assertNames(List.of("B"), model.getFilteredFriendList());
-        logic.execute("unpin 1");
+        assertFalse(model.getFilteredFriendList().getFirst().isPinned());
+        assertThrows(CommandException.class, PinCommand.MESSAGE_ARCHIVED_FRIEND, () -> logic.execute("pin 1"));
+        assertThrows(CommandException.class, UnpinCommand.MESSAGE_ARCHIVED_FRIEND, () -> logic.execute("unpin 1"));
         logic.execute("unarchive 1");
         logic.execute("list");
         assertNames(List.of("A", "C", "B"), model.getFilteredFriendList());
