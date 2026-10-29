@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.storage.JsonAdaptedFriend.MESSAGE_DUPLICATE_GAME_FORMAT;
 import static seedu.address.testutil.TypicalFriends.ALICE;
 import static seedu.address.testutil.TypicalFriends.HOON;
 import static seedu.address.testutil.TypicalFriends.IDA;
@@ -89,7 +90,8 @@ public class JsonGameMatesStorageTest {
                 "duplicateMyselfGameNamesGameMates.json")) {
             DataLoadingException exception = assertThrows(DataLoadingException.class, () -> readGameMates(fileName));
             assertInstanceOf(IllegalValueException.class, exception.getCause());
-            assertEquals(JsonAdaptedFriend.MESSAGE_DUPLICATE_GAME, exception.getCause().getMessage());
+            assertEquals(String.format(MESSAGE_DUPLICATE_GAME_FORMAT, "Alice", "VALORANT"),
+                    exception.getCause().getMessage());
         }
     }
 

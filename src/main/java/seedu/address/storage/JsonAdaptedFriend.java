@@ -26,7 +26,7 @@ import seedu.address.model.tag.Tag;
 class JsonAdaptedFriend {
 
     public static final String MISSING_FIELD_MESSAGE_FORMAT = "Friend's %s field is missing!";
-    public static final String MESSAGE_DUPLICATE_GAME = "Games list contains duplicate game name(s).";
+    public static final String MESSAGE_DUPLICATE_GAME_FORMAT = "%s's games contain duplicate name: %s";
 
     private final String name;
     private final String phone;
@@ -89,7 +89,8 @@ class JsonAdaptedFriend {
         for (JsonAdaptedGame game : games) {
             Game modelGame = game.toModelType();
             if (!gameNames.add(modelGame.getGameName())) {
-                throw new IllegalValueException(MESSAGE_DUPLICATE_GAME);
+                throw new IllegalValueException(String.format(MESSAGE_DUPLICATE_GAME_FORMAT,
+                        name, modelGame.getGameName()));
             }
             modelGames.add(modelGame);
         }
