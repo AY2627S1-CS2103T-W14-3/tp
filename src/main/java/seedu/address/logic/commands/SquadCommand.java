@@ -27,7 +27,7 @@ public class SquadCommand extends Command {
     public static final String COMMAND_WORD = "squad";
 
     public static final String MESSAGE_USAGE = "Invalid command format. Usage: " + COMMAND_WORD + " "
-            + PREFIX_GAME + "GAME "
+            + PREFIX_GAME + "GAME_NAME "
             + PREFIX_NAME + "NUMBER_OF_PEOPLE [" + PREFIX_META + "KEY:VALUE]...\n"
             + "All metadata conditions must match the requested game; keys ignore case, values match exactly,"
             + " including case."

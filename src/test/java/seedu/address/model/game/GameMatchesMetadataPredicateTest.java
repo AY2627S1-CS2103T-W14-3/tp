@@ -1,6 +1,8 @@
 package seedu.address.model.game;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
@@ -31,6 +33,20 @@ public class GameMatchesMetadataPredicateTest {
         GameMatchesMetadataPredicate predicate = new GameMatchesMetadataPredicate(new GameName("Valorant"), source);
         source.clear();
         assertFalse(predicate.test(new GameBuilder().withGameName("Valorant").build()));
+    }
+
+    @Test
+    public void equalsAndHashCode_followGameAndMetadataIdentity() throws Exception {
+        GameMatchesMetadataPredicate first = predicate("Valorant", "Role:Healer", "Region:Asia");
+        GameMatchesMetadataPredicate equivalent = predicate("VALORANT", "region:Asia", "ROLE:Healer");
+        assertEquals(first, first);
+        assertEquals(first, equivalent);
+        assertEquals(first.hashCode(), equivalent.hashCode());
+        assertNotEquals(first, null);
+        assertNotEquals(first, "Valorant");
+        assertNotEquals(first, predicate("Minecraft", "Role:Healer", "Region:Asia"));
+        assertNotEquals(first, predicate("Valorant", "Role:healer", "Region:Asia"));
+        assertNotEquals(first, predicate("Valorant", "Role:Healer"));
     }
 
     private GameMatchesMetadataPredicate predicate(String game, String... pairs) throws Exception {

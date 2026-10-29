@@ -2,6 +2,7 @@ package seedu.address.model.game;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -21,5 +22,20 @@ public final class GameMatchesMetadataPredicate implements Predicate<Game> {
     @Override
     public boolean test(Game game) {
         return game.getGameName().equals(gameName) && game.getMetas().containsAll(conditions);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        return other instanceof GameMatchesMetadataPredicate otherPredicate
+                && gameName.equals(otherPredicate.gameName)
+                && conditions.equals(otherPredicate.conditions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameName, conditions);
     }
 }

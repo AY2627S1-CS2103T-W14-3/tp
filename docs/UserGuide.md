@@ -425,17 +425,17 @@ Errors include an invalid displayed index, missing selector, missing game, inval
 Randomly selects friends who play a game from the currently displayed friend list and forms a squad including you.
 Lists each member's name, in-game username when available, and displayed friend index where applicable.
 
-Format: `squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`
+Format: `squad g/GAME_NAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`
 
 * Both `g/` and `n/` are required and may appear in either order.
-* `GAME` follows the same rules as in `gameadd`. Multiword names are accepted.
+* `GAME_NAME` follows the same rules as in `gameadd`. Multiword names are accepted.
 * Matching uses the complete game name and is case-insensitive.
   `valorant` matches `Valorant`, but `Val` does not.
 * `NUMBER_OF_PEOPLE` must be a whole number from 1 to 20, inclusive.
 * The requested size includes you: `n/3` selects you and two friends; `n/1` returns only you.
-* You are always included as the first member, labelled `Me`, even if your profile does not contain `GAME`.
+* You are always included as the first member, labelled `Me`, even if your profile does not contain `GAME_NAME`.
 * The other `NUMBER_OF_PEOPLE - 1` members are selected from the **currently displayed friend list**. To select from all active friends, run `list` first.
-  Each must play `GAME`. A person cannot appear more than once in a squad.
+  Each must play `GAME_NAME`. A person cannot appear more than once in a squad.
   Archived friends are eligible when displayed through `archivelist` or `find`.
 * Selection is random. Repeating the command may return a different squad, but may also return the same one.
 * Success preserves the current details and game-card filter. Errors also keep the existing details visible.
@@ -449,6 +449,8 @@ Format: `squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`
   metadata on another game cannot satisfy a condition. Extra stored metadata is allowed.
 * Keys match ignoring case. Values match exactly and are **case-sensitive**: `m/role:Healer` matches
   `Role:Healer`, while `m/role:healer` does not. There are no numeric comparisons, role quotas or OR expressions.
+* Quote the whole value when it contains a command prefix. For example, `m/"Note:Prefer n/3"`
+  matches the stored pair `Note:Prefer n/3`; `g/"Version n/2"` selects that complete game name.
 * Pairs split at the first colon: `m/Region:Asia:SG` matches the value `Asia:SG`. Keys and values are trimmed.
   Keys use 1–50 characters without colons; values use 1–200 characters. Each requires a letter or digit and
   rejects control characters, following existing metadata validation.
@@ -459,7 +461,7 @@ Format: `squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`
   and appear in displayed-list order. If fewer than `n - 1` displayed friends meet all conditions, the command
   reports the error `Could not find a squad of N people.`
 
-Add metadata to a game using `gameadd FRIEND_INDEX|myself g/GAME [u/USERNAME] [m/KEY:VALUE]...`.
+Add metadata to a game using `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...`.
 Each game card displays the stored pairs below its username.
 
 Examples:
@@ -494,7 +496,7 @@ Possible errors:
 
 | Input problem | Feedback |
 |---------------|----------|
-| Missing `g/` or `n/`, or a missing parameter value | Usage starts with `Invalid command format. Usage: squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...` |
+| Missing `g/` or `n/`, or a missing parameter value | Usage starts with `Invalid command format. Usage: squad g/GAME_NAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...` |
 | Invalid squad size, such as `0`, `21`, `-1`, `2.5` or `abc` | `Invalid squad size. Enter a whole number from 1 to 20.` |
 | Invalid game name | `Invalid game name GAME_NAME. Enter 1–50 printable characters containing at least one letter or digit.` |
 | Empty or malformed metadata | `Metadata must be in the format Key:Value.` |
@@ -773,7 +775,7 @@ while copying the file, then launch the destination app from its usual data fold
 | **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code><br> e.g., `gameadd myself g/Valorant u/player123 m/Role:Support` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
-| **Squad create** | `squad g/GAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`<br> e.g., `squad g/Valorant n/3 m/Role:Healer` |
+| **Squad create** | `squad g/GAME_NAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`<br> e.g., `squad g/Valorant n/3 m/Role:Healer` |
 | **List** | `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`<br> e.g., `list g/Valorant s/name o/desc` |
 | **Pin** | `pin FRIEND_INDEX`<br> e.g., `pin 1` |
 | **Unpin** | `unpin FRIEND_INDEX`<br> e.g., `unpin 1` |

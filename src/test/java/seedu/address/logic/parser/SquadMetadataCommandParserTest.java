@@ -30,6 +30,17 @@ public class SquadMetadataCommandParserTest {
     }
 
     @Test
+    public void parse_quotedPrefixes_preserveGameAndMetadataValues() throws Exception {
+        SquadCommand expected = new SquadCommand(new GameName("Version n/2"),
+                ParserUtil.parseMetas(List.of("Note:Prefer n/3")), 2);
+        assertParseSuccess(parser, " g/\"Version n/2\" n/2 m/\"Note:Prefer n/3\"", expected);
+        assertParseFailure(parser, " g/Valorant n/2 m/\"Note:Prefer n/3",
+                ArgumentTokenizer.MESSAGE_INVALID_QUOTED_VALUE);
+        assertParseFailure(parser, " g/Valorant n/1 m/\"Note:Prefer n/3\" m/\"note:Prefer n/3\"",
+                Meta.MESSAGE_DUPLICATE_KEY);
+    }
+
+    @Test
     public void parse_duplicateNormalizedKeys_rejectedEvenForSameValues() {
         for (String pairs : new String[]{"m/Role:Healer m/role:Healer", "m/Role:Healer m/ ROLE :Tank"}) {
             assertParseFailure(parser, " g/Valorant n/3 " + pairs, Meta.MESSAGE_DUPLICATE_KEY);

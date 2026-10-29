@@ -68,6 +68,26 @@ public class SquadMetadataIntegrationTest {
     }
 
     @Test
+    public void execute_literalPrefixes_matchStoredValuesWithoutMutatingData() throws Exception {
+        ModelManager model = new ModelManager();
+        Path file = directory.resolve("quoted-metadata.json");
+        LogicManager logic = new LogicManager(model, new StorageManager(new JsonGameMatesStorage(file),
+                new JsonUserPrefsStorage(directory.resolve("preferences.json"))));
+        logic.execute("add n/Alpha");
+        logic.execute("gameadd 1 g/Valorant m/Note:Prefer n/3");
+        logic.execute("gameadd 1 g/\"Version n/2\" m/\"Note:Prefer n/3\"");
+        GameMates before = new GameMates(model.getGameMates());
+        String saved = Files.readString(file);
+        for (String game : new String[]{"Valorant", "\"Version n/2\""}) {
+            var result = logic.execute("squad g/" + game + " n/2 m/\"Note:Prefer n/3\"");
+            assertEquals("Found squad of 2 people:\n1. Me\n2. Alpha (index: 1)", result.getFeedbackToUser());
+            assertTrue(result.isPreserveDetails());
+            assertEquals(before, model.getGameMates());
+            assertEquals(saved, Files.readString(file));
+        }
+    }
+
+    @Test
     public void execute_routedConditions_preserveModelAndPersistedData() throws Exception {
         ModelManager model = new ModelManager();
         model.addFriend(new FriendBuilder().withName("Hidden").build());

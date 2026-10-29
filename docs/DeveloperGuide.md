@@ -342,7 +342,7 @@ the existing exception path also preserves the details. Size one uses the base s
 heading. Other result constructors retain their previous behavior. `LogicManager` continues using its existing
 save path for success even though squad makes no data changes; a command error does not reach the save call.
 
-The [squad metadata sequence diagram source](diagrams/SquadMetadataSequenceDiagram.puml) shows the filtering order.
+![Squad metadata filtering before availability checks and sampling](images/SquadMetadataSequenceDiagram.png)
 
 ### Editing an existing game
 
@@ -1061,20 +1061,28 @@ Diagram sources live in `docs/diagrams`; regenerate their matching `docs/images/
 
 ### Manual squad metadata checks
 
-Use a disposable data directory with two friends playing Valorant. Add each game with
-`gameadd FRIEND_INDEX g/Valorant m/Role:Healer m/Region:Asia`.
-Give a third friend only `Role:Healer` on Valorant and `Region:Asia`
-on Minecraft. Select a friend's filtered game details, then run
-`squad g/Valorant n/3 m/role:Healer m/Region:Asia`. Expect Me first and only the two full matches,
-with original displayed indices and the details unchanged. Repeat with `m/role:healer`; expect an insufficient
-candidates error with unchanged details. Try `n/1`; expect only Me even without matching profile metadata,
-using the heading `Found squad of 1 person:`. Try a repeated normalized key
-and an empty `m/`; expect errors. Run `find` to hide one eligible friend, then request three people;
-expect an insufficient candidates error. Run `squad g/Valorant n/2` to confirm the base no-metadata behavior.
-After each command, confirm list order, filters and selected details persist and the saved model is unchanged.
-Repeat after `list s/name o/desc`, then after pinning one matching friend and running `list`.
-Expect the result to use the indices and order visible in each view. Archive a matching friend and run
-`archivelist`; squad selection uses that archive view and leaves its heading and stored statuses unchanged.
+In disposable data, run:
+
+```text
+clear
+add n/Alpha
+add n/Beta
+gameadd 1 g/Valorant m/Role:Healer m/"Note:Prefer n/3"
+gameadd 2 g/Valorant m/Role:Tank
+gamelist 1 g/Valorant
+```
+
+| Command | Expected |
+|---------|----------|
+| `squad g/Valorant n/3` | Me, Alpha and Beta. |
+| `squad g/Valorant n/2 m/role:Healer` | Me and Alpha. |
+| `squad g/Valorant n/2 m/"Note:Prefer n/3"` | Me and Alpha; the embedded `n/` is literal. |
+| `squad g/Valorant n/2 m/Role:healer` | Insufficient candidates; values are case-sensitive. |
+| `squad g/Valorant n/1 m/Role:Missing` | Only Me. |
+| `squad g/Valorant n/2 m/Role:Healer m/role:Healer`, then `squad g/Valorant n/2 m/` | Duplicate-key and malformed-metadata errors. |
+| `find Beta`, then `squad g/Valorant n/2 m/Role:Healer` | Insufficient displayed candidates. |
+
+After each squad command, confirm unchanged data, list order/filter and selected game details.
 
 ### Manual game edit checks
 
