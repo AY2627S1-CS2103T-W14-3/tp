@@ -11,7 +11,7 @@ import seedu.address.model.friend.Friend;
 import seedu.address.model.friend.NameContainsKeywordsPredicate;
 
 /**
- * Finds and lists all friends in GameMates whose name contains any of the argument keywords.
+ * Finds and lists currently displayed friends whose name contains any of the argument keywords.
  * Keyword matching is case insensitive.
  */
 public class FindCommand extends Command {
@@ -19,7 +19,7 @@ public class FindCommand extends Command {
     public static final String COMMAND_WORD = "find";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Finds active and archived friends whose names contain any of "
+            + ": Finds currently displayed friends whose names contain any of "
             + "the specified keywords (case-insensitive) and displays them as a list with index numbers.\n"
             + "Parameters: KEYWORD [MORE_KEYWORDS]...\n"
             + "Example: " + COMMAND_WORD + " alice bob charlie";
@@ -33,7 +33,9 @@ public class FindCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        model.updateSearchFriendList(predicate);
+        List<Friend> displayedFriends = List.copyOf(model.getFilteredFriendList());
+        model.updateSearchFriendList(friend -> predicate.test(friend)
+                && displayedFriends.stream().anyMatch(friend::isSameFriend));
         List<Friend> matchingFriends = model.getFilteredFriendList();
         return new CommandResult(
                 String.format(Messages.MESSAGE_FRIENDS_LISTED_OVERVIEW, matchingFriends.size()),

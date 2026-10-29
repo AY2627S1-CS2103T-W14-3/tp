@@ -230,7 +230,7 @@ Add and edit commands prevent a friend and the profile from sharing a name.
 
 A `FilteredList<Friend>` provides an observable view of the stored friends.
 Its predicate operates on the full collection; the filter does not create a second collection of copied friends.
-`FriendListScope` identifies active, archived and global search views, including empty results.
+`FriendListScope` identifies active, archived and search views, including empty results.
 `ModelManager` exposes a `SortedList` over this filtered list to apply the display order.
 
 Each friend's games are `Game` objects. Each object contains a game name, an optional username and optional metadata.
@@ -241,7 +241,6 @@ Other components read these preferences through `ReadOnlyUserPrefs`.
 Its classes represent domain data and make sense without those other components.
 
 **Friend fields and pin order**
-
 `Friend` contains a `Name`, optional contact values, a set of `Tag` objects and a set of `Game` objects.
 It also contains immutable `archived` and `pinned` states.
 The constructor rejects `archived && pinned` with `IllegalArgumentException` and
@@ -400,7 +399,7 @@ A single empty `t/` clears all tags. Empty and non-empty tag parameters together
 **Effect on the displayed list**
 
 Adding a friend switches to the unfiltered active view.
-Editing a displayed friend clears the filter in active and archive views, but preserves a global name-search predicate.
+Editing a displayed friend clears the filter in active and archive views, but preserves the search predicate.
 If a renamed friend no longer matches the name predicate, that friend can disappear from the results.
 Editing Myself preserves the current scope and predicate, including an empty displayed list.
 
@@ -488,13 +487,17 @@ If older JSON omits `myself`, the application keeps the default profile.
 
 **Filter predicates**
 
-`FindCommand` installs `NameContainsKeywordsPredicate`.
+`FindCommand` snapshots the currently displayed friends and combines `NameContainsKeywordsPredicate`
+with membership in that snapshot. Membership uses `Friend.isSameFriend()`, so changes to contact details
+or archive status do not remove a matching friend.
 A full name word matches if it equals any supplied keyword, ignoring case.
 
 `ListCommand` installs either `PREDICATE_SHOW_ALL_FRIENDS` or `GameNameMatchesPredicate`.
 The game predicate matches if any game belonging to a friend has the exact `GameName`.
-`find` searches all stored friends; `list` selects active friends from the stored collection.
-Both commands replace the previous predicate. Their filters do not intersect.
+`find` searches only the friends displayed when the command runs. Existing game filters and previous name
+searches therefore limit its candidates. Repeated searches narrow the results; an empty display stays empty.
+Run `list` to search all active friends, or `archivelist` to search all archived friends.
+These list commands replace the previous filter and select from the stored collection.
 
 **Display order**
 
@@ -526,7 +529,7 @@ on one entry. `Meta` equality gives case-insensitive keys and case-sensitive val
 its existing random sampling without replacement and displayed-index sort. Me bypasses the metadata
 predicate and counts towards the requested size. An empty condition set preserves base matching and feedback.
 No predicates, friends, games or preferences are updated. The displayed scope and sort comparator are
-retained, including pinned, archived and global search results. Seeded randomness controls sampling in tests.
+retained, including pinned, archived and search results. Seeded randomness controls sampling in tests.
 
 `CommandResult.preservingDetails` carries an explicit UI instruction for squad success.
 `MainWindow.refreshFriendDetails` returns early for that instruction so existing details and game-card filters
@@ -584,7 +587,7 @@ There is no transaction across model mutation and a disk-write failure.
 
 **Test coverage**
 
-Tests cover pinned order and archived targets in archive and global search scopes.
+Tests cover pinned order and archived targets in archive and search scopes.
 Save/reload tests verify both archive and pin status.
 Other tests cover command routing, atomic validation, displayed targets, metadata replacement and profile updates.
 They also cover case-only spelling, `UI` refresh and real JSON storage round trips.
@@ -780,14 +783,15 @@ Myself cannot be archived or restored.
 | --- | --- | --- |
 | `ACTIVE` | Startup, `list [g/GAME_NAME]`, adding a friend | Not archived, combined with an optional game predicate |
 | `ARCHIVED` | `archivelist [g/GAME_NAME]` | Archived, combined with an optional game predicate |
-| `SEARCH` | `find KEYWORD [MORE_KEYWORDS]` | Name keywords across both statuses |
+| `SEARCH` | `find KEYWORD [MORE_KEYWORDS]` | Name keywords within the previously displayed friends |
 
 `ListCommandParser` and `ArchiveListCommandParser` use `GameNameMatchesPredicate` for exact, case-insensitive game matching.
 Both commands use the same game-name validation rules.
 `ArchiveListCommandParser` uses `ParserUtil.parseOptionalGameFilter()`; the active-list parser also handles sorting.
-Name matching remains a global `find` operation.
+`find` matches name keywords only within the currently displayed friends.
 
-Each `list`, `archivelist` or `find` command replaces the previous predicate.
+`list` and `archivelist` replace the previous filter. `find` narrows the displayed results, retaining
+only matching friends from its snapshot of that display.
 `gamelist` preserves the friend-list filter.
 An unfiltered empty archive gives guidance on archiving.
 An empty filtered archive reports that no archived friends match the game filter.
@@ -800,7 +804,7 @@ The logic layer exposes `getFriendListScope()` to the `UI`.
 
 1. The parser accepts one positive displayed index. It rejects `myself` and extra arguments.
 2. `ArchiveCommand` rejects the archive-only scope and gives guidance to use `list`.
-   Active lists and global search results accept archiving.
+   Active lists and search results accept archiving.
    `UnarchiveCommand` accepts an archived target in archive or search results.
 3. The command validates the index against the displayed list and examines the target's archive status.
    It rejects an invalid index, an already archived archive target, or a non-archived restore target.
@@ -809,7 +813,7 @@ The logic layer exposes `getFriendListScope()` to the `UI`.
    Archiving clears any existing pin; restoring does not restore the pin.
 5. The observable filtered list updates automatically.
    Archiving removes the friend from an active-only list; restoring removes the friend from an archive-only list.
-   In global search, the friend remains visible with the new status. Clearing a pin can change its displayed position.
+   In search, the friend remains visible with the new status. Clearing a pin can change its displayed position.
    Neither command resets the predicate or scope.
 6. `LogicManager` saves the updated collection through the existing storage path.
 
@@ -820,7 +824,7 @@ are omitted. In search results, the same update keeps the matching friend visibl
 
 `edit`, `gameadd`, `gameedit` and `gamedel` preserve archive status in replacement friends.
 `gameedit` also retains the current scope and predicate.
-Friend edits clear filters in active and archive scopes, but global searches keep their name predicate.
+Friend edits clear filters in active and archive scopes, but searches keep their name and membership predicate.
 Thus, a renamed search result can disappear from the results.
 
 `delete` permanently removes the selected friend, whether active or archived.
@@ -838,7 +842,8 @@ The alternative uses separate stored collections for active and archived friends
 That approach needs transfers, cross-list uniqueness validation and a different JSON representation.
 
 Rebuilding a filtered view scans the underlying collection.
-Separate collections can reduce the scan for active-only views, but global name search must still examine both collections.
+Separate collections can reduce the scan for active-only views, but searches must still retain membership
+in the previously displayed list while matching name keywords.
 The current design favors simpler state management.
 If measurements establish a performance need, change this design.
 
@@ -1143,13 +1148,17 @@ names or a disposable friend for each attempt. These are syntax checks, not onli
 Prerequisite: fresh sample data.
 
 1. `find alex david`: expected Alex Yeoh and David Li, with `2 friend(s) listed!`.
-2. `find Dav`: expected zero results; substring matching is not supported. `find david` returns David and opens
+2. `find Dav`: expected zero results; substring matching is not supported. `list`, then `find david`, returns David and opens
    his details automatically. `find` without keywords reports usage and preserves the current display.
 3. `list g/minecraft`: expected Bernice Yu and Roy Balakrishnan, replacing the David filter.
 4. `gamelist 1`: expected Bernice's Minecraft card, although Bernice was full-list index 2. Both Minecraft players
-   remain on the left. `find Alex` now finds Alex from the full data, not from the two Minecraft results.
+   remain on the left. `find Alex` returns no matches because Alex is not among the two displayed Minecraft players.
 5. `list g/Val`: expected zero results. `list` restores all six friends and returns `Listed all active friends.`.
 6. `list n/Alex g/Valorant`: expected invalid-format feedback; combined filtering is not supported.
+7. `list g/minecraft`, then `find Bernice Roy`: expected both displayed Minecraft players.
+   `find Bernice` narrows the results to Bernice. `find Roy` then returns zero results because Roy is no longer
+   displayed. Another `find Bernice` keeps the results empty. `list` restores all active friends;
+   `archivelist` starts a new search pool containing only archived friends.
 
 ### Game cards, empty states and display-filter clearing
 
