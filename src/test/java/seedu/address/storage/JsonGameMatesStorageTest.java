@@ -11,6 +11,7 @@ import static seedu.address.testutil.TypicalFriends.IDA;
 import static seedu.address.testutil.TypicalFriends.getTypicalGameMates;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -93,6 +94,30 @@ public class JsonGameMatesStorageTest {
             assertEquals(String.format(MESSAGE_DUPLICATE_GAME_FORMAT, "Alice", "VALORANT"),
                     exception.getCause().getMessage());
         }
+    }
+
+    @Test
+    public void readGameMates_friendNameConflictsWithMyself_throwDataLoadingException() {
+        DataLoadingException exception = assertThrows(
+                DataLoadingException.class, () -> readGameMates("duplicateCustomMyselfGameMates.json"));
+        assertInstanceOf(IllegalValueException.class, exception.getCause());
+        assertEquals(JsonSerializableGameMates.MESSAGE_DUPLICATE_MYSELF, exception.getCause().getMessage());
+    }
+
+    @Test
+    public void readAndSaveGameMates_unnamedProfile_allowsFriendNamedMyself() throws Exception {
+        Model model = new ModelManager(readGameMates("friendNamedMyselfGameMates.json").get(), new UserPrefs());
+        Path filePath = testFolder.resolve("unnamed-profile.json");
+        JsonGameMatesStorage storage = new JsonGameMatesStorage(filePath);
+        storage.saveGameMates(model.getGameMates());
+        assertFalse(Files.readString(filePath).contains("\"myself\""));
+
+        GameMatesParser parser = new GameMatesParser();
+        parser.parseCommand("edit 1 p/123").execute(model);
+        assertEquals("123", model.getFilteredFriendList().getFirst().getPhone().value);
+
+        storage.saveGameMates(model.getGameMates());
+        assertEquals(model.getGameMates(), storage.readGameMates().get());
     }
 
     @Test
