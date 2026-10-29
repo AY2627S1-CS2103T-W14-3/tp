@@ -65,6 +65,6 @@ public class FriendCard extends UiPart<Region> {
         email.setText("Email: " + (friend.getEmail().isEmpty() ? "Not provided" : friend.getEmail().value));
         friend.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
-                .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+                .forEach(tag -> tags.getChildren().add(new TagLabel(tag.tagName)));
     }
 }

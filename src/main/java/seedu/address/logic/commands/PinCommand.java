@@ -9,12 +9,13 @@ import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
+import seedu.address.model.friend.UniqueFriendList;
 
 /** Pins a friend to the top of the friend list. */
 public class PinCommand extends Command {
 
     public static final String COMMAND_WORD = "pin";
-    public static final int MAX_PINNED_FRIENDS = 5;
+    public static final int MAX_PINNED_FRIENDS = UniqueFriendList.MAX_PINNED_FRIENDS;
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Pins the friend identified by the index number used in the displayed friend list.\n"
             + "Parameters: FRIEND_INDEX (must be a positive integer)\n"

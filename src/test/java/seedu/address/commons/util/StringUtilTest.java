@@ -25,13 +25,34 @@ public class StringUtilTest {
     @Test
     public void isValidTextField_validInputs_returnsTrue() {
         for (String input : new String[] {"A", "1", "Role!", "Support:Mid", "O'Connor-Jane", "李明",
-            "a😀", "a\u200bb"}) {
+            "a😀", "e\u0301", "\tA\n", "\u2003A\u2003",
+            "\u3000A\u3000", "A\u3000B", "\u2764\ufe0f1"}) {
             assertTrue(StringUtil.isValidTextField(input, 50));
         }
         assertTrue(StringUtil.isValidTextField(" A ", 1));
         assertTrue(StringUtil.isValidTextField("  " + "a".repeat(50) + "  ", 50));
         assertTrue(StringUtil.isValidTextField("a".repeat(200), 200));
         assertFalse(StringUtil.isValidTextField("a".repeat(201), 200));
+    }
+
+    @Test
+    public void isValidTextField_nonPrintableUnicode_returnsFalse() {
+        // EPs: formatting (BMP/supplementary), lone surrogates, private use, unassigned,
+        // and internal line/paragraph separators. Controls and length BVA are covered above.
+        for (String input : new String[] {"Halo\u200b", "a\uDB40\uDC01b", "a\uD800", "a\uDC00",
+            "a\uE000b", "a\u0378b", "a\u2028b", "a\u2029b"}) {
+            assertFalse(StringUtil.isValidTextField(input, 50));
+        }
+    }
+
+    @Test
+    public void isValidTextField_blankRenderingCharacters_returnsFalse() {
+        // EPs: fillers that count as letters on their own, blank symbols/marks after a letter,
+        // and no-break spaces at either end or inside the value.
+        for (String input : new String[] {"\u115F", "\u1160", "\u3164", "\uFFA0", "A\u2800", "A\u034F",
+            "\u00a0A", "A\u2007", "\u202fA", "A\u00a0B", "A\u2007B", "A\u202fB"}) {
+            assertFalse(StringUtil.isValidTextField(input, 50));
+        }
     }
 
     @Test

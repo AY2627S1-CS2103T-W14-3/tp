@@ -95,6 +95,9 @@ The `UI` consists of these classes, which inherit from `UiPart`:
 * `StatusBarFooter`
 
 `UiPart` loads the matching FXML layouts.
+`TagPane` and `TagLabel` wrap tags to the available width in friend cards and the details panel.
+`TagPane` measures wrapped labels before layout and constrains their width during layout.
+`TagLabel` adjusts its height to keep wrapped text visible.
 
 `MainWindow.fxml` uses a `SplitPane`. The observable friend list is on the left, and the details panel is on the right.
 `FriendDetailsPanel` shows contact details, tags and sorted game cards. It does not replace the friend list.
@@ -122,6 +125,11 @@ See [Viewing games](#viewing-a-friends-games).
 If a successful result has no friend payload, the details panel shows `Logic.getMyself()`.
 If `find` returns one friend, the details panel shows that friend.
 Parse failures and command failures update feedback without an explicit details refresh.
+
+`MainWindow.refreshFriendDetails` calls `FriendListPanel.selectFriend()` before it sets the final details payload.
+Friend payloads select the matching displayed friend; profile payloads and results without a friend clear the selection.
+If the target is not displayed, `selectFriend()` also clears the selection.
+Mouse selection remains supported, and a previous friend can be selected again after a command shows the profile.
 
 A game filter changes only the cards that the panel renders.
 The filter does not change the model or the predicate for the left-hand friend list.
@@ -221,6 +229,11 @@ Its classes represent domain data and make sense without those other components.
 It also contains immutable `archived` and `pinned` states.
 See [Friend archiving](#friend-archiving) for the scope, identity and persistence rules.
 
+`UniqueFriendList.MAX_PINNED_FRIENDS` limits the stored collection to five pins across active and archived friends.
+The list validates this invariant on addition, replacement and bulk replacement.
+A violation throws `PinnedFriendLimitExceededException` before the collection changes.
+Tag names contain 1–50 ASCII alphanumeric characters.
+
 After additions and replacements, `UniqueFriendList` stably partitions friends, with pinned friends before unpinned friends.
 It preserves the existing relative order within each group.
 Filters use that stored order, so filtering preserves this invariant.
@@ -235,8 +248,9 @@ An explicit sort uses a separate display comparator and can override the pin ord
 `Username` preserves case. An omitted username uses `Username.EMPTY`; `isEmpty()` identifies that value.
 `Game.isSameGame` compares game names. Full game equality also compares usernames and metadata.
 
-`GameAddCommand` rejects an existing game name, regardless of its username.
-A set alone does not enforce this rule when JSON contains same-name games with different usernames.
+`GameValidator` rejects an existing game name during addition or renaming, regardless of its username.
+Full game equality alone does not enforce this rule, so `JsonAdaptedFriend` also validates game-name uniqueness during loading.
+Duplicate names reject the load even when usernames differ.
 
 <div markdown="block" class="alert alert-info">
 
@@ -292,6 +306,12 @@ Duplicate friend names reject the entire load, including a profile parsed before
 Startup then uses a new empty `GameMates`.
 `JsonAdaptedFriend` saves the `pinned` boolean. Missing or null pin values in older files default to `false`.
 
+`JsonAdaptedFriend` rejects duplicate `GameName` values within either a friend or the profile.
+`JsonSerializableGameMates` rejects friend names that match the profile and converts excess pins to `IllegalValueException`.
+These failures reject the entire load, not only the invalid entry.
+The untouched `Friend.DEFAULT_MYSELF` uses `Name.EMPTY` and is omitted from saved JSON.
+Stored friend/profile entries still need valid non-empty names.
+
 **File paths and save timing**
 
 `MainApp` resolves `data/gamemates.json` and `preferences.json` relative to the process working directory, not the JAR location.
@@ -308,12 +328,14 @@ The loader does not repair or back up damaged files.
 The next successful command can overwrite a damaged file with fallback data.
 There is no automatic recovery or atomic transaction across command execution and file writing.
 
-**Known root-null exception**
+**Null JSON and GUI preferences**
 
-A JSON file containing only `null` reaches `requireNonNull` in `JsonUtil.readJsonFile`, outside the captured conversion.
-This throws `NullPointerException` instead of `DataLoadingException`.
-The exception bypasses the empty-data fallback and can prevent startup.
-This defect needs a separate application fix; documentation changes do not alter the loader.
+`JsonUtil.readJsonFile` calls `requireNonNull` on the deserialized root inside `Try`.
+A null root causes a `NullPointerException` that is converted to `DataLoadingException`.
+A data file containing only `null` therefore uses the usual empty-data fallback.
+`UserPrefs.setGuiSettings()` has `@JsonSetter("guiSettings")` and rejects an explicit null value during deserialization.
+`MainApp.initPrefs` catches these preference-load failures and uses and saves default preferences.
+Null window coordinates remain valid; they do not mean that the entire `guiSettings` object is null.
 
 ### Common classes
 
@@ -377,14 +399,24 @@ Phone validation examines digit counts and grouping. Email validation uses ASCII
 The [User Guide](UserGuide.html#adding-a-friend-add) defines the accepted input.
 
 No phone number, email address, game name or username is verified against an external service.
-`GameName` and `Username` use `String.strip()` to trim values and `String.length()` to count UTF-16 code units.
-The values must contain a letter or digit code point and must not contain ISO control code points.
-This is not a general Unicode printability test.
+`GameName` and `Username` use `String.strip()` to trim values. The values must contain a letter or digit.
+Length is counted in UTF-16 units with `String.length()`. The shared text validator rejects:
+
+* Unicode category C: controls, format characters, unpaired surrogates, private-use and unassigned characters
+* line (Zl) and paragraph (Zp) separators
+* characters that render blank: Hangul fillers U+115F, U+1160, U+3164 and U+FFA0, blank Braille U+2800
+  and the combining grapheme joiner U+034F
+* no-break spaces U+00A0, U+2007 and U+202F, which look like regular spaces but do not match them
+
+Other Unicode is accepted, including combining marks, emoji and variation selectors.
+These rules define the application's accepted text characters; they do not test how every font renders each character.
 
 ### Myself profile
 
 `GameMates` stores the user's profile as a separate `Friend`, initially `Friend.DEFAULT_MYSELF`.
 `edit`, `gameadd` and `gamedel` accept `myself` independently of the displayed friend list and profile name.
+The default profile has `Name.EMPTY`, rather than reserving the friend name `Myself`.
+The first `edit myself` must supply a name, as in `edit myself n/NAME`. Later profile edits can omit it.
 
 Their syntax uses `FRIEND_INDEX|myself`.
 This selector accepts either a positive displayed friend index or the case-insensitive profile keyword:
@@ -418,6 +450,8 @@ The class diagram omits unrelated members. It shows the records as ordinary clas
 For profile edits, `EditCommand` constructs the replacement before `FriendValidator` examines name conflicts.
 Validation uses all stored friends, including friends hidden by the current filter.
 Profile edits and both game commands preserve the friend-list filter.
+`FriendValidator.checkFriendInitialized()` rejects `gameadd`, `gameedit`, `gamedel` and `gamelist` for an unnamed profile.
+The feedback is `Set your profile name first using "edit myself n/NAME" command.`
 
 The following sequence shows `gameadd myself g/Valorant u/player` after parsing.
 It omits helper calls and the subsequent save.
@@ -457,23 +491,6 @@ The `find` parser accepts a non-empty keyword list; it does not enforce a 255-ch
 Queries with no matches return successful empty results.
 Filtering and sorting never include or edit the separate profile.
 
-### Squad selection
-
-`SquadCommandParser` parses `squad g/GAME n/NUMBER_OF_PEOPLE` with
-`ArgumentTokenizer.tokenizeWithQuotedValues()`.
-Whole-value quotes preserve literal `g/` and `n/` text, as in `squad g/"Version n/2" n/2`.
-This parser uses the same quote and escape rules as `gameedit`.
-
-Malformed quotes, duplicate prefixes, invalid game names and sizes outside 1–20 are rejected before execution.
-`SquadCommand` finds matching games in the displayed friend list.
-It randomly selects `size - 1` distinct friends and reports them in displayed-index order.
-
-Myself is always the first member, even without a matching profile game.
-The command preserves stored data, scope, filters and sorting.
-
-Regression tests cover prefix-containing names added by `gameadd`, either parameter order, escaped quotes and backslashes.
-They also cover malformed input and preservation of the filtered view.
-
 ### Editing an existing game
 
 **Parser and field values**
@@ -500,16 +517,20 @@ For example, `g/"PUBG n/Game"` selects the complete stored name `PUBG n/Game`.
 The tokenizer decodes `\"` and `\\`. It rejects malformed quotes, invalid escapes and trailing text.
 The decoded values pass through the same field validators and duplicate-prefix validation.
 Unquoted prefixes keep their existing command meaning.
-The ordinary tokenizer is unchanged; `squad` also uses the quoted-value tokenizer, while other commands keep their existing syntax.
+The ordinary tokenizer and other commands' syntax are unchanged. Quoted-value parsing is specific to `gameedit` in this checkout.
 
 **Validation before mutation**
 
 `GameEditCommand` uses `FriendTargetResolver` and `Model.resolveFriend` for displayed indices or Myself.
-It accepts exactly one matching existing game.
+`GameTargetResolver.resolve()` accepts exactly one matching existing game for `gameedit` and `gamedel`.
 The command constructs the complete replacement and examines name collisions against the other games.
 Only then does it call `Model.setFriend(target, updated)` once.
 
-Ambiguous duplicate names in externally edited JSON fail without mutation.
+`GameAddCommand` delegates name-conflict validation to `GameValidator.checkCanAdd()`.
+`GameEditCommand` uses `GameValidator.checkCanEdit()` for the same validation during a rename.
+`checkCanEdit()` excludes the original game, so case-only renames remain valid.
+The resolver rejects missing games and defensively rejects ambiguous in-memory names without mutation.
+Externally edited JSON with duplicate game names is rejected during loading.
 `Friend.withGames` copies all current friend fields and makes a defensive copy of the replacement set.
 The copy preserves the original archive and pin statuses.
 Its explicit copy constructor must also copy new fields from future integrations.
@@ -552,7 +573,8 @@ It translates command-specific errors locally. Other commands keep their existin
 `GameListCommand.execute` resolves numeric indices against `Model.getFilteredFriendList()`.
 This keeps indices consistent after name searches and game-based filtering.
 The command examines empty and out-of-range lists before numeric lookup.
-`Model.resolveFriend` resolves the selected friend or separate profile; `myself` also works with an empty displayed list.
+`Model.resolveFriend` resolves the selected friend or separate profile.
+`myself` works with an empty displayed list after profile setup; `FriendValidator.checkFriendInitialized()` rejects an unnamed profile.
 
 `GameName.equals` gives exact, case-insensitive matching.
 No match and no games both return successful results.
@@ -578,9 +600,10 @@ An unfiltered command clears the game filter.
 The existing two-argument `setFriend` also clears it, including when `FriendListPanel` reports another selection.
 A single-result `find` continues to select the whole friend.
 Parse failures and execution failures preserve the previous game display without a panel refresh.
+`MainWindow` also selects the displayed friend or clears the list selection for a profile result.
 
 The command does not update the friend-list predicate, friends, games, preferences or Myself profile.
-The profile fallback still shows all profile games. Explicit profile selection supports game filtering.
+The profile fallback still shows all profile games. Explicit profile selection supports game filtering after profile setup.
 
 `GameDetailsCard` renders `Game.getGameName()`, `Game.getUsername()` and `Game.getMetas()`.
 Metadata pairs appear below the username as wrapping `Key: Value` labels, sorted by key ignoring case.
@@ -614,11 +637,10 @@ before publishing a complete v1.3 MVP guide.
 | Friend filtering | Combined `list [n/KEYWORDS] [g/GAME]`, with named empty-result feedback (pp. 14–15). | Separate `find KEYWORD...` and `list [g/GAME]`; a new command replaces the previous filter. Feedback is `Listed all active friends.` or `N friend(s) listed!`, including zero. |
 | GUI | Feature-spec mockups replace the friend panel with a game's list (pp. 15, 25); later v1.3 notes call for a split panel. | The adopted split layout matches those later notes: friends stay on the left and details/game cards appear on the right. `gamelist` filters cards only. Retire the earlier mockups. |
 | Errors | Command-specific index and validation wording. | Messages differ across commands; use the verified wording in the User Guide instead of copying spec errors. |
-| Game uniqueness | One or no username per game name within a friend (pp. 16–19). | `gameadd` rejects duplicate game names through `Game.isSameGame`. Stored sets use full equality, so JSON can still contain the same game name with different usernames. |
+| Game uniqueness | One or no username per game name within a friend (pp. 16–19). | `GameValidator` rejects duplicate names during addition/renaming. `JsonAdaptedFriend` rejects duplicate game names in saved friends and profiles, even when usernames differ. |
 
-Additional integration issues found during the audit: root-level JSON `null` bypasses the loading fallback, and
-game-text validation uses ISO-control rejection rather than a complete Unicode printability check. These are
-recorded limits; no application fix is included in this documentation change.
+Root-level JSON `null` now follows the load-error fallback. Null GUI settings also use default preferences.
+Game-text validation rejects the Unicode categories, blank characters and misleading spaces listed above.
 
 Deletion confirmation and undo are outside the product scope. Deletion takes effect immediately.
 Game creation/deletion, game username editing, metadata entry/display and own-profile editing are available.
@@ -635,10 +657,12 @@ Its two-argument constructor uses an empty set.
 #### Validation and equality
 
 Before validation and storage, `String.strip()` removes leading and trailing whitespace.
-`StringUtil.isValidTextField()` accepts non-empty text with at least one letter or digit and no ISO control characters.
+`StringUtil.isValidTextField()` accepts non-empty text with at least one letter or digit. It rejects the characters listed in
+[Friend creation, editing and deletion](#friend-creation-editing-and-deletion).
 Limits use `String.length()`, which counts UTF-16 units. Supplementary characters count as two units.
 
-The validation allows punctuation. It does not exclude other Unicode categories, such as format characters.
+The validation allows punctuation and permitted combining marks, emoji and variation selectors.
+It rejects Unicode format characters and the other categories listed in the shared rules above.
 `GameName` and `Username` use the same utility.
 
 | Field | Length after trimming | Colon handling | Equality |
@@ -978,40 +1002,40 @@ Implemented by `gameedit FRIEND_INDEX g/GAME_NAME u/USERNAME`. The `myself` sele
 
 ### Non-Functional Requirements
 
-The following are targets, not measured guarantees. Startup/performance and large-data capacity need separate measurement.
+These requirements are targets, not measured guarantees. Capacity and performance require separate validation.
 
 #### Environment
 
-1. Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-1. Should work offline on a single user's personal laptop, without requiring an internet connection or any installed software other than Java `25` or above.
-1. Should work on screens with a resolution of `1280 x 720` or higher, with all panels and the command box visible without scrolling the window at its default size.
+1. Should run offline on a single user's personal laptop running a _mainstream OS_, requiring only Java `25` or above.
+1. Should display all panels and the command box without scrolling at the default window size on screens with a resolution of `1280 x 720` or higher.
 
 #### Data
 
-1. All data should be stored locally in a human-editable JSON file. GameMates should not send any data over the network.
-1. Successfully saved data should be restored on the next launch from the same working directory. Current data saves
-   occur after successful commands; window preferences save on shutdown. Metadata persistence is implemented in the JSON adapters.
-1. If the data file is missing, GameMates should start with the sample data without crashing. If the data file is corrupted, GameMates should start with an empty list without crashing.
+1. Should store all data locally in human-editable JSON files and send no data over the network.
+1. Should save data after successful commands and window preferences on shutdown, restoring saved data on the next launch from the same working directory.
+1. Should start without crashing, using sample data if the data file is missing or an empty list if it is corrupted.
 
 #### Capacity
 
-1. Should be able to hold up to 1000 friends, each with up to 100 game entries.
+1. Should support up to 1000 friends in total across the active and archived lists, excluding the user profile, each with up to 100 game entries.
 
 #### Performance
 
-1. GameMates should be ready to accept commands within 3 seconds of starting the application on a _modern computer_ running Java `25`, with up to 1000 friends and 100 game entries per friend.
-1. GameMates should display the results of each friend listing or filtering command within 2 seconds of submission on a _modern computer_ running Java `25`, with up to 1000 friends and 100 game entries per friend.
+On a _modern computer_ running Java `25`, with up to 1000 friends in total across the active and archived lists, excluding the user profile, and 100 game entries per friend:
+
+1. Should be ready to accept commands within 3 seconds of launch.
+1. Should display friend listing or filtering results within 2 seconds of command submission.
 
 #### Usability
 
-1. A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to add, edit, delete, list and filter friends, and add, delete and list game entries, faster using commands than using the mouse.
-1. A first-time user should be able to add a friend and add a game entry to that friend within 5 minutes of first launching GameMates, using only the in-app help and the sample data as a reference.
-1. Every invalid command should produce an error message that states what was wrong and shows the correct usage or allowed input range, and should not modify any data.
-1. Every command described in the User Guide should be usable through the command box alone, without needing the mouse.
+1. Users with above-average typing speed for regular English text should be able to add, edit, delete, list and filter friends, and add, delete and list game entries, faster using commands than the mouse.
+1. First-time users should be able to add a friend and a game entry for that friend within 5 minutes of launch, using only the in-app help and sample data.
+1. Invalid commands should explain the error and show the correct usage or allowed input range, without modifying data.
+1. All commands in the User Guide should be usable through the command box alone.
 
 #### Constraints
 
-1. GameMates does not verify friend names, game names, usernames or metadata against any online gaming platform. All such data is whatever the user enters.
+1. Friend names, game names, usernames and metadata are user-provided and are not verified against online gaming platforms.
 
 ### Glossary
 
@@ -1120,10 +1144,11 @@ Prerequisite: fresh sample data.
    proving that selecting another friend clears the display filter. No stored game entry should be removed.
 6. `gamelist 3 g/Stardew Valley`: expected Charlotte's Stardew Valley card. `find David`, then `gamelist 1`,
    selects David rather than Alex. `list g/Unknown`, then `gamelist 1`, reports an empty displayed list.
-7. `gamelist myself`: expected `Your details` and all profile games. `gamelist myself g/Valorant` shows only
-   your Valorant card if present. `find Unknown`, then `gamelist MYSELF`, still selects your profile with the empty
-   friend list unchanged. `gamelist myself g/Unknown` reports no match. If no profile details exist, the panel
-   continues showing `No details added`.
+7. Before profile setup, `gamelist myself` reports `Set your profile name first using "edit myself n/NAME" command.`
+   Run `edit myself n/Own Profile`, then `gameadd myself g/Valorant u/own`.
+   `gamelist myself` now shows `Your details` and all profile games; `gamelist myself g/Valorant` shows only Valorant.
+   `find Unknown`, then `gamelist MYSELF`, still selects the profile with the empty friend list unchanged.
+   `gamelist myself g/Unknown` reports no match. A failed command before setup preserves the previous details display.
 
 ### Deletion and clearing
 
@@ -1184,8 +1209,11 @@ Prerequisite: independent disposable app folders and closed app instances before
 | Start in an empty folder without `data/gamemates.json`; enter `list`. | Six sample friends and a default profile; the successful command creates the data file. |
 | Save the fixture above, close the app, copy the data file to a backup, then replace its contents with `{broken`. Relaunch without entering commands. | Empty friends and default profile; the malformed file stays on disk. No automatic backup or recovery prompt. Close the app and restore the backup to recover. |
 | Repeat the invalid-file setup, then enter `list`. | `Listed all active friends.` with an empty list; the file is overwritten with the empty fallback data. |
-| In a separate disposable folder, replace the data file with the literal `null`, then launch. | Known defect: startup can fail with an uncaught null-value error instead of the empty-data fallback. Restore a valid backup to continue. |
+| In a separate disposable folder, replace the data file with the literal `null`, then launch. | Empty friends and default profile, without a startup crash. The invalid file stays unchanged until a successful command saves the fallback data. |
+| Replace `preferences.json` with `null`, or with `{"guiSettings":null}`, then launch. | Default GUI settings, without a startup crash. Startup saves valid default preferences. A null window-coordinate field remains valid. |
 | In a copy of the valid fixture, use an invalid phone such as `12`, or duplicate the friend with an equal name. Relaunch. | The whole data load fails; empty friends and default profile. Restore the backup before continuing. |
+| Duplicate a game name within a friend or profile, including a case variant with a different username. Relaunch. | The entire load fails; no duplicate game entries are accepted. Restore the valid backup before continuing. |
+| Set a stored friend's name equal to the profile name, or mark six distinct friends as pinned across both statuses. Relaunch. | The entire load fails. The profile conflict and pin limit apply to stored data as well as commands. |
 | Remove the `myself` and `games` properties from a valid copy, then relaunch. | Default profile and a friend with no games. Empty/missing phone and email are accepted; invalid non-empty contacts are not. |
 | Copy the same JAR to a second empty folder and launch there. | A separate sample dataset, not the first folder's saved friends. Restore a backup into the second folder to transfer data. |
 | With the app running, make its data file unwritable for that user (for example `chmod a-w data/gamemates.json` on Linux/macOS). Enter `add n/Unsaved Test`. | A `Could not save data` error. The friend may already be visible in memory; this is not a rolled-back transaction. |
@@ -1222,16 +1250,6 @@ Get current screenshots from the application, not from specification mockups.
 Diagram sources are in `docs/diagrams`.
 If you change a source, regenerate its matching `docs/images/*.png` file.
 
-### Manual squad selection checks
-
-Use a disposable data folder. Run `clear`, `add n/Tester`, then `gameadd 1 g/Version n/2 u/player`.
-
-1. Run `find Tester`, then `squad g/"Version n/2" n/2`. Expect Me and Tester, with username `player` and index 1.
-2. Run `squad n/2 g/"Version n/2"`. Expect the same two members; the parameter order does not change selection.
-3. Try an unclosed quoted value, `squad g/"Version n/2 n/2`, and duplicate size prefixes,
-   `squad g/"Version n/2" n/2 n/2`. Expect errors with stored data and the search filter unchanged.
-4. Run `squad g/"Version n/2" n/3`. Expect `Could not find a squad of 3 people.` without changing the view.
-
 ### Manual game edit checks
 
 **Basic game edits**
@@ -1249,6 +1267,7 @@ Also try repeated normalized metadata keys.
 Expect errors with unchanged data and details.
 Clear metadata with `gameedit 1 g/Valorant m/`.
 
+Set up the profile with `edit myself n/Owner`.
 Add a profile game with `gameadd myself g/Valorant u/own`.
 Enter `find Nobody`.
 Then enter `gameedit myself g/Valorant u/newOwn`.
