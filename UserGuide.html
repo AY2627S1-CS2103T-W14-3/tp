@@ -1014,7 +1014,8 @@ or use <code class="language-plaintext highlighter-rouge">exit</code>.</p>
 
 <p>If saving fails, an error beginning <code class="language-plaintext highlighter-rouge">Could not save data</code> appears. A friend change may already be visible in the
 running application even though it was not written to disk. Restore write access to the data folder and run a
-successful command such as <code class="language-plaintext highlighter-rouge">list</code> to try saving again before closing the app.</p>
+successful command such as <code class="language-plaintext highlighter-rouge">list</code> to try saving again before closing the app.
+When saving fails, the <code class="language-plaintext highlighter-rouge">help</code> and <code class="language-plaintext highlighter-rouge">exit</code> commands also fail. See <a href="#known-limitations">Known limitations</a> for the workaround.</p>
 
 <h3 id="editing-the-data-file">Editing the data file</h3>
 
@@ -1084,6 +1085,16 @@ Game names, usernames and metadata accept other Unicode characters, but other la
   <li>
 <strong>Some characters count as more than one toward length limits.</strong> Lengths are counted in UTF-16 code units, so
 <code class="language-plaintext highlighter-rouge">😀</code> counts as 2 and <code class="language-plaintext highlighter-rouge">👨‍👩‍👧</code> (built from 3 emoji and 2 joiners) counts as 8.</li>
+  <li>
+<strong>The <code class="language-plaintext highlighter-rouge">help</code> and <code class="language-plaintext highlighter-rouge">exit</code> commands fail while saving fails.</strong> GameMates saves after every command, so these commands
+show the <code class="language-plaintext highlighter-rouge">Could not save data</code> error instead. Use these instead:
+    <ul>
+      <li>To open help, use the <strong>Help</strong> menu or press <code class="language-plaintext highlighter-rouge">F1</code>.</li>
+      <li>To close the app, use <strong>File</strong> &gt; <strong>Exit</strong> or the window’s close button.</li>
+    </ul>
+
+    <p>Closing the app this way discards any changes that were not saved. To keep them, fix the save issue first.</p>
+  </li>
 </ol>
 
 <hr>
