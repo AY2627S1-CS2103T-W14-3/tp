@@ -183,7 +183,8 @@ For example, <code class="language-plaintext highlighter-rouge">g/"PUBG u/Game\ 
     <li>Repeating a single-value <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> parameter in <code class="language-plaintext highlighter-rouge">add</code> or <code class="language-plaintext highlighter-rouge">edit</code> is rejected, even with identical values.
 Tags may be repeated. Identical tag values are applied once.</li>
     <li>Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run <code class="language-plaintext highlighter-rouge">list</code> to see all active friends
-again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.</li>
+again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.
+Invalid-index feedback quotes the rejected input. In error examples below, <code class="language-plaintext highlighter-rouge">INPUT</code> stands for that text.</li>
     <li>
       <p>For <code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> means either a displayed friend index or the
 case-insensitive keyword <code class="language-plaintext highlighter-rouge">myself</code> for your own profile. Do not type <code class="language-plaintext highlighter-rouge">|</code>. The selector must come before prefixes.
@@ -344,11 +345,12 @@ Both forms switch to the active view.</p>
 including when the list is empty.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> shows active friends who have a game with that exact name. The match is case-insensitive, so <code class="language-plaintext highlighter-rouge">list g/valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
+  <li>Pinned friends remain above unpinned friends. Sorting applies within each group.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list s/name</code> orders the displayed friends alphabetically by name, ignoring case.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list s/game</code> orders friends by the alphabetically first game in each friend’s game list, ignoring case.
-Friends without games appear last in ascending order and first in descending order; name breaks ties.</li>
+Friends without games appear last within each group in either direction; name breaks ties.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">o/asc</code> explicitly selects ascending order; this is the default. <code class="language-plaintext highlighter-rouge">o/desc</code> reverses the selected name or game
 order. An order may only be supplied with <code class="language-plaintext highlighter-rouge">s/</code>.</li>
@@ -356,7 +358,7 @@ order. An order may only be supplied with <code class="language-plaintext highli
 <code class="language-plaintext highlighter-rouge">list g/GAME_NAME s/NAME|GAME</code> first filters by game, then sorts the matching friends. Prefixes may be supplied in
 either order.</li>
   <li>Running <code class="language-plaintext highlighter-rouge">find</code> changes only the friend-list filter and retains a sort applied by an earlier <code class="language-plaintext highlighter-rouge">list</code> command.
-Running <code class="language-plaintext highlighter-rouge">list</code> without <code class="language-plaintext highlighter-rouge">s/</code> clears that sort and returns to the stored insertion order.</li>
+Running <code class="language-plaintext highlighter-rouge">list</code> without <code class="language-plaintext highlighter-rouge">s/</code> clears that sort and returns to the stored insertion order within each pin group.</li>
   <li>Leading and trailing spaces in <code class="language-plaintext highlighter-rouge">GAME_NAME</code> are ignored, but partial names do not match. For example, <code class="language-plaintext highlighter-rouge">list g/Val</code> does not match <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
   <li>Only game names are matched; a friend’s in-game username is not matched.</li>
   <li>Multi-word game names are accepted. Only one <code class="language-plaintext highlighter-rouge">g/</code> prefix may be supplied, and the game name must not be empty.</li>
@@ -390,8 +392,9 @@ A valid game filter returns <code class="language-plaintext highlighter-rouge">N
 <h3 id="pinning-a-friend-pin">Pinning a friend: <code class="language-plaintext highlighter-rouge">pin</code>
 </h3>
 
-<p>Keeps a friend in the pinned group at the top of the stored friend order.
-Explicit sorting can override the displayed position, as described under <a href="#listing-filtering-and-sorting-friends-list"><code class="language-plaintext highlighter-rouge">list</code></a>.</p>
+<p>Keeps a friend in the pinned group at the top of the displayed friend list.
+Pinned friends stay above unpinned friends, including when using the sorting options under
+<a href="#listing-filtering-and-sorting-friends-list"><code class="language-plaintext highlighter-rouge">list</code></a>.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">pin FRIEND_INDEX</code></p>
 
@@ -404,8 +407,8 @@ is rejected without changing the list.
 The limit counts active and archived friends together and also applies when loading saved data.</li>
   <li>Pinning is saved with your data. Pinned friends remain above unpinned friends after reopening GameMates and when
 filtering the list by game.</li>
-  <li>A newly pinned friend is placed after friends already in the pinned group, while remaining above all unpinned
-friends.</li>
+  <li>Without an explicit sort, friends within each group follow their stored insertion order. Pinning changes
+the displayed group without changing the stored order.</li>
   <li>Pinned friend cards display a <code class="language-plaintext highlighter-rouge">Pinned</code> badge, making the boundary between pinned and unpinned friends visible.</li>
 </ul>
 
@@ -429,7 +432,8 @@ friends.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> refers to the current displayed list.</li>
   <li>Unpinning a friend who is not pinned is rejected without changing the list.</li>
-  <li>The friend is returned to the unpinned group, below all pinned friends.</li>
+  <li>The friend is returned to the unpinned group, below all pinned friends. Without an explicit sort, they
+return to their position in the stored insertion order.</li>
 </ul>
 
 <p>Examples:</p>
@@ -616,7 +620,7 @@ while the left panel continues showing only Minecraft players.</li>
     </tr>
     <tr>
       <td>Malformed, zero, negative or overflowing index</td>
-      <td><code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code></td>
     </tr>
     <tr>
       <td>Positive index outside the displayed list</td>
@@ -810,7 +814,11 @@ conditions, the command reports an error:</p>
 
 <ul>
   <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
-  <li>Use <code class="language-plaintext highlighter-rouge">myself</code> instead of <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> to edit your own profile, for example <code class="language-plaintext highlighter-rouge">edit myself n/Alex Tan</code>. The selector is case-insensitive.</li>
+  <li>Use <code class="language-plaintext highlighter-rouge">myself</code> instead of <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> to edit your own profile, for example <code class="language-plaintext highlighter-rouge">edit myself n/Alex Tan</code>. The selector is case-insensitive.
+If the name belongs to an active or archived friend, choose a different profile name; unarchiving that friend
+does not resolve the name conflict.</li>
+  <li>Invalid indices include the rejected text in the feedback. For example, <code class="language-plaintext highlighter-rouge">edit 1 x/abc</code> reports
+<code class="language-plaintext highlighter-rouge">Invalid index "1 x/abc".</code> followed by the allowed index range. Use the supported field prefixes shown above.</li>
   <li>The first <code class="language-plaintext highlighter-rouge">edit myself</code> must include <code class="language-plaintext highlighter-rouge">n/NAME</code>. After setup, later edits can omit the name, and you can use
 <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code>, <code class="language-plaintext highlighter-rouge">gamedel</code> and <code class="language-plaintext highlighter-rouge">gamelist</code> with <code class="language-plaintext highlighter-rouge">myself</code>.</li>
   <li>
@@ -856,7 +864,7 @@ Editing preserves the friend’s archive status, games and your profile. A succe
 <ul>
   <li>Missing index: <code class="language-plaintext highlighter-rouge">Please provide an index.</code>
 </li>
-  <li>Invalid index (including a value above 2147483647): <code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
+  <li>Invalid index (including a value above 2147483647): <code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
 </li>
   <li>Empty displayed list: <code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list to show all friends.</code>
 </li>
@@ -926,9 +934,9 @@ an <strong>Archived</strong> badge. The current filter stays in place.</li>
   <li>Feedback is <code class="language-plaintext highlighter-rouge">Archived FRIEND_NAME.</code>. Archiving an already archived friend is rejected.</li>
   <li>Your Myself profile cannot be archived. <code class="language-plaintext highlighter-rouge">myself</code>, missing indices, extra arguments and invalid indices are rejected.</li>
   <li>Missing indices report <code class="language-plaintext highlighter-rouge">Please provide an index.</code>. Invalid indices (such as <code class="language-plaintext highlighter-rouge">-1</code>, <code class="language-plaintext highlighter-rouge">0</code> or <code class="language-plaintext highlighter-rouge">abc</code>) report
-<code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>.</li>
+<code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>.</li>
   <li>Archived friends keep their names reserved. Adding or renaming another friend to the same name is rejected
-with a suggestion to use <code class="language-plaintext highlighter-rouge">archivelist</code> and <code class="language-plaintext highlighter-rouge">unarchive</code>.</li>
+with <code class="language-plaintext highlighter-rouge">This name is already used by an archived friend. Choose a different name.</code> This also applies to profile edits.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list</code> and <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> show active friends only. <code class="language-plaintext highlighter-rouge">find</code> searches both active and archived friends.</li>
 </ul>
@@ -938,7 +946,8 @@ with a suggestion to use <code class="language-plaintext highlighter-rouge">arch
 <h3 id="listing-and-filtering-archived-friends-archivelist">Listing and filtering archived friends: <code class="language-plaintext highlighter-rouge">archivelist</code>
 </h3>
 
-<p>Shows archived friends, optionally filtered by game. It follows the same syntax and game-matching rules as <code class="language-plaintext highlighter-rouge">list</code>.</p>
+<p>Shows archived friends, optionally filtered by game. Game names use the same exact, case-insensitive matching as
+<code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code>. The sorting options <code class="language-plaintext highlighter-rouge">s/</code> and <code class="language-plaintext highlighter-rouge">o/</code> are not supported by <code class="language-plaintext highlighter-rouge">archivelist</code>.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">archivelist [g/GAME_NAME]</code></p>
 
@@ -993,7 +1002,7 @@ Run <code class="language-plaintext highlighter-rouge">list</code> to see active
   <li>
 <code class="language-plaintext highlighter-rouge">myself</code>, missing indices, extra arguments and invalid indices are rejected. Missing indices report
 <code class="language-plaintext highlighter-rouge">Please provide an index.</code>; invalid indices report
-<code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>.</li>
+<code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>.</li>
   <li>Out-of-range indices, including
 empty lists, report <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code> without changing data or the current view.</li>
 </ul>
@@ -1033,7 +1042,7 @@ with the friend; other friends and your stored profile are preserved. The curren
   <li>Missing index: <code class="language-plaintext highlighter-rouge">Please provide an index.</code>
 </li>
   <li>Invalid index (such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">-1</code>, or <code class="language-plaintext highlighter-rouge">abc</code>), extra arguments, or a value above 2147483647:
-<code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
+<code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
 </li>
   <li>Index outside the displayed list, including an empty list: <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>
 </li>
@@ -1064,9 +1073,9 @@ The active friend-list filter, selection and game display filter are not saved; 
 your profile. Window size and position are stored separately in <code class="language-plaintext highlighter-rouge">preferences.json</code> when you close the main window
 or use <code class="language-plaintext highlighter-rouge">exit</code>.</p>
 
-<p>If saving fails, an error beginning <code class="language-plaintext highlighter-rouge">Could not save data</code> appears. A friend change may already be visible in the
-running application even though it was not written to disk. Restore write access to the data folder and run a
-successful command such as <code class="language-plaintext highlighter-rouge">list</code> to try saving again before closing the app.
+<p>If saving fails, an error starting with <code class="language-plaintext highlighter-rouge">Could not save data</code> appears. The change still shows in the app, but it is
+not saved and will be lost on exit. Fix the issue (e.g. restore write access to the data folder), then run any
+command such as <code class="language-plaintext highlighter-rouge">list</code> to save again.
 When saving fails, the <code class="language-plaintext highlighter-rouge">help</code> and <code class="language-plaintext highlighter-rouge">exit</code> commands also fail. See <a href="#known-limitations">Known limitations</a> for the workaround.</p>
 
 <h3 id="editing-the-data-file">Editing the data file</h3>

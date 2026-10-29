@@ -386,10 +386,10 @@ The list validates this invariant on addition, replacement and bulk replacement.
 A violation throws <code class="language-plaintext highlighter-rouge">PinnedFriendLimitExceededException</code> before the collection changes.
 Tag names contain 1–50 ASCII alphanumeric characters.</p>
 
-<p>After additions and replacements, <code class="language-plaintext highlighter-rouge">UniqueFriendList</code> stably partitions friends, with pinned friends before unpinned friends.
-It preserves the existing relative order within each group.
-Filters use that stored order, so filtering preserves this invariant.
-An explicit sort uses a separate display comparator and can override the pin order in the current implementation.</p>
+<p><code class="language-plaintext highlighter-rouge">UniqueFriendList</code> retains insertion order, including when pin or archive status changes.
+<code class="language-plaintext highlighter-rouge">ModelManager</code> applies <code class="language-plaintext highlighter-rouge">PINNED_FRIENDS_FIRST</code> to its <code class="language-plaintext highlighter-rouge">SortedList</code>, placing pinned friends above unpinned friends
+without rearranging the stored collection. With no explicit sort, each group follows insertion order.
+Explicit name/game comparators also put pinned friends first. JSON saves the original insertion order and pin status.</p>
 
 <p><strong>Game fields and identity</strong></p>
 
@@ -632,12 +632,11 @@ Both commands replace the previous predicate. Their filters do not intersect.</p
 <p><strong>Display order</strong></p>
 
 <p>After filtering, <code class="language-plaintext highlighter-rouge">list s/name</code> and <code class="language-plaintext highlighter-rouge">list s/game</code> set a <code class="language-plaintext highlighter-rouge">SortedList</code> comparator in <code class="language-plaintext highlighter-rouge">ModelManager</code>.
-The default direction and <code class="language-plaintext highlighter-rouge">o/asc</code> use ascending order. <code class="language-plaintext highlighter-rouge">o/desc</code> reverses the comparator.
-The default <code class="language-plaintext highlighter-rouge">list</code> clears the comparator and keeps the stored insertion order.</p>
+The default direction and <code class="language-plaintext highlighter-rouge">o/asc</code> use ascending order. <code class="language-plaintext highlighter-rouge">o/desc</code> reverses the order within each pin group.
+The default <code class="language-plaintext highlighter-rouge">list</code> restores the pin-only comparator, keeping stored insertion order within each group.</p>
 
 <p>Game sorting uses each friend’s alphabetically first game name. Friend names resolve ties.
-Ascending game order puts friends without games last.
-Reversing the comparator currently also reverses that placement.</p>
+Friends without games appear last within each pin group in both directions.</p>
 
 <p><strong>Parser behavior and empty results</strong></p>
 
@@ -917,7 +916,8 @@ They must also differ from the separately stored Myself profile.
 An archived friend’s name stays reserved.</p>
 
 <p><code class="language-plaintext highlighter-rouge">FriendValidator</code> rejects a conflicting add or rename.
-If the existing friend is archived, the feedback suggests <code class="language-plaintext highlighter-rouge">archivelist</code> and <code class="language-plaintext highlighter-rouge">unarchive</code>.
+For any add or rename, including profile edits, an archived conflict explains that the name is already used by
+an archived friend and asks for a different name. Unarchiving the friend does not resolve the name conflict.
 The validator uses <code class="language-plaintext highlighter-rouge">Model.findFriend()</code> for one identity lookup across both statuses, independently of the display filter.</p>
 
 <p>An existing friend can keep their own name during an edit.
@@ -1684,7 +1684,8 @@ reappear with <code class="language-plaintext highlighter-rouge">list</code>. Be
   <li>
 <code class="language-plaintext highlighter-rouge">delete</code>, <code class="language-plaintext highlighter-rouge">delete 0</code>, <code class="language-plaintext highlighter-rouge">delete -1</code>, <code class="language-plaintext highlighter-rouge">delete x</code>, <code class="language-plaintext highlighter-rouge">delete 2147483648</code>, <code class="language-plaintext highlighter-rouge">delete 1 2</code> and <code class="language-plaintext highlighter-rouge">delete 999</code>:
 expected errors without deleting anyone. Missing index reports <code class="language-plaintext highlighter-rouge">Please provide an index.</code>; malformed values
-report <code class="language-plaintext highlighter-rouge">Index must be a positive integer between 1 and 2147483647 (inclusive).</code>; an out-of-range index reports <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>.</li>
+report <code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>,
+where <code class="language-plaintext highlighter-rouge">INPUT</code> is the rejected text. An out-of-range index reports <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">clear</code>: expected immediate empty list and <code class="language-plaintext highlighter-rouge">All active and archived friends have been cleared!</code>. <code class="language-plaintext highlighter-rouge">delete 1</code> then reports the generic
 invalid-displayed-index error; <code class="language-plaintext highlighter-rouge">edit 1 n/Test</code> and <code class="language-plaintext highlighter-rouge">gamelist 1</code> report an empty displayed list. There is no undo.</li>
@@ -1786,7 +1787,7 @@ and its phone still removed. Filters are reset.</li>
     </tr>
     <tr>
       <td>With the app running, make its data file unwritable for that user (for example <code class="language-plaintext highlighter-rouge">chmod a-w data/gamemates.json</code> on Linux/macOS). Enter <code class="language-plaintext highlighter-rouge">add n/Unsaved Test</code>.</td>
-      <td>A <code class="language-plaintext highlighter-rouge">Could not save data</code> error. The friend may already be visible in memory; this is not a rolled-back transaction.</td>
+      <td>A <code class="language-plaintext highlighter-rouge">Could not save data</code> error saying the change was applied but not saved. The friend still shows. The change is not rolled back.</td>
     </tr>
     <tr>
       <td>Restore write access (<code class="language-plaintext highlighter-rouge">chmod u+w data/gamemates.json</code>), enter <code class="language-plaintext highlighter-rouge">list</code>, then exit and relaunch.</td>
