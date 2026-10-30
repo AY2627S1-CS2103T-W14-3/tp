@@ -1101,7 +1101,9 @@ Open a terminal in that folder.
 Start the application with `java -jar gamemates.jar`.
 
 Do not use a real user's data for deletion, corruption or write-failure tests.
-For each scenario labeled **fresh sample data**, use a new disposable folder.
+For each scenario labeled **fresh sample data**, use a new disposable folder and a fresh app start.
+Do not enter any commands before the scenario's first step.
+Indices assume the stated starting data. If an index differs in your app, use the friend's index in your displayed list.
 Do not start two application instances against the same data file.
 
 Enter the commands below in the application's command box, not in the terminal.
@@ -1301,20 +1303,23 @@ After each squad command, confirm unchanged data, list order/filter and selected
 
 ### Manual game edit checks
 
+Prerequisite: fresh sample data, on a fresh app start.
+Run these subsections in order. Each one continues from the previous one.
+
 **Basic game edits**
 
-Use a disposable data directory.
 Enter `add n/Tester`.
-Add the first game with `gameadd 1 g/Valorant u/tester`.
-Add the second game with `gameadd 1 g/Minecraft u/builder`.
+Tester is index 7 in the full list.
+Add the first game with `gameadd 7 g/Valorant u/tester`.
+Add the second game with `gameadd 7 g/Minecraft u/builder`.
 
-Enter `gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Role:Healer`.
+Enter `gameedit 7 g/Valorant n/VALORANT u/newPlayer m/Role:Healer`.
 Expect both games to remain and the other friend fields to stay unchanged.
 
-Try `gameedit 1 g/Valorant n/Minecraft`.
-Also try repeated normalized metadata keys.
+Try `gameedit 7 g/Valorant n/Minecraft`.
+Also try repeated normalized metadata keys with `gameedit 7 g/Valorant m/Role:A m/role:B`.
 Expect errors with unchanged data and details.
-Clear metadata with `gameedit 1 g/Valorant m/`.
+Clear metadata with `gameedit 7 g/Valorant m/`.
 
 Set up the profile with `edit myself n/Owner`.
 Add a profile game with `gameadd myself g/Valorant u/own`.
@@ -1327,28 +1332,29 @@ Make sure that all edits persist.
 **Literal prefixes**
 
 Enter `list`.
-Add `gameadd 1 g/PUBG u/plain`.
-Then add `gameadd 1 g/PUBG n/Game u/special`.
+Add `gameadd 7 g/PUBG u/plain`.
+Then add `gameadd 7 g/PUBG n/Game u/special`.
 
-Enter `gameedit 1 g/"PUBG n/Game" u/updated`.
+Enter `gameedit 7 g/"PUBG n/Game" u/updated`.
 Only `PUBG n/Game` must change. The plain `PUBG` entry must keep username `plain`.
 
-Rename the quoted target with `n/"PUBG m/Edition"`.
-Edit it again with `g/"PUBG m/Edition"`.
-Try an unclosed quoted selector.
+Rename the quoted target with `gameedit 7 g/"PUBG n/Game" n/"PUBG m/Edition"`.
+Edit it again with `gameedit 7 g/"PUBG m/Edition" u/again`.
+Try an unclosed quoted selector with `gameedit 7 g/"PUBG m/Edition u/bad`.
 Expect an error without changes to either game.
 
 **Archived targets**
 
 Enter `list`.
-Enter `archive 1`.
+Enter `archive 7`.
 Enter `archivelist`.
+Tester is now index 1.
 Edit the game with `gameedit 1 g/Valorant u/archivePlayer`.
 Expect the friend to stay archived and the heading to stay `Archived friends`.
 Other fields and games must stay unchanged.
 
 Enter `find Tester`.
-Edit the same game again.
+Edit the same game again with `gameedit 1 g/Valorant u/searchPlayer`.
 Expect the archive status and `Search results` scope to remain.
 Restart and use `archivelist`.
 Make sure that the edited game and archive status were saved.
@@ -1357,17 +1363,18 @@ Make sure that the edited game and archive status were saved.
 
 Enter `unarchive 1`.
 Enter `list`.
-Enter `pin 1`.
+Enter `pin 7`.
+Tester moves to index 1.
 Edit the game with `gameedit 1 g/Valorant m/Role:Tank`.
 Expect the friend to keep the pinned badge and list position.
 The details card must show `Role: Tank`.
 
-Archive the pinned friend.
+Archive the pinned friend with `archive 1`.
 Enter `archivelist`.
-Edit the username again.
+Edit the username again with `gameedit 1 g/Valorant u/again`.
 Restart and use `archivelist`.
 Expect the edited game and archive status to persist, with no pinned badge.
-Enter `pin 1` and `unpin 1`; both must reject the archived target without changing data.
-Enter `find Tester` and repeat both commands on the archived result; both must still be rejected.
+Enter `pin 1` and `unpin 1`. Both must reject the archived target without changing data.
+Enter `find Tester` and repeat both commands on the archived result. Both must still be rejected.
 Enter `unarchive 1`, then `list`.
-Expect the restored friend to remain unpinned; pinning must be requested explicitly again.
+Expect the restored friend to remain unpinned. Pinning must be requested explicitly again.
