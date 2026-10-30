@@ -409,8 +409,7 @@ Editing Myself preserves the current scope and predicate, including an empty dis
 `DeleteCommand` uses the same displayed-list indexing and keeps the current predicate.
 It immediately removes the entire friend and their games. There is no confirmation state.
 
-An empty list or out-of-range index produces the shared generic deletion error.
-In contrast, `EditCommand` and `GameListCommand` distinguish empty lists and report a displayed range.
+Like other index-based commands, it distinguishes empty lists and reports a displayed range for out-of-range indices.
 `ClearCommand` replaces the friends with an empty `GameMates` and copies the existing profile.
 
 **Field validation**
@@ -801,7 +800,8 @@ The logic layer exposes `getFriendListScope()` to the `UI`.
 1. The parser accepts one positive displayed index. It rejects `myself` and extra arguments.
 2. `ArchiveCommand` rejects the archive-only scope and gives guidance to use `list`.
    Active lists and global search results accept archiving.
-   `UnarchiveCommand` accepts an archived target in archive or search results.
+   `UnarchiveCommand` rejects the active-only scope and gives guidance to use `archivelist`.
+   It accepts an archived target in archive or search results.
 3. The command validates the index against the displayed list and examines the target's archive status.
    It rejects an invalid index, an already archived archive target, or a non-archived restore target.
    Failed commands preserve the data, scope and filter.
@@ -1182,9 +1182,9 @@ Prerequisite: fresh sample data. These actions are destructive within the dispos
 2. `delete`, `delete 0`, `delete -1`, `delete x`, `delete 2147483648`, `delete 1 2` and `delete 999`:
    expected errors without deleting anyone. Missing index reports `Please provide an index.`; malformed values
    report `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`,
-   where `INPUT` is the rejected text. An out-of-range index reports `The friend index provided is invalid.`.
-3. `clear`: expected immediate empty list and `All active and archived friends have been cleared!`. `delete 1` then reports the generic
-   invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list. There is no undo.
+   where `INPUT` is the rejected text. An out-of-range index reports `No friend exists at index 999. Choose an index from 1 to MAX_LIST_INDEX.`.
+3. `clear`: expected immediate empty list and `All active and archived friends have been cleared!`. `delete 1`, `edit 1 n/Test` and
+   `gamelist 1` then report an empty displayed list. There is no undo.
 
 ### Saved profile and game round trip
 

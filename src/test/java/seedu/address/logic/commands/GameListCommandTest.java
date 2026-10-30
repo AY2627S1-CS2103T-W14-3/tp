@@ -153,10 +153,10 @@ public class GameListCommandTest {
     public void execute_emptyDisplayedList_failure() {
         Model emptyModel = new ModelManager();
         assertCommandFailure(new GameListCommand(INDEX_FIRST_FRIEND), emptyModel,
-                "No friends are currently displayed. Use list to show all friends.");
+                "No friends are currently displayed. Use list or archivelist to show friends.");
         new FindCommand(new NameContainsKeywordsPredicate(List.of("Unknown"))).execute(model);
         assertCommandFailure(new GameListCommand(INDEX_FIRST_FRIEND, new GameName("Valorant")), model,
-                "No friends are currently displayed. Use list to show all friends.");
+                "No friends are currently displayed. Use list or archivelist to show friends.");
     }
 
     @Test

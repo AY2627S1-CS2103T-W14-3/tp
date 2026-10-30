@@ -161,8 +161,9 @@ public class ArchiveCommandsTest {
         for (String search : List.of("find Alice Bob", "find Nobody")) {
             execute(search);
             List<Friend> displayed = List.copyOf(model.getFilteredFriendList());
-            assertThrows(CommandException.class, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX, ()
-                    -> execute("archive 99"));
+            String expected = displayed.isEmpty() ? EditCommand.MESSAGE_EMPTY_LIST
+                    : String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND, 99, displayed.size());
+            assertThrows(CommandException.class, expected, () -> execute("archive 99"));
             assertEquals(displayed, model.getFilteredFriendList());
             assertEquals(FriendListScope.SEARCH, model.getFriendListScope());
             assertEquals(List.of(alice, bob.withArchived(true)), model.getGameMates().getFriendList());
@@ -253,8 +254,9 @@ public class ArchiveCommandsTest {
     @Test
     public void archiveCommands_invalidTargets_leaveDataAndViewUnchanged() throws Exception {
         model.addFriend(alice);
-        assertThrows(CommandException.class, UnarchiveCommand.MESSAGE_WRONG_STATUS, () -> execute("unarchive 1"));
-        assertThrows(CommandException.class, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX, ()
+        assertThrows(CommandException.class, UnarchiveCommand.MESSAGE_WRONG_VIEW, () -> execute("unarchive 1"));
+        assertThrows(CommandException.class, UnarchiveCommand.MESSAGE_WRONG_VIEW, () -> execute("unarchive 99"));
+        assertThrows(CommandException.class, String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND, 2, 1), ()
                 -> execute("archive 2"));
         assertThrows(CommandException.class, ArchiveCommand.MESSAGE_MYSELF, ()
                 -> new ArchiveCommand(Index.myself()).execute(model));
@@ -264,11 +266,13 @@ public class ArchiveCommandsTest {
         execute("archive 1");
         execute("archivelist");
         assertThrows(CommandException.class, ArchiveCommand.MESSAGE_WRONG_VIEW, () -> execute("archive 1"));
+        assertThrows(CommandException.class, String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND, 2, 1), ()
+                -> execute("unarchive 2"));
         assertEquals(List.of(alice.withArchived(true)), model.getFilteredFriendList());
         execute("archivelist g/Unknown");
         assertTrue(model.getFilteredFriendList().isEmpty());
         assertEquals(FriendListScope.ARCHIVED, model.getFriendListScope());
-        assertThrows(CommandException.class, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX, ()
+        assertThrows(CommandException.class, EditCommand.MESSAGE_EMPTY_LIST, ()
                 -> execute("unarchive 1"));
     }
 

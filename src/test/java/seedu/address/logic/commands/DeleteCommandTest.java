@@ -14,7 +14,6 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_FRIEND;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.Messages;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -48,7 +47,8 @@ public class DeleteCommandTest {
         Index outOfBoundIndex = Index.fromOneBased(model.getFilteredFriendList().size() + 1);
         DeleteCommand deleteCommand = new DeleteCommand(outOfBoundIndex);
 
-        assertCommandFailure(deleteCommand, model, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        assertCommandFailure(deleteCommand, model, String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND,
+                outOfBoundIndex.getOneBased(), model.getFilteredFriendList().size()));
     }
 
     @Test
@@ -89,7 +89,8 @@ public class DeleteCommandTest {
 
         DeleteCommand deleteCommand = new DeleteCommand(outOfBoundIndex);
 
-        assertCommandFailure(deleteCommand, model, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        assertCommandFailure(deleteCommand, model, String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND,
+                outOfBoundIndex.getOneBased(), 1));
     }
 
     @Test
@@ -101,14 +102,14 @@ public class DeleteCommandTest {
     public void execute_emptyList_throwsCommandException() {
         Model emptyModel = new ModelManager(new GameMates(), new UserPrefs());
         assertCommandFailure(new DeleteCommand(INDEX_FIRST_FRIEND), emptyModel,
-                Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+                EditCommand.MESSAGE_EMPTY_LIST);
     }
 
     @Test
     public void execute_emptyFilteredList_doesNotDeleteHiddenFriends() {
         showNoFriend(model);
         assertCommandFailure(new DeleteCommand(INDEX_FIRST_FRIEND), model,
-                Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+                EditCommand.MESSAGE_EMPTY_LIST);
     }
 
     @Test

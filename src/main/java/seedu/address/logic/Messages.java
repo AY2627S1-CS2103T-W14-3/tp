@@ -14,7 +14,6 @@ public class Messages {
 
     public static final String MESSAGE_UNKNOWN_COMMAND = "Unknown command.";
     public static final String MESSAGE_INVALID_COMMAND_FORMAT = "Invalid command format!\n%1$s";
-    public static final String MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX = "The friend index provided is invalid.";
     public static final String MESSAGE_FRIENDS_LISTED_OVERVIEW = "%1$d friend(s) listed!";
     public static final String MESSAGE_DUPLICATE_ARCHIVED_FRIEND =
             "This name is already used by an archived friend. Choose a different name.";

@@ -51,9 +51,9 @@ deactivate GameMatesParser
 LogicManager -> DeleteCommand : execute(m)
 activate DeleteCommand
 
-DeleteCommand -> Model : getFilteredFriendList()
+DeleteCommand -> Model : resolveFriend(index)
 activate Model
-Model --> DeleteCommand : displayedFriends
+Model --> DeleteCommand : target
 deactivate Model
 note right of DeleteCommand: Resolve index 1 to a Friend\nin the displayed list.
 
