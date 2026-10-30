@@ -18,7 +18,7 @@ final class FriendValidator {
     /** Rejects adding a friend whose identity conflicts with a friend or the Myself profile. */
     static void checkCanAdd(Model model, Friend candidate) throws CommandException {
         requireAllNonNull(model, candidate);
-        checkForDuplicateFriend(model, candidate);
+        checkForDuplicateFriend(model, candidate, Messages.MESSAGE_DUPLICATE_FRIEND);
         checkForDuplicateMyself(model, candidate);
     }
 
@@ -29,11 +29,11 @@ final class FriendValidator {
             if (candidate.getName().isEmpty()) {
                 throw new CommandException(Messages.MESSAGE_MYSELF_NOT_INITIALIZED);
             }
-            checkForDuplicateFriend(model, candidate);
+            checkForDuplicateFriend(model, candidate, Messages.MESSAGE_MYSELF_NAME_USED_BY_FRIEND);
         } else {
             checkForDuplicateMyself(model, candidate);
             if (!target.friend().isSameFriend(candidate)) {
-                checkForDuplicateFriend(model, candidate);
+                checkForDuplicateFriend(model, candidate, Messages.MESSAGE_DUPLICATE_FRIEND);
             }
         }
     }
@@ -46,11 +46,12 @@ final class FriendValidator {
         }
     }
 
-    private static void checkForDuplicateFriend(Model model, Friend candidate) throws CommandException {
+    private static void checkForDuplicateFriend(Model model, Friend candidate, String activeFriendMessage)
+            throws CommandException {
         Option<Friend> existing = model.findFriend(candidate);
         if (existing.isDefined()) {
             throw new CommandException(existing.get().isArchived()
-                    ? Messages.MESSAGE_DUPLICATE_ARCHIVED_FRIEND : Messages.MESSAGE_DUPLICATE_FRIEND);
+                    ? Messages.MESSAGE_DUPLICATE_ARCHIVED_FRIEND : activeFriendMessage);
         }
     }
 

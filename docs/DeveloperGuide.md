@@ -931,7 +931,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     Use case ends.
 * 1b. A friend with the same name already exists.
 
-  * 1b1. GameMates shows `This friend already exists in GameMates.`
+  * 1b1. GameMates shows `A friend with this name already exists. Names ignore case and repeated spaces.`
 
     Use case resumes at step 1.
 
