@@ -584,8 +584,9 @@ Errors:
 * Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
 * First profile edit without a name: `Set your profile name first using "edit myself n/NAME" command.`
-* Duplicate name: `This friend already exists in GameMates.`
-* Adding or renaming a friend to your profile's name: `This name is already used by your Myself profile.`
+* Duplicate name: `A friend with this name already exists. Names ignore case and repeated spaces.`
+* Adding or renaming a friend to your profile's name: `This name is already used by your Myself profile. Names ignore case and repeated spaces.`
+* Renaming your profile to a friend's name: `This name is already used by a friend. Names ignore case and repeated spaces. Choose a different name.`
 
 ### Locating friends by name: `find`
 
@@ -632,7 +633,7 @@ Format: `archive FRIEND_INDEX`
 * Missing indices report `Please provide an index.`. Invalid indices (such as `-1`, `0` or `abc`) report
   `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`.
 * Archived friends keep their names reserved. Adding or renaming another friend to the same name is rejected
-  with `This name is already used by an archived friend. Choose a different name.` This also applies to profile edits.
+  with `This name is already used by an archived friend. Names ignore case and repeated spaces. Choose a different name.` This also applies to profile edits.
 * `list` and `list g/GAME_NAME` show active friends only. `find` searches both active and archived friends.
 
 Example: `list`, then `archive 1` archives the first displayed active friend.
