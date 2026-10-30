@@ -15,8 +15,10 @@ public class Email {
     public static final Email EMPTY = new Email();
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Enter an email like name@example.com (up to 254 characters, no spaces). "
-                    + "See the User Guide for the full format.";
+            "Use the format name@example.com: up to 254 ASCII characters, no spaces.\n"
+                    + "Before @: up to 64 letters, digits, single inner dots or !#$%&'*+/=?^_`{|}~-\n"
+                    + "After @: labels of 1-63 letters, digits or hyphens, separated by single dots.\n"
+                    + "Labels must start and end with a letter or digit. See the User Guide for more details.";
 
     // RFC 5322 dot-atom syntax, with RFC 5321 domain labels and SMTP length limits.
     // This practical ASCII subset excludes quoted local parts and address literals.
