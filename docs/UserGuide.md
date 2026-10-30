@@ -43,9 +43,9 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
 
    * `gamelist 1 g/Valorant` : Shows the first displayed friend's Valorant card, if present.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com` : Adds a contact named `John Doe` to GameMates.
+   * `add n/John Doe p/98765432 e/johnd@example.com` : Adds a friend named `John Doe` to GameMates.
 
-   * `delete 3` : Deletes the 3rd contact shown in the current list.
+   * `delete 3` : Deletes the 3rd friend shown in the current list.
 
    * `clear` : Deletes all active and archived friends and their games immediately, while keeping your profile.
 
