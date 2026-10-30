@@ -436,7 +436,7 @@ These rules define the application's accepted text characters; they do not test 
 ### Myself profile
 
 `GameMates` stores the user's profile as a separate `Friend`, initially `Friend.DEFAULT_MYSELF`.
-`edit`, `gameadd` and `gamedel` accept `myself` independently of the displayed friend list and profile name.
+`edit`, `gameadd`, `gamedel`, `gameedit` and `gamelist` accept `myself` independently of the displayed friend list and profile name.
 The default profile has `Name.EMPTY`, rather than reserving the friend name `Myself`.
 The first `edit myself` must supply a name, as in `edit myself n/NAME`. Later profile edits can omit it.
 
@@ -453,7 +453,7 @@ gamelist FRIEND_INDEX|myself [g/GAME_NAME]
 
 **Target resolution**
 
-The sealed `FriendTarget` interface lets these commands update the profile or a listed friend.
+The sealed `FriendTarget` interface lets these commands read or update the profile or a listed friend.
 Its nested `Myself` and `ListedFriend` records retain the selected `Friend` and identify the update destination.
 They keep that destination even if the friend-list filter changes.
 
@@ -461,10 +461,10 @@ The class diagram omits unrelated members. It shows the records as ordinary clas
 
 ![Classes involved in resolving and updating a friend target](images/MyselfTargetClassDiagram.png)
 
-1. The three command parsers use `ParserUtil.parseIndexOrMyself`.
+1. These five command parsers use `ParserUtil.parseIndexOrMyself`.
    A case-insensitive `Index.MYSELF_KEYWORD` becomes `Index.myself()`; numeric selectors remain displayed friend indices.
 2. During execution, `ModelManager.resolveFriend(index)` captures the profile or currently displayed friend in a target.
-3. The command constructs and validates a replacement `Friend`, then calls `ModelManager.setFriend(target, updatedFriend)`.
+3. Commands that modify data construct and validate a replacement `Friend`, then call `ModelManager.setFriend(target, updatedFriend)`.
    An exhaustive switch routes `Myself` to the profile and `ListedFriend` to its captured friend.
 
 **Validation and saving**
