@@ -414,7 +414,7 @@ Errors:
 | Missing selector or extra words before `g/` | <code>Invalid command format. Usage: gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code> |
 | Malformed, zero, negative or overflowing index | `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).` |
 | Positive index outside the displayed list | `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.` |
-| Numeric index with an empty displayed list | `No friends are currently displayed. Use list to show all friends.` |
+| Numeric index with an empty displayed list | `No friends are currently displayed. Use list or archivelist to show friends.` |
 | Invalid game name, including empty `g/` | `Game names must contain 1 to 50 printable characters and include at least one letter or digit.` |
 | Repeated `g/` | `Multiple values specified for the following single-valued field(s): g/` |
 
@@ -580,7 +580,7 @@ Errors:
 
 * Missing index: `Please provide an index.`
 * Invalid index (including a value above 2147483647): `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`
-* Empty displayed list: `No friends are currently displayed. Use list to show all friends.`
+* Empty displayed list: `No friends are currently displayed. Use list or archivelist to show friends.`
 * Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
 * First profile edit without a name: `Set your profile name first using "edit myself n/NAME" command.`
@@ -677,12 +677,16 @@ Format: `unarchive FRIEND_INDEX`
 * The friend returns to the active list with all their details intact. They disappear from an archive-only view,
   but stay visible in **Search results** with the **Archived** badge removed. The current filter stays in place.
   Run `list` to see active friends.
-* Feedback is `Restored FRIEND_NAME.`. Selecting an active friend is rejected with a suggestion to use `archivelist`.
+* From the active list, `unarchive` reports `Run archivelist to switch to the archived list before restoring a friend.`
+  before checking whether the index exists.
+* Feedback is `Restored FRIEND_NAME.`. Selecting an active friend in **Search results** is rejected with a suggestion
+  to use `archivelist`.
 * `myself`, missing indices, extra arguments and invalid indices are rejected. Missing indices report
   `Please provide an index.`; invalid indices report
   `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`.
-* Out-of-range indices, including
-  empty lists, report `The friend index provided is invalid.` without changing data or the current view.
+* Out-of-range indices report `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`.
+  Empty lists report `No friends are currently displayed. Use list or archivelist to show friends.`.
+  Neither changes data or the current view.
 
 Example: `archivelist g/Valorant`, then `unarchive 1` restores the first displayed archived friend who plays Valorant.
 
@@ -710,7 +714,8 @@ Errors:
 * Missing index: `Please provide an index.`
 * Invalid index (such as `0`, `-1`, or `abc`), extra arguments, or a value above 2147483647:
   `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`
-* Index outside the displayed list, including an empty list: `The friend index provided is invalid.`
+* Empty displayed list: `No friends are currently displayed. Use list or archivelist to show friends.`
+* Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 
 ### Clearing the friend list: `clear`
 

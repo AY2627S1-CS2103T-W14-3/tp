@@ -7,7 +7,6 @@ import static seedu.address.testutil.TypicalFriends.getTypicalGameMates;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.Messages;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -55,7 +54,8 @@ public class GameDeleteCommandTest {
 
     @Test
     public void execute_invalidFriendIndex_failure() {
-        assertCommandFailure(new GameDeleteCommand(Index.fromOneBased(model.getFilteredFriendList().size() + 1),
-                new GameName("Minecraft")), model, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        int size = model.getFilteredFriendList().size();
+        assertCommandFailure(new GameDeleteCommand(Index.fromOneBased(size + 1),
+                new GameName("Minecraft")), model, String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND, size + 1, size));
     }
 }

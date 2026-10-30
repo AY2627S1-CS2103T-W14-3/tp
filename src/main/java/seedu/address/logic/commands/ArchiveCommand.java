@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.FriendListScope;
 import seedu.address.model.Model;
@@ -37,10 +36,7 @@ public class ArchiveCommand extends Command {
         if (model.getFriendListScope() == FriendListScope.ARCHIVED) {
             throw new CommandException(MESSAGE_WRONG_VIEW);
         }
-        if (targetIndex.getZeroBased() >= model.getFilteredFriendList().size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
-        }
-        Friend friend = model.getFilteredFriendList().get(targetIndex.getZeroBased());
+        Friend friend = FriendTargetResolver.resolve(model, targetIndex).friend();
         if (friend.isArchived()) {
             throw new CommandException(MESSAGE_WRONG_STATUS);
         }

@@ -54,7 +54,7 @@ public class EditCommand extends Command {
             + "to edit specific details.";
 
     public static final String MESSAGE_EMPTY_LIST =
-            "No friends are currently displayed. Use list to show all friends.";
+            "No friends are currently displayed. Use list or archivelist to show friends.";
     public static final String MESSAGE_INDEX_NOT_FOUND =
             "No friend exists at index %1$d. Choose an index from 1 to %2$d.";
 
@@ -76,11 +76,7 @@ public class EditCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        FriendTarget target = FriendTargetResolver.resolve(model, index, () -> {
-            int displayedCount = model.getFilteredFriendList().size();
-            return displayedCount == 0 ? MESSAGE_EMPTY_LIST
-                    : String.format(MESSAGE_INDEX_NOT_FOUND, index.getOneBased(), displayedCount);
-        });
+        FriendTarget target = FriendTargetResolver.resolve(model, index);
         Friend friendToEdit = target.friend();
         Friend editedFriend = createEditedFriend(friendToEdit, editFriendDescriptor);
         FriendValidator.checkCanEdit(model, target, editedFriend);

@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.GameEditCommand.EditGameDescriptor;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.GameMatesParser;
@@ -174,7 +173,7 @@ public class GameEditCommandTest {
             assertSame(friend, model.getFilteredFriendList().getFirst());
         }
         model.updateFilteredFriendList(f -> false);
-        assertThrows(CommandException.class, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX, () ->
+        assertThrows(CommandException.class, EditCommand.MESSAGE_EMPTY_LIST, () ->
                 execute("gameedit 1 g/Valorant u/player"));
     }
 

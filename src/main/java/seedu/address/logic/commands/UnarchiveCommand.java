@@ -4,8 +4,8 @@ import static java.util.Objects.requireNonNull;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.model.FriendListScope;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
 
@@ -16,6 +16,8 @@ public class UnarchiveCommand extends Command {
             + ": Selects an archived friend by its displayed index.\n"
             + "Parameters: FRIEND_INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 1";
+    public static final String MESSAGE_WRONG_VIEW =
+            "Run archivelist to switch to the archived list before restoring a friend.";
     public static final String MESSAGE_SUCCESS = "Restored %1$s.";
     public static final String MESSAGE_WRONG_STATUS = "This friend is not archived. "
             + "Use archivelist to select an archived friend.";
@@ -33,10 +35,10 @@ public class UnarchiveCommand extends Command {
         if (targetIndex.isMyself()) {
             throw new CommandException(MESSAGE_MYSELF);
         }
-        if (targetIndex.getZeroBased() >= model.getFilteredFriendList().size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        if (model.getFriendListScope() == FriendListScope.ACTIVE) {
+            throw new CommandException(MESSAGE_WRONG_VIEW);
         }
-        Friend friend = model.getFilteredFriendList().get(targetIndex.getZeroBased());
+        Friend friend = FriendTargetResolver.resolve(model, targetIndex).friend();
         if (friend.isArchived() == false) {
             throw new CommandException(MESSAGE_WRONG_STATUS);
         }

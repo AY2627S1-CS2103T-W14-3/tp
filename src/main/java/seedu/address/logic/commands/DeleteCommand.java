@@ -2,11 +2,8 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
-
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.Friend;
@@ -38,13 +35,7 @@ public class DeleteCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Friend> lastShownList = model.getFilteredFriendList();
-
-        if (targetIndex.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
-        }
-
-        Friend friendToDelete = lastShownList.get(targetIndex.getZeroBased());
+        Friend friendToDelete = FriendTargetResolver.resolve(model, targetIndex).friend();
         model.deleteFriend(friendToDelete);
         return new CommandResult(String.format(MESSAGE_DELETE_FRIEND_SUCCESS, friendToDelete.getName()));
     }
