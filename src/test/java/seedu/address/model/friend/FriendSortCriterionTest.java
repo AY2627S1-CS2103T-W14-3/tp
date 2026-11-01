@@ -24,6 +24,19 @@ public class FriendSortCriterionTest {
     }
 
     @Test
+    public void nameComparator_sortsSymbolsByCharacterCode() {
+        Friend underscore = new FriendBuilder().withName("_Slayer_").build();
+        Friend alex = new FriendBuilder().withName("alex").build();
+        Friend zoe = new FriendBuilder().withName("Zoe").build();
+        Friend tilde = new FriendBuilder().withName("~Slayer").build();
+
+        List<Friend> friends = List.of(tilde, zoe, alex, underscore).stream()
+                .sorted(FriendSortCriterion.NAME.comparator(false)).toList();
+
+        assertEquals(List.of(underscore, alex, zoe, tilde), friends);
+    }
+
+    @Test
     public void gameComparator_sortsByFirstGameThenNameAndPutsFriendsWithoutGamesLast() {
         Friend zelda = new FriendBuilder().withName("Zelda").withGames(
                 new Game(new GameName("Zelda"), new Username("zeldaPlayer"))).build();

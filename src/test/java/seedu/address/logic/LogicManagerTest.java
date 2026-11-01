@@ -2,6 +2,7 @@ package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
@@ -83,6 +84,20 @@ public class LogicManagerTest {
         assertEquals(0, model.getFilteredFriendList().size());
         JsonGameMatesStorage storage = new JsonGameMatesStorage(temporaryFolder.resolve("gameMates.json"));
         assertEquals(model.getGameMates(), storage.readGameMates().get());
+    }
+
+    @Test
+    public void execute_nameWithFormatSpecifiers_showsNameLiterally() throws Exception {
+        String name = "%s %d %n";
+        logic.execute("edit myself n/Owner");
+        logic.execute("gameadd myself g/Valorant");
+        for (String command : List.of("add n/" + name, "gameadd 1 g/Valorant", "gamelist 1", "gamelist 1 g/Valorant",
+                "gamelist 1 g/Unknown", "gameedit 1 g/Valorant u/player", "squad g/Valorant n/2", "edit 1 t/duo",
+                "gamedel 1 g/Valorant", "pin 1", "unpin 1", "archive 1", "archivelist", "unarchive 1", "list",
+                "delete 1")) {
+            String feedback = logic.execute(command).getFeedbackToUser();
+            assertTrue(command.equals("archivelist") || command.equals("list") || feedback.contains(name), command);
+        }
     }
 
     @Test

@@ -219,6 +219,12 @@ public class EditCommandParserTest {
     }
 
     @Test
+    public void parse_nameWithSymbols_success() {
+        EditFriendDescriptor descriptor = new EditFriendDescriptorBuilder().withName("Ravi s/o Kumar").build();
+        assertParseSuccess(parser, "1 n/Ravi s/o Kumar", new EditCommand(INDEX_FIRST_FRIEND, descriptor));
+    }
+
+    @Test
     public void parse_clearName_failure() {
         assertParseFailure(parser, "1 n/ ", Name.MESSAGE_CONSTRAINTS);
     }

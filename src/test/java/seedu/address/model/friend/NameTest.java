@@ -31,12 +31,10 @@ public class NameTest {
         assertFalse(Name.isValidName("")); // empty string
         assertFalse(Name.isValidName(" ")); // spaces only
         assertFalse(Name.isValidName("a".repeat(Name.MAX_LENGTH + 1))); // exceeds maximum length
-        assertFalse(Name.isValidName("^")); // only non-alphanumeric characters
-        assertFalse(Name.isValidName("peter*")); // contains non-alphanumeric characters
-        assertFalse(Name.isValidName("O'Connor-Jane")); // punctuation is not allowed
         assertFalse(Name.isValidName("李明")); // non-ASCII characters are not allowed
         assertFalse(Name.isValidName("peter\tjack")); // only spaces are allowed as whitespace
         assertFalse(Name.isValidName("peter\njack"));
+        assertFalse(Name.isValidName("peter\u007fjack")); // ASCII control characters are not allowed
 
         // valid name
         assertTrue(Name.isValidName("a")); // minimum length
@@ -47,6 +45,9 @@ public class NameTest {
         assertTrue(Name.isValidName("peter the 2nd")); // alphanumeric characters
         assertTrue(Name.isValidName("Capital Tan")); // with capital letters
         assertTrue(Name.isValidName("David Roger Jackson Ray Jr 2nd")); // long names
+        assertTrue(Name.isValidName("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")); // every ASCII symbol
+        assertTrue(Name.isValidName("!")); // first ASCII symbol, and only symbols
+        assertTrue(Name.isValidName("~")); // last ASCII symbol, and only symbols
     }
 
     @Test
@@ -70,6 +71,12 @@ public class NameTest {
         assertTrue(name.equals(new Name("john doe")));
         assertEquals(name.hashCode(), variant.hashCode());
         assertTrue(Set.of(name).contains(variant));
+    }
+
+    @Test
+    public void equals_symbolsAreSignificant() {
+        assertFalse(new Name("Mary-Jane").equals(new Name("Mary Jane")));
+        assertTrue(new Name("Mary-Jane").equals(new Name("mary-jane")));
     }
 
     @Test

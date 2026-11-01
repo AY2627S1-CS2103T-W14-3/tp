@@ -38,6 +38,13 @@ public class NameContainsKeywordsPredicateTest {
     }
 
     @Test
+    public void test_nameWithSymbols_matchesWholeSpaceSeparatedWords() {
+        Friend friend = new FriendBuilder().withName("Mary-Jane Tan").build();
+        assertTrue(new NameContainsKeywordsPredicate(List.of("mary-jane")).test(friend));
+        assertFalse(new NameContainsKeywordsPredicate(List.of("Mary")).test(friend));
+    }
+
+    @Test
     public void test_nameContainsKeywords_returnsTrue() {
         // One keyword
         NameContainsKeywordsPredicate predicate = new NameContainsKeywordsPredicate(List.of("Alice"));

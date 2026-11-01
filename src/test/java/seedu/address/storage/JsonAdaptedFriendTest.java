@@ -143,6 +143,14 @@ public class JsonAdaptedFriendTest {
     }
 
     @Test
+    public void toModelType_nameWithEveryAsciiSymbol_survivesJsonRoundTrip() throws Exception {
+        String name = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+        Friend friend = new FriendBuilder(BENSON).withName(name).build();
+        String json = JsonUtil.toJsonString(new JsonAdaptedFriend(friend));
+        assertEquals(name, JsonUtil.fromJsonString(json, JsonAdaptedFriend.class).toModelType().getName().fullName);
+    }
+
+    @Test
     public void toModelType_invalidName_throwsIllegalValueException() {
         JsonAdaptedFriend friend =
                 new JsonAdaptedFriend(INVALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_GAMES, VALID_TAGS);

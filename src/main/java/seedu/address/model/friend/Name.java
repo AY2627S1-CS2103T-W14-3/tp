@@ -16,14 +16,14 @@ public class Name {
 
     public static final int MAX_LENGTH = 100;
     public static final String MESSAGE_CONSTRAINTS =
-            "Names should only contain alphanumeric characters and spaces, and should not be blank. "
+            "Names should only contain ASCII letters, digits, spaces and symbols, and should not be blank. "
                     + "Maximum length is " + MAX_LENGTH + " characters.";
 
     /*
      * The first character of the name must not be a whitespace,
      * otherwise " " (a blank string) becomes a valid input.
      */
-    public static final String VALIDATION_REGEX = "[\\p{Alnum}][\\p{Alnum} ]*";
+    public static final String VALIDATION_REGEX = "\\p{Graph}\\p{Print}*";
 
     public final String fullName;
 
@@ -48,7 +48,7 @@ public class Name {
     }
 
     /**
-     * Returns true if a given string is a valid name, i.e. alphanumeric characters and spaces only, and at most
+     * Returns true if a given string is a valid name, i.e. only ASCII letters, digits, spaces and symbols, and at most
      * {@value #MAX_LENGTH} characters long. Leading and trailing whitespace is ignored.
      */
     public static boolean isValidName(String test) {

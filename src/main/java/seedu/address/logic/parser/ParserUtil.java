@@ -88,8 +88,7 @@ public class ParserUtil {
     /**
      * Parses a {@code String name} into a {@code Name}.
      * Leading and trailing whitespaces will be trimmed.
-     * The trimmed value must contain only alphanumeric characters and spaces, and be at most
-     * {@value Name#MAX_LENGTH} characters long.
+     * The trimmed value must satisfy {@link Name#isValidName(String)}.
      *
      * @throws ParseException if the given {@code name} is invalid.
      */
