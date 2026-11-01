@@ -11,7 +11,7 @@ title: Developer Guide
 
 * [Vavr](https://vavr.io/) provides `Option`, `Try`, and checked-function adapters for parsing, edit descriptors, and storage.
 
-This guide describes GameMates' design, implementation and testing. Proposed features are labelled explicitly.
+This guide describes GameMates' current design, implementation and testing.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -407,7 +407,7 @@ Editing Myself preserves the current scope and predicate, including an empty dis
 **Deletion and clearing**
 
 `DeleteCommand` uses the same displayed-list indexing and keeps the current predicate.
-It immediately removes the entire friend and their games. There is no confirmation state.
+It immediately removes the entire friend and their games.
 
 An empty list or out-of-range index produces the shared generic deletion error.
 In contrast, `EditCommand` and `GameListCommand` distinguish empty lists and report a displayed range.
@@ -570,7 +570,6 @@ The resolver rejects missing games and defensively rejects ambiguous in-memory n
 Externally edited JSON with duplicate game names is rejected during loading.
 `Friend.withGames` copies all current friend fields and makes a defensive copy of the replacement set.
 The copy preserves the original archive and pin statuses.
-Its explicit copy constructor must also copy new fields from future integrations.
 
 **View updates and persistence**
 
@@ -655,7 +654,7 @@ They also verify that invalid input preserves the details view.
 
 ### Current limitations
 
-Deletion takes effect immediately. Deletion confirmation, undo and redo are outside the product scope.
+Deletion takes effect immediately.
 
 ### Game metadata
 
@@ -747,7 +746,7 @@ It preserves contact details, tags, games, optional usernames and game metadata.
 The implemented commands are `archive FRIEND_INDEX`, `unarchive FRIEND_INDEX` and `archivelist [g/GAME_NAME]`.
 
 This feature is separate from JSON file backups.
-Automatic backups, scheduled retention and undo are not implemented.
+Automatic backups and scheduled retention are not implemented.
 
 #### Stored status and identity
 
@@ -840,7 +839,6 @@ That approach needs transfers, cross-list uniqueness validation and a different 
 Rebuilding a filtered view scans the underlying collection.
 Separate collections can reduce the scan for active-only views, but global name search must still examine both collections.
 The current design favors simpler state management.
-If measurements establish a performance need, change this design.
 
 Regression tests cover mixed-status searches, filtered displayed indices, invalid targets and empty archive feedback.
 They also cover identity conflicts, edits to archived friends, and save/reload restoration of complete game data.
@@ -875,10 +873,10 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
 
 ### User stories
 
-These user stories include future work. See [Implementation](#implementation) for current features and
+These user stories describe current features. See [Implementation](#implementation) for implementation details and
 [Current limitations](#current-limitations) for unsupported behaviour.
 
-Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
+Priorities: High - `* * *`, Medium - `* *`, Low - `*`
 
 | Priority | As a …​                          | I want to …​                                            | So that I can…​                                                   |
 |----------|----------------------------------|--------------------------------------------------------|------------------------------------------------------------------|
@@ -897,19 +895,14 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | gamer                            | edit my own details                                    | keep my profile accurate as my games and usernames change        |
 | `* * *`  | gamer                            | have my data saved automatically                       | keep my friend list after closing the App                        |
 | `* *`    | gamer                            | be warned when adding a friend who already exists      | avoid duplicate entries                                          |
-| `* *`    | gamer                            | see which games my friends and I have in common        | decide what to play together                                     |
 | `* *`    | gamer who plays many games       | see all the games a friend plays                       | know which games I can invite them to                            |
 | `* *`    | gamer                            | record a friend's preferred role (e.g. support, tank)  | put together a balanced team                                     |
 | `* *`    | gamer                            | record the server or region a friend plays on          | invite only friends who can join my lobby                        |
 | `* *`    | gamer                            | record a friend's rank in a game                       | find friends at a similar skill level                            |
 | `* *`    | gamer                            | add notes about a friend's play style                  | remember who is casual and who is competitive                    |
 | `* *`    | gamer                            | tag friends (e.g. "duo", "casual")                     | group them in ways that suit me                                  |
-| `* *`    | expert user                      | use shorter command aliases                            | manage my friends even faster                                    |
 | `*`      | gamer with many friends          | sort friends by name                                   | locate a friend easily                                           |
-| `*`      | gamer                            | mark friends as favourites                             | find my regular teammates first                                  |
-| `*`      | gamer with friends abroad        | record a friend's time zone                            | know when they are likely to be online                           |
-| `*`      | gamer                            | record when I last played with a friend                | reconnect with friends I have not played with in a while         |
-| `*`      | gamer                            | export my friend list                                  | back up my data or move it to another computer                   |
+| `*`      | gamer                            | pin friends to the top of the list                     | find my regular teammates first                                  |
 
 ### Use cases
 
@@ -1177,14 +1170,14 @@ Prerequisite: fresh sample data.
 Prerequisite: fresh sample data. These actions are destructive within the disposable folder.
 
 1. `list g/Minecraft`, then `delete 1`: expected Bernice is removed immediately, with
-   `Successfully deleted Bernice Yu.`. No confirmation appears. Roy remains in the filtered list, and other friends
+   `Successfully deleted Bernice Yu.`. Roy remains in the filtered list, and other friends
    reappear with `list`. Bernice's games are removed with her, while Roy's Minecraft entry remains.
 2. `delete`, `delete 0`, `delete -1`, `delete x`, `delete 2147483648`, `delete 1 2` and `delete 999`:
    expected errors without deleting anyone. Missing index reports `Please provide an index.`; malformed values
    report `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`,
    where `INPUT` is the rejected text. An out-of-range index reports `The friend index provided is invalid.`.
 3. `clear`: expected immediate empty list and `All active and archived friends have been cleared!`. `delete 1` then reports the generic
-   invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list. There is no undo.
+   invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list.
 
 ### Saved profile and game round trip
 
