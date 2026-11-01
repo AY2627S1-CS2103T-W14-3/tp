@@ -15,9 +15,7 @@ Class "<<interface>>\nReadOnlyGameMates" as ReadOnlyGameMates
 Class "<<interface>>\nReadOnlyUserPrefs" as ReadOnlyUserPrefs
 Class "<<interface>>\nModel" as Model
 Class GameMates
-Class ModelManager {
-    -friendListScope: FriendListScope
-}
+Class ModelManager
 enum FriendListScope <<enumeration>> {
     ACTIVE
     ARCHIVED
@@ -28,6 +26,7 @@ Class UserPrefs
 Class UniqueFriendList
 Class Friend {
     -archived: boolean
+    -pinned: boolean
 }
 Class Email
 Class Name
@@ -36,6 +35,9 @@ Class Tag
 Class Game
 Class GameName
 Class Username
+Class Meta
+Class MetaKey
+Class MetaValue
 
 Class I #FFFFFF
 }
@@ -43,34 +45,36 @@ Class I #FFFFFF
 Class HiddenOutside #FFFFFF
 HiddenOutside ..> Model
 
-' Only archive-related attributes are expanded in this partial class diagram.
+' Only archive and pin attributes are expanded in this partial class diagram.
 show Friend attributes
 show FriendListScope members
-show ModelManager members
 hide FriendListScope methods
 
 GameMates .up.|> ReadOnlyGameMates
 
 ModelManager .up.|> Model
-Model .right.> ReadOnlyUserPrefs
-Model .left.> ReadOnlyGameMates
-ModelManager -left-> "1" GameMates
-ModelManager -right-> "1" UserPrefs
-' The enum is the type of the attribute above, as in the course enumeration examples.
-ModelManager -[hidden]down-> FriendListScope
+' Smetana ignores nodesep, so blank labels keep these horizontal arrows long enough to read.
+Model .right.> ReadOnlyUserPrefs : <color:#FFFFFF>____</color>
+Model .left.> ReadOnlyGameMates : <color:#FFFFFF>____</color>
+ModelManager -left-> "1" GameMates : <color:#FFFFFF>______</color>
+ModelManager -right-> "1" UserPrefs : <color:#FFFFFF>______</color>
+ModelManager --> "1\n<size:6> </size>" FriendListScope
 UserPrefs .up.|> ReadOnlyUserPrefs
 
 ' A small spacer keeps endpoint multiplicities close to, but clear of, arrowheads in Smetana.
 GameMates *--> "1\n<size:6> </size>" UniqueFriendList
 UniqueFriendList --> "*\n<size:6> </size>" Friend : all
 GameMates --> "1\n<size:6> </size>" Friend : myself
-Friend *--> Name
-Friend *--> Phone
-Friend *--> Email
+Friend *--> "1\n<size:6> </size>" Name
+Friend *--> "1\n<size:6> </size>" Phone
+Friend *--> "1\n<size:6> </size>" Email
 Friend *--> "*\n<size:6> </size>" Tag
 Friend *--> "*\n<size:6> </size>" Game
 Game *--> "1\n<size:6> </size>" GameName
 Game *--> "1\n<size:6> </size>" Username
+Game *--> "*\n<size:6> </size>" Meta
+Meta *--> "1\n<size:6> </size>" MetaKey
+Meta *--> "1\n<size:6> </size>" MetaValue
 
 Friend -[hidden]up--> I
 UniqueFriendList -[hidden]right-> I
