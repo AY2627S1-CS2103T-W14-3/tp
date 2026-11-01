@@ -1,0 +1,41 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+
+participant "<u>:ArchiveCommand</u>" as Command LOGIC_COLOR
+participant "<u>model:ModelManager</u>" as Model MODEL_COLOR
+participant "<u>friend:Friend</u>" as Friend MODEL_COLOR
+
+[-> Command : execute(model)
+activate Command
+Command -> Model : getFriendListScope()
+activate Model
+Model --> Command : ACTIVE
+deactivate Model
+Command -> Model : getFilteredFriendList()
+activate Model
+Model --> Command : displayedFriends
+deactivate Model
+note over Command
+Validate index 1 and select friend.
+end note
+Command -> Friend : isArchived()
+activate Friend
+Friend --> Command : false
+deactivate Friend
+Command -> Friend : withArchived(true)
+activate Friend
+Friend --> Command : archivedFriend
+deactivate Friend
+Command -> Model : setFriend(friend, archivedFriend)
+activate Model
+note over Model
+The active view hides the friend.
+Scope and filter are preserved.
+end note
+Model --> Command
+deactivate Model
+[<-- Command : result
+deactivate Command
+@enduml
