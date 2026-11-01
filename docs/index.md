@@ -25,7 +25,7 @@ Your friends and game entries are saved locally for your next session.
 For example, `list g/Valorant` lists Valorant players. Then `gamelist 1 g/Valorant` shows the first displayed
 player's Valorant card without changing the filtered friend list.
 
-Add roles, levels and other game details with `gameadd 1 g/Valorant u/player m/Role:Support m/Level:20`.
+Add roles, levels and other game details with `gameadd 1 g/Overwatch u/player m/Role:Support m/Level:20`.
 Metadata appears below the username in each game card. See the [User Guide](UserGuide.html#adding-a-game-gameadd).
 
 ### Get started

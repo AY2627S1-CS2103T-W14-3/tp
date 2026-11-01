@@ -444,10 +444,10 @@ Their syntax uses `FRIEND_INDEX|myself`.
 This selector accepts either a positive displayed friend index or the case-insensitive profile keyword:
 
 ```text
-edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…
-gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…
+edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]...
+gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...
 gamedel FRIEND_INDEX|myself g/GAME_NAME
-gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]…
+gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...
 gamelist FRIEND_INDEX|myself [g/GAME_NAME]
 ```
 
@@ -471,7 +471,7 @@ The class diagram omits unrelated members. It shows the records as ordinary clas
 
 For profile edits, `EditCommand` constructs the replacement before `FriendValidator` examines name conflicts.
 Validation uses all stored friends, including friends hidden by the current filter.
-Profile edits and both game commands preserve the friend-list filter.
+Profile edits, `gameadd`, `gameedit`, `gamedel` and `gamelist` preserve the friend-list filter.
 `FriendValidator.checkFriendInitialized()` rejects `gameadd`, `gameedit`, `gamedel` and `gamelist` for an unnamed profile.
 The feedback is `Set your profile name first using "edit myself n/NAME" command.`
 
@@ -880,7 +880,7 @@ These user stories include future work. See [Implementation](#implementation) fo
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​                          | I want to …​                                            | So that I can…​                                                   |
+| Priority | As a ...                          | I want to ...                                            | So that I can...                                                   |
 |----------|----------------------------------|--------------------------------------------------------|------------------------------------------------------------------|
 | `* * *`  | new user                         | see usage instructions                                 | refer to instructions when I forget how to use the App           |
 | `* * *`  | gamer                            | add a gaming friend                                    | remember the people I play games with                            |
@@ -1024,8 +1024,6 @@ Implemented by `gameedit FRIEND_INDEX g/GAME_NAME u/USERNAME`. The `myself` sele
 
 ### Non-Functional Requirements
 
-These requirements are targets, not measured guarantees. Capacity and performance require separate validation.
-
 #### Environment
 
 1. Should run offline on a single user's personal laptop running a _mainstream OS_, requiring only Java `25` or above.
@@ -1051,7 +1049,7 @@ On a _modern computer_ running Java `25`, with up to 1000 friends in total acros
 #### Usability
 
 1. Users with above-average typing speed for regular English text should be able to add, edit, delete, list and filter friends, and add, delete and list game entries, faster using commands than the mouse.
-1. First-time users should be able to add a friend and a game entry for that friend within 5 minutes of launch, using only the in-app help and sample data.
+1. First-time users should be able to add a friend and a game entry for that friend within 5 minutes of launch, using only the User Guide and sample data.
 1. Invalid commands should explain the error and show the correct usage or allowed input range, without modifying data.
 1. All commands in the User Guide should be usable through the command box alone.
 
@@ -1066,8 +1064,8 @@ On a _modern computer_ running Java `25`, with up to 1000 friends in total acros
 * **Mainstream OS**: Windows, Linux, Unix or macOS.
 * **Friend**: A person stored in GameMates with a unique name. Contact details and game entries are optional.
 * **User profile**: The current user's separately stored details.
-  Use `edit myself ...` to edit the profile. Friend-list commands preserve it.
-* **Game entry**: A record that a friend plays a game. It contains a game name, an in-game username and optional metadata.
+  Use `edit myself` to edit the profile. Friend-list commands preserve it.
+* **Game entry**: A record that a friend plays a game. It contains a game name, an optional in-game username and optional metadata.
 * **Role**: A job or duty that a friend plays in a game. Examples include `Sniper` and `Healer`.
 * **Game name**: The user-provided name that identifies a game within one friend's game entries.
   Aliases such as “Val” and “Valorant” are different game names.
