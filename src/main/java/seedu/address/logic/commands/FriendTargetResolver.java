@@ -5,7 +5,6 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 import java.util.function.Supplier;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.friend.FriendTarget;
@@ -16,9 +15,13 @@ final class FriendTargetResolver {
     private FriendTargetResolver() {
     }
 
-    /** Resolves a target using the standard invalid-index message. */
+    /** Resolves a target, reporting the valid index range if the index is outside the displayed list. */
     static FriendTarget resolve(Model model, Index index) throws CommandException {
-        return resolve(model, index, () -> Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        return resolve(model, index, () -> {
+            int displayedCount = model.getFilteredFriendList().size();
+            return displayedCount == 0 ? EditCommand.MESSAGE_EMPTY_LIST
+                    : String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND, index.getOneBased(), displayedCount);
+        });
     }
 
     /** Resolves a target, generating command-specific feedback only if the index is invalid. */

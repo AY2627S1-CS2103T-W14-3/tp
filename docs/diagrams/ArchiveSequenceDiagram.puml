@@ -13,9 +13,9 @@ Command -> Model : getFriendListScope()
 activate Model
 Model --> Command : ACTIVE
 deactivate Model
-Command -> Model : getFilteredFriendList()
+Command -> Model : resolveFriend(index)
 activate Model
-Model --> Command : displayedFriends
+Model --> Command : target
 deactivate Model
 note over Command
 Validate index 1 and select friend.

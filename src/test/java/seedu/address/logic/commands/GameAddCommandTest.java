@@ -11,7 +11,6 @@ import static seedu.address.testutil.TypicalFriends.getTypicalGameMates;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.Messages;
 import seedu.address.model.GameMates;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -81,12 +80,12 @@ public class GameAddCommandTest {
     public void execute_invalidDisplayedIndex_failure() {
         int size = model.getFilteredFriendList().size();
         assertCommandFailure(new GameAddCommand(Index.fromOneBased(size + 1), game), model,
-                Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+                String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND, size + 1, size));
         showFriendAtIndex(model, first);
         assertCommandFailure(new GameAddCommand(Index.fromOneBased(2), game), model,
-                Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+                String.format(EditCommand.MESSAGE_INDEX_NOT_FOUND, 2, 1));
         model.updateFilteredFriendList(friend -> false);
-        assertCommandFailure(new GameAddCommand(first, game), model, Messages.MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX);
+        assertCommandFailure(new GameAddCommand(first, game), model, EditCommand.MESSAGE_EMPTY_LIST);
     }
 
     @Test
