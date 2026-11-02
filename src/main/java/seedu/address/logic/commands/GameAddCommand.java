@@ -29,7 +29,7 @@ public class GameAddCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a game to a friend or your own profile. "
             + "Parameters: FRIEND_INDEX|myself (use a positive integer for a friend, or myself for your own profile) "
             + PREFIX_GAME_NAME + "GAME_NAME "
-            + "[" + PREFIX_USERNAME + "USER_NAME] "
+            + "[" + PREFIX_USERNAME + "USERNAME] "
             + "[" + PREFIX_META + "KEY:VALUE]...\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_GAME_NAME + "Valorant "
