@@ -82,16 +82,9 @@ The component API is defined in
 
 **UI classes and layouts**
 
-The `UI` consists of these classes, which inherit from `UiPart`:
+These `UI` classes inherit from `UiPart`:
 
-* `MainWindow`
-* `CommandBox`
-* `ResultDisplay`
-* `FriendListPanel`
-* `FriendDetailsPanel`
-* `GameDetailsCard`
-* `HelpWindow`
-* `StatusBarFooter`
+![UI classes that inherit from UiPart](images/UiPartClassDiagram.png)
 
 `UiPart` loads the matching FXML layouts.
 `TagPane` and `TagLabel` wrap tags to the available width in friend cards and the details panel.
@@ -159,7 +152,6 @@ A PlantUML limitation makes it continue to the end of the diagram.
 2. The parser creates an instance of a `Command` subclass, such as `DeleteCommand`.
    `LogicManager` executes that command object.
 3. The command communicates with `Model` as necessary, for example to delete a friend.
-   The diagram shows one interaction for simplicity. The code can use more than one interaction to complete the operation.
 4. The command creates a `CommandResult`.
    `LogicManager` obtains the data through `Model.getGameMates()`.
    Before it returns the result to the `UI`, `LogicManager` saves the complete `ReadOnlyGameMates` through `Storage`.
@@ -219,7 +211,7 @@ so `g/"PUBG n/Game"` gives `PUBG n/Game`.
 
 <img src="images/ModelClassDiagram.png" width="625" />
 
-This partial class diagram shows selected archive-related attributes; unrelated members are omitted.
+This partial class diagram shows selected archive and pin attributes. Unrelated members are omitted.
 `ModelManager.friendListScope` uses the `FriendListScope` enumeration to identify the displayed view.
 
 **Stored data and views**

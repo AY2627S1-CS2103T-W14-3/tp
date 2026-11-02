@@ -22,6 +22,7 @@ Class JsonAdaptedTag
 Class JsonAdaptedGame
 Class JsonAdaptedGameName
 Class JsonAdaptedUsername
+Class JsonAdaptedMeta
 }
 
 }
@@ -30,15 +31,20 @@ Class HiddenOutside #FFFFFF
 HiddenOutside ..> Storage
 
 StorageManager .up.|> Storage
-StorageManager -down-> "1" JsonUserPrefsStorage
-StorageManager -down-> "1" JsonGameMatesStorage
+' A small spacer keeps endpoint multiplicities close to, but clear of, arrowheads in Smetana.
+StorageManager -down-> "1\n<size:6> </size>" JsonUserPrefsStorage
+StorageManager -down-> "1\n<size:6> </size>" JsonGameMatesStorage
 
 JsonGameMatesStorage ..> JsonSerializableGameMates
-JsonSerializableGameMates --> "*" JsonAdaptedFriend
-JsonSerializableGameMates --> "0..1 myself" JsonAdaptedFriend
-JsonAdaptedFriend --> "*" JsonAdaptedTag
-JsonAdaptedFriend --> "*" JsonAdaptedGame
-JsonAdaptedGame --> "1" JsonAdaptedGameName
-JsonAdaptedGame --> "1" JsonAdaptedUsername
+' The role sits with the multiplicity so that it stays on the outer side of the left arrow.
+' Text in the package's background colour is invisible. The padding moves the role clear of the
+' line and the multiplicity next to the arrowhead. The blank label keeps the two arrows apart.
+JsonSerializableGameMates --> "friends<color:#F4F6F6>________________</color>\n<color:#F4F6F6>__________________________</color>*" JsonAdaptedFriend : <color:#F4F6F6>___</color>
+JsonSerializableGameMates --> "0..1" JsonAdaptedFriend : myself
+JsonAdaptedFriend --> "*\n<size:6> </size>" JsonAdaptedTag
+JsonAdaptedFriend --> "*\n<size:6> </size>" JsonAdaptedGame
+JsonAdaptedGame --> "1\n<size:6> </size>" JsonAdaptedGameName
+JsonAdaptedGame --> "1\n<size:6> </size>" JsonAdaptedUsername
+JsonAdaptedGame --> "*\n<size:6> </size>" JsonAdaptedMeta
 
 @enduml
