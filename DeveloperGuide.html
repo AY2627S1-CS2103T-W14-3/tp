@@ -541,8 +541,7 @@ Editing Myself preserves the current scope and predicate, including an empty dis
 <p><code class="language-plaintext highlighter-rouge">DeleteCommand</code> uses the same displayed-list indexing and keeps the current predicate.
 It immediately removes the entire friend and their games.</p>
 
-<p>An empty list or out-of-range index produces the shared generic deletion error.
-In contrast, <code class="language-plaintext highlighter-rouge">EditCommand</code> and <code class="language-plaintext highlighter-rouge">GameListCommand</code> distinguish empty lists and report a displayed range.
+<p>Like other index-based commands, it distinguishes empty lists and reports a displayed range for out-of-range indices.
 <code class="language-plaintext highlighter-rouge">ClearCommand</code> replaces the friends with an empty <code class="language-plaintext highlighter-rouge">GameMates</code> and copies the existing profile.</p>
 
 <p><strong>Field validation</strong></p>
@@ -978,7 +977,8 @@ An empty filtered archive reports that no archived friends match the game filter
   <li>
 <code class="language-plaintext highlighter-rouge">ArchiveCommand</code> rejects the archive-only scope and gives guidance to use <code class="language-plaintext highlighter-rouge">list</code>.
 Active lists and global search results accept archiving.
-<code class="language-plaintext highlighter-rouge">UnarchiveCommand</code> accepts an archived target in archive or search results.</li>
+<code class="language-plaintext highlighter-rouge">UnarchiveCommand</code> rejects the active-only scope and gives guidance to use <code class="language-plaintext highlighter-rouge">archivelist</code>.
+It accepts an archived target in archive or search results.</li>
   <li>The command validates the index against the displayed list and examines the target’s archive status.
 It rejects an invalid index, an already archived archive target, or a non-archived restore target.
 Failed commands preserve the data, scope and filter.</li>
@@ -1658,10 +1658,10 @@ reappear with <code class="language-plaintext highlighter-rouge">list</code>. Be
 <code class="language-plaintext highlighter-rouge">delete</code>, <code class="language-plaintext highlighter-rouge">delete 0</code>, <code class="language-plaintext highlighter-rouge">delete -1</code>, <code class="language-plaintext highlighter-rouge">delete x</code>, <code class="language-plaintext highlighter-rouge">delete 2147483648</code>, <code class="language-plaintext highlighter-rouge">delete 1 2</code> and <code class="language-plaintext highlighter-rouge">delete 999</code>:
 expected errors without deleting anyone. Missing index reports <code class="language-plaintext highlighter-rouge">Please provide an index.</code>; malformed values
 report <code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>,
-where <code class="language-plaintext highlighter-rouge">INPUT</code> is the rejected text. An out-of-range index reports <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>.</li>
+where <code class="language-plaintext highlighter-rouge">INPUT</code> is the rejected text. An out-of-range index reports <code class="language-plaintext highlighter-rouge">No friend exists at index 999. Choose an index from 1 to MAX_LIST_INDEX.</code>.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">clear</code>: expected immediate empty list and <code class="language-plaintext highlighter-rouge">All active and archived friends have been cleared!</code>. <code class="language-plaintext highlighter-rouge">delete 1</code> then reports the generic
-invalid-displayed-index error; <code class="language-plaintext highlighter-rouge">edit 1 n/Test</code> and <code class="language-plaintext highlighter-rouge">gamelist 1</code> report an empty displayed list.</li>
+<code class="language-plaintext highlighter-rouge">clear</code>: expected immediate empty list and <code class="language-plaintext highlighter-rouge">All active and archived friends have been cleared!</code>. <code class="language-plaintext highlighter-rouge">delete 1</code>, <code class="language-plaintext highlighter-rouge">edit 1 n/Test</code> and
+<code class="language-plaintext highlighter-rouge">gamelist 1</code> then report an empty displayed list.</li>
 </ol>
 
 <h3 id="saved-profile-and-game-round-trip">Saved profile and game round trip</h3>

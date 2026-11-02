@@ -631,7 +631,7 @@ while the left panel continues showing only Minecraft players.</li>
     </tr>
     <tr>
       <td>Numeric index with an empty displayed list</td>
-      <td><code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list to show all friends.</code></td>
+      <td><code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list or archivelist to show friends.</code></td>
     </tr>
     <tr>
       <td>Invalid game name, including empty <code class="language-plaintext highlighter-rouge">g/</code>
@@ -869,7 +869,7 @@ Editing preserves the friend’s archive status, games and your profile. A succe
 </li>
   <li>Invalid index (including a value above 2147483647): <code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
 </li>
-  <li>Empty displayed list: <code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list to show all friends.</code>
+  <li>Empty displayed list: <code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list or archivelist to show friends.</code>
 </li>
   <li>Index outside the displayed list: <code class="language-plaintext highlighter-rouge">No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.</code>
 </li>
@@ -1004,13 +1004,17 @@ details clears the game filter within the archive view. <code class="language-pl
   <li>The friend returns to the active list with all their details intact. They disappear from an archive-only view,
 but stay visible in <strong>Search results</strong> with the <strong>Archived</strong> badge removed. The current filter stays in place.
 Run <code class="language-plaintext highlighter-rouge">list</code> to see active friends.</li>
-  <li>Feedback is <code class="language-plaintext highlighter-rouge">Restored FRIEND_NAME.</code>. Selecting an active friend is rejected with a suggestion to use <code class="language-plaintext highlighter-rouge">archivelist</code>.</li>
+  <li>From the active list, <code class="language-plaintext highlighter-rouge">unarchive</code> reports <code class="language-plaintext highlighter-rouge">Run archivelist to switch to the archived list before restoring a friend.</code>
+before checking whether the index exists.</li>
+  <li>Feedback is <code class="language-plaintext highlighter-rouge">Restored FRIEND_NAME.</code>. Selecting an active friend in <strong>Search results</strong> is rejected with a suggestion
+to use <code class="language-plaintext highlighter-rouge">archivelist</code>.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">myself</code>, missing indices, extra arguments and invalid indices are rejected. Missing indices report
 <code class="language-plaintext highlighter-rouge">Please provide an index.</code>; invalid indices report
 <code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>.</li>
-  <li>Out-of-range indices, including
-empty lists, report <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code> without changing data or the current view.</li>
+  <li>Out-of-range indices report <code class="language-plaintext highlighter-rouge">No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.</code>.
+Empty lists report <code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list or archivelist to show friends.</code>.
+Neither changes data or the current view.</li>
 </ul>
 
 <p>Example: <code class="language-plaintext highlighter-rouge">archivelist g/Valorant</code>, then <code class="language-plaintext highlighter-rouge">unarchive 1</code> restores the first displayed archived friend who plays Valorant.</p>
@@ -1050,7 +1054,9 @@ are preserved and current friend-list filter stays active.</li>
   <li>Invalid index (such as <code class="language-plaintext highlighter-rouge">0</code>, <code class="language-plaintext highlighter-rouge">-1</code>, or <code class="language-plaintext highlighter-rouge">abc</code>), extra arguments, or a value above 2147483647:
 <code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>
 </li>
-  <li>Index outside the displayed list, including an empty list: <code class="language-plaintext highlighter-rouge">The friend index provided is invalid.</code>
+  <li>Empty displayed list: <code class="language-plaintext highlighter-rouge">No friends are currently displayed. Use list or archivelist to show friends.</code>
+</li>
+  <li>Index outside the displayed list: <code class="language-plaintext highlighter-rouge">No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.</code>
 </li>
 </ul>
 
