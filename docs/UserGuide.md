@@ -697,8 +697,8 @@ Format: `delete FRIEND_INDEX`
 * The index **must be a positive integer** 1, 2, 3, …​
 * Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647 (inclusive).
 * A successful deletion displays `Successfully deleted FRIEND_NAME.`
-* Deletion happens immediately, with no confirmation dialog and no undo command. The friend's games are deleted
-  with the friend; other friends and your stored profile are preserved. The current friend-list filter stays active.
+* Deletion happens immediately. The friend's games are deleted with the friend. Other friends and your stored profile
+  are preserved and current friend-list filter stays active.
 
 Examples:
 
@@ -718,7 +718,7 @@ Clears all active and archived friends from GameMates and preserves your Myself 
 
 Format: `clear`
 
-The command takes effect immediately, with no confirmation or undo. Feedback is `All active and archived friends have been cleared!`.
+The command takes effect immediately. Feedback is `All active and archived friends have been cleared!`.
 All active and archived friends and their game entries are removed. Back up your data file first if you may need them again.
 
 ### Exiting the program: `exit`
@@ -781,10 +781,6 @@ The original file is not automatically repaired or backed up. The next successfu
 the current data, so close the app and restore your backup before entering commands if you need to recover it.
 Unknown JSON fields are ignored and are not preserved on the next save. Use the supported `metas` format for metadata.
 </div>
-
-### Archiving data files `[coming in v2.0]`
-
-Future proposal only: automatic archiving is not implemented. Use the manual backup procedure above.
 
 --------------------------------------------------------------------------------------------------------------------
 
