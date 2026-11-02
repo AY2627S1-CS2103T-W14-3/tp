@@ -877,9 +877,11 @@ Editing preserves the friend’s archive status, games and your profile. A succe
 </li>
   <li>First profile edit without a name: <code class="language-plaintext highlighter-rouge">Set your profile name first using "edit myself n/NAME" command.</code>
 </li>
-  <li>Duplicate name: <code class="language-plaintext highlighter-rouge">This friend already exists in GameMates.</code>
+  <li>Duplicate name: <code class="language-plaintext highlighter-rouge">A friend with this name already exists. Names ignore case and repeated spaces.</code>
 </li>
-  <li>Adding or renaming a friend to your profile’s name: <code class="language-plaintext highlighter-rouge">This name is already used by your Myself profile.</code>
+  <li>Adding or renaming a friend to your profile’s name: <code class="language-plaintext highlighter-rouge">This name is already used by your Myself profile. Names ignore case and repeated spaces.</code>
+</li>
+  <li>Renaming your profile to a friend’s name: <code class="language-plaintext highlighter-rouge">This name is already used by a friend. Names ignore case and repeated spaces. Choose a different name.</code>
 </li>
 </ul>
 
@@ -940,7 +942,7 @@ an <strong>Archived</strong> badge. The current filter stays in place.</li>
   <li>Missing indices report <code class="language-plaintext highlighter-rouge">Please provide an index.</code>. Invalid indices (such as <code class="language-plaintext highlighter-rouge">-1</code>, <code class="language-plaintext highlighter-rouge">0</code> or <code class="language-plaintext highlighter-rouge">abc</code>) report
 <code class="language-plaintext highlighter-rouge">Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).</code>.</li>
   <li>Archived friends keep their names reserved. Adding or renaming another friend to the same name is rejected
-with <code class="language-plaintext highlighter-rouge">This name is already used by an archived friend. Choose a different name.</code> This also applies to profile edits.</li>
+with <code class="language-plaintext highlighter-rouge">This name is already used by an archived friend. Names ignore case and repeated spaces. Choose a different name.</code> This also applies to profile edits.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list</code> and <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> show active friends only. <code class="language-plaintext highlighter-rouge">find</code> searches both active and archived friends.</li>
 </ul>
