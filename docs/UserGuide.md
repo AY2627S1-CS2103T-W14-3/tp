@@ -67,8 +67,8 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
 * Items in square brackets are optional.<br>
   For example, `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
 
-* Items followed by `…`​ can appear zero or more times.<br>
-  For example, `[t/TAG]…​` may be omitted, or written as `t/friend` or `t/friend t/family`.
+* Items followed by `...` can appear zero or more times.<br>
+  For example, `[t/TAG]...` may be omitted, or written as `t/friend` or `t/friend t/family`.
 
 * Prefixed parameters can be in any order. Positional indices must come first.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
@@ -82,14 +82,14 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
 * To end a quoted value with `\`, add a space before the closing quote.
   For example, `g/"PUBG u/Game\ "` is the game name `PUBG u/Game\`.
 * For metadata, wrap the whole `KEY:VALUE`. For example, use `m/"Rank:Gold u/1"`, not `m/Rank:"Gold u/1"`.
-* Quotes only applicable in values after a prefix. Friend indices, `myself` and `find` keywords read `"` as a normal character.
+* Quotes apply only to values after a prefix. Friend indices, `myself` and `find` keywords read `"` as a normal character.
 * A bare `"` in the middle of a value, a missing closing quote or text after the closing quote is rejected.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
   Tags may be repeated. Identical tag values are applied once.
 * Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all active friends
   again before choosing an index. Zero, negative numbers, decimals, a leading `+` and larger integers are rejected.
   Invalid-index feedback quotes the rejected input. In error examples below, `INPUT` stands for that text.
-* For `edit`, `gameadd`, `gameedit` and `gamedel`, `FRIEND_INDEX|myself` means either a displayed friend index or the
+* For `edit`, `gameadd`, `gameedit`, `gamedel` and `gamelist`, `FRIEND_INDEX|myself` means either a displayed friend index or the
   case-insensitive keyword `myself` for your own profile. Do not type `|`. The selector must come before prefixes.
   `myself` also works when no friends are displayed.
 
@@ -124,7 +124,6 @@ The main window has two panels: the friend list on the left and a details panel 
   Adding a friend shows all active friends. Editing a friend clears filters in active/archive views, but keeps
   the name filter in Search results. Deleting a friend keeps the current friend-list filter.
 * Without an explicit sort, pinned friends appear above unpinned friends, retaining the stored order within each group.
-  A `list s/name` or `list s/game` sort currently orders the whole displayed list and can override pin placement.
   Run `list` without `s/` to return to the stored order.
 
 ### Your profile and game entries
@@ -158,7 +157,7 @@ Format: `help`
 
 Adds a friend to GameMates.
 
-Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…`
+Format: `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]...`
 
 * Only the name is required. Omitted phone and email details are shown as `Not provided`.
 * Supplied phone and email values must satisfy the validation rules. Empty `p/` or `e/` values are rejected.
@@ -307,7 +306,7 @@ Examples:
 
 Adds a game with an optional in-game username and metadata (e.g. role or level) to a friend or your own profile.
 
-Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…`
+Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...`
 
 * For `myself`, [set up your profile first](#your-profile-and-game-entries).
 * The game name is required. The username is optional. Omit `u/` if you do not know it.
@@ -338,10 +337,10 @@ Text copied from websites or game apps can contain hidden characters. If an inpu
 
 Examples:
 
-* `gameadd 1 g/Valorant u/player123`
-* `gameadd 1 g/Valorant u/player123 m/Role:Support m/Level:20`
+* `gameadd 1 g/Minecraft u/player123`
+* `gameadd 1 g/Overwatch u/player123 m/Role:Support m/Level:20`
 * `gameadd myself g/Minecraft u/myUsername m/Mode:Creative`
-* `gameadd 1 g/Valorant` adds the game without a username.
+* `gameadd 1 g/Stardew Valley` adds the game without a username.
 * `gameadd myself g/Stardew Valley m/Role:Farmer` adds a game with metadata and no username.
 
 ### Deleting a game: `gamedel`
@@ -363,7 +362,7 @@ Examples:
 
 Shows a friend's or your own details and game cards in the right panel, keeping the friend list and its current
 filter on the left.
-Each game card shows the game name and in-game username if provided.
+Each game card shows the game name, the in-game username or `Username: Not provided`, and any metadata.
 
 Format: `gamelist FRIEND_INDEX|myself [g/GAME_NAME]`
 
@@ -538,9 +537,9 @@ Empty keys/values and invalid lengths report the existing metadata field constra
 
 Edits an existing friend or your separately stored Myself profile in GameMates.
 
-Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…`
+Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]...`
 
-* Edits the friend at the specified `FRIEND_INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, …​
+* Edits the friend at the specified `FRIEND_INDEX`. The index refers to the index number shown in the displayed friend list. The index **must be a positive integer** 1, 2, 3, ...
 * Use `myself` instead of `FRIEND_INDEX` to edit your own profile, for example `edit myself n/Alex Tan`. The selector is case-insensitive.
   If the name belongs to an active or archived friend, choose a different profile name; unarchiving that friend
   does not resolve the name conflict.
@@ -694,7 +693,7 @@ Format: `delete FRIEND_INDEX`
 
 * Deletes the friend at the specified `FRIEND_INDEX`.
 * The index refers to the index number shown in the displayed friend list.
-* The index **must be a positive integer** 1, 2, 3, …​
+* The index **must be a positive integer** 1, 2, 3, ...
 * Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647 (inclusive).
 * A successful deletion displays `Successfully deleted FRIEND_NAME.`
 * Deletion happens immediately. The friend's games are deleted with the friend. Other friends and your stored profile
@@ -799,7 +798,7 @@ while copying the file, then launch the destination app from its usual data fold
 2. **GameMates primarily supports English.** Friend names, tags, phones and emails accept only ASCII characters.
    Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.
 3. **Some characters count as more than one toward length limits.** Lengths are counted in UTF-16 code units, so
-   `😀` counts as 2 and `👨‍👩‍👧` (built from 3 emoji and 2 joiners) counts as 8.
+   `😀` counts as 2. Not all emojis are supported by JavaFX.
 4. **The `help` and `exit` commands fail while saving fails.** GameMates saves after every command, so these commands
    show the `Could not save data` error instead. Use these instead:
    * To open help, use the **Help** menu or press `F1`.
@@ -820,16 +819,16 @@ while copying the file, then launch the destination app from its usual data fold
 
 | Action | Format, Examples |
 |--------|------------------|
-| **Add** | `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…` <br> e.g., `add n/James Ho t/friend` |
+| **Add** | `add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]...` <br> e.g., `add n/James Ho t/friend` |
 | **Archive** | `archive FRIEND_INDEX` |
 | **Archive list/filter** | `archivelist [g/GAME_NAME]` |
 | **Unarchive** | `unarchive FRIEND_INDEX` |
 | **Clear** | `clear` |
 | **Delete** | `delete FRIEND_INDEX`<br> e.g., `delete 3` |
-| **Edit** | <code>edit FRIEND_INDEX&#124;myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
+| **Edit** | <code>edit FRIEND_INDEX&#124;myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]...</code><br> e.g., `edit myself n/Joash` or `edit 2 n/James Lee e/jameslee@example.com` |
 | **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake` |
 | **Game edit** | <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...</code><br> e.g., `gameedit myself g/Valorant m/Role:Healer` |
-| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code><br> e.g., `gameadd myself g/Valorant u/player123 m/Role:Support` |
+| **Game add** | <code>gameadd FRIEND_INDEX&#124;myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...</code><br> e.g., `gameadd myself g/Valorant u/player123 m/Role:Support` |
 | **Game delete** | <code>gamedel FRIEND_INDEX&#124;myself g/GAME_NAME</code><br> e.g., `gamedel myself g/Valorant` |
 | **Game list** | <code>gamelist FRIEND_INDEX&#124;myself [g/GAME_NAME]</code><br> e.g., `gamelist myself g/Valorant` |
 | **Squad create** | `squad g/GAME_NAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`<br> e.g., `squad g/Valorant n/3 m/Role:Healer` |
