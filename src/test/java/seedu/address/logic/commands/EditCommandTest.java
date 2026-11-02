@@ -149,7 +149,7 @@ public class EditCommandTest {
         EditCommand command = new EditCommand(Index.myself(),
                 new EditFriendDescriptorBuilder().withName(friendName).build());
 
-        assertCommandFailure(command, model, Messages.MESSAGE_DUPLICATE_FRIEND);
+        assertCommandFailure(command, model, Messages.MESSAGE_MYSELF_NAME_USED_BY_FRIEND);
     }
 
     @Test

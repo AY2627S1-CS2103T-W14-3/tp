@@ -17,9 +17,15 @@ public class Messages {
     public static final String MESSAGE_INVALID_FRIEND_DISPLAYED_INDEX = "The friend index provided is invalid.";
     public static final String MESSAGE_FRIENDS_LISTED_OVERVIEW = "%1$d friend(s) listed!";
     public static final String MESSAGE_DUPLICATE_ARCHIVED_FRIEND =
-            "This name is already used by an archived friend. Choose a different name.";
-    public static final String MESSAGE_DUPLICATE_FRIEND = "This friend already exists in GameMates.";
-    public static final String MESSAGE_DUPLICATE_MYSELF = "This name is already used by your Myself profile.";
+            "This name is already used by an archived friend. Names ignore case and repeated spaces. "
+                    + "Choose a different name.";
+    public static final String MESSAGE_DUPLICATE_FRIEND =
+            "A friend with this name already exists. Names ignore case and repeated spaces.";
+    public static final String MESSAGE_DUPLICATE_MYSELF =
+            "This name is already used by your Myself profile. Names ignore case and repeated spaces.";
+    public static final String MESSAGE_MYSELF_NAME_USED_BY_FRIEND =
+            "This name is already used by a friend. Names ignore case and repeated spaces. "
+                    + "Choose a different name.";
     public static final String MESSAGE_MYSELF_NOT_INITIALIZED =
             "Set your profile name first using \"edit myself n/NAME\" command.";
     public static final String MESSAGE_DUPLICATE_FIELDS =
