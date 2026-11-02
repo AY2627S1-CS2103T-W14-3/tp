@@ -11,6 +11,11 @@ title: Developer Guide
 
 * [Vavr](https://vavr.io/) provides `Option`, `Try`, and checked-function adapters for parsing, edit descriptors, and storage.
 
+Notable uses of AI:
+
+* The team used AI tools to assist with testing the application and identifying potential bugs and edge cases.
+* AI tools were also used to help identify inconsistencies in the application and its documentation.
+
 This guide describes GameMates' design, implementation and testing. Proposed features are labelled explicitly.
 
 --------------------------------------------------------------------------------------------------------------------
