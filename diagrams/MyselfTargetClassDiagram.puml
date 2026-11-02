@@ -1,5 +1,5 @@
 @startuml
-skinparam linetype ortho
+!pragma layout smetana
 skinparam nodesep 90
 skinparam ranksep 65
 skinparam Shadowing false
@@ -16,8 +16,8 @@ hide circle
 hide empty members
 
 interface Model <<interface>> {
-    +resolveFriend(index): FriendTarget
-    +setFriend(target, updatedFriend)
+    +resolveFriend(index: Index): FriendTarget
+    +setFriend(target: FriendTarget, updatedFriend: Friend)
 }
 class ModelManager
 interface FriendTarget <<interface>> {

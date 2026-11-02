@@ -77,7 +77,6 @@ Optional metadata conditions on <code class="language-plaintext highlighter-roug
       <li><a href="#exiting-the-program-exit" id="markdown-toc-exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code></a></li>
       <li><a href="#saving-the-data" id="markdown-toc-saving-the-data">Saving the data</a></li>
       <li><a href="#editing-the-data-file" id="markdown-toc-editing-the-data-file">Editing the data file</a></li>
-      <li><a href="#archiving-data-files-coming-in-v20" id="markdown-toc-archiving-data-files-coming-in-v20">Archiving data files <code class="language-plaintext highlighter-rouge">[coming in v2.0]</code></a></li>
     </ul>
   </li>
   <li><a href="#faq" id="markdown-toc-faq">FAQ</a></li>
@@ -1029,8 +1028,8 @@ empty lists, report <code class="language-plaintext highlighter-rouge">The frien
   <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647 (inclusive).</li>
   <li>A successful deletion displays <code class="language-plaintext highlighter-rouge">Successfully deleted FRIEND_NAME.</code>
 </li>
-  <li>Deletion happens immediately, with no confirmation dialog and no undo command. The friend’s games are deleted
-with the friend; other friends and your stored profile are preserved. The current friend-list filter stays active.</li>
+  <li>Deletion happens immediately. The friend’s games are deleted with the friend. Other friends and your stored profile
+are preserved and current friend-list filter stays active.</li>
 </ul>
 
 <p>Examples:</p>
@@ -1061,7 +1060,7 @@ with the friend; other friends and your stored profile are preserved. The curren
 
 <p>Format: <code class="language-plaintext highlighter-rouge">clear</code></p>
 
-<p>The command takes effect immediately, with no confirmation or undo. Feedback is <code class="language-plaintext highlighter-rouge">All active and archived friends have been cleared!</code>.
+<p>The command takes effect immediately. Feedback is <code class="language-plaintext highlighter-rouge">All active and archived friends have been cleared!</code>.
 All active and archived friends and their game entries are removed. Back up your data file first if you may need them again.</p>
 
 <h3 id="exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code>
@@ -1126,11 +1125,6 @@ The original file is not automatically repaired or backed up. The next successfu
 the current data, so close the app and restore your backup before entering commands if you need to recover it.
 Unknown JSON fields are ignored and are not preserved on the next save. Use the supported <code class="language-plaintext highlighter-rouge">metas</code> format for metadata.
 </div>
-
-<h3 id="archiving-data-files-coming-in-v20">Archiving data files <code class="language-plaintext highlighter-rouge">[coming in v2.0]</code>
-</h3>
-
-<p>Future proposal only: automatic archiving is not implemented. Use the manual backup procedure above.</p>
 
 <hr>
 
