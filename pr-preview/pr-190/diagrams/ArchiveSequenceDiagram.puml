@@ -3,9 +3,9 @@
 skinparam ArrowFontStyle plain
 skinparam ParticipantFontColor #FFFFFF
 
-participant "<u>:ArchiveCommand</u>" as Command LOGIC_COLOR
-participant "<u>model:ModelManager</u>" as Model MODEL_COLOR
-participant "<u>friend:Friend</u>" as Friend MODEL_COLOR
+participant ":ArchiveCommand" as Command LOGIC_COLOR
+participant "model:ModelManager" as Model MODEL_COLOR
+participant "friend:Friend" as Friend MODEL_COLOR
 
 [-> Command : execute(model)
 activate Command

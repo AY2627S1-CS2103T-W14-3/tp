@@ -77,7 +77,6 @@ Optional metadata conditions on <code class="language-plaintext highlighter-roug
       <li><a href="#exiting-the-program-exit" id="markdown-toc-exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code></a></li>
       <li><a href="#saving-the-data" id="markdown-toc-saving-the-data">Saving the data</a></li>
       <li><a href="#editing-the-data-file" id="markdown-toc-editing-the-data-file">Editing the data file</a></li>
-      <li><a href="#archiving-data-files-coming-in-v20" id="markdown-toc-archiving-data-files-coming-in-v20">Archiving data files <code class="language-plaintext highlighter-rouge">[coming in v2.0]</code></a></li>
     </ul>
   </li>
   <li><a href="#faq" id="markdown-toc-faq">FAQ</a></li>
@@ -162,8 +161,8 @@ For example, in <code class="language-plaintext highlighter-rouge">add n/NAME</c
 For example, <code class="language-plaintext highlighter-rouge">n/NAME [t/TAG]</code> can be used as <code class="language-plaintext highlighter-rouge">n/John Doe t/friend</code> or as <code class="language-plaintext highlighter-rouge">n/John Doe</code>.</p>
     </li>
     <li>
-      <p>Items followed by <code class="language-plaintext highlighter-rouge">…</code>​ can appear zero or more times.<br>
-For example, <code class="language-plaintext highlighter-rouge">[t/TAG]…​</code> may be omitted, or written as <code class="language-plaintext highlighter-rouge">t/friend</code> or <code class="language-plaintext highlighter-rouge">t/friend t/family</code>.</p>
+      <p>Items followed by <code class="language-plaintext highlighter-rouge">...</code> can appear zero or more times.<br>
+For example, <code class="language-plaintext highlighter-rouge">[t/TAG]...</code> may be omitted, or written as <code class="language-plaintext highlighter-rouge">t/friend</code> or <code class="language-plaintext highlighter-rouge">t/friend t/family</code>.</p>
     </li>
     <li>
       <p>Prefixed parameters can be in any order. Positional indices must come first.<br>
@@ -178,7 +177,7 @@ For example, <code class="language-plaintext highlighter-rouge">g/\"Game</code> 
     <li>To end a quoted value with <code class="language-plaintext highlighter-rouge">\</code>, add a space before the closing quote.
 For example, <code class="language-plaintext highlighter-rouge">g/"PUBG u/Game\ "</code> is the game name <code class="language-plaintext highlighter-rouge">PUBG u/Game\</code>.</li>
     <li>For metadata, wrap the whole <code class="language-plaintext highlighter-rouge">KEY:VALUE</code>. For example, use <code class="language-plaintext highlighter-rouge">m/"Rank:Gold u/1"</code>, not <code class="language-plaintext highlighter-rouge">m/Rank:"Gold u/1"</code>.</li>
-    <li>Quotes only applicable in values after a prefix. Friend indices, <code class="language-plaintext highlighter-rouge">myself</code> and <code class="language-plaintext highlighter-rouge">find</code> keywords read <code class="language-plaintext highlighter-rouge">"</code> as a normal character.</li>
+    <li>Quotes apply only to values after a prefix. Friend indices, <code class="language-plaintext highlighter-rouge">myself</code> and <code class="language-plaintext highlighter-rouge">find</code> keywords read <code class="language-plaintext highlighter-rouge">"</code> as a normal character.</li>
     <li>A bare <code class="language-plaintext highlighter-rouge">"</code> in the middle of a value, a missing closing quote or text after the closing quote is rejected.</li>
     <li>Repeating a single-value <code class="language-plaintext highlighter-rouge">n/</code>, <code class="language-plaintext highlighter-rouge">p/</code> or <code class="language-plaintext highlighter-rouge">e/</code> parameter in <code class="language-plaintext highlighter-rouge">add</code> or <code class="language-plaintext highlighter-rouge">edit</code> is rejected, even with identical values.
 Tags may be repeated. Identical tag values are applied once.</li>
@@ -186,7 +185,7 @@ Tags may be repeated. Identical tag values are applied once.</li>
 again before choosing an index. Zero, negative numbers, decimals, a leading <code class="language-plaintext highlighter-rouge">+</code> and larger integers are rejected.
 Invalid-index feedback quotes the rejected input. In error examples below, <code class="language-plaintext highlighter-rouge">INPUT</code> stands for that text.</li>
     <li>
-      <p>For <code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> means either a displayed friend index or the
+      <p>For <code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code>, <code class="language-plaintext highlighter-rouge">gamedel</code> and <code class="language-plaintext highlighter-rouge">gamelist</code>, <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code> means either a displayed friend index or the
 case-insensitive keyword <code class="language-plaintext highlighter-rouge">myself</code> for your own profile. Do not type <code class="language-plaintext highlighter-rouge">|</code>. The selector must come before prefixes.
 <code class="language-plaintext highlighter-rouge">myself</code> also works when no friends are displayed.</p>
     </li>
@@ -226,7 +225,6 @@ Clicking a friend selects their details again. Invalid commands keep the existin
 Adding a friend shows all active friends. Editing a friend clears filters in active/archive views, but keeps
 the name filter in Search results. Deleting a friend keeps the current friend-list filter.</li>
   <li>Without an explicit sort, pinned friends appear above unpinned friends, retaining the stored order within each group.
-A <code class="language-plaintext highlighter-rouge">list s/name</code> or <code class="language-plaintext highlighter-rouge">list s/game</code> sort currently orders the whole displayed list and can override pin placement.
 Run <code class="language-plaintext highlighter-rouge">list</code> without <code class="language-plaintext highlighter-rouge">s/</code> to return to the stored order.</li>
 </ul>
 
@@ -262,7 +260,7 @@ You can also open Help using the menu or <code class="language-plaintext highlig
 
 <p>Adds a friend to GameMates.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]...</code></p>
 
 <ul>
   <li>Only the name is required. Omitted phone and email details are shown as <code class="language-plaintext highlighter-rouge">Not provided</code>.</li>
@@ -453,7 +451,7 @@ return to their position in the stored insertion order.</li>
 
 <p>Adds a game with an optional in-game username and metadata (e.g. role or level) to a friend or your own profile.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...</code></p>
 
 <ul>
   <li>For <code class="language-plaintext highlighter-rouge">myself</code>, <a href="#your-profile-and-game-entries">set up your profile first</a>.</li>
@@ -488,11 +486,11 @@ Text copied from websites or game apps can contain hidden characters. If an inpu
 <p>Examples:</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant u/player123</code></li>
-  <li><code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant u/player123 m/Role:Support m/Level:20</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gameadd 1 g/Minecraft u/player123</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gameadd 1 g/Overwatch u/player123 m/Role:Support m/Level:20</code></li>
   <li><code class="language-plaintext highlighter-rouge">gameadd myself g/Minecraft u/myUsername m/Mode:Creative</code></li>
   <li>
-<code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant</code> adds the game without a username.</li>
+<code class="language-plaintext highlighter-rouge">gameadd 1 g/Stardew Valley</code> adds the game without a username.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">gameadd myself g/Stardew Valley m/Role:Farmer</code> adds a game with metadata and no username.</li>
 </ul>
@@ -522,7 +520,7 @@ Text copied from websites or game apps can contain hidden characters. If an inpu
 
 <p>Shows a friend’s or your own details and game cards in the right panel, keeping the friend list and its current
 filter on the left.
-Each game card shows the game name and in-game username if provided.</p>
+Each game card shows the game name, the in-game username or <code class="language-plaintext highlighter-rouge">Username: Not provided</code>, and any metadata.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code></p>
 
@@ -815,10 +813,10 @@ conditions, the command reports an error:</p>
 
 <p>Edits an existing friend or your separately stored Myself profile in GameMates.</p>
 
-<p>Format: <code class="language-plaintext highlighter-rouge">edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code></p>
+<p>Format: <code class="language-plaintext highlighter-rouge">edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]...</code></p>
 
 <ul>
-  <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
+  <li>Edits the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>. The index refers to the index number shown in the displayed friend list. The index <strong>must be a positive integer</strong> 1, 2, 3, …</li>
   <li>Use <code class="language-plaintext highlighter-rouge">myself</code> instead of <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code> to edit your own profile, for example <code class="language-plaintext highlighter-rouge">edit myself n/Alex Tan</code>. The selector is case-insensitive.
 If the name belongs to an active or archived friend, choose a different profile name; unarchiving that friend
 does not resolve the name conflict.</li>
@@ -1025,12 +1023,12 @@ empty lists, report <code class="language-plaintext highlighter-rouge">The frien
 <ul>
   <li>Deletes the friend at the specified <code class="language-plaintext highlighter-rouge">FRIEND_INDEX</code>.</li>
   <li>The index refers to the index number shown in the displayed friend list.</li>
-  <li>The index <strong>must be a positive integer</strong> 1, 2, 3, …​</li>
+  <li>The index <strong>must be a positive integer</strong> 1, 2, 3, …</li>
   <li>Leading and trailing spaces are ignored. The index must have a value from 1 to 2147483647 (inclusive).</li>
   <li>A successful deletion displays <code class="language-plaintext highlighter-rouge">Successfully deleted FRIEND_NAME.</code>
 </li>
-  <li>Deletion happens immediately, with no confirmation dialog and no undo command. The friend’s games are deleted
-with the friend; other friends and your stored profile are preserved. The current friend-list filter stays active.</li>
+  <li>Deletion happens immediately. The friend’s games are deleted with the friend. Other friends and your stored profile
+are preserved and current friend-list filter stays active.</li>
 </ul>
 
 <p>Examples:</p>
@@ -1061,7 +1059,7 @@ with the friend; other friends and your stored profile are preserved. The curren
 
 <p>Format: <code class="language-plaintext highlighter-rouge">clear</code></p>
 
-<p>The command takes effect immediately, with no confirmation or undo. Feedback is <code class="language-plaintext highlighter-rouge">All active and archived friends have been cleared!</code>.
+<p>The command takes effect immediately. Feedback is <code class="language-plaintext highlighter-rouge">All active and archived friends have been cleared!</code>.
 All active and archived friends and their game entries are removed. Back up your data file first if you may need them again.</p>
 
 <h3 id="exiting-the-program-exit">Exiting the program: <code class="language-plaintext highlighter-rouge">exit</code>
@@ -1127,11 +1125,6 @@ the current data, so close the app and restore your backup before entering comma
 Unknown JSON fields are ignored and are not preserved on the next save. Use the supported <code class="language-plaintext highlighter-rouge">metas</code> format for metadata.
 </div>
 
-<h3 id="archiving-data-files-coming-in-v20">Archiving data files <code class="language-plaintext highlighter-rouge">[coming in v2.0]</code>
-</h3>
-
-<p>Future proposal only: automatic archiving is not implemented. Use the manual backup procedure above.</p>
-
 <hr>
 
 <h2 id="faq">FAQ</h2>
@@ -1153,7 +1146,7 @@ and may overwrite each other’s changes, causing data loss.</li>
 Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.</li>
   <li>
 <strong>Some characters count as more than one toward length limits.</strong> Lengths are counted in UTF-16 code units, so
-<code class="language-plaintext highlighter-rouge">😀</code> counts as 2 and <code class="language-plaintext highlighter-rouge">👨‍👩‍👧</code> (built from 3 emoji and 2 joiners) counts as 8.</li>
+<code class="language-plaintext highlighter-rouge">😀</code> counts as 2. Not all emojis are supported by JavaFX.</li>
   <li>
 <strong>The <code class="language-plaintext highlighter-rouge">help</code> and <code class="language-plaintext highlighter-rouge">exit</code> commands fail while saving fails.</strong> GameMates saves after every command, so these commands
 show the <code class="language-plaintext highlighter-rouge">Could not save data</code> error instead. Use these instead:
@@ -1192,7 +1185,7 @@ show the <code class="language-plaintext highlighter-rouge">Could not save data<
     <tr>
       <td><strong>Add</strong></td>
       <td>
-<code class="language-plaintext highlighter-rouge">add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]…</code> <br> e.g., <code class="language-plaintext highlighter-rouge">add n/James Ho t/friend</code>
+<code class="language-plaintext highlighter-rouge">add n/NAME [p/PHONE_NUMBER] [e/EMAIL] [t/TAG]...</code> <br> e.g., <code class="language-plaintext highlighter-rouge">add n/James Ho t/friend</code>
 </td>
     </tr>
     <tr>
@@ -1220,7 +1213,7 @@ show the <code class="language-plaintext highlighter-rouge">Could not save data<
     <tr>
       <td><strong>Edit</strong></td>
       <td>
-<code>edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…</code><br> e.g., <code class="language-plaintext highlighter-rouge">edit myself n/Joash</code> or <code class="language-plaintext highlighter-rouge">edit 2 n/James Lee e/jameslee@example.com</code>
+<code>edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]...</code><br> e.g., <code class="language-plaintext highlighter-rouge">edit myself n/Joash</code> or <code class="language-plaintext highlighter-rouge">edit 2 n/James Lee e/jameslee@example.com</code>
 </td>
     </tr>
     <tr>
@@ -1238,7 +1231,7 @@ show the <code class="language-plaintext highlighter-rouge">Could not save data<
     <tr>
       <td><strong>Game add</strong></td>
       <td>
-<code>gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…</code><br> e.g., <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player123 m/Role:Support</code>
+<code>gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...</code><br> e.g., <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/player123 m/Role:Support</code>
 </td>
     </tr>
     <tr>

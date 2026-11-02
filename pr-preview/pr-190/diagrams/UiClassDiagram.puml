@@ -7,7 +7,6 @@ skinparam classBackgroundColor UI_COLOR
 
 package UI <<Rectangle>>{
 Class "<<interface>>\nUi" as Ui
-Class "{abstract}\nUiPart" as UiPart
 Class UiManager
 Class MainWindow
 Class HelpWindow
@@ -18,6 +17,8 @@ Class FriendDetailsPanel
 Class GameDetailsCard
 Class StatusBarFooter
 Class CommandBox
+Class TagPane
+Class TagLabel
 }
 
 package Model <<Rectangle>> {
@@ -31,39 +32,32 @@ Class HiddenLogic #FFFFFF
 Class HiddenOutside #FFFFFF
 HiddenOutside ..> Ui
 
-UiManager .left.|> Ui
-UiManager -down-> "1" MainWindow
-MainWindow *-down->  "1" CommandBox
-MainWindow *-down-> "1" ResultDisplay
-MainWindow *-down-> "1" FriendListPanel
-MainWindow *-down-> "1" FriendDetailsPanel
-MainWindow *-down-> "1" StatusBarFooter
-MainWindow --> "0..1" HelpWindow
+' Inheritance from UiPart is shown separately in UiPartClassDiagram to keep these arrows readable.
+UiManager .up.|> Ui
+' A small spacer keeps endpoint multiplicities close to, but clear of, arrowheads in Smetana.
+UiManager -down-> "1\n<size:6> </size>" MainWindow
+MainWindow *-down-> "1\n<size:6> </size>" CommandBox
+MainWindow *-down-> "1\n<size:6> </size>" ResultDisplay
+MainWindow *-down-> "1\n<size:6> </size>" FriendListPanel
+MainWindow *-down-> "1\n<size:6> </size>" FriendDetailsPanel
+MainWindow *-down-> "1\n<size:6> </size>" StatusBarFooter
+MainWindow --> "0..1\n<size:6> </size>" HelpWindow
 
-FriendListPanel -down-> "*" FriendCard
-FriendDetailsPanel *-down-> "*" GameDetailsCard
+FriendListPanel -down-> "*\n<size:6> </size>" FriendCard
+FriendDetailsPanel *-down-> "*\n<size:6> </size>" GameDetailsCard
 
-MainWindow -left-|> UiPart
-
-ResultDisplay --|> UiPart
-CommandBox --|> UiPart
-FriendListPanel --|> UiPart
-FriendCard --|> UiPart
-FriendDetailsPanel --|> UiPart
-GameDetailsCard --|> UiPart
-StatusBarFooter --|> UiPart
-HelpWindow --|> UiPart
+FriendCard --> "1\n<size:6> </size>" TagPane
+FriendDetailsPanel --> "1\n<size:6> </size>" TagPane
+TagPane --> "*\n<size:6> </size>" TagLabel
 
 FriendCard ..> Model
 FriendDetailsPanel ..> Model
 GameDetailsCard ..> Model
 UiManager -right-> Logic
-MainWindow -left-> Logic
+MainWindow -right-> Logic
 
 FriendListPanel -[hidden]left- HelpWindow
 HelpWindow -[hidden]left- CommandBox
 CommandBox -[hidden]left- ResultDisplay
 ResultDisplay -[hidden]left- StatusBarFooter
-
-MainWindow -[hidden]-|> UiPart
 @enduml
