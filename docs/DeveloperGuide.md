@@ -16,7 +16,7 @@ Notable uses of AI:
 * The team used AI tools to assist with testing the application and identifying potential bugs and edge cases.
 * AI tools were also used to help identify inconsistencies in the application and its documentation.
 
-This guide describes GameMates' design, implementation and testing. Proposed features are labelled explicitly.
+This guide describes GameMates' current design, implementation and testing.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -87,16 +87,9 @@ The component API is defined in
 
 **UI classes and layouts**
 
-The `UI` consists of these classes, which inherit from `UiPart`:
+These `UI` classes inherit from `UiPart`:
 
-* `MainWindow`
-* `CommandBox`
-* `ResultDisplay`
-* `FriendListPanel`
-* `FriendDetailsPanel`
-* `GameDetailsCard`
-* `HelpWindow`
-* `StatusBarFooter`
+![UI classes that inherit from UiPart](images/UiPartClassDiagram.png)
 
 `UiPart` loads the matching FXML layouts.
 `TagPane` and `TagLabel` wrap tags to the available width in friend cards and the details panel.
@@ -164,7 +157,6 @@ A PlantUML limitation makes it continue to the end of the diagram.
 2. The parser creates an instance of a `Command` subclass, such as `DeleteCommand`.
    `LogicManager` executes that command object.
 3. The command communicates with `Model` as necessary, for example to delete a friend.
-   The diagram shows one interaction for simplicity. The code can use more than one interaction to complete the operation.
 4. The command creates a `CommandResult`.
    `LogicManager` obtains the data through `Model.getGameMates()`.
    Before it returns the result to the `UI`, `LogicManager` saves the complete `ReadOnlyGameMates` through `Storage`.
@@ -224,7 +216,7 @@ so `g/"PUBG n/Game"` gives `PUBG n/Game`.
 
 <img src="images/ModelClassDiagram.png" width="625" />
 
-This partial class diagram shows selected archive-related attributes; unrelated members are omitted.
+This partial class diagram shows selected archive and pin attributes. Unrelated members are omitted.
 `ModelManager.friendListScope` uses the `FriendListScope` enumeration to identify the displayed view.
 
 **Stored data and views**
@@ -412,7 +404,7 @@ Editing Myself preserves the current scope and predicate, including an empty dis
 **Deletion and clearing**
 
 `DeleteCommand` uses the same displayed-list indexing and keeps the current predicate.
-It immediately removes the entire friend and their games. There is no confirmation state.
+It immediately removes the entire friend and their games.
 
 An empty list or out-of-range index produces the shared generic deletion error.
 In contrast, `EditCommand` and `GameListCommand` distinguish empty lists and report a displayed range.
@@ -449,10 +441,10 @@ Their syntax uses `FRIEND_INDEX|myself`.
 This selector accepts either a positive displayed friend index or the case-insensitive profile keyword:
 
 ```text
-edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…
-gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…
+edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]...
+gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...
 gamedel FRIEND_INDEX|myself g/GAME_NAME
-gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]…
+gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...
 gamelist FRIEND_INDEX|myself [g/GAME_NAME]
 ```
 
@@ -476,7 +468,7 @@ The class diagram omits unrelated members. It shows the records as ordinary clas
 
 For profile edits, `EditCommand` constructs the replacement before `FriendValidator` examines name conflicts.
 Validation uses all stored friends, including friends hidden by the current filter.
-Profile edits and both game commands preserve the friend-list filter.
+Profile edits, `gameadd`, `gameedit`, `gamedel` and `gamelist` preserve the friend-list filter.
 `FriendValidator.checkFriendInitialized()` rejects `gameadd`, `gameedit`, `gamedel` and `gamelist` for an unnamed profile.
 The feedback is `Set your profile name first using "edit myself n/NAME" command.`
 
@@ -575,7 +567,6 @@ The resolver rejects missing games and defensively rejects ambiguous in-memory n
 Externally edited JSON with duplicate game names is rejected during loading.
 `Friend.withGames` copies all current friend fields and makes a defensive copy of the replacement set.
 The copy preserves the original archive and pin statuses.
-Its explicit copy constructor must also copy new fields from future integrations.
 
 **View updates and persistence**
 
@@ -660,7 +651,7 @@ They also verify that invalid input preserves the details view.
 
 ### Current limitations
 
-Deletion takes effect immediately. Deletion confirmation, undo and redo are outside the product scope.
+Deletion takes effect immediately.
 
 ### Game metadata
 
@@ -752,7 +743,7 @@ It preserves contact details, tags, games, optional usernames and game metadata.
 The implemented commands are `archive FRIEND_INDEX`, `unarchive FRIEND_INDEX` and `archivelist [g/GAME_NAME]`.
 
 This feature is separate from JSON file backups.
-Automatic backups, scheduled retention and undo are not implemented.
+Automatic backups and scheduled retention are not implemented.
 
 #### Stored status and identity
 
@@ -845,7 +836,6 @@ That approach needs transfers, cross-list uniqueness validation and a different 
 Rebuilding a filtered view scans the underlying collection.
 Separate collections can reduce the scan for active-only views, but global name search must still examine both collections.
 The current design favors simpler state management.
-If measurements establish a performance need, change this design.
 
 Regression tests cover mixed-status searches, filtered displayed indices, invalid targets and empty archive feedback.
 They also cover identity conflicts, edits to archived friends, and save/reload restoration of complete game data.
@@ -880,12 +870,12 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
 
 ### User stories
 
-These user stories include future work. See [Implementation](#implementation) for current features and
+These user stories describe current features. See [Implementation](#implementation) for implementation details and
 [Current limitations](#current-limitations) for unsupported behaviour.
 
-Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
+Priorities: High - `* * *`, Medium - `* *`, Low - `*`
 
-| Priority | As a …​                          | I want to …​                                            | So that I can…​                                                   |
+| Priority | As a ...                          | I want to ...                                            | So that I can...                                                   |
 |----------|----------------------------------|--------------------------------------------------------|------------------------------------------------------------------|
 | `* * *`  | new user                         | see usage instructions                                 | refer to instructions when I forget how to use the App           |
 | `* * *`  | gamer                            | add a gaming friend                                    | remember the people I play games with                            |
@@ -902,19 +892,14 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | gamer                            | edit my own details                                    | keep my profile accurate as my games and usernames change        |
 | `* * *`  | gamer                            | have my data saved automatically                       | keep my friend list after closing the App                        |
 | `* *`    | gamer                            | be warned when adding a friend who already exists      | avoid duplicate entries                                          |
-| `* *`    | gamer                            | see which games my friends and I have in common        | decide what to play together                                     |
 | `* *`    | gamer who plays many games       | see all the games a friend plays                       | know which games I can invite them to                            |
 | `* *`    | gamer                            | record a friend's preferred role (e.g. support, tank)  | put together a balanced team                                     |
 | `* *`    | gamer                            | record the server or region a friend plays on          | invite only friends who can join my lobby                        |
 | `* *`    | gamer                            | record a friend's rank in a game                       | find friends at a similar skill level                            |
 | `* *`    | gamer                            | add notes about a friend's play style                  | remember who is casual and who is competitive                    |
 | `* *`    | gamer                            | tag friends (e.g. "duo", "casual")                     | group them in ways that suit me                                  |
-| `* *`    | expert user                      | use shorter command aliases                            | manage my friends even faster                                    |
 | `*`      | gamer with many friends          | sort friends by name                                   | locate a friend easily                                           |
-| `*`      | gamer                            | mark friends as favourites                             | find my regular teammates first                                  |
-| `*`      | gamer with friends abroad        | record a friend's time zone                            | know when they are likely to be online                           |
-| `*`      | gamer                            | record when I last played with a friend                | reconnect with friends I have not played with in a while         |
-| `*`      | gamer                            | export my friend list                                  | back up my data or move it to another computer                   |
+| `*`      | gamer                            | pin friends to the top of the list                     | find my regular teammates first                                  |
 
 ### Use cases
 
@@ -1029,8 +1014,6 @@ Implemented by `gameedit FRIEND_INDEX g/GAME_NAME u/USERNAME`. The `myself` sele
 
 ### Non-Functional Requirements
 
-These requirements are targets, not measured guarantees. Capacity and performance require separate validation.
-
 #### Environment
 
 1. Should run offline on a single user's personal laptop running a _mainstream OS_, requiring only Java `25` or above.
@@ -1056,7 +1039,7 @@ On a _modern computer_ running Java `25`, with up to 1000 friends in total acros
 #### Usability
 
 1. Users with above-average typing speed for regular English text should be able to add, edit, delete, list and filter friends, and add, delete and list game entries, faster using commands than the mouse.
-1. First-time users should be able to add a friend and a game entry for that friend within 5 minutes of launch, using only the in-app help and sample data.
+1. First-time users should be able to add a friend and a game entry for that friend within 5 minutes of launch, using only the User Guide and sample data.
 1. Invalid commands should explain the error and show the correct usage or allowed input range, without modifying data.
 1. All commands in the User Guide should be usable through the command box alone.
 
@@ -1071,8 +1054,8 @@ On a _modern computer_ running Java `25`, with up to 1000 friends in total acros
 * **Mainstream OS**: Windows, Linux, Unix or macOS.
 * **Friend**: A person stored in GameMates with a unique name. Contact details and game entries are optional.
 * **User profile**: The current user's separately stored details.
-  Use `edit myself ...` to edit the profile. Friend-list commands preserve it.
-* **Game entry**: A record that a friend plays a game. It contains a game name, an in-game username and optional metadata.
+  Use `edit myself` to edit the profile. Friend-list commands preserve it.
+* **Game entry**: A record that a friend plays a game. It contains a game name, an optional in-game username and optional metadata.
 * **Role**: A job or duty that a friend plays in a game. Examples include `Sniper` and `Healer`.
 * **Game name**: The user-provided name that identifies a game within one friend's game entries.
   Aliases such as “Val” and “Valorant” are different game names.
@@ -1106,7 +1089,9 @@ Open a terminal in that folder.
 Start the application with `java -jar gamemates.jar`.
 
 Do not use a real user's data for deletion, corruption or write-failure tests.
-For each scenario labeled **fresh sample data**, use a new disposable folder.
+For each scenario labeled **fresh sample data**, use a new disposable folder and a fresh app start.
+Do not enter any commands before the scenario's first step.
+Indices assume the stated starting data. If an index differs in your app, use the friend's index in your displayed list.
 Do not start two application instances against the same data file.
 
 Enter the commands below in the application's command box, not in the terminal.
@@ -1182,14 +1167,14 @@ Prerequisite: fresh sample data.
 Prerequisite: fresh sample data. These actions are destructive within the disposable folder.
 
 1. `list g/Minecraft`, then `delete 1`: expected Bernice is removed immediately, with
-   `Successfully deleted Bernice Yu.`. No confirmation appears. Roy remains in the filtered list, and other friends
+   `Successfully deleted Bernice Yu.`. Roy remains in the filtered list, and other friends
    reappear with `list`. Bernice's games are removed with her, while Roy's Minecraft entry remains.
 2. `delete`, `delete 0`, `delete -1`, `delete x`, `delete 2147483648`, `delete 1 2` and `delete 999`:
    expected errors without deleting anyone. Missing index reports `Please provide an index.`; malformed values
    report `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`,
    where `INPUT` is the rejected text. An out-of-range index reports `The friend index provided is invalid.`.
 3. `clear`: expected immediate empty list and `All active and archived friends have been cleared!`. `delete 1` then reports the generic
-   invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list. There is no undo.
+   invalid-displayed-index error; `edit 1 n/Test` and `gamelist 1` report an empty displayed list.
 
 ### Saved profile and game round trip
 
@@ -1306,20 +1291,23 @@ After each squad command, confirm unchanged data, list order/filter and selected
 
 ### Manual game edit checks
 
+Prerequisite: fresh sample data, on a fresh app start.
+Run these subsections in order. Each one continues from the previous one.
+
 **Basic game edits**
 
-Use a disposable data directory.
 Enter `add n/Tester`.
-Add the first game with `gameadd 1 g/Valorant u/tester`.
-Add the second game with `gameadd 1 g/Minecraft u/builder`.
+Tester is index 7 in the full list.
+Add the first game with `gameadd 7 g/Valorant u/tester`.
+Add the second game with `gameadd 7 g/Minecraft u/builder`.
 
-Enter `gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Role:Healer`.
+Enter `gameedit 7 g/Valorant n/VALORANT u/newPlayer m/Role:Healer`.
 Expect both games to remain and the other friend fields to stay unchanged.
 
-Try `gameedit 1 g/Valorant n/Minecraft`.
-Also try repeated normalized metadata keys.
+Try `gameedit 7 g/Valorant n/Minecraft`.
+Also try repeated normalized metadata keys with `gameedit 7 g/Valorant m/Role:A m/role:B`.
 Expect errors with unchanged data and details.
-Clear metadata with `gameedit 1 g/Valorant m/`.
+Clear metadata with `gameedit 7 g/Valorant m/`.
 
 Set up the profile with `edit myself n/Owner`.
 Add a profile game with `gameadd myself g/Valorant u/own`.
@@ -1332,28 +1320,29 @@ Make sure that all edits persist.
 **Literal prefixes**
 
 Enter `list`.
-Add `gameadd 1 g/PUBG u/plain`.
-Then add `gameadd 1 g/PUBG n/Game u/special`.
+Add `gameadd 7 g/PUBG u/plain`.
+Then add `gameadd 7 g/PUBG n/Game u/special`.
 
-Enter `gameedit 1 g/"PUBG n/Game" u/updated`.
+Enter `gameedit 7 g/"PUBG n/Game" u/updated`.
 Only `PUBG n/Game` must change. The plain `PUBG` entry must keep username `plain`.
 
-Rename the quoted target with `n/"PUBG m/Edition"`.
-Edit it again with `g/"PUBG m/Edition"`.
-Try an unclosed quoted selector.
+Rename the quoted target with `gameedit 7 g/"PUBG n/Game" n/"PUBG m/Edition"`.
+Edit it again with `gameedit 7 g/"PUBG m/Edition" u/again`.
+Try an unclosed quoted selector with `gameedit 7 g/"PUBG m/Edition u/bad`.
 Expect an error without changes to either game.
 
 **Archived targets**
 
 Enter `list`.
-Enter `archive 1`.
+Enter `archive 7`.
 Enter `archivelist`.
+Tester is now index 1.
 Edit the game with `gameedit 1 g/Valorant u/archivePlayer`.
 Expect the friend to stay archived and the heading to stay `Archived friends`.
 Other fields and games must stay unchanged.
 
 Enter `find Tester`.
-Edit the same game again.
+Edit the same game again with `gameedit 1 g/Valorant u/searchPlayer`.
 Expect the archive status and `Search results` scope to remain.
 Restart and use `archivelist`.
 Make sure that the edited game and archive status were saved.
@@ -1362,17 +1351,18 @@ Make sure that the edited game and archive status were saved.
 
 Enter `unarchive 1`.
 Enter `list`.
-Enter `pin 1`.
+Enter `pin 7`.
+Tester moves to index 1.
 Edit the game with `gameedit 1 g/Valorant m/Role:Tank`.
 Expect the friend to keep the pinned badge and list position.
 The details card must show `Role: Tank`.
 
-Archive the pinned friend.
+Archive the pinned friend with `archive 1`.
 Enter `archivelist`.
-Edit the username again.
+Edit the username again with `gameedit 1 g/Valorant u/again`.
 Restart and use `archivelist`.
 Expect the edited game and archive status to persist, with no pinned badge.
-Enter `pin 1` and `unpin 1`; both must reject the archived target without changing data.
-Enter `find Tester` and repeat both commands on the archived result; both must still be rejected.
+Enter `pin 1` and `unpin 1`. Both must reject the archived target without changing data.
+Enter `find Tester` and repeat both commands on the archived result. Both must still be rejected.
 Enter `unarchive 1`, then `list`.
-Expect the restored friend to remain unpinned; pinning must be requested explicitly again.
+Expect the restored friend to remain unpinned. Pinning must be requested explicitly again.
