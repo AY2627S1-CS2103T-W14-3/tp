@@ -1502,7 +1502,9 @@ Open a terminal in that folder.
 Start the application with <code class="language-plaintext highlighter-rouge">java -jar gamemates.jar</code>.</p>
 
 <p>Do not use a real user’s data for deletion, corruption or write-failure tests.
-For each scenario labeled <strong>fresh sample data</strong>, use a new disposable folder.
+For each scenario labeled <strong>fresh sample data</strong>, use a new disposable folder and a fresh app start.
+Do not enter any commands before the scenario’s first step.
+Indices assume the stated starting data. If an index differs in your app, use the friend’s index in your displayed list.
 Do not start two application instances against the same data file.</p>
 
 <p>Enter the commands below in the application’s command box, not in the terminal.</p>
@@ -1853,20 +1855,23 @@ gamelist 1 g/Valorant
 
 <h3 id="manual-game-edit-checks">Manual game edit checks</h3>
 
+<p>Prerequisite: fresh sample data, on a fresh app start.
+Run these subsections in order. Each one continues from the previous one.</p>
+
 <p><strong>Basic game edits</strong></p>
 
-<p>Use a disposable data directory.
-Enter <code class="language-plaintext highlighter-rouge">add n/Tester</code>.
-Add the first game with <code class="language-plaintext highlighter-rouge">gameadd 1 g/Valorant u/tester</code>.
-Add the second game with <code class="language-plaintext highlighter-rouge">gameadd 1 g/Minecraft u/builder</code>.</p>
+<p>Enter <code class="language-plaintext highlighter-rouge">add n/Tester</code>.
+Tester is index 7 in the full list.
+Add the first game with <code class="language-plaintext highlighter-rouge">gameadd 7 g/Valorant u/tester</code>.
+Add the second game with <code class="language-plaintext highlighter-rouge">gameadd 7 g/Minecraft u/builder</code>.</p>
 
-<p>Enter <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant n/VALORANT u/newPlayer m/Role:Healer</code>.
+<p>Enter <code class="language-plaintext highlighter-rouge">gameedit 7 g/Valorant n/VALORANT u/newPlayer m/Role:Healer</code>.
 Expect both games to remain and the other friend fields to stay unchanged.</p>
 
-<p>Try <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant n/Minecraft</code>.
-Also try repeated normalized metadata keys.
+<p>Try <code class="language-plaintext highlighter-rouge">gameedit 7 g/Valorant n/Minecraft</code>.
+Also try repeated normalized metadata keys with <code class="language-plaintext highlighter-rouge">gameedit 7 g/Valorant m/Role:A m/role:B</code>.
 Expect errors with unchanged data and details.
-Clear metadata with <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant m/</code>.</p>
+Clear metadata with <code class="language-plaintext highlighter-rouge">gameedit 7 g/Valorant m/</code>.</p>
 
 <p>Set up the profile with <code class="language-plaintext highlighter-rouge">edit myself n/Owner</code>.
 Add a profile game with <code class="language-plaintext highlighter-rouge">gameadd myself g/Valorant u/own</code>.
@@ -1879,28 +1884,29 @@ Make sure that all edits persist.</p>
 <p><strong>Literal prefixes</strong></p>
 
 <p>Enter <code class="language-plaintext highlighter-rouge">list</code>.
-Add <code class="language-plaintext highlighter-rouge">gameadd 1 g/PUBG u/plain</code>.
-Then add <code class="language-plaintext highlighter-rouge">gameadd 1 g/PUBG n/Game u/special</code>.</p>
+Add <code class="language-plaintext highlighter-rouge">gameadd 7 g/PUBG u/plain</code>.
+Then add <code class="language-plaintext highlighter-rouge">gameadd 7 g/PUBG n/Game u/special</code>.</p>
 
-<p>Enter <code class="language-plaintext highlighter-rouge">gameedit 1 g/"PUBG n/Game" u/updated</code>.
+<p>Enter <code class="language-plaintext highlighter-rouge">gameedit 7 g/"PUBG n/Game" u/updated</code>.
 Only <code class="language-plaintext highlighter-rouge">PUBG n/Game</code> must change. The plain <code class="language-plaintext highlighter-rouge">PUBG</code> entry must keep username <code class="language-plaintext highlighter-rouge">plain</code>.</p>
 
-<p>Rename the quoted target with <code class="language-plaintext highlighter-rouge">n/"PUBG m/Edition"</code>.
-Edit it again with <code class="language-plaintext highlighter-rouge">g/"PUBG m/Edition"</code>.
-Try an unclosed quoted selector.
+<p>Rename the quoted target with <code class="language-plaintext highlighter-rouge">gameedit 7 g/"PUBG n/Game" n/"PUBG m/Edition"</code>.
+Edit it again with <code class="language-plaintext highlighter-rouge">gameedit 7 g/"PUBG m/Edition" u/again</code>.
+Try an unclosed quoted selector with <code class="language-plaintext highlighter-rouge">gameedit 7 g/"PUBG m/Edition u/bad</code>.
 Expect an error without changes to either game.</p>
 
 <p><strong>Archived targets</strong></p>
 
 <p>Enter <code class="language-plaintext highlighter-rouge">list</code>.
-Enter <code class="language-plaintext highlighter-rouge">archive 1</code>.
+Enter <code class="language-plaintext highlighter-rouge">archive 7</code>.
 Enter <code class="language-plaintext highlighter-rouge">archivelist</code>.
+Tester is now index 1.
 Edit the game with <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant u/archivePlayer</code>.
 Expect the friend to stay archived and the heading to stay <code class="language-plaintext highlighter-rouge">Archived friends</code>.
 Other fields and games must stay unchanged.</p>
 
 <p>Enter <code class="language-plaintext highlighter-rouge">find Tester</code>.
-Edit the same game again.
+Edit the same game again with <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant u/searchPlayer</code>.
 Expect the archive status and <code class="language-plaintext highlighter-rouge">Search results</code> scope to remain.
 Restart and use <code class="language-plaintext highlighter-rouge">archivelist</code>.
 Make sure that the edited game and archive status were saved.</p>
@@ -1909,20 +1915,21 @@ Make sure that the edited game and archive status were saved.</p>
 
 <p>Enter <code class="language-plaintext highlighter-rouge">unarchive 1</code>.
 Enter <code class="language-plaintext highlighter-rouge">list</code>.
-Enter <code class="language-plaintext highlighter-rouge">pin 1</code>.
+Enter <code class="language-plaintext highlighter-rouge">pin 7</code>.
+Tester moves to index 1.
 Edit the game with <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant m/Role:Tank</code>.
 Expect the friend to keep the pinned badge and list position.
 The details card must show <code class="language-plaintext highlighter-rouge">Role: Tank</code>.</p>
 
-<p>Archive the pinned friend.
+<p>Archive the pinned friend with <code class="language-plaintext highlighter-rouge">archive 1</code>.
 Enter <code class="language-plaintext highlighter-rouge">archivelist</code>.
-Edit the username again.
+Edit the username again with <code class="language-plaintext highlighter-rouge">gameedit 1 g/Valorant u/again</code>.
 Restart and use <code class="language-plaintext highlighter-rouge">archivelist</code>.
 Expect the edited game and archive status to persist, with no pinned badge.
-Enter <code class="language-plaintext highlighter-rouge">pin 1</code> and <code class="language-plaintext highlighter-rouge">unpin 1</code>; both must reject the archived target without changing data.
-Enter <code class="language-plaintext highlighter-rouge">find Tester</code> and repeat both commands on the archived result; both must still be rejected.
+Enter <code class="language-plaintext highlighter-rouge">pin 1</code> and <code class="language-plaintext highlighter-rouge">unpin 1</code>. Both must reject the archived target without changing data.
+Enter <code class="language-plaintext highlighter-rouge">find Tester</code> and repeat both commands on the archived result. Both must still be rejected.
 Enter <code class="language-plaintext highlighter-rouge">unarchive 1</code>, then <code class="language-plaintext highlighter-rouge">list</code>.
-Expect the restored friend to remain unpinned; pinning must be requested explicitly again.</p>
+Expect the restored friend to remain unpinned. Pinning must be requested explicitly again.</p>
 
   </div>
 
