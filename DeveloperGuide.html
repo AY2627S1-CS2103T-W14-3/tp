@@ -570,10 +570,10 @@ The first <code class="language-plaintext highlighter-rouge">edit myself</code> 
 <p>Their syntax uses <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code>.
 This selector accepts either a positive displayed friend index or the case-insensitive profile keyword:</p>
 
-<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]…
-gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USER_NAME] [m/KEY:VALUE]…
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG]...
+gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...
 gamedel FRIEND_INDEX|myself g/GAME_NAME
-gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]…
+gameedit FRIEND_INDEX|myself g/EXISTING_GAME [n/NEW_GAME_NAME] [u/USERNAME] [m/KEY:VALUE]...
 gamelist FRIEND_INDEX|myself [g/GAME_NAME]
 </code></pre></div></div>
 
@@ -599,7 +599,7 @@ An exhaustive switch routes <code class="language-plaintext highlighter-rouge">M
 
 <p>For profile edits, <code class="language-plaintext highlighter-rouge">EditCommand</code> constructs the replacement before <code class="language-plaintext highlighter-rouge">FriendValidator</code> examines name conflicts.
 Validation uses all stored friends, including friends hidden by the current filter.
-Profile edits and both game commands preserve the friend-list filter.
+Profile edits, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code>, <code class="language-plaintext highlighter-rouge">gamedel</code> and <code class="language-plaintext highlighter-rouge">gamelist</code> preserve the friend-list filter.
 <code class="language-plaintext highlighter-rouge">FriendValidator.checkFriendInitialized()</code> rejects <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gameedit</code>, <code class="language-plaintext highlighter-rouge">gamedel</code> and <code class="language-plaintext highlighter-rouge">gamelist</code> for an unnamed profile.
 The feedback is <code class="language-plaintext highlighter-rouge">Set your profile name first using "edit myself n/NAME" command.</code></p>
 
@@ -1059,9 +1059,9 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
   <thead>
     <tr>
       <th>Priority</th>
-      <th>As a …​</th>
-      <th>I want to …​</th>
-      <th>So that I can…​</th>
+      <th>As a …</th>
+      <th>I want to …</th>
+      <th>So that I can…</th>
     </tr>
   </thead>
   <tbody>
@@ -1395,8 +1395,6 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
 
 <h3 id="non-functional-requirements">Non-Functional Requirements</h3>
 
-<p>These requirements are targets, not measured guarantees. Capacity and performance require separate validation.</p>
-
 <h4 id="environment">Environment</h4>
 
 <ol>
@@ -1431,7 +1429,7 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
 
 <ol>
   <li>Users with above-average typing speed for regular English text should be able to add, edit, delete, list and filter friends, and add, delete and list game entries, faster using commands than the mouse.</li>
-  <li>First-time users should be able to add a friend and a game entry for that friend within 5 minutes of launch, using only the in-app help and sample data.</li>
+  <li>First-time users should be able to add a friend and a game entry for that friend within 5 minutes of launch, using only the User Guide and sample data.</li>
   <li>Invalid commands should explain the error and show the correct usage or allowed input range, without modifying data.</li>
   <li>All commands in the User Guide should be usable through the command box alone.</li>
 </ol>
@@ -1454,9 +1452,9 @@ Examples of that processor class include Intel Core i5 and AMD Ryzen 5.</li>
 <strong>Friend</strong>: A person stored in GameMates with a unique name. Contact details and game entries are optional.</li>
   <li>
 <strong>User profile</strong>: The current user’s separately stored details.
-Use <code class="language-plaintext highlighter-rouge">edit myself ...</code> to edit the profile. Friend-list commands preserve it.</li>
+Use <code class="language-plaintext highlighter-rouge">edit myself</code> to edit the profile. Friend-list commands preserve it.</li>
   <li>
-<strong>Game entry</strong>: A record that a friend plays a game. It contains a game name, an in-game username and optional metadata.</li>
+<strong>Game entry</strong>: A record that a friend plays a game. It contains a game name, an optional in-game username and optional metadata.</li>
   <li>
 <strong>Role</strong>: A job or duty that a friend plays in a game. Examples include <code class="language-plaintext highlighter-rouge">Sniper</code> and <code class="language-plaintext highlighter-rouge">Healer</code>.</li>
   <li>
