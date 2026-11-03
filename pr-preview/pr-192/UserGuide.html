@@ -1187,8 +1187,8 @@ and may overwrite each other’s changes, causing data loss.</li>
   <li>
 <strong>GameMates primarily supports English.</strong> Friend names, tags, phones and emails accept only ASCII characters.
 Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.
-Some Unicode case variants, such as <code class="language-plaintext highlighter-rouge">ΟΣ</code> and <code class="language-plaintext highlighter-rouge">οσ</code>, count as distinct metadata keys and do not match in <code class="language-plaintext highlighter-rouge">squad</code>.
-Use English keys or consistent spelling.</li>
+Some Unicode case variants, such as <code class="language-plaintext highlighter-rouge">ΟΣ</code> and <code class="language-plaintext highlighter-rouge">οσ</code>, count as different game names and metadata keys.
+They do not match each other in <code class="language-plaintext highlighter-rouge">list</code>, <code class="language-plaintext highlighter-rouge">gamelist</code> or <code class="language-plaintext highlighter-rouge">squad</code>. Use English or consistent spelling.</li>
   <li>
 <strong>Some characters count as more than one toward length limits.</strong> Lengths are counted in UTF-16 code units, so
 <code class="language-plaintext highlighter-rouge">😀</code> counts as 2. Not all emojis are supported by JavaFX.</li>
