@@ -595,7 +595,7 @@ Names stay ASCII-only because <code class="language-plaintext highlighter-rouge"
 <h3 id="myself-profile">Myself profile</h3>
 
 <p><code class="language-plaintext highlighter-rouge">GameMates</code> stores the user’s profile as a separate <code class="language-plaintext highlighter-rouge">Friend</code>, initially <code class="language-plaintext highlighter-rouge">Friend.DEFAULT_MYSELF</code>.
-<code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code> and <code class="language-plaintext highlighter-rouge">gamedel</code> accept <code class="language-plaintext highlighter-rouge">myself</code> independently of the displayed friend list and profile name.
+<code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamelist</code> accept <code class="language-plaintext highlighter-rouge">myself</code> independently of the displayed friend list and profile name.
 The default profile has <code class="language-plaintext highlighter-rouge">Name.EMPTY</code>, rather than reserving the friend name <code class="language-plaintext highlighter-rouge">Myself</code>.
 The first <code class="language-plaintext highlighter-rouge">edit myself</code> must supply a name, as in <code class="language-plaintext highlighter-rouge">edit myself n/NAME</code>. Later profile edits can omit it.</p>
 
@@ -611,7 +611,7 @@ gamelist FRIEND_INDEX|myself [g/GAME_NAME]
 
 <p><strong>Target resolution</strong></p>
 
-<p>The sealed <code class="language-plaintext highlighter-rouge">FriendTarget</code> interface lets these commands update the profile or a listed friend.
+<p>The sealed <code class="language-plaintext highlighter-rouge">FriendTarget</code> interface lets these commands read or update the profile or a listed friend.
 Its nested <code class="language-plaintext highlighter-rouge">Myself</code> and <code class="language-plaintext highlighter-rouge">ListedFriend</code> records retain the selected <code class="language-plaintext highlighter-rouge">Friend</code> and identify the update destination.
 They keep that destination even if the friend-list filter changes.</p>
 
@@ -620,10 +620,10 @@ They keep that destination even if the friend-list filter changes.</p>
 <p><img src="/tp/images/MyselfTargetClassDiagram.png" alt="Classes involved in resolving and updating a friend target"></p>
 
 <ol>
-  <li>The three command parsers use <code class="language-plaintext highlighter-rouge">ParserUtil.parseIndexOrMyself</code>.
+  <li>These five command parsers use <code class="language-plaintext highlighter-rouge">ParserUtil.parseIndexOrMyself</code>.
 A case-insensitive <code class="language-plaintext highlighter-rouge">Index.MYSELF_KEYWORD</code> becomes <code class="language-plaintext highlighter-rouge">Index.myself()</code>; numeric selectors remain displayed friend indices.</li>
   <li>During execution, <code class="language-plaintext highlighter-rouge">ModelManager.resolveFriend(index)</code> captures the profile or currently displayed friend in a target.</li>
-  <li>The command constructs and validates a replacement <code class="language-plaintext highlighter-rouge">Friend</code>, then calls <code class="language-plaintext highlighter-rouge">ModelManager.setFriend(target, updatedFriend)</code>.
+  <li>Commands that modify data construct and validate a replacement <code class="language-plaintext highlighter-rouge">Friend</code>, then call <code class="language-plaintext highlighter-rouge">ModelManager.setFriend(target, updatedFriend)</code>.
 An exhaustive switch routes <code class="language-plaintext highlighter-rouge">Myself</code> to the profile and <code class="language-plaintext highlighter-rouge">ListedFriend</code> to its captured friend.</li>
 </ol>
 
