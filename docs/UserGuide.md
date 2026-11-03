@@ -325,6 +325,7 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...`
   Keys allow 1–50 characters and values allow 1–200. Both follow the game-name character rules.
   Only values may contain colons.
 * Repeat `m/` for distinct keys. Metadata keys are case-insensitive, so `Role` and `role` are duplicates.
+  Non-English keys have [case-matching limitations](#known-limitations).
   Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
   Omit `m/` entirely for no metadata.
 * A space followed by `g/`, `u/` or `m/` starts a new parameter. Quote the whole value to include such text.
@@ -439,6 +440,7 @@ Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME
 * Supplying metadata **replaces the entire metadata set**. Omitting `m/` preserves it. A single empty `m/` clears all metadata. Do not mix an empty `m/` with pairs.
 * Pairs split at the first colon: `m/Region:Asia:SG` means key `Region`, value `Asia:SG`. Keys and values are trimmed independently. Keys use 1–50 characters and cannot contain colons; values use 1–200 characters. Both require a letter or digit and reject control characters, using the existing game metadata validation.
 * Keys are unique ignoring case: `m/Role:Healer m/role:Healer` is rejected even though the values agree. Values preserve case.
+  Non-English keys have [case-matching limitations](#known-limitations).
 * Every edit is validated before any data changes. On success, the right panel shows the updated friend (all games) or your updated profile. Feedback includes the resulting game name, username and metadata. Metadata is saved and displayed on game cards below the username.
 
 Examples:
@@ -480,6 +482,7 @@ Format: `squad g/GAME_NAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`
   metadata on another game cannot satisfy a condition. Extra stored metadata is allowed.
 * Keys match ignoring case. Values match exactly and are **case-sensitive**: `m/role:Healer` matches
   `Role:Healer`, while `m/role:healer` does not. There are no numeric comparisons, role quotas or OR expressions.
+  Non-English keys have [case-matching limitations](#known-limitations).
 * Quote the whole value when it contains a command prefix. For example, `m/"Note:Prefer n/3"`
   matches the stored pair `Note:Prefer n/3`; `g/"Version n/2"` selects that complete game name.
 * Pairs split at the first colon: `m/Region:Asia:SG` matches the value `Asia:SG`. Keys and values are trimmed.
@@ -606,8 +609,8 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
   `find` does not accept `n/` or `g/` as filter syntax; such text is treated as literal name keywords.
 * Do not wrap keywords in quotes. Quotes are read as part of the keyword.
 * Results appear under **Search results**, with an **Archived** badge on archived friends.
-* `archive FRIEND_INDEX` archives an active result; `unarchive FRIEND_INDEX` restores an archived result. The friend stays in
-  the search results with their updated status, and the search filter and displayed order stay in place.
+* `archive FRIEND_INDEX` archives an active result; `unarchive FRIEND_INDEX` restores an archived result.
+  The friend stays visible with their updated status. The search filter is unchanged.
 * Archiving an already archived search result reports `This friend is already archived.` without changing data.
 * `list` returns to active friends; `archivelist [g/GAME_NAME]` switches to archived friends only.
 * Feedback is `N friend(s) listed!`. No matches is a successful empty search view. Exactly one result also opens that
@@ -828,6 +831,8 @@ while copying the file, then launch the destination app from its usual data fold
    and may overwrite each other's changes, causing data loss.
 2. **GameMates primarily supports English.** Friend names, tags, phones and emails accept only ASCII characters.
    Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.
+   Some Unicode case variants, such as `ΟΣ` and `οσ`, count as distinct metadata keys and do not match in `squad`.
+   Use English keys or consistent spelling.
 3. **Some characters count as more than one toward length limits.** Lengths are counted in UTF-16 code units, so
    `😀` counts as 2. Not all emojis are supported by JavaFX.
 4. **`help` and `exit` do not run while saving fails.** GameMates saves after every command, so these commands show
