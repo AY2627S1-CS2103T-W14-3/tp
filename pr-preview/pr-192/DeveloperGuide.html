@@ -353,7 +353,10 @@ Users add a space before the closing quote, which trimming removes.</li>
 <p><img src="images/ModelClassDiagram.png" width="625"></p>
 
 <p>This partial class diagram shows selected archive and pin attributes. Unrelated members are omitted.
-<code class="language-plaintext highlighter-rouge">ModelManager.friendListScope</code> uses the <code class="language-plaintext highlighter-rouge">FriendListScope</code> enumeration to identify the displayed view.</p>
+<code class="language-plaintext highlighter-rouge">ModelManager.friendListScope</code> uses the <code class="language-plaintext highlighter-rouge">FriendListScope</code> enumeration to identify the displayed view.
+Links from <code class="language-plaintext highlighter-rouge">Friend</code>, <code class="language-plaintext highlighter-rouge">Game</code> and <code class="language-plaintext highlighter-rouge">Meta</code> to their immutable field objects are ordinary associations:
+these objects can be shared, including the <code class="language-plaintext highlighter-rouge">Phone.EMPTY</code>, <code class="language-plaintext highlighter-rouge">Email.EMPTY</code> and <code class="language-plaintext highlighter-rouge">Username.EMPTY</code> singletons.
+The composition diamond marks <code class="language-plaintext highlighter-rouge">GameMates</code>’ ownership of its <code class="language-plaintext highlighter-rouge">UniqueFriendList</code> container.</p>
 
 <p><strong>Stored data and views</strong></p>
 
