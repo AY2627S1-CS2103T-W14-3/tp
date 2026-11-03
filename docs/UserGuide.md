@@ -767,7 +767,7 @@ or use `exit`.
 If saving fails, an error starting with `Could not save data` appears. The change still shows in the app, but it is
 not saved and will be lost on exit. Fix the issue (e.g. restore write access to the data folder), then run any
 command such as `list` to save again.
-When saving fails, the `help` and `exit` commands also fail. See [Known limitations](#known-limitations) for the workaround.
+While saving fails, `help` and `exit` do not run. See [Known limitations](#known-limitations) for the workaround.
 
 ### Editing the data file
 
@@ -830,12 +830,12 @@ while copying the file, then launch the destination app from its usual data fold
    Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.
 3. **Some characters count as more than one toward length limits.** Lengths are counted in UTF-16 code units, so
    `😀` counts as 2. Not all emojis are supported by JavaFX.
-4. **The `help` and `exit` commands fail while saving fails.** GameMates saves after every command, so these commands
-   show the `Could not save data` error instead. Use these instead:
+4. **`help` and `exit` do not run while saving fails.** GameMates saves after every command, so these commands show
+   the `Could not save data` error. The error says the command was applied, but the help window does not open and
+   the app stays open. Use these instead:
    * To open help, use the **Help** menu or press `F1`.
-   * To close the app, use **File** > **Exit** or the window's close button.
-
-   Closing the app this way discards any changes that were not saved. To keep them, fix the save issue first.
+   * To close the app, use **File** > **Exit** or the window's close button. This discards unsaved changes, so fix
+     the save issue first if you want to keep them.
 
 --------------------------------------------------------------------------------------------------------------------
 

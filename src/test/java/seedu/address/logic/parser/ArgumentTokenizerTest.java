@@ -52,8 +52,10 @@ public class ArgumentTokenizerTest {
 
     @Test
     public void tokenize_malformedQuotedValues_throwsParseException() throws Exception {
-        assertTokenizeFailure(ArgumentTokenizer.MESSAGE_UNCLOSED_QUOTE,
-                " p/\"open", " p/\"open -tvalue", " p/\"escaped\\\"", " p/\"a\\\\\"");
+        assertTokenizeFailure(ArgumentTokenizer.MESSAGE_UNCLOSED_QUOTE, " p/\"open", " p/\"open -tvalue");
+        // An escaped quote at the end explains how to end a value with a backslash.
+        assertTokenizeFailure(ArgumentTokenizer.MESSAGE_UNCLOSED_QUOTE_AFTER_BACKSLASH,
+                " p/\"escaped\\\"", " p/\"a\\\\\"", " p/\"escaped\\\"  ");
         assertTokenizeFailure(ArgumentTokenizer.MESSAGE_TEXT_AFTER_QUOTE,
                 " p/\"done\"extra", " p/\"done\" extra -tvalue");
         assertTokenizeFailure(ArgumentTokenizer.MESSAGE_BARE_QUOTE, " p/end\"", " p/mid \"dle\" -tvalue");
