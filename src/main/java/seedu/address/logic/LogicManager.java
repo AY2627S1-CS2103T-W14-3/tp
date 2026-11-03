@@ -22,7 +22,7 @@ import seedu.address.storage.Storage;
  */
 public class LogicManager implements Logic {
     public static final String FILE_OPS_UNSAVED_CHANGES_NOTE =
-            "\nThe change was applied but not saved, and will be lost on exit. "
+            "\nThe command action was applied but any changes are not saved, and will be lost on exit. "
             + "Fix the issue, then run any command (e.g. `list`) to save again.";
 
     public static final String FILE_OPS_ERROR_FORMAT = "Could not save data due to the following error: %s"
