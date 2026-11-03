@@ -1095,7 +1095,8 @@ All active and archived friends and their game entries are removed. Back up your
 <h3 id="using-quotes-in-values">Using quotes in values</h3>
 
 <p>Quotes work only in values typed after a prefix, such as <code class="language-plaintext highlighter-rouge">n/</code> or <code class="language-plaintext highlighter-rouge">g/</code>. Elsewhere, <code class="language-plaintext highlighter-rouge">"</code> is a normal character,
-so <code class="language-plaintext highlighter-rouge">find "Alex"</code> finds no one. Most values do not need quotes. Use them only when a value contains prefix text such as ` u/`.</p>
+so <code class="language-plaintext highlighter-rouge">find "Alex"</code> searches for the word <code class="language-plaintext highlighter-rouge">"Alex"</code>, including the quotes, and does not match a friend named <code class="language-plaintext highlighter-rouge">Alex</code>.
+Most values do not need quotes. Use them only when a value contains prefix text such as ` u/`.</p>
 
 <ul>
   <li>Wrap the whole value in double quotes. For example, <code class="language-plaintext highlighter-rouge">g/"PUBG u/Game"</code> is the game name <code class="language-plaintext highlighter-rouge">PUBG u/Game</code>.</li>
