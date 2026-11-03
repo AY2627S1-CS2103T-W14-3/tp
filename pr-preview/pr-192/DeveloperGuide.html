@@ -753,7 +753,10 @@ Save/reload tests verify both archive and pin status.
 Other tests cover command routing, atomic validation, displayed targets, metadata replacement and profile updates.
 They also cover case-only spelling, <code class="language-plaintext highlighter-rouge">UI</code> refresh and real JSON storage round trips.</p>
 
-<p>The <a href="/tp/pr-preview/pr-192/diagrams/GameEditSequenceDiagram.puml">game edit sequence diagram source</a> shows validation before mutation.</p>
+<p>The sequence shows a successful <code class="language-plaintext highlighter-rouge">gameedit</code> on a displayed friend after parsing. Helper calls and saving are omitted.
+For <code class="language-plaintext highlighter-rouge">myself</code>, <code class="language-plaintext highlighter-rouge">resolveFriend</code> creates a <code class="language-plaintext highlighter-rouge">Myself</code> target instead of a <code class="language-plaintext highlighter-rouge">ListedFriend</code>.</p>
+
+<p><img src="/tp/pr-preview/pr-192/images/GameEditSequenceDiagram.png" alt="Editing a game after validation"></p>
 
 <h3 id="viewing-a-friends-games">Viewing a friend’s games</h3>
 
@@ -1075,9 +1078,9 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
   <li>Have many gaming friends across different games or platforms.</li>
   <li>Want to remember each friend’s in-game usernames, preferred roles, servers, play styles, or other game-specific details.</li>
   <li>Prefer using a command-line interface over navigating menus and mouse interactions.</li>
-  <li>Prefers a desktop application for managing gaming contacts.</li>
-  <li>Is comfortable typing commands to manage information quickly.</li>
-  <li>Still wants a simple visual interface to view their friend and game information clearly.</li>
+  <li>Prefer a desktop application for managing gaming contacts.</li>
+  <li>Are comfortable typing commands to manage information quickly.</li>
+  <li>Still want a simple visual interface to view their friend and game information clearly.</li>
 </ul>
 
 <p><strong>Value proposition</strong>: Manage gaming friends and their game-specific details faster than generic contacts apps, spreadsheets, or chat history searches.</p>
