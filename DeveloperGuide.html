@@ -58,7 +58,11 @@
   </li>
   <li>
 <a href="#implementation" id="markdown-toc-implementation"><strong>Implementation</strong></a>    <ul>
-      <li><a href="#friend-creation-editing-and-deletion" id="markdown-toc-friend-creation-editing-and-deletion">Friend creation, editing and deletion</a></li>
+      <li>
+<a href="#friend-creation-editing-and-deletion" id="markdown-toc-friend-creation-editing-and-deletion">Friend creation, editing and deletion</a>        <ul>
+          <li><a href="#name-validation" id="markdown-toc-name-validation">Name validation</a></li>
+        </ul>
+      </li>
       <li><a href="#myself-profile" id="markdown-toc-myself-profile">Myself profile</a></li>
       <li><a href="#name-and-game-filtering" id="markdown-toc-name-and-game-filtering">Name and game filtering</a></li>
       <li><a href="#squad-metadata-conditions" id="markdown-toc-squad-metadata-conditions">Squad metadata conditions</a></li>
@@ -394,7 +398,7 @@ Explicit name/game comparators also put pinned friends first. JSON saves the ori
 <p><strong>Game fields and identity</strong></p>
 
 <p><code class="language-plaintext highlighter-rouge">Game</code> contains a <code class="language-plaintext highlighter-rouge">GameName</code>, a <code class="language-plaintext highlighter-rouge">Username</code> and an immutable metadata set.
-<code class="language-plaintext highlighter-rouge">Name</code> equality ignores case and treats repeated ASCII spaces as one space.
+<code class="language-plaintext highlighter-rouge">Name</code> equality ignores case and treats repeated ASCII spaces as one space. Symbols are compared as typed.
 <code class="language-plaintext highlighter-rouge">GameName.equals</code> compares complete names after lower-case normalization with <code class="language-plaintext highlighter-rouge">Locale.ROOT</code>.</p>
 
 <p><code class="language-plaintext highlighter-rouge">Username</code> preserves case. An omitted username uses <code class="language-plaintext highlighter-rouge">Username.EMPTY</code>; <code class="language-plaintext highlighter-rouge">isEmpty()</code> identifies that value.
@@ -547,7 +551,7 @@ It immediately removes the entire friend and their games.</p>
 <p><strong>Field validation</strong></p>
 
 <p>The contact rules differ from the submitted draft.
-Names accept 1–100 ASCII alphanumeric characters and spaces.
+Names follow the <a href="#name-validation">name validation</a> rules.
 Phone validation examines digit counts and grouping. Email validation uses ASCII dot-atom and domain syntax with length limits.
 The <a href="UserGuide.html#adding-a-friend-add">User Guide</a> defines the accepted input.</p>
 
@@ -565,6 +569,28 @@ and the combining grapheme joiner U+034F</li>
 
 <p>Other Unicode is accepted, including combining marks, emoji and variation selectors.
 These rules define the application’s accepted text characters; they do not test how every font renders each character.</p>
+
+<h4 id="name-validation">Name validation</h4>
+
+<p><code class="language-plaintext highlighter-rouge">Name.isValidName</code> trims the value, then checks the 100-character limit and <code class="language-plaintext highlighter-rouge">Name.VALIDATION_REGEX</code>
+(<code class="language-plaintext highlighter-rouge">\p{Graph}\p{Print}*</code>). This accepts printable ASCII, including symbol-only names such as <code class="language-plaintext highlighter-rouge">---</code>, and rejects blank names.
+Commands and saved data both use it.
+Names stay ASCII-only because <code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">Name.equals</code> compare exact characters, so <code class="language-plaintext highlighter-rouge">Elodie</code> would not match <code class="language-plaintext highlighter-rouge">Élodie</code>.</p>
+
+<p>Allowing all symbols has these effects:</p>
+
+<ul>
+  <li>
+<strong>Prefixes:</strong> <code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code> only recognises the current command’s prefixes, so <code class="language-plaintext highlighter-rouge">add n/John g/Valorant</code> gives the name <code class="language-plaintext highlighter-rouge">John g/Valorant</code>.</li>
+  <li>
+<strong>Quotes:</strong> <code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code> handles <code class="language-plaintext highlighter-rouge">"</code> first, so commands must type it as <code class="language-plaintext highlighter-rouge">\"</code>.</li>
+  <li>
+<strong>Search:</strong> names split on whitespace only, so <code class="language-plaintext highlighter-rouge">find Mary</code> does not match <code class="language-plaintext highlighter-rouge">Mary-Jane Tan</code>.</li>
+  <li>
+<strong>Sorting:</strong> order follows character codes, so <code class="language-plaintext highlighter-rouge">_Slayer_</code> comes before <code class="language-plaintext highlighter-rouge">Alex</code> and <code class="language-plaintext highlighter-rouge">~Slayer</code> comes after <code class="language-plaintext highlighter-rouge">Zoe</code>.</li>
+  <li>
+<strong>Feedback:</strong> names can contain <code class="language-plaintext highlighter-rouge">%</code>, so pass them only as <code class="language-plaintext highlighter-rouge">String.format</code> arguments.</li>
+</ul>
 
 <h3 id="myself-profile">Myself profile</h3>
 
@@ -1253,6 +1279,17 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
       </li>
     </ul>
   </li>
+  <li>
+    <p>1c. The name breaks the <a href="#name-validation">name rules</a>, for example by using a non-ASCII character such as <code class="language-plaintext highlighter-rouge">李</code>.</p>
+
+    <ul>
+      <li>
+        <p>1c1. GameMates shows the name rules and does not add the friend.</p>
+
+        <p>Use case resumes at step 1.</p>
+      </li>
+    </ul>
+  </li>
 </ul>
 
 <p><strong>Use case: Delete a friend</strong></p>
@@ -1487,7 +1524,8 @@ Friend indices refer to this list.</li>
 <strong>Filter</strong>: A condition that narrows a displayed list, such as a name keyword or game name.</li>
   <li>
 <strong>Name keyword</strong>: A full word matched against a friend’s name, ignoring case.
-A substring such as <code class="language-plaintext highlighter-rouge">Dav</code> does not match <code class="language-plaintext highlighter-rouge">David</code>.</li>
+Words are separated by spaces, so symbols are part of a word.
+A substring such as <code class="language-plaintext highlighter-rouge">Dav</code> does not match <code class="language-plaintext highlighter-rouge">David</code>, and <code class="language-plaintext highlighter-rouge">Mary</code> does not match <code class="language-plaintext highlighter-rouge">Mary-Jane</code>.</li>
   <li>
 <strong>Case-insensitive comparison</strong>: A comparison that treats uppercase and lowercase letters as equivalent.</li>
   <li>
@@ -1588,7 +1626,28 @@ Expected: saved size/position restored, all friends visible, default profile on 
   </tbody>
 </table>
 
-<p>Test invalid input independently: <code class="language-plaintext highlighter-rouge">add</code>, <code class="language-plaintext highlighter-rouge">add n/</code>, <code class="language-plaintext highlighter-rouge">add n/Joash-Test</code>, <code class="language-plaintext highlighter-rouge">add n/Test p/</code>, <code class="language-plaintext highlighter-rouge">add n/Test p/12</code>,
+<p>Test name symbols independently, starting from fresh sample data:</p>
+
+<ol>
+  <li>
+<code class="language-plaintext highlighter-rouge">add n/Mary-Jane Tan</code>, <code class="language-plaintext highlighter-rouge">add n/Sean O'Brien</code>, <code class="language-plaintext highlighter-rouge">add n/Ravi s/o Kumar</code>, <code class="language-plaintext highlighter-rouge">add n/xX_Slayer_Xx</code>, <code class="language-plaintext highlighter-rouge">add n/Anna (Work)</code>, <code class="language-plaintext highlighter-rouge">add n/Slayer#1234</code>, <code class="language-plaintext highlighter-rouge">add n/[TSM] Bjerg</code> and <code class="language-plaintext highlighter-rouge">add n/100%</code>.
+Expected: each friend is added with the name shown exactly as typed, including in the list and details panel.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">add n/Mary Jane Tan</code>. Expected: added as a different friend, because symbols count in name comparison.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">find Mary</code>. Expected: <code class="language-plaintext highlighter-rouge">Mary Jane Tan</code> only. <code class="language-plaintext highlighter-rouge">find Mary-Jane</code> returns <code class="language-plaintext highlighter-rouge">Mary-Jane Tan</code> only.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">add n/_Slayer_</code>, then <code class="language-plaintext highlighter-rouge">list s/name</code>. Expected: <code class="language-plaintext highlighter-rouge">_Slayer_</code> comes before names starting with a letter.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">add n/John g/Valorant</code>. Expected: a friend named <code class="language-plaintext highlighter-rouge">John g/Valorant</code>, with no games.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">add n/"Anna t/o Lee"</code>. Expected: a friend named <code class="language-plaintext highlighter-rouge">Anna t/o Lee</code>, with no tags.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">add n/\"Ace\" Tan</code>. Expected: a friend named <code class="language-plaintext highlighter-rouge">"Ace" Tan</code>. <code class="language-plaintext highlighter-rouge">add n/"Ace" Tan</code> reports a text-after-quote error.</li>
+  <li>Exit and relaunch. Expected: all of these friends load with their names unchanged.</li>
+</ol>
+
+<p>Test invalid input independently: <code class="language-plaintext highlighter-rouge">add</code>, <code class="language-plaintext highlighter-rouge">add n/</code>, <code class="language-plaintext highlighter-rouge">add n/李明</code>, <code class="language-plaintext highlighter-rouge">add n/Test p/</code>, <code class="language-plaintext highlighter-rouge">add n/Test p/12</code>,
 <code class="language-plaintext highlighter-rouge">add n/Test p/9123.4567</code>, <code class="language-plaintext highlighter-rouge">add n/Test p/123;4</code>, <code class="language-plaintext highlighter-rouge">add n/Test e/name@</code>, <code class="language-plaintext highlighter-rouge">add n/Test e/a..b@example.com</code>,
 <code class="language-plaintext highlighter-rouge">add n/Test n/Test</code>, and <code class="language-plaintext highlighter-rouge">edit 1 t/ t/duo</code>. Expected: validation or duplicate-prefix errors and no stored change.
 Also try 100 versus 101 ASCII letters for a name, 15 versus 16 phone digits, and email local parts of 64 versus 65

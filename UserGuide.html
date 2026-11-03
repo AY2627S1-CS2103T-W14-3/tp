@@ -282,13 +282,23 @@ A friend can have any number of tags, including zero.
   <li><code class="language-plaintext highlighter-rouge">add n/John Doe</code></li>
   <li><code class="language-plaintext highlighter-rouge">add n/John Doe p/98765432 e/johnd@example.com</code></li>
   <li><code class="language-plaintext highlighter-rouge">add n/Betsy Crowe t/friend e/betsycrowe@example.com p/1234567 t/criminal</code></li>
+  <li><code class="language-plaintext highlighter-rouge">add n/Sean O'Brien</code></li>
+  <li><code class="language-plaintext highlighter-rouge">add n/Ravi s/o Kumar</code></li>
+  <li><code class="language-plaintext highlighter-rouge">add n/xX_Slayer_Xx</code></li>
+  <li><code class="language-plaintext highlighter-rouge">add n/[TSM] Bjerg</code></li>
 </ul>
 
-<p>Names are trimmed before validation, must not be blank and may contain at most 100 characters.
-Only ASCII letters, digits and spaces are accepted. Names are compared case-insensitively,
-so <code class="language-plaintext highlighter-rouge">john doe</code> and <code class="language-plaintext highlighter-rouge">John Doe</code> are the same friend.
-To distinguish two people with the same name, use names such as <code class="language-plaintext highlighter-rouge">John Doe School</code> and <code class="language-plaintext highlighter-rouge">John Doe Work</code>.
-Adding a different tag alone does not make a duplicate name unique; parentheses are not valid in names.</p>
+<p>Names are trimmed before validation, must not be blank and may contain at most 100 characters:</p>
+
+<ul>
+  <li>Only ASCII letters, digits, spaces and the symbols <code class="language-plaintext highlighter-rouge">!"#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~</code> are accepted.
+Non-ASCII characters, tabs and line breaks are rejected.</li>
+  <li>Symbols can appear anywhere, and is considered a character.</li>
+  <li>Symbols count when comparing names, so <code class="language-plaintext highlighter-rouge">Mary-Jane Tan</code> and <code class="language-plaintext highlighter-rouge">Mary Jane Tan</code> are different friends.</li>
+  <li>To include ` n/<code class="language-plaintext highlighter-rouge">, </code> p/<code class="language-plaintext highlighter-rouge">, </code> e/<code class="language-plaintext highlighter-rouge"> or </code> t/<code class="language-plaintext highlighter-rouge"> in a name, quote the whole name, as in </code>add n/”Anna t/o Lee”`.</li>
+  <li>To include a double quote, type it as <code class="language-plaintext highlighter-rouge">\"</code>, as in <code class="language-plaintext highlighter-rouge">add n/\"Ace\" Tan</code>.</li>
+  <li>These rules also apply when editing friends and loading saved data.</li>
+</ul>
 
 <p>Tag names must contain 1–50 characters and use only ASCII letters and digits (no spaces or symbols).
 Tags wrap within friend cards and the details panel when the available width is too narrow.</p>
@@ -345,7 +355,8 @@ including when the list is empty.</li>
 <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> shows active friends who have a game with that exact name. The match is case-insensitive, so <code class="language-plaintext highlighter-rouge">list g/valorant</code> matches <code class="language-plaintext highlighter-rouge">Valorant</code>.</li>
   <li>Pinned friends remain above unpinned friends. Sorting applies within each group.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">list s/name</code> orders the displayed friends alphabetically by name, ignoring case.</li>
+<code class="language-plaintext highlighter-rouge">list s/name</code> orders the displayed friends alphabetically by name, ignoring case.
+Symbols sort by character code, so <code class="language-plaintext highlighter-rouge">_Slayer_</code> comes before <code class="language-plaintext highlighter-rouge">Alex</code> and <code class="language-plaintext highlighter-rouge">~Slayer</code> comes after <code class="language-plaintext highlighter-rouge">Zoe</code>.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">list s/game</code> orders friends by the alphabetically first game in each friend’s game list, ignoring case.
 Friends without games appear last within each group in either direction; name breaks ties.</li>
@@ -897,6 +908,8 @@ Editing preserves the friend’s archive status, games and your profile. A succe
   <li>Keyword order does not matter; for example, <code class="language-plaintext highlighter-rouge">Hans Bo</code> matches <code class="language-plaintext highlighter-rouge">Bo Hans</code>.</li>
   <li>The search considers only names.</li>
   <li>Only full words match; for example, <code class="language-plaintext highlighter-rouge">Han</code> does not match <code class="language-plaintext highlighter-rouge">Hans</code>.</li>
+  <li>Words are separated by spaces, so symbols are part of a word. <code class="language-plaintext highlighter-rouge">Mary</code> does not match <code class="language-plaintext highlighter-rouge">Mary-Jane Tan</code>, but <code class="language-plaintext highlighter-rouge">Mary-Jane</code> and <code class="language-plaintext highlighter-rouge">Tan</code> do.
+<code class="language-plaintext highlighter-rouge">Work</code> does not match <code class="language-plaintext highlighter-rouge">Anna (Work)</code>, but <code class="language-plaintext highlighter-rouge">(Work)</code> and <code class="language-plaintext highlighter-rouge">Anna</code> do.</li>
   <li>Friends matching at least one keyword are returned (an <code class="language-plaintext highlighter-rouge">OR</code> search); for example, <code class="language-plaintext highlighter-rouge">Hans Bo</code> returns <code class="language-plaintext highlighter-rouge">Hans Gruber</code> and <code class="language-plaintext highlighter-rouge">Bo Yang</code>.</li>
   <li>Searching starts from all active and archived friends, replacing any previous name or game filter.
 <code class="language-plaintext highlighter-rouge">find</code> does not accept <code class="language-plaintext highlighter-rouge">n/</code> or <code class="language-plaintext highlighter-rouge">g/</code> as filter syntax; such text is treated as literal name keywords.</li>
@@ -916,6 +929,9 @@ friend’s complete details and games on the right. An empty keyword list is rej
 <ul>
   <li>
 <code class="language-plaintext highlighter-rouge">find John</code> returns <code class="language-plaintext highlighter-rouge">john</code> and <code class="language-plaintext highlighter-rouge">John Doe</code>
+</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">find Mary-Jane</code> returns <code class="language-plaintext highlighter-rouge">Mary-Jane Tan</code>
 </li>
   <li>With the initial sample data, <code class="language-plaintext highlighter-rouge">find alex david</code> returns <code class="language-plaintext highlighter-rouge">Alex Yeoh</code>, <code class="language-plaintext highlighter-rouge">David Li</code>.<br>
 <img src="/tp/images/findAlexDavidResult.png" alt="result for 'find alex david'">
