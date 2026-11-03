@@ -216,6 +216,9 @@ so `g/"PUBG n/Game"` gives `PUBG n/Game`. The activity diagram shows how one pre
 
 This partial class diagram shows selected archive and pin attributes. Unrelated members are omitted.
 `ModelManager.friendListScope` uses the `FriendListScope` enumeration to identify the displayed view.
+Links from `Friend`, `Game` and `Meta` to their immutable field objects are ordinary associations:
+these objects can be shared, including the `Phone.EMPTY`, `Email.EMPTY` and `Username.EMPTY` singletons.
+The composition diamond marks `GameMates`' ownership of its `UniqueFriendList` container.
 
 **Stored data and views**
 
