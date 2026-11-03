@@ -44,6 +44,8 @@ class MainWindowTest {
             window.getRoot().getScene().getRoot().applyCss();
 
             executeCommand(window, "gameadd 1 g/Valorant u/alice m/Role:Support:Mid");
+            assertEquals("Friend details", getLabel(window, "#title").getText());
+            assertEquals("Alice", getLabel(window, "#name").getText());
             executeCommand(window, "gamelist 1 g/Valorant");
             assertEquals("Friend details", getLabel(window, "#title").getText());
             assertEquals("Role: Support:Mid", getLabel(window, ".details-game-metadata").getText());

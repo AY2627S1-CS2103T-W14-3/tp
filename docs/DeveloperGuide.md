@@ -122,6 +122,7 @@ See [Viewing games](#viewing-a-friends-games).
 Results with `preserveDetails`, such as `squad`, keep the current selection, details and game filter.
 Otherwise, a successful result without a friend payload shows `Logic.getMyself()`.
 If `find` returns one friend, the details panel shows that friend.
+`gameadd`, `gamedel` and `gameedit` on a listed friend return the updated friend, so the panel shows the change.
 Parse failures and command failures update feedback without an explicit details refresh.
 
 `MainWindow.refreshFriendDetails` returns immediately when `preserveDetails` is set.

@@ -26,11 +26,12 @@ public class GameDeleteCommandTest {
         Game minecraft = new Game(new GameName("Minecraft"), new Username("builder"));
         Friend withGame = new FriendBuilder(original).withGames(minecraft).build();
         model.setFriend(original, withGame);
+        Friend updated = new FriendBuilder(withGame).withGames().build();
         Model expected = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
-        expected.setFriend(withGame, new FriendBuilder(withGame).withGames().build());
+        expected.setFriend(withGame, updated);
 
         assertCommandSuccess(new GameDeleteCommand(Index.fromOneBased(1), new GameName("minecraft")), model,
-                "Deleted game minecraft from " + original.getName() + ".", expected);
+                new CommandResult("Deleted game minecraft from " + original.getName() + ".", updated), expected);
     }
 
     @Test

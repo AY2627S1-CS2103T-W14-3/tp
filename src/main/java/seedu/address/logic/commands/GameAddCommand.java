@@ -59,8 +59,10 @@ public class GameAddCommand extends Command {
         FriendValidator.checkFriendInitialized(target);
         Friend friend = target.friend();
         GameValidator.checkCanAdd(friend, toAdd);
-        model.setFriend(target, createFriendWithAddedGame(friend));
-        return new CommandResult(formatSuccessMessage(friend));
+        Friend updated = createFriendWithAddedGame(friend);
+        model.setFriend(target, updated);
+        String feedback = formatSuccessMessage(friend);
+        return target.isMyself() ? new CommandResult(feedback) : new CommandResult(feedback, updated);
     }
 
     /** Creates a friend with the added game, preserving their other details and games. */

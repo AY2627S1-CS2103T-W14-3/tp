@@ -111,8 +111,11 @@ The main window has two panels: the friend list on the left and a details panel 
 * Use `gamelist FRIEND_INDEX|myself [g/GAME_NAME]` to select a friend or your own profile and optionally
   show only one game.
   Clicking another friend shows all of that friend's games.
-* Successful commands other than `gamelist`, `squad`, a friend-targeted `gameedit` or a single-result `find` return the right panel to your profile. Squad preserves the current details and game-card filter.
-  Clicking a friend selects their details again. Invalid commands keep the existing details display.
+* Most successful commands show your profile on the right. The exceptions are:
+  * `gamelist`, and `gameadd`, `gamedel` or `gameedit` on a friend, show that friend.
+  * A `find` with one result shows that friend.
+  * `squad` keeps the current details and game filter.
+* Invalid commands keep the current details. Click a friend to view their details again.
 * `find` and `list g/GAME_NAME` each replace the previous friend-list filter. They do not combine filters.
   Adding a friend shows all active friends. Editing a friend clears filters in active/archive views, but keeps
   the name filter in Search results. Deleting a friend keeps the current friend-list filter.
@@ -331,6 +334,7 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...`
 * A space followed by `g/`, `u/` or `m/` starts a new parameter. Quote the whole value to include such text.
 * A game name already present on the selected friend or profile is rejected, ignoring case.
 * Other details and games are preserved. The friend-list filter stays unchanged.
+* The right panel shows the updated friend, or your profile for `myself`.
 * Metadata appears below the username, sorted by key ignoring case. Long fields wrap. Scroll for additional rows.
 * The success message also lists supplied metadata below the username, sorted by key ignoring case.
 
@@ -355,6 +359,7 @@ Format: `gamedel FRIEND_INDEX|myself g/GAME_NAME`
 * For `myself`, [set up your profile first](#your-profile-and-game-entries).
 * The game name is required and matched case-insensitively. A missing game is rejected.
 * Other details and games are preserved. The friend-list filter stays unchanged.
+* The right panel shows the updated friend, or your profile for `myself`.
 
 Examples:
 

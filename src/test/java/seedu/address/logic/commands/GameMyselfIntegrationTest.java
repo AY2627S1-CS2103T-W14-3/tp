@@ -41,6 +41,7 @@ public class GameMyselfIntegrationTest {
         Friend withGame = new FriendBuilder(original).withGames(minecraft, valorant).build();
         assertEquals(withGame, model.getGameMates().getMyself());
         assertEquals("Added Valorant to Alex's games.\nUsername: player", added.getFeedbackToUser());
+        assertTrue(added.getFriendToShow().isEmpty());
         assertTrue(model.getFilteredFriendList().isEmpty());
         JsonGameMatesStorage storage = new JsonGameMatesStorage(testFolder.resolve("myself.json"));
         storage.saveGameMates(model.getGameMates());
@@ -51,6 +52,7 @@ public class GameMyselfIntegrationTest {
 
         assertEquals(original, model.getGameMates().getMyself());
         assertEquals("Deleted game valorant from Alex.", deleted.getFeedbackToUser());
+        assertTrue(deleted.getFriendToShow().isEmpty());
         assertTrue(model.getFilteredFriendList().isEmpty());
         storage.saveGameMates(model.getGameMates());
         assertEquals(model.getGameMates(), storage.readGameMates().get());
