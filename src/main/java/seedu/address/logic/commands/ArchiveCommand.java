@@ -40,7 +40,7 @@ public class ArchiveCommand extends Command {
         if (friend.isArchived()) {
             throw new CommandException(MESSAGE_WRONG_STATUS);
         }
-        model.setFriend(friend, friend.withArchived(true).withPinned(false));
+        model.setFriend(friend, friend.withArchived(true));
         return new CommandResult(String.format(MESSAGE_SUCCESS, friend.getName()));
     }
 
