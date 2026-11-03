@@ -15,8 +15,9 @@ UniqueTagList ---> "*\n<size:6> </size>" Tag
 
 Friend --> "*\n<size:6> </size>" Tag
 
-Friend *--> "1\n<size:6> </size>" Name
-Friend *--> "1\n<size:6> </size>" Phone
-Friend *--> "1\n<size:6> </size>" Email
-Friend *--> "*\n<size:6> </size>" Game
+' The alternative shares immutable field objects just as the current model does.
+Friend --> "1\n<size:6> </size>" Name
+Friend --> "1\n<size:6> </size>" Phone
+Friend --> "1\n<size:6> </size>" Email
+Friend --> "*\n<size:6> </size>" Game
 @enduml

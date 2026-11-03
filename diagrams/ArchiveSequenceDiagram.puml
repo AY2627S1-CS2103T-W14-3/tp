@@ -5,6 +5,7 @@ skinparam ParticipantFontColor #FFFFFF
 
 participant ":ArchiveCommand" as Command LOGIC_COLOR
 participant "model:ModelManager" as Model MODEL_COLOR
+participant "target:ListedFriend" as Target MODEL_COLOR
 participant "friend:Friend" as Friend MODEL_COLOR
 
 [-> Command : execute(model)
@@ -15,11 +16,17 @@ Model --> Command : ACTIVE
 deactivate Model
 Command -> Model : resolveFriend(index)
 activate Model
+create Target
+Model -> Target : create(friend)
+activate Target
+Target --> Model
+deactivate Target
 Model --> Command : target
 deactivate Model
-note over Command
-Validate index 1 and select friend.
-end note
+Command -> Target : friend()
+activate Target
+Target --> Command : friend
+deactivate Target
 Command -> Friend : isArchived()
 activate Friend
 Friend --> Command : false
@@ -28,14 +35,18 @@ Command -> Friend : withArchived(true)
 activate Friend
 Friend --> Command : archivedFriend
 deactivate Friend
+note right of Friend
+The copy is archived
+and unpinned.
+end note
 Command -> Model : setFriend(friend, archivedFriend)
 activate Model
-note over Model
+Model --> Command
+deactivate Model
+note right of Model
 The active view hides the friend.
 Scope and filter are preserved.
 end note
-Model --> Command
-deactivate Model
 [<-- Command : result
 deactivate Command
 @enduml

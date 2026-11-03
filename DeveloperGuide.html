@@ -68,7 +68,6 @@
       <li><a href="#squad-metadata-conditions" id="markdown-toc-squad-metadata-conditions">Squad metadata conditions</a></li>
       <li><a href="#editing-an-existing-game" id="markdown-toc-editing-an-existing-game">Editing an existing game</a></li>
       <li><a href="#viewing-a-friends-games" id="markdown-toc-viewing-a-friends-games">Viewing a friend’s games</a></li>
-      <li><a href="#current-limitations" id="markdown-toc-current-limitations">Current limitations</a></li>
       <li>
 <a href="#game-metadata" id="markdown-toc-game-metadata">Game metadata</a>        <ul>
           <li><a href="#validation-and-equality" id="markdown-toc-validation-and-equality">Validation and equality</a></li>
@@ -252,11 +251,13 @@ defines the layout of
 Command-driven selection uses <code class="language-plaintext highlighter-rouge">CommandResult.friendToShow</code>, <code class="language-plaintext highlighter-rouge">showMyself</code> and <code class="language-plaintext highlighter-rouge">gameFilter</code>.
 See <a href="#viewing-a-friends-games">Viewing games</a>.</p>
 
-<p>If a successful result has no friend payload, the details panel shows <code class="language-plaintext highlighter-rouge">Logic.getMyself()</code>.
+<p>Results with <code class="language-plaintext highlighter-rouge">preserveDetails</code>, such as <code class="language-plaintext highlighter-rouge">squad</code>, keep the current selection, details and game filter.
+Otherwise, a successful result without a friend payload shows <code class="language-plaintext highlighter-rouge">Logic.getMyself()</code>.
 If <code class="language-plaintext highlighter-rouge">find</code> returns one friend, the details panel shows that friend.
 Parse failures and command failures update feedback without an explicit details refresh.</p>
 
-<p><code class="language-plaintext highlighter-rouge">MainWindow.refreshFriendDetails</code> calls <code class="language-plaintext highlighter-rouge">FriendListPanel.selectFriend()</code> before it sets the final details payload.
+<p><code class="language-plaintext highlighter-rouge">MainWindow.refreshFriendDetails</code> returns immediately when <code class="language-plaintext highlighter-rouge">preserveDetails</code> is set.
+Otherwise, it calls <code class="language-plaintext highlighter-rouge">FriendListPanel.selectFriend()</code> before setting the final details payload.
 Friend payloads select the matching displayed friend; profile payloads and results without a friend clear the selection.
 If the target is not displayed, <code class="language-plaintext highlighter-rouge">selectFriend()</code> also clears the selection.
 Mouse selection remains supported, and a previous friend can be selected again after a command shows the profile.</p>
@@ -335,17 +336,15 @@ It rejects a supplied blank <code class="language-plaintext highlighter-rouge">u
 <h4 id="quoted-values">Quoted values</h4>
 
 <p><code class="language-plaintext highlighter-rouge">ArgumentTokenizer</code> lets users wrap a whole value in double quotes. Prefixes inside the quotes are literal text,
-so <code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> gives <code class="language-plaintext highlighter-rouge">PUBG n/Game</code>.</p>
+so <code class="language-plaintext highlighter-rouge">g/"PUBG n/Game"</code> gives <code class="language-plaintext highlighter-rouge">PUBG n/Game</code>. The activity diagram shows how one prefixed value is read.</p>
+
+<p><img src="/tp/images/QuotedValueActivityDiagram.png" alt="Reading one prefixed value with optional quotes"></p>
 
 <ul>
-  <li>A value is quoted when its first character after trimming is <code class="language-plaintext highlighter-rouge">"</code>. Its content is trimmed like any value.</li>
-  <li>In any value, <code class="language-plaintext highlighter-rouge">\"</code> is a literal <code class="language-plaintext highlighter-rouge">"</code>. Only the backslash right before a quote is removed, so <code class="language-plaintext highlighter-rouge">\\"</code> gives <code class="language-plaintext highlighter-rouge">\"</code>.</li>
-  <li>A quoted value cannot end with <code class="language-plaintext highlighter-rouge">\</code> right before the closing quote, since <code class="language-plaintext highlighter-rouge">\"</code> is read as a literal <code class="language-plaintext highlighter-rouge">"</code>.
-Users add a space before the closing quote instead, which trimming removes.</li>
-  <li>A bare <code class="language-plaintext highlighter-rouge">"</code> in an unquoted value, a missing closing quote or text after the closing quote throws a <code class="language-plaintext highlighter-rouge">ParseException</code>.
-Each case has its own message.</li>
-  <li>Only straight quotes <code class="language-plaintext highlighter-rouge">"</code> are supported. Other quotes such as curly quotes <code class="language-plaintext highlighter-rouge">“ ”</code> do not start or end a quoted value.
-They are kept as normal text.</li>
+  <li>Only the backslash right before a quote is removed, so <code class="language-plaintext highlighter-rouge">\\"</code> gives <code class="language-plaintext highlighter-rouge">\"</code>.</li>
+  <li>A quoted value cannot end with <code class="language-plaintext highlighter-rouge">\</code>, since <code class="language-plaintext highlighter-rouge">\"</code> is read as a literal <code class="language-plaintext highlighter-rouge">"</code>.
+Users add a space before the closing quote, which trimming removes.</li>
+  <li>Curly quotes such as <code class="language-plaintext highlighter-rouge">“ ”</code> are normal text. They do not start or end a quoted value.</li>
   <li>The preamble is not parsed for quotes.</li>
 </ul>
 
@@ -356,7 +355,10 @@ They are kept as normal text.</li>
 <p><img src="images/ModelClassDiagram.png" width="625"></p>
 
 <p>This partial class diagram shows selected archive and pin attributes. Unrelated members are omitted.
-<code class="language-plaintext highlighter-rouge">ModelManager.friendListScope</code> uses the <code class="language-plaintext highlighter-rouge">FriendListScope</code> enumeration to identify the displayed view.</p>
+<code class="language-plaintext highlighter-rouge">ModelManager.friendListScope</code> uses the <code class="language-plaintext highlighter-rouge">FriendListScope</code> enumeration to identify the displayed view.
+Links from <code class="language-plaintext highlighter-rouge">Friend</code>, <code class="language-plaintext highlighter-rouge">Game</code> and <code class="language-plaintext highlighter-rouge">Meta</code> to their immutable field objects are ordinary associations:
+these objects can be shared, including the <code class="language-plaintext highlighter-rouge">Phone.EMPTY</code>, <code class="language-plaintext highlighter-rouge">Email.EMPTY</code> and <code class="language-plaintext highlighter-rouge">Username.EMPTY</code> singletons.
+The composition diamond marks <code class="language-plaintext highlighter-rouge">GameMates</code>’ ownership of its <code class="language-plaintext highlighter-rouge">UniqueFriendList</code> container.</p>
 
 <p><strong>Stored data and views</strong></p>
 
@@ -452,7 +454,8 @@ Missing or unreadable preferences use the default preferences.</p>
 
 <p>Null or empty contact fields become the corresponding empty contact values.
 Invalid non-empty contacts are rejected without trimming.
-Missing or null <code class="language-plaintext highlighter-rouge">games</code> and <code class="language-plaintext highlighter-rouge">tags</code> load as empty sets. Missing <code class="language-plaintext highlighter-rouge">myself</code> uses <code class="language-plaintext highlighter-rouge">Friend.DEFAULT_MYSELF</code>.</p>
+Missing or null <code class="language-plaintext highlighter-rouge">friends</code>, <code class="language-plaintext highlighter-rouge">games</code> and <code class="language-plaintext highlighter-rouge">tags</code> load as empty collections.
+A missing, null or empty <code class="language-plaintext highlighter-rouge">myself</code> object uses <code class="language-plaintext highlighter-rouge">Friend.DEFAULT_MYSELF</code>. <code class="language-plaintext highlighter-rouge">JsonAdaptedFriend.isEmpty()</code> detects the empty object.</p>
 
 <p>Stored games must have a valid <code class="language-plaintext highlighter-rouge">name</code>.
 Missing, null or empty usernames become <code class="language-plaintext highlighter-rouge">Username.EMPTY</code>.
@@ -468,7 +471,7 @@ Invalid archived pins are not silently cleared.</p>
 <code class="language-plaintext highlighter-rouge">JsonSerializableGameMates</code> rejects friend names that match the profile and converts excess pins to <code class="language-plaintext highlighter-rouge">IllegalValueException</code>.
 These failures reject the entire load, not only the invalid entry.
 The untouched <code class="language-plaintext highlighter-rouge">Friend.DEFAULT_MYSELF</code> uses <code class="language-plaintext highlighter-rouge">Name.EMPTY</code> and is omitted from saved JSON.
-Stored friend/profile entries still need valid non-empty names.</p>
+Other stored friend and profile entries still need valid non-empty names.</p>
 
 <p><strong>File paths and save timing</strong></p>
 
@@ -575,7 +578,8 @@ These rules define the application’s accepted text characters; they do not tes
 <p><code class="language-plaintext highlighter-rouge">Name.isValidName</code> trims the value, then checks the 100-character limit and <code class="language-plaintext highlighter-rouge">Name.VALIDATION_REGEX</code>
 (<code class="language-plaintext highlighter-rouge">\p{Graph}\p{Print}*</code>). This accepts printable ASCII, including symbol-only names such as <code class="language-plaintext highlighter-rouge">---</code>, and rejects blank names.
 Commands and saved data both use it.
-Names stay ASCII-only because <code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">Name.equals</code> compare exact characters, so <code class="language-plaintext highlighter-rouge">Elodie</code> would not match <code class="language-plaintext highlighter-rouge">Élodie</code>.</p>
+Names are limited to ASCII because <code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">Name.equals</code> compare exact characters.
+If accented letters were allowed, <code class="language-plaintext highlighter-rouge">find Elodie</code> would not find <code class="language-plaintext highlighter-rouge">Élodie</code>.</p>
 
 <p>Allowing all symbols has these effects:</p>
 
@@ -595,8 +599,9 @@ Names stay ASCII-only because <code class="language-plaintext highlighter-rouge"
 <h3 id="myself-profile">Myself profile</h3>
 
 <p><code class="language-plaintext highlighter-rouge">GameMates</code> stores the user’s profile as a separate <code class="language-plaintext highlighter-rouge">Friend</code>, initially <code class="language-plaintext highlighter-rouge">Friend.DEFAULT_MYSELF</code>.
-<code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamelist</code> accept <code class="language-plaintext highlighter-rouge">myself</code> independently of the displayed friend list and profile name.
-The default profile has <code class="language-plaintext highlighter-rouge">Name.EMPTY</code>, rather than reserving the friend name <code class="language-plaintext highlighter-rouge">Myself</code>.
+<code class="language-plaintext highlighter-rouge">edit</code>, <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gamedel</code>, <code class="language-plaintext highlighter-rouge">gameedit</code> and <code class="language-plaintext highlighter-rouge">gamelist</code> accept <code class="language-plaintext highlighter-rouge">myself</code> in place of a friend index.
+It selects the profile even when the displayed friend list is filtered or empty.
+The default profile has <code class="language-plaintext highlighter-rouge">Name.EMPTY</code>.
 The first <code class="language-plaintext highlighter-rouge">edit myself</code> must supply a name, as in <code class="language-plaintext highlighter-rouge">edit myself n/NAME</code>. Later profile edits can omit it.</p>
 
 <p>Their syntax uses <code class="language-plaintext highlighter-rouge">FRIEND_INDEX|myself</code>.
@@ -642,7 +647,7 @@ It omits helper calls and the subsequent save.</p>
 
 <p>After success, <code class="language-plaintext highlighter-rouge">LogicManager</code> saves <code class="language-plaintext highlighter-rouge">friends</code> and <code class="language-plaintext highlighter-rouge">myself</code> through <code class="language-plaintext highlighter-rouge">JsonSerializableGameMates</code>.
 <code class="language-plaintext highlighter-rouge">MainWindow</code> refreshes the profile through <code class="language-plaintext highlighter-rouge">Logic.getMyself()</code>.
-If older JSON omits <code class="language-plaintext highlighter-rouge">myself</code>, the application keeps the default profile.</p>
+If the JSON omits <code class="language-plaintext highlighter-rouge">myself</code> or leaves it empty, the application keeps the default profile.</p>
 
 <h3 id="name-and-game-filtering">Name and game filtering</h3>
 
@@ -748,7 +753,10 @@ Save/reload tests verify both archive and pin status.
 Other tests cover command routing, atomic validation, displayed targets, metadata replacement and profile updates.
 They also cover case-only spelling, <code class="language-plaintext highlighter-rouge">UI</code> refresh and real JSON storage round trips.</p>
 
-<p>The <a href="/tp/diagrams/GameEditSequenceDiagram.puml">game edit sequence diagram source</a> shows validation before mutation.</p>
+<p>The sequence shows a successful <code class="language-plaintext highlighter-rouge">gameedit</code> on a displayed friend after parsing. Helper calls and saving are omitted.
+For <code class="language-plaintext highlighter-rouge">myself</code>, <code class="language-plaintext highlighter-rouge">resolveFriend</code> creates a <code class="language-plaintext highlighter-rouge">Myself</code> target instead of a <code class="language-plaintext highlighter-rouge">ListedFriend</code>.</p>
+
+<p><img src="/tp/images/GameEditSequenceDiagram.png" alt="Editing a game after validation"></p>
 
 <h3 id="viewing-a-friends-games">Viewing a friend’s games</h3>
 
@@ -811,10 +819,6 @@ JavaFX panel and window tests cover filtered payloads, empty states, filter clea
 They also verify that invalid input preserves the details view.</p>
 
 <p><img src="/tp/images/GameListSequenceDiagram.png" alt="Command-to-panel flow for a filtered game list"></p>
-
-<h3 id="current-limitations">Current limitations</h3>
-
-<p>Deletion takes effect immediately.</p>
 
 <h3 id="game-metadata">Game metadata</h3>
 
@@ -1074,17 +1078,16 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
   <li>Have many gaming friends across different games or platforms.</li>
   <li>Want to remember each friend’s in-game usernames, preferred roles, servers, play styles, or other game-specific details.</li>
   <li>Prefer using a command-line interface over navigating menus and mouse interactions.</li>
-  <li>Prefers a desktop application for managing gaming contacts.</li>
-  <li>Is comfortable typing commands to manage information quickly.</li>
-  <li>Still wants a simple visual interface to view their friend and game information clearly.</li>
+  <li>Prefer a desktop application for managing gaming contacts.</li>
+  <li>Are comfortable typing commands to manage information quickly.</li>
+  <li>Still want a simple visual interface to view their friend and game information clearly.</li>
 </ul>
 
 <p><strong>Value proposition</strong>: Manage gaming friends and their game-specific details faster than generic contacts apps, spreadsheets, or chat history searches.</p>
 
 <h3 id="user-stories">User stories</h3>
 
-<p>These user stories describe current features. See <a href="#implementation">Implementation</a> for implementation details and
-<a href="#current-limitations">Current limitations</a> for unsupported behaviour.</p>
+<p>These user stories describe current features. See <a href="#implementation">Implementation</a> for implementation details.</p>
 
 <p>Priorities: High - <code class="language-plaintext highlighter-rouge">* * *</code>, Medium - <code class="language-plaintext highlighter-rouge">* *</code>, Low - <code class="language-plaintext highlighter-rouge">*</code></p>
 
@@ -1816,6 +1819,10 @@ and its phone still removed. Filters are reset.</li>
     <tr>
       <td>Remove the <code class="language-plaintext highlighter-rouge">myself</code> and <code class="language-plaintext highlighter-rouge">games</code> properties from a valid copy, then relaunch.</td>
       <td>Default profile and a friend with no games. Empty/missing phone and email are accepted; invalid non-empty contacts are not.</td>
+    </tr>
+    <tr>
+      <td>Replace the whole data file with <code class="language-plaintext highlighter-rouge">{}</code>, then relaunch. Repeat with <code class="language-plaintext highlighter-rouge">{"myself": {}}</code>.</td>
+      <td>No friends and the default profile, without a load error.</td>
     </tr>
     <tr>
       <td>Copy the same JAR to a second empty folder and launch there.</td>
