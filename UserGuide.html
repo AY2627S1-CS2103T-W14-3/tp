@@ -211,8 +211,16 @@ clear the friend selection, so you can click that same friend again to reopen th
   <li>Use <code class="language-plaintext highlighter-rouge">gamelist FRIEND_INDEX|myself [g/GAME_NAME]</code> to select a friend or your own profile and optionally
 show only one game.
 Clicking another friend shows all of that friend’s games.</li>
-  <li>Successful commands other than <code class="language-plaintext highlighter-rouge">gamelist</code>, <code class="language-plaintext highlighter-rouge">squad</code>, a friend-targeted <code class="language-plaintext highlighter-rouge">gameedit</code> or a single-result <code class="language-plaintext highlighter-rouge">find</code> return the right panel to your profile. Squad preserves the current details and game-card filter.
-Clicking a friend selects their details again. Invalid commands keep the existing details display.</li>
+  <li>Most successful commands show your profile on the right. The exceptions are:
+    <ul>
+      <li>
+<code class="language-plaintext highlighter-rouge">gamelist</code>, and <code class="language-plaintext highlighter-rouge">gameadd</code>, <code class="language-plaintext highlighter-rouge">gamedel</code> or <code class="language-plaintext highlighter-rouge">gameedit</code> on a friend, show that friend.</li>
+      <li>A <code class="language-plaintext highlighter-rouge">find</code> with one result shows that friend.</li>
+      <li>
+<code class="language-plaintext highlighter-rouge">squad</code> keeps the current details and game filter.</li>
+    </ul>
+  </li>
+  <li>Invalid commands keep the current details. Click a friend to view their details again.</li>
   <li>
 <code class="language-plaintext highlighter-rouge">find</code> and <code class="language-plaintext highlighter-rouge">list g/GAME_NAME</code> each replace the previous friend-list filter. They do not combine filters.
 Adding a friend shows all active friends. Editing a friend clears filters in active/archive views, but keeps
@@ -479,6 +487,7 @@ Omit <code class="language-plaintext highlighter-rouge">m/</code> entirely for n
   <li>A space followed by <code class="language-plaintext highlighter-rouge">g/</code>, <code class="language-plaintext highlighter-rouge">u/</code> or <code class="language-plaintext highlighter-rouge">m/</code> starts a new parameter. Quote the whole value to include such text.</li>
   <li>A game name already present on the selected friend or profile is rejected, ignoring case.</li>
   <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
+  <li>The right panel shows the updated friend, or your profile for <code class="language-plaintext highlighter-rouge">myself</code>.</li>
   <li>Metadata appears below the username, sorted by key ignoring case. Long fields wrap. Scroll for additional rows.</li>
   <li>The success message also lists supplied metadata below the username, sorted by key ignoring case.</li>
 </ul>
@@ -511,6 +520,7 @@ Text copied from websites or game apps can contain hidden characters. If an inpu
   <li>For <code class="language-plaintext highlighter-rouge">myself</code>, <a href="#your-profile-and-game-entries">set up your profile first</a>.</li>
   <li>The game name is required and matched case-insensitively. A missing game is rejected.</li>
   <li>Other details and games are preserved. The friend-list filter stays unchanged.</li>
+  <li>The right panel shows the updated friend, or your profile for <code class="language-plaintext highlighter-rouge">myself</code>.</li>
 </ul>
 
 <p>Examples:</p>
@@ -895,7 +905,9 @@ Editing preserves the friend’s archive status, games and your profile. A succe
 <h3 id="locating-friends-by-name-find">Locating friends by name: <code class="language-plaintext highlighter-rouge">find</code>
 </h3>
 
-<p>Finds active and archived friends whose names contain any of the given keywords, regardless of the current view.</p>
+<p>Finds active and archived friends whose names contain any of the given keywords, regardless of the current view.
+<code class="language-plaintext highlighter-rouge">find</code> searches all your friends, active and archived, so you can locate anyone without switching
+views. Archived results are marked with an <strong>Archived</strong> badge.</p>
 
 <p>Format: <code class="language-plaintext highlighter-rouge">find KEYWORD [MORE_KEYWORDS]</code></p>
 
