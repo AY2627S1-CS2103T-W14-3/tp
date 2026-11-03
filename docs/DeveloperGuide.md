@@ -119,11 +119,13 @@ The `UI` component:
 Command-driven selection uses `CommandResult.friendToShow`, `showMyself` and `gameFilter`.
 See [Viewing games](#viewing-a-friends-games).
 
-If a successful result has no friend payload, the details panel shows `Logic.getMyself()`.
+Results with `preserveDetails`, such as `squad`, keep the current selection, details and game filter.
+Otherwise, a successful result without a friend payload shows `Logic.getMyself()`.
 If `find` returns one friend, the details panel shows that friend.
 Parse failures and command failures update feedback without an explicit details refresh.
 
-`MainWindow.refreshFriendDetails` calls `FriendListPanel.selectFriend()` before it sets the final details payload.
+`MainWindow.refreshFriendDetails` returns immediately when `preserveDetails` is set.
+Otherwise, it calls `FriendListPanel.selectFriend()` before setting the final details payload.
 Friend payloads select the matching displayed friend; profile payloads and results without a friend clear the selection.
 If the target is not displayed, `selectFriend()` also clears the selection.
 Mouse selection remains supported, and a previous friend can be selected again after a command shows the profile.
