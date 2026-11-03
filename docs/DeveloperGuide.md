@@ -448,7 +448,7 @@ Allowing all symbols has these effects:
 
 `GameMates` stores the user's profile as a separate `Friend`, initially `Friend.DEFAULT_MYSELF`.
 `edit`, `gameadd`, `gamedel`, `gameedit` and `gamelist` accept `myself` independently of the displayed friend list and profile name.
-The default profile has `Name.EMPTY`, rather than reserving the friend name `Myself`.
+The default profile has `Name.EMPTY`.
 The first `edit myself` must supply a name, as in `edit myself n/NAME`. Later profile edits can omit it.
 
 Their syntax uses `FRIEND_INDEX|myself`.

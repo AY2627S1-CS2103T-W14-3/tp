@@ -74,16 +74,14 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
 * Use spaces between parameters and lower-case command words and prefixes. Do not type square or angle brackets.
-  Quotes are not needed around multiword names. Use only the prefixes documented for each command.
+  Quotes are not needed around multiword names.
+* Each command reads only the prefixes in its own format. Any other prefix, such as `x/` or another command's `g/`,
+  is treated as part of the value before it. Check the result when a value looks wrong.<br>
+  For example, `add n/John g/Valorant` adds a friend named `John g/Valorant`, with no games.
+  `edit 1 x/abc` reports `Invalid index "1 x/abc"`, because `x/abc` is read as part of the index.
 * To use prefix text such as ` n/` in a value, wrap the whole value in double quotes.
-  For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`. Spaces at the start and end of the quoted value are removed.
-* To include a double quote in a value, type it as `\"`. Other backslashes are kept as typed.
-  For example, `g/\"Game` is the game name `"Game`.
-* To end a quoted value with `\`, add a space before the closing quote.
-  For example, `g/"PUBG u/Game\ "` is the game name `PUBG u/Game\`.
-* For metadata, wrap the whole `KEY:VALUE`. For example, use `m/"Rank:Gold u/1"`, not `m/Rank:"Gold u/1"`.
-* Quotes apply only to values after a prefix. Friend indices, `myself` and `find` keywords read `"` as a normal character.
-* A bare `"` in the middle of a value, a missing closing quote or text after the closing quote is rejected.
+  For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`.
+  See [Using quotes in values](#using-quotes-in-values) for more rules.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
   Tags may be repeated. Identical tag values are applied once.
 * Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all active friends
@@ -98,11 +96,6 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
 
 * Wide tables scroll horizontally on narrow screens. If you are using a PDF version, take care when copying
   commands across line breaks: spaces can be lost during copying.
-</div>
-
-<div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-Use straight double quotes `"`, not other types such as curly quotes `“ ”`. The app reads curly quotes as normal text, so the value
-is not quoted. Text copied from a PDF or web page may contain curly quotes, so double check them before running a command.
 </div>
 
 ### Viewing friend details
@@ -133,8 +126,8 @@ If it contains no details, the right panel shows `No details added`. Filtering, 
 change your stored profile.
 
 Set up your profile with `edit myself n/Joash` before using `gameadd`, `gameedit`, `gamedel` or `gamelist` with `myself`.
-The first edit requires a valid, unique name. Later edits can omit it.
-Before profile setup, `Myself` is not a reserved friend name. After setup, your profile name must differ from all friend names.
+The first edit requires a valid name. Later edits can omit it.
+Your profile name must differ from all friend names.
 The `myself` selector is case-insensitive and works even when the friend list is empty or filtered.
 Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve your games and the friend-list filter.
 
@@ -184,7 +177,7 @@ Names are trimmed before validation, must not be blank and may contain at most 1
 
 * Only ASCII letters, digits, spaces and the symbols ``!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~`` are accepted.
   Non-ASCII characters, tabs and line breaks are rejected.
-* Symbols can appear anywhere, and is considered a character.
+* Symbols can appear anywhere in a name and count towards the 100-character limit.
 * Symbols count when comparing names, so `Mary-Jane Tan` and `Mary Jane Tan` are different friends.
 * To include ` n/`, ` p/`, ` e/` or ` t/` in a name, quote the whole name, as in `add n/"Anna t/o Lee"`.
 * To include a double quote, type it as `\"`, as in `add n/\"Ace\" Tan`.
@@ -611,6 +604,7 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * Friends matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
 * Searching starts from all active and archived friends, replacing any previous name or game filter.
   `find` does not accept `n/` or `g/` as filter syntax; such text is treated as literal name keywords.
+* Do not wrap keywords in quotes. Quotes are read as part of the keyword.
 * Results appear under **Search results**, with an **Archived** badge on archived friends.
 * `archive FRIEND_INDEX` archives an active result; `unarchive FRIEND_INDEX` restores an archived result. The friend stays in
   the search results with their updated status, and the search filter and displayed order stay in place.
@@ -743,6 +737,24 @@ All active and archived friends and their game entries are removed. Back up your
 Exits the program.
 
 Format: `exit`
+
+### Using quotes in values
+
+Quotes work only in values typed after a prefix, such as `n/` or `g/`. Elsewhere, `"` is a normal character,
+so `find "Alex"` finds no one. Most values do not need quotes. Use them only when a value contains prefix text such as ` u/`.
+
+* Wrap the whole value in double quotes. For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`.
+* For metadata, wrap the whole pair. Use `m/"Rank:Gold u/1"`, not `m/Rank:"Gold u/1"`.
+* To include a double quote in a value, type `\"`. For example, `add n/\"Ace\" Tan` adds `"Ace" Tan`.
+* To end a quoted value with `\`, add a space before the closing quote. For example, `g/"Game\ "` is the game name `Game\`.
+
+A stray `"` (as in `add n/O"Neil`), a missing closing quote or text after the closing quote is rejected.
+Type `add n/O\"Neil` instead.
+
+<div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
+Use straight double quotes `"`, not curly quotes `“ ”`. Text copied from a PDF or web page may contain curly quotes.
+The app treats them as normal text.
+</div>
 
 ### Saving the data
 
