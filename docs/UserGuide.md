@@ -746,7 +746,8 @@ Format: `exit`
 ### Using quotes in values
 
 Quotes work only in values typed after a prefix, such as `n/` or `g/`. Elsewhere, `"` is a normal character,
-so `find "Alex"` finds no one. Most values do not need quotes. Use them only when a value contains prefix text such as ` u/`.
+so `find "Alex"` searches for the word `"Alex"`, including the quotes, and does not match a friend named `Alex`.
+Most values do not need quotes. Use them only when a value contains prefix text such as ` u/`.
 
 * Wrap the whole value in double quotes. For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`.
 * For metadata, wrap the whole pair. Use `m/"Rank:Gold u/1"`, not `m/Rank:"Gold u/1"`.
