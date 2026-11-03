@@ -311,7 +311,8 @@ Missing or unreadable preferences use the default preferences.
 
 Null or empty contact fields become the corresponding empty contact values.
 Invalid non-empty contacts are rejected without trimming.
-Missing or null `games` and `tags` load as empty sets. Missing `myself` uses `Friend.DEFAULT_MYSELF`.
+Missing or null `friends`, `games` and `tags` load as empty collections.
+A missing, null or empty `myself` object uses `Friend.DEFAULT_MYSELF`. `JsonAdaptedFriend.isEmpty()` detects the empty object.
 
 Stored games must have a valid `name`.
 Missing, null or empty usernames become `Username.EMPTY`.
@@ -327,7 +328,7 @@ Invalid archived pins are not silently cleared.
 `JsonSerializableGameMates` rejects friend names that match the profile and converts excess pins to `IllegalValueException`.
 These failures reject the entire load, not only the invalid entry.
 The untouched `Friend.DEFAULT_MYSELF` uses `Name.EMPTY` and is omitted from saved JSON.
-Stored friend/profile entries still need valid non-empty names.
+Other stored friend and profile entries still need valid non-empty names.
 
 **File paths and save timing**
 
@@ -493,7 +494,7 @@ It omits helper calls and the subsequent save.
 
 After success, `LogicManager` saves `friends` and `myself` through `JsonSerializableGameMates`.
 `MainWindow` refreshes the profile through `Logic.getMyself()`.
-If older JSON omits `myself`, the application keeps the default profile.
+If the JSON omits `myself` or leaves it empty, the application keeps the default profile.
 
 ### Name and game filtering
 
@@ -1257,6 +1258,7 @@ Prerequisite: independent disposable app folders and closed app instances before
 | Set a stored friend's name equal to the profile name, or mark six distinct active friends as pinned. Relaunch. | The entire load fails. The profile conflict and pin limit apply to stored data as well as commands. |
 | Set both `archived` and `pinned` to `true` on one stored friend. Relaunch. | The entire load fails; archived friends cannot be pinned. The invalid entry is not silently repaired. Restore the valid backup before continuing. |
 | Remove the `myself` and `games` properties from a valid copy, then relaunch. | Default profile and a friend with no games. Empty/missing phone and email are accepted; invalid non-empty contacts are not. |
+| Replace the whole data file with `{}`, then relaunch. Repeat with `{"myself": {}}`. | No friends and the default profile, without a load error. |
 | Copy the same JAR to a second empty folder and launch there. | A separate sample dataset, not the first folder's saved friends. Restore a backup into the second folder to transfer data. |
 | With the app running, make its data file unwritable for that user (for example `chmod a-w data/gamemates.json` on Linux/macOS). Enter `add n/Unsaved Test`. | A `Could not save data` error saying the change was applied but not saved. The friend still shows. The change is not rolled back. |
 | Restore write access (`chmod u+w data/gamemates.json`), enter `list`, then exit and relaunch. | The in-memory change is saved and the new friend reloads. Test permissions as a normal user, not root. |

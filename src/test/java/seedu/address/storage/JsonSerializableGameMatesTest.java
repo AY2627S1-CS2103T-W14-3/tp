@@ -50,6 +50,33 @@ public class JsonSerializableGameMatesTest {
     }
 
     @Test
+    public void toModelType_missingOrNullFriends_loadsNoFriends() throws Exception {
+        for (String json : new String[] {"{}", "{\"friends\": null}"}) {
+            GameMates gameMates = JsonUtil.fromJsonString(json, JsonSerializableGameMates.class).toModelType();
+            assertEquals(new GameMates(), gameMates);
+        }
+    }
+
+    @Test
+    public void toModelType_myselfWithoutFriends_loadsProfile() throws Exception {
+        String json = """
+                {"myself": {"name": "Hoon Meier"}}
+                """;
+        GameMates gameMates = JsonUtil.fromJsonString(json, JsonSerializableGameMates.class).toModelType();
+        assertEquals(0, gameMates.getFriendList().size());
+        assertEquals("Hoon Meier", gameMates.getMyself().getName().fullName);
+    }
+
+    @Test
+    public void toModelType_emptyMyself_usesDefaultProfile() throws Exception {
+        String json = """
+                {"friends": [], "myself": {}}
+                """;
+        GameMates gameMates = JsonUtil.fromJsonString(json, JsonSerializableGameMates.class).toModelType();
+        assertEquals(Friend.DEFAULT_MYSELF, gameMates.getMyself());
+    }
+
+    @Test
     public void toModelType_invalidMyself_throwsIllegalValueException() throws Exception {
         JsonSerializableGameMates data = JsonUtil.readJsonFile(INVALID_MYSELF_FILE,
                 JsonSerializableGameMates.class).get();

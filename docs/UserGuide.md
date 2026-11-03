@@ -78,7 +78,7 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
 * Each command reads only the prefixes in its own format. Any other prefix, such as `x/` or another command's `g/`,
   is treated as part of the value before it. Check the result when a value looks wrong.<br>
   For example, `add n/John g/Valorant` adds a friend named `John g/Valorant`, with no games.
-  `edit 1 x/abc` reports `Invalid index "1 x/abc"`, because `x/abc` is read as part of the index.
+  `edit 1 x/abc` reports `Invalid index "1 x/abc"`, because `x/abc` is read as part of the non-prefixed parameter such as index.
 * To use prefix text such as ` n/` in a value, wrap the whole value in double quotes.
   For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`.
   See [Using quotes in values](#using-quotes-in-values) for more rules.
@@ -545,8 +545,6 @@ Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG
 * Use `myself` instead of `FRIEND_INDEX` to edit your own profile, for example `edit myself n/Alex Tan`. The selector is case-insensitive.
   If the name belongs to an active or archived friend, choose a different profile name; unarchiving that friend
   does not resolve the name conflict.
-* Invalid indices include the rejected text in the feedback. For example, `edit 1 x/abc` reports
-  `Invalid index "1 x/abc".` followed by the allowed index range. Use the supported field prefixes shown above.
 * The first `edit myself` must include `n/NAME`. After setup, later edits can omit the name, and you can use
   `gameadd`, `gameedit`, `gamedel` and `gamelist` with `myself`.
 * `|` means "or": enter either a friend index or `myself`. Do not type the `|` character.
@@ -581,6 +579,8 @@ Errors:
 
 * Missing index: `Please provide an index.`
 * Invalid index (including a value above 2147483647): `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`
+* Unknown prefix right after the index: the prefix is read as part of the index. For example, `edit 1 x/abc` reports
+  `Invalid index "1 x/abc"`. Use only `n/`, `p/`, `e/` and `t/`.
 * Empty displayed list: `No friends are currently displayed. Use list or archivelist to show friends.`
 * Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
@@ -786,8 +786,9 @@ required `name` and an optional `username`.
 Archived friends must have `pinned` set to `false`. A saved entry with both `archived` and `pinned` set to
 `true` is invalid and causes loading to fail.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
-Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
-The untouched default profile is omitted when saving. Stored friends and profiles must have a valid non-empty name.
+A missing `friends` list loads with no friends. A friend without `games` loads with no games.
+A missing or empty `myself`, such as `"myself": {}`, uses the default empty profile.
+The untouched default profile is omitted when saving. Other stored friends and profiles must have a valid non-empty name.
 Friend names must be unique and must differ from the stored profile name.
 Each person can have only one entry for a game name, ignoring case, even if the usernames differ.
 At most five active friends can have `pinned: true`. Archived entries must have `pinned: false`.
