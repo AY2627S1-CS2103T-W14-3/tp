@@ -19,8 +19,11 @@ import seedu.address.logic.parser.exceptions.ParseException;
  */
 public class ArgumentTokenizer {
 
-    public static final String MESSAGE_UNCLOSED_QUOTE = "Missing closing double quote. To end a quoted value "
-            + "with \\, add a space before the closing quote.";
+    public static final String MESSAGE_UNCLOSED_QUOTE = "Missing closing double quote. "
+            + "Add \" at the end of the quoted value.";
+    public static final String MESSAGE_UNCLOSED_QUOTE_AFTER_BACKSLASH = "Missing closing double quote. "
+            + "\\\" is read as a literal double quote. To end a quoted value with \\, "
+            + "add a space before the closing quote.";
     public static final String MESSAGE_TEXT_AFTER_QUOTE = "Text after a closing double quote is not allowed. "
             + "Wrap the whole value in double quotes, and add a space before the next prefix.";
     public static final String MESSAGE_BARE_QUOTE = "Invalid double quote. Wrap the whole value in double quotes, "
@@ -102,7 +105,8 @@ public class ArgumentTokenizer {
             i++;
         }
         if (i == argsString.length()) {
-            throw new ParseException(MESSAGE_UNCLOSED_QUOTE);
+            throw new ParseException(argsString.stripTrailing().endsWith("\\\"")
+                    ? MESSAGE_UNCLOSED_QUOTE_AFTER_BACKSLASH : MESSAGE_UNCLOSED_QUOTE);
         }
         return new QuotedValue(value.toString(), i + 1);
     }

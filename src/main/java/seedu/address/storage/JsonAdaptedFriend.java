@@ -79,6 +79,14 @@ class JsonAdaptedFriend {
     }
 
     /**
+     * Returns true if no field was given, as in an empty JSON object.
+     */
+    boolean isEmpty() {
+        return name == null && phone == null && email == null && games.isEmpty() && tags.isEmpty()
+                && !archived && !pinned;
+    }
+
+    /**
      * Converts this Jackson-friendly adapted friend object into the model's {@code Friend} object.
      *
      * @throws IllegalValueException if there were any data constraints violated in the adapted friend.

@@ -119,11 +119,13 @@ The `UI` component:
 Command-driven selection uses `CommandResult.friendToShow`, `showMyself` and `gameFilter`.
 See [Viewing games](#viewing-a-friends-games).
 
-If a successful result has no friend payload, the details panel shows `Logic.getMyself()`.
+Results with `preserveDetails`, such as `squad`, keep the current selection, details and game filter.
+Otherwise, a successful result without a friend payload shows `Logic.getMyself()`.
 If `find` returns one friend, the details panel shows that friend.
 Parse failures and command failures update feedback without an explicit details refresh.
 
-`MainWindow.refreshFriendDetails` calls `FriendListPanel.selectFriend()` before it sets the final details payload.
+`MainWindow.refreshFriendDetails` returns immediately when `preserveDetails` is set.
+Otherwise, it calls `FriendListPanel.selectFriend()` before setting the final details payload.
 Friend payloads select the matching displayed friend; profile payloads and results without a friend clear the selection.
 If the target is not displayed, `selectFriend()` also clears the selection.
 Mouse selection remains supported, and a previous friend can be selected again after a command shows the profile.
@@ -198,16 +200,14 @@ It rejects a supplied blank `u/`.
 #### Quoted values
 
 `ArgumentTokenizer` lets users wrap a whole value in double quotes. Prefixes inside the quotes are literal text,
-so `g/"PUBG n/Game"` gives `PUBG n/Game`.
+so `g/"PUBG n/Game"` gives `PUBG n/Game`. The activity diagram shows how one prefixed value is read.
 
-* A value is quoted when its first character after trimming is `"`. Its content is trimmed like any value.
-* In any value, `\"` is a literal `"`. Only the backslash right before a quote is removed, so `\\"` gives `\"`.
-* A quoted value cannot end with `\` right before the closing quote, since `\"` is read as a literal `"`.
-  Users add a space before the closing quote instead, which trimming removes.
-* A bare `"` in an unquoted value, a missing closing quote or text after the closing quote throws a `ParseException`.
-  Each case has its own message.
-* Only straight quotes `"` are supported. Other quotes such as curly quotes `“ ”` do not start or end a quoted value.
-  They are kept as normal text.
+![Reading one prefixed value with optional quotes](images/QuotedValueActivityDiagram.png)
+
+* Only the backslash right before a quote is removed, so `\\"` gives `\"`.
+* A quoted value cannot end with `\`, since `\"` is read as a literal `"`.
+  Users add a space before the closing quote, which trimming removes.
+* Curly quotes such as `“ ”` are normal text. They do not start or end a quoted value.
 * The preamble is not parsed for quotes.
 
 ### Model component
@@ -218,6 +218,9 @@ so `g/"PUBG n/Game"` gives `PUBG n/Game`.
 
 This partial class diagram shows selected archive and pin attributes. Unrelated members are omitted.
 `ModelManager.friendListScope` uses the `FriendListScope` enumeration to identify the displayed view.
+Links from `Friend`, `Game` and `Meta` to their immutable field objects are ordinary associations:
+these objects can be shared, including the `Phone.EMPTY`, `Email.EMPTY` and `Username.EMPTY` singletons.
+The composition diamond marks `GameMates`' ownership of its `UniqueFriendList` container.
 
 **Stored data and views**
 
@@ -313,7 +316,8 @@ Missing or unreadable preferences use the default preferences.
 
 Null or empty contact fields become the corresponding empty contact values.
 Invalid non-empty contacts are rejected without trimming.
-Missing or null `games` and `tags` load as empty sets. Missing `myself` uses `Friend.DEFAULT_MYSELF`.
+Missing or null `friends`, `games` and `tags` load as empty collections.
+A missing, null or empty `myself` object uses `Friend.DEFAULT_MYSELF`. `JsonAdaptedFriend.isEmpty()` detects the empty object.
 
 Stored games must have a valid `name`.
 Missing, null or empty usernames become `Username.EMPTY`.
@@ -329,7 +333,7 @@ Invalid archived pins are not silently cleared.
 `JsonSerializableGameMates` rejects friend names that match the profile and converts excess pins to `IllegalValueException`.
 These failures reject the entire load, not only the invalid entry.
 The untouched `Friend.DEFAULT_MYSELF` uses `Name.EMPTY` and is omitted from saved JSON.
-Stored friend/profile entries still need valid non-empty names.
+Other stored friend and profile entries still need valid non-empty names.
 
 **File paths and save timing**
 
@@ -434,7 +438,8 @@ These rules define the application's accepted text characters; they do not test 
 `Name.isValidName` trims the value, then checks the 100-character limit and `Name.VALIDATION_REGEX`
 (`\p{Graph}\p{Print}*`). This accepts printable ASCII, including symbol-only names such as `---`, and rejects blank names.
 Commands and saved data both use it.
-Names stay ASCII-only because `find` and `Name.equals` compare exact characters, so `Elodie` would not match `Élodie`.
+Names are limited to ASCII because `find` and `Name.equals` compare exact characters.
+If accented letters were allowed, `find Elodie` would not find `Élodie`.
 
 Allowing all symbols has these effects:
 
@@ -447,8 +452,9 @@ Allowing all symbols has these effects:
 ### Myself profile
 
 `GameMates` stores the user's profile as a separate `Friend`, initially `Friend.DEFAULT_MYSELF`.
-`edit`, `gameadd`, `gamedel`, `gameedit` and `gamelist` accept `myself` independently of the displayed friend list and profile name.
-The default profile has `Name.EMPTY`, rather than reserving the friend name `Myself`.
+`edit`, `gameadd`, `gamedel`, `gameedit` and `gamelist` accept `myself` in place of a friend index.
+It selects the profile even when the displayed friend list is filtered or empty.
+The default profile has `Name.EMPTY`.
 The first `edit myself` must supply a name, as in `edit myself n/NAME`. Later profile edits can omit it.
 
 Their syntax uses `FRIEND_INDEX|myself`.
@@ -493,7 +499,7 @@ It omits helper calls and the subsequent save.
 
 After success, `LogicManager` saves `friends` and `myself` through `JsonSerializableGameMates`.
 `MainWindow` refreshes the profile through `Logic.getMyself()`.
-If older JSON omits `myself`, the application keeps the default profile.
+If the JSON omits `myself` or leaves it empty, the application keeps the default profile.
 
 ### Name and game filtering
 
@@ -599,7 +605,10 @@ Save/reload tests verify both archive and pin status.
 Other tests cover command routing, atomic validation, displayed targets, metadata replacement and profile updates.
 They also cover case-only spelling, `UI` refresh and real JSON storage round trips.
 
-The [game edit sequence diagram source](diagrams/GameEditSequenceDiagram.puml) shows validation before mutation.
+The sequence shows a successful `gameedit` on a displayed friend after parsing. Helper calls and saving are omitted.
+For `myself`, `resolveFriend` creates a `Myself` target instead of a `ListedFriend`.
+
+![Editing a game after validation](images/GameEditSequenceDiagram.png)
 
 ### Viewing a friend's games
 
@@ -662,10 +671,6 @@ JavaFX panel and window tests cover filtered payloads, empty states, filter clea
 They also verify that invalid input preserves the details view.
 
 ![Command-to-panel flow for a filtered game list](images/GameListSequenceDiagram.png)
-
-### Current limitations
-
-Deletion takes effect immediately.
 
 ### Game metadata
 
@@ -876,17 +881,16 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
 * Have many gaming friends across different games or platforms.
 * Want to remember each friend's in-game usernames, preferred roles, servers, play styles, or other game-specific details.
 * Prefer using a command-line interface over navigating menus and mouse interactions.
-* Prefers a desktop application for managing gaming contacts.
-* Is comfortable typing commands to manage information quickly.
-* Still wants a simple visual interface to view their friend and game information clearly.
+* Prefer a desktop application for managing gaming contacts.
+* Are comfortable typing commands to manage information quickly.
+* Still want a simple visual interface to view their friend and game information clearly.
 
 **Value proposition**: Manage gaming friends and their game-specific details faster than generic contacts apps, spreadsheets, or chat history searches.
 
 
 ### User stories
 
-These user stories describe current features. See [Implementation](#implementation) for implementation details and
-[Current limitations](#current-limitations) for unsupported behaviour.
+These user stories describe current features. See [Implementation](#implementation) for implementation details.
 
 Priorities: High - `* * *`, Medium - `* *`, Low - `*`
 
@@ -1262,6 +1266,7 @@ Prerequisite: independent disposable app folders and closed app instances before
 | Set a stored friend's name equal to the profile name, or mark six distinct active friends as pinned. Relaunch. | The entire load fails. The profile conflict and pin limit apply to stored data as well as commands. |
 | Set both `archived` and `pinned` to `true` on one stored friend. Relaunch. | The entire load fails; archived friends cannot be pinned. The invalid entry is not silently repaired. Restore the valid backup before continuing. |
 | Remove the `myself` and `games` properties from a valid copy, then relaunch. | Default profile and a friend with no games. Empty/missing phone and email are accepted; invalid non-empty contacts are not. |
+| Replace the whole data file with `{}`, then relaunch. Repeat with `{"myself": {}}`. | No friends and the default profile, without a load error. |
 | Copy the same JAR to a second empty folder and launch there. | A separate sample dataset, not the first folder's saved friends. Restore a backup into the second folder to transfer data. |
 | With the app running, make its data file unwritable for that user (for example `chmod a-w data/gamemates.json` on Linux/macOS). Enter `add n/Unsaved Test`. | A `Could not save data` error saying the change was applied but not saved. The friend still shows. The change is not rolled back. |
 | Restore write access (`chmod u+w data/gamemates.json`), enter `list`, then exit and relaunch. | The in-memory change is saved and the new friend reloads. Test permissions as a normal user, not root. |

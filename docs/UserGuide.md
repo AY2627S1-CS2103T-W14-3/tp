@@ -7,7 +7,7 @@ GameMates helps gamers keep track of friends, their contact details, the games t
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer. Browsing the online help and downloading releases require internet access.
 
-This guide describes the commands available in this checkout. Use `gameadd`, `gamedel`, and `gameedit` to manage game
+This guide explains how to use every GameMates command. Use `gameadd`, `gamedel`, and `gameedit` to manage game
 entries. `gameedit` can also replace or clear metadata. Metadata appears on game cards below the username.
 See [Your profile and game entries](#your-profile-and-game-entries) for adding games to your profile.
 Optional metadata conditions on `squad` filter candidates by their entries for the requested game.
@@ -74,16 +74,14 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
 * Use spaces between parameters and lower-case command words and prefixes. Do not type square or angle brackets.
-  Quotes are not needed around multiword names. Use only the prefixes documented for each command.
+  Quotes are not needed around multiword names.
+* Each command reads only the prefixes in its own format. Any other prefix, such as `x/` or another command's `g/`,
+  is treated as part of the value before it. Check the result when a value looks wrong.<br>
+  For example, `add n/John g/Valorant` adds a friend named `John g/Valorant`, with no games.
+  `edit 1 x/abc` reports `Invalid index "1 x/abc"`, because `x/abc` is read as part of the non-prefixed parameter such as index.
 * To use prefix text such as ` n/` in a value, wrap the whole value in double quotes.
-  For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`. Spaces at the start and end of the quoted value are removed.
-* To include a double quote in a value, type it as `\"`. Other backslashes are kept as typed.
-  For example, `g/\"Game` is the game name `"Game`.
-* To end a quoted value with `\`, add a space before the closing quote.
-  For example, `g/"PUBG u/Game\ "` is the game name `PUBG u/Game\`.
-* For metadata, wrap the whole `KEY:VALUE`. For example, use `m/"Rank:Gold u/1"`, not `m/Rank:"Gold u/1"`.
-* Quotes apply only to values after a prefix. Friend indices, `myself` and `find` keywords read `"` as a normal character.
-* A bare `"` in the middle of a value, a missing closing quote or text after the closing quote is rejected.
+  For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`.
+  See [Using quotes in values](#using-quotes-in-values) for more rules.
 * Repeating a single-value `n/`, `p/` or `e/` parameter in `add` or `edit` is rejected, even with identical values.
   Tags may be repeated. Identical tag values are applied once.
 * Friend indices refer to the current left-hand list and range from 1 to 2147483647 (inclusive). Run `list` to see all active friends
@@ -96,13 +94,8 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
 * Extraneous parameters for commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
-* Wide tables scroll horizontally on narrow screens. If you are using a PDF version, take care when copying
-  commands across line breaks: spaces can be lost during copying.
-</div>
-
-<div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-Use straight double quotes `"`, not other types such as curly quotes `“ ”`. The app reads curly quotes as normal text, so the value
-is not quoted. Text copied from a PDF or web page may contain curly quotes, so double check them before running a command.
+* Wide tables scroll horizontally on narrow screens. Take care when copying commands across line breaks:
+  spaces can be lost during copying.
 </div>
 
 ### Viewing friend details
@@ -133,8 +126,8 @@ If it contains no details, the right panel shows `No details added`. Filtering, 
 change your stored profile.
 
 Set up your profile with `edit myself n/Joash` before using `gameadd`, `gameedit`, `gamedel` or `gamelist` with `myself`.
-The first edit requires a valid, unique name. Later edits can omit it.
-Before profile setup, `Myself` is not a reserved friend name. After setup, your profile name must differ from all friend names.
+The first edit requires a valid name. Later edits can omit it.
+Your profile name must differ from all friend names.
 The `myself` selector is case-insensitive and works even when the friend list is empty or filtered.
 Omitting the selector, as in `edit n/Joash`, is rejected. Profile edits preserve your games and the friend-list filter.
 
@@ -184,7 +177,7 @@ Names are trimmed before validation, must not be blank and may contain at most 1
 
 * Only ASCII letters, digits, spaces and the symbols ``!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~`` are accepted.
   Non-ASCII characters, tabs and line breaks are rejected.
-* Symbols can appear anywhere, and is considered a character.
+* Symbols can appear anywhere in a name and count towards the 100-character limit.
 * Symbols count when comparing names, so `Mary-Jane Tan` and `Mary Jane Tan` are different friends.
 * To include ` n/`, ` p/`, ` e/` or ` t/` in a name, quote the whole name, as in `add n/"Anna t/o Lee"`.
 * To include a double quote, type it as `\"`, as in `add n/\"Ace\" Tan`.
@@ -228,7 +221,7 @@ The 254-character address limit leaves room for the enclosing `<` and `>` in the
 ### Listing, filtering and sorting friends: `list`
 
 Shows active friends in GameMates, optionally filters the friend list by game, and can sort the displayed friends.
-Both forms switch to the active view.
+Every form of `list` switches to the active view.
 
 Format: `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`
 
@@ -332,6 +325,7 @@ Format: `gameadd FRIEND_INDEX|myself g/GAME_NAME [u/USERNAME] [m/KEY:VALUE]...`
   Keys allow 1–50 characters and values allow 1–200. Both follow the game-name character rules.
   Only values may contain colons.
 * Repeat `m/` for distinct keys. Metadata keys are case-insensitive, so `Role` and `role` are duplicates.
+  Non-English keys have [case-matching limitations](#known-limitations).
   Malformed pairs, empty fields or duplicate keys reject the whole command, even if values match.
   Omit `m/` entirely for no metadata.
 * A space followed by `g/`, `u/` or `m/` starts a new parameter. Quote the whole value to include such text.
@@ -446,6 +440,7 @@ Format: <code>gameedit FRIEND_INDEX&#124;myself g/EXISTING_GAME [n/NEW_GAME_NAME
 * Supplying metadata **replaces the entire metadata set**. Omitting `m/` preserves it. A single empty `m/` clears all metadata. Do not mix an empty `m/` with pairs.
 * Pairs split at the first colon: `m/Region:Asia:SG` means key `Region`, value `Asia:SG`. Keys and values are trimmed independently. Keys use 1–50 characters and cannot contain colons; values use 1–200 characters. Both require a letter or digit and reject control characters, using the existing game metadata validation.
 * Keys are unique ignoring case: `m/Role:Healer m/role:Healer` is rejected even though the values agree. Values preserve case.
+  Non-English keys have [case-matching limitations](#known-limitations).
 * Every edit is validated before any data changes. On success, the right panel shows the updated friend (all games) or your updated profile. Feedback includes the resulting game name, username and metadata. Metadata is saved and displayed on game cards below the username.
 
 Examples:
@@ -487,6 +482,7 @@ Format: `squad g/GAME_NAME n/NUMBER_OF_PEOPLE [m/KEY:VALUE]...`
   metadata on another game cannot satisfy a condition. Extra stored metadata is allowed.
 * Keys match ignoring case. Values match exactly and are **case-sensitive**: `m/role:Healer` matches
   `Role:Healer`, while `m/role:healer` does not. There are no numeric comparisons, role quotas or OR expressions.
+  Non-English keys have [case-matching limitations](#known-limitations).
 * Quote the whole value when it contains a command prefix. For example, `m/"Note:Prefer n/3"`
   matches the stored pair `Note:Prefer n/3`; `g/"Version n/2"` selects that complete game name.
 * Pairs split at the first colon: `m/Region:Asia:SG` matches the value `Asia:SG`. Keys and values are trimmed.
@@ -552,8 +548,6 @@ Format: `edit FRIEND_INDEX|myself [n/NAME] [p/[PHONE_NUMBER]] [e/[EMAIL]] [t/TAG
 * Use `myself` instead of `FRIEND_INDEX` to edit your own profile, for example `edit myself n/Alex Tan`. The selector is case-insensitive.
   If the name belongs to an active or archived friend, choose a different profile name; unarchiving that friend
   does not resolve the name conflict.
-* Invalid indices include the rejected text in the feedback. For example, `edit 1 x/abc` reports
-  `Invalid index "1 x/abc".` followed by the allowed index range. Use the supported field prefixes shown above.
 * The first `edit myself` must include `n/NAME`. After setup, later edits can omit the name, and you can use
   `gameadd`, `gameedit`, `gamedel` and `gamelist` with `myself`.
 * `|` means "or": enter either a friend index or `myself`. Do not type the `|` character.
@@ -588,6 +582,8 @@ Errors:
 
 * Missing index: `Please provide an index.`
 * Invalid index (including a value above 2147483647): `Invalid index "INPUT". Index must be a positive integer between 1 and 2147483647 (inclusive).`
+* Unknown prefix right after the index: the prefix is read as part of the index. For example, `edit 1 x/abc` reports
+  `Invalid index "1 x/abc"`. Use only `n/`, `p/`, `e/` and `t/`.
 * Empty displayed list: `No friends are currently displayed. Use list or archivelist to show friends.`
 * Index outside the displayed list: `No friend exists at index FRIEND_INDEX. Choose an index from 1 to MAX_LIST_INDEX.`
 * No fields provided: `No details were passed to the command. Specify at least one parameter ([n/NAME], [p/[PHONE]], [e/[EMAIL]], [t/TAG]...) to edit specific details.`
@@ -611,9 +607,10 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * Friends matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
 * Searching starts from all active and archived friends, replacing any previous name or game filter.
   `find` does not accept `n/` or `g/` as filter syntax; such text is treated as literal name keywords.
+* Do not wrap keywords in quotes. Quotes are read as part of the keyword.
 * Results appear under **Search results**, with an **Archived** badge on archived friends.
-* `archive FRIEND_INDEX` archives an active result; `unarchive FRIEND_INDEX` restores an archived result. The friend stays in
-  the search results with their updated status, and the search filter and displayed order stay in place.
+* `archive FRIEND_INDEX` archives an active result; `unarchive FRIEND_INDEX` restores an archived result.
+  The friend stays visible with their updated status. The search filter is unchanged.
 * Archiving an already archived search result reports `This friend is already archived.` without changing data.
 * `list` returns to active friends; `archivelist [g/GAME_NAME]` switches to archived friends only.
 * Feedback is `N friend(s) listed!`. No matches is a successful empty search view. Exactly one result also opens that
@@ -682,6 +679,8 @@ Examples:
 
 ### Restoring an archived friend: `unarchive`
 
+Returns an archived friend to the active list.
+
 Format: `unarchive FRIEND_INDEX`
 
 * Use `archivelist`, `archivelist g/GAME_NAME`, or `find KEYWORD` to display archived friends.
@@ -744,6 +743,25 @@ Exits the program.
 
 Format: `exit`
 
+### Using quotes in values
+
+Quotes work only in values typed after a prefix, such as `n/` or `g/`. Elsewhere, `"` is a normal character,
+so `find "Alex"` searches for the word `"Alex"`, including the quotes, and does not match a friend named `Alex`.
+Most values do not need quotes. Use them only when a value contains prefix text such as ` u/`.
+
+* Wrap the whole value in double quotes. For example, `g/"PUBG u/Game"` is the game name `PUBG u/Game`.
+* For metadata, wrap the whole pair. Use `m/"Rank:Gold u/1"`, not `m/Rank:"Gold u/1"`.
+* To include a double quote in a value, type `\"`. For example, `add n/\"Ace\" Tan` adds `"Ace" Tan`.
+* To end a quoted value with `\`, add a space before the closing quote. For example, `g/"Game\ "` is the game name `Game\`.
+
+A stray `"` (as in `add n/O"Neil`), a missing closing quote or text after the closing quote is rejected.
+Type `add n/O\"Neil` instead.
+
+<div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
+Use straight double quotes `"`, not curly quotes `“ ”`. Copied text may contain curly quotes.
+The app treats them as normal text.
+</div>
+
 ### Saving the data
 
 GameMates saves the complete friend list, games and stored profile after every command that parses and executes
@@ -755,7 +773,7 @@ or use `exit`.
 If saving fails, an error starting with `Could not save data` appears. The change still shows in the app, but it is
 not saved and will be lost on exit. Fix the issue (e.g. restore write access to the data folder), then run any
 command such as `list` to save again.
-When saving fails, the `help` and `exit` commands also fail. See [Known limitations](#known-limitations) for the workaround.
+While saving fails, `help` and `exit` do not run. See [Known limitations](#known-limitations) for the workaround.
 
 ### Editing the data file
 
@@ -774,8 +792,9 @@ required `name` and an optional `username`.
 Archived friends must have `pinned` set to `false`. A saved entry with both `archived` and `pinned` set to
 `true` is invalid and causes loading to fail.
 An empty or missing `username` means no username has been provided; the game entry is still retained.
-Existing files that omit `games` load with no games; files that omit `myself` use the default empty profile.
-The untouched default profile is omitted when saving. Stored friends and profiles must have a valid non-empty name.
+A missing `friends` list loads with no friends. A friend without `games` loads with no games.
+A missing or empty `myself`, such as `"myself": {}`, uses the default empty profile.
+The untouched default profile is omitted when saving. Other stored friends and profiles must have a valid non-empty name.
 Friend names must be unique and must differ from the stored profile name.
 Each person can have only one entry for a game name, ignoring case, even if the usernames differ.
 At most five active friends can have `pinned: true`. Archived entries must have `pinned: false`.
@@ -815,14 +834,16 @@ while copying the file, then launch the destination app from its usual data fold
    and may overwrite each other's changes, causing data loss.
 2. **GameMates primarily supports English.** Friend names, tags, phones and emails accept only ASCII characters.
    Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.
+   Some Unicode case variants, such as `ΟΣ` and `οσ`, count as different game names and metadata keys.
+   They do not match each other in `list`, `gamelist` or `squad`. Use English or consistent spelling.
 3. **Some characters count as more than one toward length limits.** Lengths are counted in UTF-16 code units, so
    `😀` counts as 2. Not all emojis are supported by JavaFX.
-4. **The `help` and `exit` commands fail while saving fails.** GameMates saves after every command, so these commands
-   show the `Could not save data` error instead. Use these instead:
+4. **`help` and `exit` do not run while saving fails.** GameMates saves after every command, so these commands show
+   the `Could not save data` error. The error says the command was applied, but the help window does not open and
+   the app stays open. Use these instead:
    * To open help, use the **Help** menu or press `F1`.
-   * To close the app, use **File** > **Exit** or the window's close button.
-
-   Closing the app this way discards any changes that were not saved. To keep them, fix the save issue first.
+   * To close the app, use **File** > **Exit** or the window's close button. This discards unsaved changes, so fix
+     the save issue first if you want to keep them.
 
 --------------------------------------------------------------------------------------------------------------------
 

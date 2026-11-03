@@ -65,16 +65,17 @@ UserPrefs .up.|> ReadOnlyUserPrefs
 GameMates *--> "1\n<size:6> </size>" UniqueFriendList
 UniqueFriendList --> "*\n<size:6> </size>" Friend : all
 GameMates --> "1\n<size:6> </size>" Friend : myself
-Friend *--> "1\n<size:6> </size>" Name
-Friend *--> "1\n<size:6> </size>" Phone
-Friend *--> "1\n<size:6> </size>" Email
-Friend *--> "*\n<size:6> </size>" Tag
-Friend *--> "*\n<size:6> </size>" Game
-Game *--> "1\n<size:6> </size>" GameName
-Game *--> "1\n<size:6> </size>" Username
-Game *--> "*\n<size:6> </size>" Meta
-Meta *--> "1\n<size:6> </size>" MetaKey
-Meta *--> "1\n<size:6> </size>" MetaValue
+' Immutable field objects can be shared, so these links do not imply exclusive ownership.
+Friend --> "1\n<size:6> </size>" Name
+Friend --> "1\n<size:6> </size>" Phone
+Friend --> "1\n<size:6> </size>" Email
+Friend --> "*\n<size:6> </size>" Tag
+Friend --> "*\n<size:6> </size>" Game
+Game --> "1\n<size:6> </size>" GameName
+Game --> "1\n<size:6> </size>" Username
+Game --> "*\n<size:6> </size>" Meta
+Meta --> "1\n<size:6> </size>" MetaKey
+Meta --> "1\n<size:6> </size>" MetaValue
 
 Friend -[hidden]up--> I
 UniqueFriendList -[hidden]right-> I

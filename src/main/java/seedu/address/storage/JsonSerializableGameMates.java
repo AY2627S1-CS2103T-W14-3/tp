@@ -34,11 +34,14 @@ class JsonSerializableGameMates {
 
     /**
      * Constructs a {@code JsonSerializableGameMates} with the given friends and optional user profile.
+     * Missing or null friends load as an empty list.
      */
     @JsonCreator
     public JsonSerializableGameMates(@JsonProperty("friends") List<JsonAdaptedFriend> friends,
             @JsonProperty("myself") JsonAdaptedFriend myself) {
-        this.friends.addAll(friends);
+        if (friends != null) {
+            this.friends.addAll(friends);
+        }
         this.myself = myself;
     }
 
@@ -59,7 +62,7 @@ class JsonSerializableGameMates {
      */
     public GameMates toModelType() throws IllegalValueException {
         GameMates gameMates = new GameMates();
-        if (myself != null) {
+        if (myself != null && !myself.isEmpty()) {
             gameMates.setMyself(myself.toModelType());
         }
         List<Friend> modelFriends = new ArrayList<>();
