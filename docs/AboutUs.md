@@ -16,7 +16,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[homepage](https://benthecat.com)]
 [[github](https://github.com/benwoo1110)]
 
-* Role: Project Advisor
+* Role: Team Lead
 
 ### Melody
 
@@ -24,8 +24,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](https://github.com/melogens)]
 
-* Role: Team Lead
-* Responsibilities: UI
+* Role: Developer
 
 ### Joash Chen
 
@@ -34,7 +33,6 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](http://github.com/joash-chen)]
 
 * Role: Developer
-* Responsibilities: Data
 
 ### Felicia Duwana
 
@@ -43,7 +41,6 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](http://github.com/felicia-duwana)]
 
 * Role: Developer
-* Responsibilities: Dev Ops + Threading
 
 ### Aarav Malani
 
@@ -52,4 +49,3 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](http://github.com/AaravMalani)]
 
 * Role: Developer
-* Responsibilities: UI
