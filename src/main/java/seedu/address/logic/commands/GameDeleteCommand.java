@@ -46,8 +46,10 @@ public class GameDeleteCommand extends Command {
         Game toDelete = GameTargetResolver.resolve(friend, gameName);
         Set<Game> games = new HashSet<>(friend.getGames());
         games.remove(toDelete);
-        model.setFriend(target, friend.withGames(games));
-        return new CommandResult(String.format(MESSAGE_SUCCESS, gameName, friend.getName()));
+        Friend updated = friend.withGames(games);
+        model.setFriend(target, updated);
+        String feedback = String.format(MESSAGE_SUCCESS, gameName, friend.getName());
+        return target.isMyself() ? new CommandResult(feedback) : new CommandResult(feedback, updated);
     }
 
     @Override

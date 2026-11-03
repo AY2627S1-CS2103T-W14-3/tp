@@ -33,10 +33,11 @@ public class GameAddCommandTest {
     public void execute_omittedUsername_addsGame() {
         Friend original = model.getFilteredFriendList().get(0);
         Game withoutUsername = new Game(new GameName("Valorant"), Username.EMPTY);
+        Friend updated = new FriendBuilder(original).withGames(withoutUsername).build();
         Model expected = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
-        expected.setFriend(original, new FriendBuilder(original).withGames(withoutUsername).build());
-        assertCommandSuccess(new GameAddCommand(first, withoutUsername), model,
-                "Added Valorant to " + original.getName() + "'s games.\nUsername: Not provided", expected);
+        expected.setFriend(original, updated);
+        assertCommandSuccess(new GameAddCommand(first, withoutUsername), model, new CommandResult(
+                "Added Valorant to " + original.getName() + "'s games.\nUsername: Not provided", updated), expected);
     }
 
     @Test
@@ -48,8 +49,8 @@ public class GameAddCommandTest {
         Friend updated = new FriendBuilder(withGame).withGames(existing, game).build();
         Model expected = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
         expected.setFriend(withGame, updated);
-        assertCommandSuccess(new GameAddCommand(first, game), model,
-                "Added Valorant to " + original.getName() + "'s games.\nUsername: benergy10", expected);
+        assertCommandSuccess(new GameAddCommand(first, game), model, new CommandResult(
+                "Added Valorant to " + original.getName() + "'s games.\nUsername: benergy10", updated), expected);
     }
 
     @Test
@@ -57,11 +58,12 @@ public class GameAddCommandTest {
         Index second = Index.fromOneBased(2);
         Friend target = model.getFilteredFriendList().get(1);
         showFriendAtIndex(model, second);
+        Friend updated = new FriendBuilder(target).withGames(game).build();
         Model expected = new ModelManager(new GameMates(model.getGameMates()), new UserPrefs());
-        expected.setFriend(target, new FriendBuilder(target).withGames(game).build());
+        expected.setFriend(target, updated);
         showFriendAtIndex(expected, second);
-        assertCommandSuccess(new GameAddCommand(first, game), model,
-                "Added Valorant to " + target.getName() + "'s games.\nUsername: benergy10", expected);
+        assertCommandSuccess(new GameAddCommand(first, game), model, new CommandResult(
+                "Added Valorant to " + target.getName() + "'s games.\nUsername: benergy10", updated), expected);
         assertEquals(1, model.getFilteredFriendList().size());
     }
 
