@@ -831,8 +831,8 @@ while copying the file, then launch the destination app from its usual data fold
    and may overwrite each other's changes, causing data loss.
 2. **GameMates primarily supports English.** Friend names, tags, phones and emails accept only ASCII characters.
    Game names, usernames and metadata accept other Unicode characters, but other languages are not formally tested.
-   Some Unicode case variants, such as `ΟΣ` and `οσ`, count as distinct metadata keys and do not match in `squad`.
-   Use English keys or consistent spelling.
+   Some Unicode case variants, such as `ΟΣ` and `οσ`, count as different game names and metadata keys.
+   They do not match each other in `list`, `gamelist` or `squad`. Use English or consistent spelling.
 3. **Some characters count as more than one toward length limits.** Lengths are counted in UTF-16 code units, so
    `😀` counts as 2. Not all emojis are supported by JavaFX.
 4. **`help` and `exit` do not run while saving fails.** GameMates saves after every command, so these commands show
