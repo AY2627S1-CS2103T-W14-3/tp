@@ -114,6 +114,20 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_nameWithSlashOrQuotes_success() {
+        assertNameParsed("Ravi s/o Kumar", "Ravi s/o Kumar"); // not a prefix of add
+        assertNameParsed("John g/Valorant", "John g/Valorant"); // prefix of another command
+        assertNameParsed("\"Anna t/o Lee\"", "Anna t/o Lee"); // quoted prefix of add
+        assertNameParsed("\\\"Ace\\\" Tan", "\"Ace\" Tan"); // escaped quotes
+    }
+
+    private void assertNameParsed(String nameInput, String expectedName) {
+        Friend expectedFriend = new FriendBuilder(BOB).withName(expectedName).withTags().build();
+        assertParseSuccess(parser, " n/" + nameInput + PHONE_DESC_BOB + EMAIL_DESC_BOB,
+                new AddCommand(expectedFriend));
+    }
+
+    @Test
     public void parse_optionalFieldsMissing_success() {
         // zero tags
         Friend expectedFriend = new FriendBuilder(AMY).withTags().build();

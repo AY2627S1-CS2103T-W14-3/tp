@@ -276,11 +276,6 @@ public class ParserUtilTest {
     }
 
     @Test
-    public void parseName_punctuation_throwsParseException() {
-        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseName("O'Connor-Jane"));
-    }
-
-    @Test
     public void parsePhone_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parsePhone(null));
     }

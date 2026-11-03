@@ -175,12 +175,20 @@ Examples:
 * `add n/John Doe`
 * `add n/John Doe p/98765432 e/johnd@example.com`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com p/1234567 t/criminal`
+* `add n/Sean O'Brien`
+* `add n/Ravi s/o Kumar`
+* `add n/xX_Slayer_Xx`
+* `add n/[TSM] Bjerg`
 
-Names are trimmed before validation, must not be blank and may contain at most 100 characters.
-Only ASCII letters, digits and spaces are accepted. Names are compared case-insensitively,
-so `john doe` and `John Doe` are the same friend.
-To distinguish two people with the same name, use names such as `John Doe School` and `John Doe Work`.
-Adding a different tag alone does not make a duplicate name unique; parentheses are not valid in names.
+Names are trimmed before validation, must not be blank and may contain at most 100 characters:
+
+* Only ASCII letters, digits, spaces and the symbols ``!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~`` are accepted.
+  Non-ASCII characters, tabs and line breaks are rejected.
+* Symbols can appear anywhere, and is considered a character.
+* Symbols count when comparing names, so `Mary-Jane Tan` and `Mary Jane Tan` are different friends.
+* To include ` n/`, ` p/`, ` e/` or ` t/` in a name, quote the whole name, as in `add n/"Anna t/o Lee"`.
+* To include a double quote, type it as `\"`, as in `add n/\"Ace\" Tan`.
+* These rules also apply when editing friends and loading saved data.
 
 Tag names must contain 1–50 characters and use only ASCII letters and digits (no spaces or symbols).
 Tags wrap within friend cards and the details panel when the available width is too narrow.
@@ -229,6 +237,7 @@ Format: `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`
 * `list g/GAME_NAME` shows active friends who have a game with that exact name. The match is case-insensitive, so `list g/valorant` matches `Valorant`.
 * Pinned friends remain above unpinned friends. Sorting applies within each group.
 * `list s/name` orders the displayed friends alphabetically by name, ignoring case.
+  Symbols sort by character code, so `_Slayer_` comes before `Alex` and `~Slayer` comes after `Zoe`.
 * `list s/game` orders friends by the alphabetically first game in each friend's game list, ignoring case.
   Friends without games appear last within each group in either direction; name breaks ties.
 * `o/asc` explicitly selects ascending order; this is the default. `o/desc` reverses the selected name or game
@@ -597,6 +606,8 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
 * The search considers only names.
 * Only full words match; for example, `Han` does not match `Hans`.
+* Words are separated by spaces, so symbols are part of a word. `Mary` does not match `Mary-Jane Tan`, but `Mary-Jane` and `Tan` do.
+  `Work` does not match `Anna (Work)`, but `(Work)` and `Anna` do.
 * Friends matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
 * Searching starts from all active and archived friends, replacing any previous name or game filter.
   `find` does not accept `n/` or `g/` as filter syntax; such text is treated as literal name keywords.
@@ -611,6 +622,7 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 Examples:
 
 * `find John` returns `john` and `John Doe`
+* `find Mary-Jane` returns `Mary-Jane Tan`
 * With the initial sample data, `find alex david` returns `Alex Yeoh`, `David Li`.<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 

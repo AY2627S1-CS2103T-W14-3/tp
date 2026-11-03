@@ -259,7 +259,7 @@ Explicit name/game comparators also put pinned friends first. JSON saves the ori
 **Game fields and identity**
 
 `Game` contains a `GameName`, a `Username` and an immutable metadata set.
-`Name` equality ignores case and treats repeated ASCII spaces as one space.
+`Name` equality ignores case and treats repeated ASCII spaces as one space. Symbols are compared as typed.
 `GameName.equals` compares complete names after lower-case normalization with `Locale.ROOT`.
 
 `Username` preserves case. An omitted username uses `Username.EMPTY`; `isEmpty()` identifies that value.
@@ -412,7 +412,7 @@ Like other index-based commands, it distinguishes empty lists and reports a disp
 **Field validation**
 
 The contact rules differ from the submitted draft.
-Names accept 1–100 ASCII alphanumeric characters and spaces.
+Names follow the [name validation](#name-validation) rules.
 Phone validation examines digit counts and grouping. Email validation uses ASCII dot-atom and domain syntax with length limits.
 The [User Guide](UserGuide.html#adding-a-friend-add) defines the accepted input.
 
@@ -428,6 +428,21 @@ Length is counted in UTF-16 units with `String.length()`. The shared text valida
 
 Other Unicode is accepted, including combining marks, emoji and variation selectors.
 These rules define the application's accepted text characters; they do not test how every font renders each character.
+
+#### Name validation
+
+`Name.isValidName` trims the value, then checks the 100-character limit and `Name.VALIDATION_REGEX`
+(`\p{Graph}\p{Print}*`). This accepts printable ASCII, including symbol-only names such as `---`, and rejects blank names.
+Commands and saved data both use it.
+Names stay ASCII-only because `find` and `Name.equals` compare exact characters, so `Elodie` would not match `Élodie`.
+
+Allowing all symbols has these effects:
+
+* **Prefixes:** `ArgumentTokenizer` only recognises the current command's prefixes, so `add n/John g/Valorant` gives the name `John g/Valorant`.
+* **Quotes:** `ArgumentTokenizer` handles `"` first, so commands must type it as `\"`.
+* **Search:** names split on whitespace only, so `find Mary` does not match `Mary-Jane Tan`.
+* **Sorting:** order follows character codes, so `_Slayer_` comes before `Alex` and `~Slayer` comes after `Zoe`.
+* **Feedback:** names can contain `%`, so pass them only as `String.format` arguments.
 
 ### Myself profile
 
@@ -924,6 +939,11 @@ Priorities: High - `* * *`, Medium - `* *`, Low - `*`
   * 1b1. GameMates shows `A friend with this name already exists. Names ignore case and repeated spaces.`
 
     Use case resumes at step 1.
+* 1c. The name breaks the [name rules](#name-validation), for example by using a non-ASCII character such as `李`.
+
+  * 1c1. GameMates shows the name rules and does not add the friend.
+
+    Use case resumes at step 1.
 
 
 **Use case: Delete a friend**
@@ -1071,7 +1091,8 @@ On a _modern computer_ running Java `25`, with up to 1000 friends in total acros
   Friend indices refer to this list.
 * **Filter**: A condition that narrows a displayed list, such as a name keyword or game name.
 * **Name keyword**: A full word matched against a friend's name, ignoring case.
-  A substring such as `Dav` does not match `David`.
+  Words are separated by spaces, so symbols are part of a word.
+  A substring such as `Dav` does not match `David`, and `Mary` does not match `Mary-Jane`.
 * **Case-insensitive comparison**: A comparison that treats uppercase and lowercase letters as equivalent.
 * **Trimmed value**: A value with its leading and trailing spaces removed.
 * **Duplicate**: Two entries that the project matching rules consider the same. Both entries are therefore not allowed together.
@@ -1121,7 +1142,19 @@ Prerequisite: fresh sample data. These steps deliberately add a disposable frien
 | 6 | `find Joash`, then `edit 1 t/duo t/casual`, then `find Joash`, then `edit 1 t/` | Both tags are added, then all are cleared. Omitted name/contact fields are preserved. |
 | 7 | `find Joash`, then `gamelist 1` | `Joash Test has no games added yet.` and a `No games added` label. |
 
-Test invalid input independently: `add`, `add n/`, `add n/Joash-Test`, `add n/Test p/`, `add n/Test p/12`,
+Test name symbols independently, starting from fresh sample data:
+
+1. `add n/Mary-Jane Tan`, `add n/Sean O'Brien`, `add n/Ravi s/o Kumar`, `add n/xX_Slayer_Xx`, `add n/Anna (Work)`, `add n/Slayer#1234`, `add n/[TSM] Bjerg` and `add n/100%`.
+   Expected: each friend is added with the name shown exactly as typed, including in the list and details panel.
+2. `add n/Mary Jane Tan`. Expected: added as a different friend, because symbols count in name comparison.
+3. `find Mary`. Expected: `Mary Jane Tan` only. `find Mary-Jane` returns `Mary-Jane Tan` only.
+4. `add n/_Slayer_`, then `list s/name`. Expected: `_Slayer_` comes before names starting with a letter.
+5. `add n/John g/Valorant`. Expected: a friend named `John g/Valorant`, with no games.
+6. `add n/"Anna t/o Lee"`. Expected: a friend named `Anna t/o Lee`, with no tags.
+7. `add n/\"Ace\" Tan`. Expected: a friend named `"Ace" Tan`. `add n/"Ace" Tan` reports a text-after-quote error.
+8. Exit and relaunch. Expected: all of these friends load with their names unchanged.
+
+Test invalid input independently: `add`, `add n/`, `add n/李明`, `add n/Test p/`, `add n/Test p/12`,
 `add n/Test p/9123.4567`, `add n/Test p/123;4`, `add n/Test e/name@`, `add n/Test e/a..b@example.com`,
 `add n/Test n/Test`, and `edit 1 t/ t/duo`. Expected: validation or duplicate-prefix errors and no stored change.
 Also try 100 versus 101 ASCII letters for a name, 15 versus 16 phone digits, and email local parts of 64 versus 65
