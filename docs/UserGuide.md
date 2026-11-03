@@ -600,6 +600,8 @@ Errors:
 ### Locating friends by name: `find`
 
 Finds active and archived friends whose names contain any of the given keywords, regardless of the current view.
+`find` searches all your friends, active and archived, so you can locate anyone without switching
+views. Archived results are marked with an **Archived** badge.
 
 Format: `find KEYWORD [MORE_KEYWORDS]`
 
