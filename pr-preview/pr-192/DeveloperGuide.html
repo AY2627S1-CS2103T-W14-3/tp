@@ -251,11 +251,13 @@ defines the layout of
 Command-driven selection uses <code class="language-plaintext highlighter-rouge">CommandResult.friendToShow</code>, <code class="language-plaintext highlighter-rouge">showMyself</code> and <code class="language-plaintext highlighter-rouge">gameFilter</code>.
 See <a href="#viewing-a-friends-games">Viewing games</a>.</p>
 
-<p>If a successful result has no friend payload, the details panel shows <code class="language-plaintext highlighter-rouge">Logic.getMyself()</code>.
+<p>Results with <code class="language-plaintext highlighter-rouge">preserveDetails</code>, such as <code class="language-plaintext highlighter-rouge">squad</code>, keep the current selection, details and game filter.
+Otherwise, a successful result without a friend payload shows <code class="language-plaintext highlighter-rouge">Logic.getMyself()</code>.
 If <code class="language-plaintext highlighter-rouge">find</code> returns one friend, the details panel shows that friend.
 Parse failures and command failures update feedback without an explicit details refresh.</p>
 
-<p><code class="language-plaintext highlighter-rouge">MainWindow.refreshFriendDetails</code> calls <code class="language-plaintext highlighter-rouge">FriendListPanel.selectFriend()</code> before it sets the final details payload.
+<p><code class="language-plaintext highlighter-rouge">MainWindow.refreshFriendDetails</code> returns immediately when <code class="language-plaintext highlighter-rouge">preserveDetails</code> is set.
+Otherwise, it calls <code class="language-plaintext highlighter-rouge">FriendListPanel.selectFriend()</code> before setting the final details payload.
 Friend payloads select the matching displayed friend; profile payloads and results without a friend clear the selection.
 If the target is not displayed, <code class="language-plaintext highlighter-rouge">selectFriend()</code> also clears the selection.
 Mouse selection remains supported, and a previous friend can be selected again after a command shows the profile.</p>
