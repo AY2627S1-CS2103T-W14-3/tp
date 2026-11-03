@@ -198,16 +198,14 @@ It rejects a supplied blank `u/`.
 #### Quoted values
 
 `ArgumentTokenizer` lets users wrap a whole value in double quotes. Prefixes inside the quotes are literal text,
-so `g/"PUBG n/Game"` gives `PUBG n/Game`.
+so `g/"PUBG n/Game"` gives `PUBG n/Game`. The activity diagram shows how one prefixed value is read.
 
-* A value is quoted when its first character after trimming is `"`. Its content is trimmed like any value.
-* In any value, `\"` is a literal `"`. Only the backslash right before a quote is removed, so `\\"` gives `\"`.
-* A quoted value cannot end with `\` right before the closing quote, since `\"` is read as a literal `"`.
-  Users add a space before the closing quote instead, which trimming removes.
-* A bare `"` in an unquoted value, a missing closing quote or text after the closing quote throws a `ParseException`.
-  Each case has its own message.
-* Only straight quotes `"` are supported. Other quotes such as curly quotes `“ ”` do not start or end a quoted value.
-  They are kept as normal text.
+![Reading one prefixed value with optional quotes](images/QuotedValueActivityDiagram.png)
+
+* Only the backslash right before a quote is removed, so `\\"` gives `\"`.
+* A quoted value cannot end with `\`, since `\"` is read as a literal `"`.
+  Users add a space before the closing quote, which trimming removes.
+* Curly quotes such as `“ ”` are normal text. They do not start or end a quoted value.
 * The preamble is not parsed for quotes.
 
 ### Model component
@@ -434,7 +432,8 @@ These rules define the application's accepted text characters; they do not test 
 `Name.isValidName` trims the value, then checks the 100-character limit and `Name.VALIDATION_REGEX`
 (`\p{Graph}\p{Print}*`). This accepts printable ASCII, including symbol-only names such as `---`, and rejects blank names.
 Commands and saved data both use it.
-Names stay ASCII-only because `find` and `Name.equals` compare exact characters, so `Elodie` would not match `Élodie`.
+Names are limited to ASCII because `find` and `Name.equals` compare exact characters.
+If accented letters were allowed, `find Elodie` would not find `Élodie`.
 
 Allowing all symbols has these effects:
 
@@ -447,7 +446,8 @@ Allowing all symbols has these effects:
 ### Myself profile
 
 `GameMates` stores the user's profile as a separate `Friend`, initially `Friend.DEFAULT_MYSELF`.
-`edit`, `gameadd`, `gamedel`, `gameedit` and `gamelist` accept `myself` independently of the displayed friend list and profile name.
+`edit`, `gameadd`, `gamedel`, `gameedit` and `gamelist` accept `myself` in place of a friend index.
+It selects the profile even when the displayed friend list is filtered or empty.
 The default profile has `Name.EMPTY`.
 The first `edit myself` must supply a name, as in `edit myself n/NAME`. Later profile edits can omit it.
 
@@ -662,10 +662,6 @@ JavaFX panel and window tests cover filtered payloads, empty states, filter clea
 They also verify that invalid input preserves the details view.
 
 ![Command-to-panel flow for a filtered game list](images/GameListSequenceDiagram.png)
-
-### Current limitations
-
-Deletion takes effect immediately.
 
 ### Game metadata
 
@@ -885,8 +881,7 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
 
 ### User stories
 
-These user stories describe current features. See [Implementation](#implementation) for implementation details and
-[Current limitations](#current-limitations) for unsupported behaviour.
+These user stories describe current features. See [Implementation](#implementation) for implementation details.
 
 Priorities: High - `* * *`, Medium - `* *`, Low - `*`
 
