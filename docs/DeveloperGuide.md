@@ -605,7 +605,10 @@ Save/reload tests verify both archive and pin status.
 Other tests cover command routing, atomic validation, displayed targets, metadata replacement and profile updates.
 They also cover case-only spelling, `UI` refresh and real JSON storage round trips.
 
-The [game edit sequence diagram source](diagrams/GameEditSequenceDiagram.puml) shows validation before mutation.
+The sequence shows a successful `gameedit` on a displayed friend after parsing. Helper calls and saving are omitted.
+For `myself`, `resolveFriend` creates a `Myself` target instead of a `ListedFriend`.
+
+![Editing a game after validation](images/GameEditSequenceDiagram.png)
 
 ### Viewing a friend's games
 
@@ -878,9 +881,9 @@ They also cover identity conflicts, edits to archived friends, and save/reload r
 * Have many gaming friends across different games or platforms.
 * Want to remember each friend's in-game usernames, preferred roles, servers, play styles, or other game-specific details.
 * Prefer using a command-line interface over navigating menus and mouse interactions.
-* Prefers a desktop application for managing gaming contacts.
-* Is comfortable typing commands to manage information quickly.
-* Still wants a simple visual interface to view their friend and game information clearly.
+* Prefer a desktop application for managing gaming contacts.
+* Are comfortable typing commands to manage information quickly.
+* Still want a simple visual interface to view their friend and game information clearly.
 
 **Value proposition**: Manage gaming friends and their game-specific details faster than generic contacts apps, spreadsheets, or chat history searches.
 

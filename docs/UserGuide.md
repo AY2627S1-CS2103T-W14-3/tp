@@ -7,7 +7,7 @@ GameMates helps gamers keep track of friends, their contact details, the games t
 Type commands to manage your friends, then use the split details panel to check who to invite to a game.
 Your data stays on your computer. Browsing the online help and downloading releases require internet access.
 
-This guide describes the commands available in this checkout. Use `gameadd`, `gamedel`, and `gameedit` to manage game
+This guide explains how to use every GameMates command. Use `gameadd`, `gamedel`, and `gameedit` to manage game
 entries. `gameedit` can also replace or clear metadata. Metadata appears on game cards below the username.
 See [Your profile and game entries](#your-profile-and-game-entries) for adding games to your profile.
 Optional metadata conditions on `squad` filter candidates by their entries for the requested game.
@@ -221,7 +221,7 @@ The 254-character address limit leaves room for the enclosing `<` and `>` in the
 ### Listing, filtering and sorting friends: `list`
 
 Shows active friends in GameMates, optionally filters the friend list by game, and can sort the displayed friends.
-Both forms switch to the active view.
+Every form of `list` switches to the active view.
 
 Format: `list [g/GAME_NAME] [s/NAME|GAME] [o/ASC|DESC]`
 
@@ -678,6 +678,8 @@ Examples:
 * `archivelist g/Stardew Valley` shows archived friends who play Stardew Valley.
 
 ### Restoring an archived friend: `unarchive`
+
+Returns an archived friend to the active list.
 
 Format: `unarchive FRIEND_INDEX`
 
