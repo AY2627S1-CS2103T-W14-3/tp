@@ -94,8 +94,8 @@ Optional metadata conditions on `squad` filter candidates by their entries for t
 * Extraneous parameters for commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
-* Wide tables scroll horizontally on narrow screens. If you are using a PDF version, take care when copying
-  commands across line breaks: spaces can be lost during copying.
+* Wide tables scroll horizontally on narrow screens. Take care when copying commands across line breaks:
+  spaces can be lost during copying.
 </div>
 
 ### Viewing friend details
@@ -752,7 +752,7 @@ A stray `"` (as in `add n/O"Neil`), a missing closing quote or text after the cl
 Type `add n/O\"Neil` instead.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-Use straight double quotes `"`, not curly quotes `“ ”`. Text copied from a PDF or web page may contain curly quotes.
+Use straight double quotes `"`, not curly quotes `“ ”`. Copied text may contain curly quotes.
 The app treats them as normal text.
 </div>
 
